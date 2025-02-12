@@ -1,0 +1,107 @@
+/* SidebarEM.css */
+.menu {
+    display: flex;
+    flex-direction: column;
+    gap: 2.3rem;
+    height: 100vh;
+    width: 250px; /* Adjust width as needed */
+    background-color: #f4f4f4; /* Light grey background */
+    padding: 1rem 0;
+    box-shadow: 2px 0 10px rgba(0, 0, 0, 0.1); /* Subtle shadow effect */
+}
+
+.menu-list {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+    padding: 0 1.5rem;
+}
+
+.menu-list .item {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-size: 18px;
+    text-decoration: none;
+    font-weight: 600;
+    padding: 12px 15px;
+    border-radius: 8px;
+    transition: all 0.3s ease-in-out;
+    color: #154734;
+}
+
+.menu-list .item:hover {
+    background-color: #154734;
+    color: whitesmoke;
+}
+
+/* Dropdown Button */
+.dropdown-btn {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 18px;
+  text-decoration: none;
+  font-weight: 600;
+  padding: 12px 15px;
+  border-radius: 8px;
+  transition: all 0.3s ease-in-out;
+  color: #154734;
+  background-color: transparent;
+  border: none;
+  width: 100%;
+  text-align: left;
+  cursor: pointer;
+}
+
+.dropdown-btn:hover {
+  background-color: #154734;
+  color: whitesmoke;
+}
+
+/* Dropdown Content */
+.dropdown-content {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  padding: 10px 0;
+  margin-left: 20px; /* Indent dropdown content */
+  border-left: 2px solid #154734; /* Add a left border for visual separation */
+}
+
+.dropdown-content a {
+  text-decoration: none;
+  font-size: 16px;
+  color: #154734;
+  padding: 8px 15px;
+  border-radius: 6px;
+  transition: all 0.3s ease-in-out;
+}
+
+.dropdown-content a:hover {
+  background-color: #154734;
+  color: whitesmoke;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+    .menu {
+        width: 200px;
+    }
+
+    .menu-list .item {
+        font-size: 16px;
+        padding: 10px;
+    }
+
+    .dropdown-btn {
+        font-size: 16px;
+        padding: 10px;
+    }
+
+    .dropdown-content a {
+        font-size: 14px;
+        padding: 6px 12px;
+    }
+} 
+ 

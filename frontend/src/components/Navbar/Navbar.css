@@ -1,0 +1,89 @@
+/* Navbar base styles */
+.navbar {
+    background-color: #154734; /* Dark green background */
+    padding: 15px 0;
+  }
+  
+  .navbar-brand {
+    color: #fff !important;  /* Ensure white color */
+    font-weight: bold;
+    font-size: 1.3rem;
+    text-decoration: none;
+}
+
+.navbar-brand:hover {
+    color: #ddd !important;  /* Ensure hover effect works */
+}
+  
+  /* Navbar Links */
+  .navbar-nav .nav-link {
+    color: #fff;
+    font-weight: bold;
+    padding: 5px 10px;
+    transition: border 0.3s ease, color 0.3s ease;
+    text-decoration: none;
+    margin-right: 20px;
+  }
+  
+  .navbar-nav .nav-link:hover {
+    color: #ddd;
+    border-bottom: 2px solid #ddd; /* Underline effect on hover */
+  }
+  
+  /* Navbar buttons */
+  .btn-outline-light {
+    color: #fff;
+    border-color: #fff;
+  }
+  
+  .btn-outline-light:hover {
+    background-color: #fff;
+    color: #154734;
+  }
+  
+  /* Sign Up Button */
+  .btn-light {
+    background-color: #fff;
+    color: #154734;
+    font-weight: bold;
+  }
+  
+  .btn-light:hover {
+    background-color: #ddd;
+  }
+  
+  /* Mobile Navbar Toggler */
+  .navbar-toggler {
+    border-color: rgba(255, 255, 255, 0.5);
+  }
+  
+  .navbar-toggler-icon {
+    background-color: rgba(255, 255, 255, 0.8);
+  }
+  
+  /* Fix content shifting under navbar */
+  body {
+    padding-top: 70px;
+  }
+  
+  /* Style for the navbar toggler button */
+.navbar-toggler {
+    border-color: rgba(255, 255, 255, 0.5);
+    background-color: transparent;
+    padding: 5px 10px;
+  }
+  
+  /* Style for the toggler icon */
+  .navbar-toggler-icon {
+    background-color: rgba(255, 255, 255, 0.8); /* Light color for visibility */
+    width: 30px;
+    height: 3px;
+    display: block;
+    border-radius: 2px;
+  }
+  
+  /* Additional hover effect for toggler */
+  .navbar-toggler:hover {
+    background-color: rgba(255, 255, 255, 0.2);
+  }
+  

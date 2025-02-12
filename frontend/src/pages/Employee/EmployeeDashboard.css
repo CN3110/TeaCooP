@@ -1,0 +1,35 @@
+.employee-dashboard{
+    display: flex;
+    gap: 20px;
+    min-height: 100vh;
+}
+
+.employee-dashboard-content {
+    flex: 1; /* This is correct */
+    display: flex;
+    flex-grow: 1; /* Ensures it fills remaining space */
+    flex-direction: row;
+    padding: 2rem;
+    gap: 1.5rem;
+    justify-content: space-between;
+    align-items: flex-start;
+    background: #fff;
+    border-radius: 2rem;
+ }
+
+ .content-wrapper {
+    flex: 2;
+ }
+ 
+ .profile-wrapper {
+    flex: 1;
+    display: flex;
+    justify-content: flex-end;
+ }
+
+ .sidebar {
+    width: 250px; /* Ensure sidebar has a fixed width */
+    min-height: 100vh;
+    background: #f4f4f4;
+}
+ 
