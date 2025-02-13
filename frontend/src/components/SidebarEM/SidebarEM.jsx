@@ -65,8 +65,8 @@ const SidebarEM = () => {
           </button>
           {openDropdown === "drivers" && (
             <div className="dropdown-content">
-              <Link to="#">Add Driver</Link>
-              <Link to="#">View Drivers</Link>
+              <Link to="/add-driver">Add Driver</Link>
+              <Link to="/view-drivers">View Drivers</Link>
             </div>
           )}
         </div>

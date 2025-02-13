@@ -1,0 +1,87 @@
+.view-driver-container {
+    max-width: 1200px;
+    margin: 20px auto;
+    padding: 20px;
+    background-color: #f9f9f9;
+    border-radius: 8px;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+  }
+  
+  .view-driver-container h3 {
+    text-align: center;
+    color: #154734;
+    margin-bottom: 20px;
+  }
+  
+  .content-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px;
+  }
+  
+  .header-activity {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+  }
+  
+  .search-box {
+    display: flex;
+    align-items: center;
+    background-color: white;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    padding: 5px 10px;
+  }
+  
+  .search-box input {
+    border: none;
+    outline: none;
+    font-size: 16px;
+    width: 200px;
+  }
+  
+  .search-box .icon {
+    color: #154734;
+    cursor: pointer;
+  }
+  
+  .add-driver-btn {
+    padding: 10px 20px;
+    background-color: #154734;
+    color: white;
+    border: none;
+    border-radius: 4px;
+    font-size: 16px;
+    cursor: pointer;
+  }
+  
+  .add-driver-btn:hover {
+    background-color: #0f361f;
+  }
+  
+  .drivers-table {
+    width: 100%;
+    border-collapse: collapse;
+    background-color: white;
+    border-radius: 8px;
+    overflow: hidden;
+    box-shadow: 0 0 5px rgba(0, 0, 0, 0.1);
+  }
+  
+  .drivers-table th,
+  .drivers-table td {
+    padding: 12px;
+    text-align: left;
+    border-bottom: 1px solid #ddd;
+  }
+  
+  .drivers-table th {
+    background-color: #154734;
+    color: white;
+  }
+  
+  .drivers-table tbody tr:hover {
+    background-color: #f1f1f1;
+  }

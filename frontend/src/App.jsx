@@ -10,6 +10,8 @@ import "bootstrap/dist/css/bootstrap.min.css"; // Bootstrap styles
 import EmployeeDashboard from "./pages/Employee/EmployeeDashboard.jsx";
 import AddSupplier from "./pages/AddSupplier/AddSupplier.jsx";
 import ViewSuppliers from "./pages/ViewSuppliers/ViewSuppliers.jsx";
+import AddDriver from "./pages/AddDriver/AddDriver.jsx";
+import ViewDrivers from "./pages/ViewDrivers/ViewDrivers.jsx";
 
 const App = () => {
   const [showLogin, setShowLogin] = useState(false); // Add state for LoginPopup
@@ -25,6 +27,8 @@ const App = () => {
           <Route path="/employeedashboard" element={<EmployeeDashboard />} />
           <Route path="/add-supplier" element={<AddSupplier/>} />
           <Route path="/view-suppliers" element={<ViewSuppliers/>} />
+          <Route path="/add-driver" element={<AddDriver />} />
+          <Route path="/view-drivers" element={<ViewDrivers/>}/>
         </Routes>
       </div>
 

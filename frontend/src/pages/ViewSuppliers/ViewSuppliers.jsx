@@ -10,10 +10,10 @@ const ViewSuppliers = () => {
 
   // Sample supplier data (replace with real data from an API or state)
   const [suppliers, setSuppliers] = useState([
-    { id: "500001", name: "-", contact: "-", size: "-", address: "-" },
-    { id: "500002", name: "-", contact: "-", size: "-", address: "-" },
-    { id: "500003", name: "-", contact: "-", size: "-", address: "-" },
-    { id: "500004", name: "-", contact: "-", size: "-", address: "-" },
+    { id: "S00001", name: "-", contact: "-", size: "-", address: "-" },
+    { id: "S00002", name: "-", contact: "-", size: "-", address: "-" },
+    { id: "S00003", name: "-", contact: "-", size: "-", address: "-" },
+    { id: "S00004", name: "-", contact: "-", size: "-", address: "-" },
   ]);
 
   // Handle search input change
