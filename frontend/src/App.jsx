@@ -5,7 +5,7 @@ import Home from "./pages/Home/Home";
 import AboutUs from "./pages/About Us/AboutUs.jsx";
 import Contact from "./pages/Contact/Contact";
 import Footer from "./components/Footer/Footer.jsx";
-import LoginPopup from "./components/LoginPopup/LoginPopup"; // Import LoginPopup
+import LoginPopup from "./components/LoginPopup/LoginPopup"; 
 import "bootstrap/dist/css/bootstrap.min.css"; // Bootstrap styles
 import EmployeeDashboard from "./pages/Employee/EmployeeDashboard.jsx";
 import AddSupplier from "./pages/AddSupplier/AddSupplier.jsx";

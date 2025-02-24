@@ -19,13 +19,13 @@ const AddSupplier = () => {
 
   const navigate = useNavigate();
 
-  // Handle input changes for supplier details
+  //handle input changes for supplier details
   const handleInputChange = (e) => {
     const { name, value } = e.target;
     setSupplierData({ ...supplierData, [name]: value });
   };
 
-  // Handle input changes for land details
+  //handle input changes for land details
   const handleLandDetailsChange = (index, e) => {
     const { name, value } = e.target;
     const updatedLandDetails = [...supplierData.landDetails];
@@ -33,7 +33,7 @@ const AddSupplier = () => {
     setSupplierData({ ...supplierData, landDetails: updatedLandDetails });
   };
 
-  // Add a new land detail field
+  //Add a new land detail field
   const addLandDetail = () => {
     setSupplierData({
       ...supplierData,
@@ -44,17 +44,35 @@ const AddSupplier = () => {
     });
   };
 
-  // Handle form submission
-  const handleSubmit = (e) => {
+  //handle form submission
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    console.log("Supplier Data:", supplierData);
-    alert("Supplier added successfully!");
-    navigate("/manage-suppliers");
+
+    try { //backend API call to add a new supplier
+      const response = await fetch("http://localhost:3001/api/suppliers/add", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(supplierData),
+      });
+
+      if (response.ok) {
+        alert("Supplier added successfully!");
+        navigate("/manage-suppliers");
+      } else {
+        const errorData = await response.json();
+        alert(`Failed to add supplier: ${errorData.error}`);
+      }
+    } catch (error) {
+      console.error("Error submitting supplier data:", error);
+      alert("An error occurred while submitting the form.");
+    }
   };
 
-  // Handle cancel button click
+  //handle cancel button click
   const handleCancel = () => {
-    navigate("/manage-suppliers"); // Redirect to the suppliers list page
+    navigate("/view-suppliers"); //redirect to the suppliers view page
   };
 
   return (
@@ -104,8 +122,7 @@ const AddSupplier = () => {
             {supplierData.landDetails.map((land, index) => (
               <div key={index} className="land-detail-group">
                 <div className="form-group">
-                <small>Land No. {index + 1}</small>
-                  
+                  <small>Land No. {index + 1}</small>
                 </div>
 
                 <div className="form-group">
@@ -133,19 +150,18 @@ const AddSupplier = () => {
             ))}
 
             {/* Button to add more land details */}
-            <button type="button" className="btn btn-outline-secondary" onClick={addLandDetail}> Add More Land</button>
-          
-             
-            
+            <button
+              type="button"
+              className="btn btn-outline-secondary"
+              onClick={addLandDetail}
+            >
+              Add More Land
+            </button>
           </div>
 
           {/* Buttons */}
           <div className="form-buttons">
-            <button
-              type="button"
-              className="cancel-btn"
-              onClick={handleCancel}
-            >
+            <button type="button" className="cancel-btn" onClick={handleCancel}>
               Cancel
             </button>
             <button type="submit" className="submit-btn">

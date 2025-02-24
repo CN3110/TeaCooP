@@ -6,12 +6,10 @@ const LoginPopup = ({ show, handleClose }) => {
   const [isSignup, setIsSignup] = useState(false); // Toggle between Signup & Login
   const [formData, setFormData] = useState({
     employeeId: "",
-    name: "",
-    contact: "",
-    nic: "",
-    userId: "",
-    password: "",
-    confirmPassword: "",
+    employeeName: "", // Updated to match database column
+    employeeContactNo: "", // Updated to match database column
+    employeePassword: "", // Updated to match database column
+    employeeConfirmPassword: "", // Updated to match database column
   });
 
   const handleChange = (e) => {
@@ -21,19 +19,23 @@ const LoginPopup = ({ show, handleClose }) => {
   const handleSubmit = (e) => {
     e.preventDefault();
     console.log(isSignup ? "Signup Data" : "Login Data", formData);
-    handleClose(); // Close modal after submission
+    handleClose(); // Close the modal after submission
   };
 
   return (
     <Modal show={show} onHide={handleClose} centered>
-      <Modal.Header closeButton aria-label="Close" className="modal-header-custom">
+      <Modal.Header
+        closeButton
+        aria-label="Close"
+        className="modal-header-custom"
+      >
         <Modal.Title className="modal-title-custom">
           {isSignup ? "Register - Employee" : "Log In"}
         </Modal.Title>
       </Modal.Header>
       <Modal.Body>
         <Form onSubmit={handleSubmit}>
-          {isSignup ? (
+          {isSignup ? ( // When the user is not signed up, show the Sign Up (Register) form
             <>
               <Form.Group className="mb-2">
                 <Form.Control
@@ -48,9 +50,9 @@ const LoginPopup = ({ show, handleClose }) => {
               <Form.Group className="mb-2">
                 <Form.Control
                   type="text"
-                  name="name"
-                  placeholder="Name"
-                  value={formData.name}
+                  name="employeeName"
+                  placeholder="Employee Name"
+                  value={formData.employeeName}
                   onChange={handleChange}
                   required
                 />
@@ -58,31 +60,22 @@ const LoginPopup = ({ show, handleClose }) => {
               <Form.Group className="mb-2">
                 <Form.Control
                   type="text"
-                  name="contact"
+                  name="employeeContactNo"
                   placeholder="Contact No."
-                  value={formData.contact}
-                  onChange={handleChange}
-                  required
-                />
-              </Form.Group>
-              <Form.Group className="mb-2">
-                <Form.Control
-                  type="text"
-                  name="nic"
-                  placeholder="NIC"
-                  value={formData.nic}
+                  value={formData.employeeContactNo}
                   onChange={handleChange}
                   required
                 />
               </Form.Group>
             </>
           ) : (
+            // When the user has an account
             <Form.Group className="mb-2">
               <Form.Control
                 type="text"
-                name="userId"
-                placeholder="User ID"
-                value={formData.userId}
+                name="employeeId"
+                placeholder="Employee ID"
+                value={formData.employeeId}
                 onChange={handleChange}
                 required
               />
@@ -92,9 +85,9 @@ const LoginPopup = ({ show, handleClose }) => {
           <Form.Group className="mb-2">
             <Form.Control
               type="password"
-              name="password"
+              name="employeePassword"
               placeholder="Password"
-              value={formData.password}
+              value={formData.employeePassword}
               onChange={handleChange}
               required
             />
@@ -104,9 +97,9 @@ const LoginPopup = ({ show, handleClose }) => {
             <Form.Group className="mb-2">
               <Form.Control
                 type="password"
-                name="confirmPassword"
+                name="employeeConfirmPassword"
                 placeholder="Confirm Password"
-                value={formData.confirmPassword}
+                value={formData.employeeConfirmPassword}
                 onChange={handleChange}
                 required
               />

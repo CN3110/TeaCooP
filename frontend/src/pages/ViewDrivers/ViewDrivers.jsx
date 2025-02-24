@@ -8,21 +8,21 @@ const ViewDrivers = () => {
   const [searchId, setSearchId] = useState("");
   const navigate = useNavigate();
 
-  // Sample driver data (replace with real data from an API or state)
+  //sample driver data
   const [drivers, setDrivers] = useState([
-    { id: "D1001", name: "John Doe", contact: "0712345678", vehicleNo: "ABC-123" },
-    { id: "D1002", name: "Jane Smith", contact: "0712345679", vehicleNo: "XYZ-456"},
-    { id: "D1003", name: "Sam Brown", contact: "0712345680", vehicleNo: "DEF-789" },
+    { id: "D1001", name: "-", contact: "-", vehicleNo: "-" },
+    { id: "D1002", name: "-", contact: "-", vehicleNo: "-"},
+    { id: "D1003", name: "-", contact: "-", vehicleNo: "-" },
   ]);
 
-  // Handle search input change
+  //handle search input change
   const handleSearchChange = (e) => {
     setSearchId(e.target.value);
   };
 
-  // Handle search submission
+  //handle search submission
   const handleSearchSubmit = (e) => {
-    e.preventDefault();
+    e.preventDefault(); 
     // Add logic to filter drivers based on searchId
     console.log("Search for Driver ID:", searchId);
   };

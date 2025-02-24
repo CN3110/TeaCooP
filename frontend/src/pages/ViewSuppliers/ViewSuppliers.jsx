@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { BiSearch } from "react-icons/bi";
 import EmployeeLayout from "../../components/EmployeeLayout/EmployeeLayout";
@@ -6,26 +6,20 @@ import "./ViewSuppliers.css";
 
 const ViewSuppliers = () => {
   const [searchId, setSearchId] = useState("");
+  const [suppliers, setSuppliers] = useState([]);
+  const [filteredSuppliers, setFilteredSuppliers] = useState([]);
   const navigate = useNavigate();
 
-  // Sample supplier data (replace with real data from an API or state)
-  const [suppliers, setSuppliers] = useState([
-    { id: "S00001", name: "-", contact: "-", size: "-", address: "-" },
-    { id: "S00002", name: "-", contact: "-", size: "-", address: "-" },
-    { id: "S00003", name: "-", contact: "-", size: "-", address: "-" },
-    { id: "S00004", name: "-", contact: "-", size: "-", address: "-" },
-  ]);
-
-  // Handle search input change
+  //handle search input change
   const handleSearchChange = (e) => {
-    setSearchId(e.target.value);
-  };
+    const searchTerm = e.target.value;
+    setSearchId(searchTerm);
 
-  // Handle search submission
-  const handleSearchSubmit = (e) => {
-    e.preventDefault();
-    // Add logic to filter suppliers based on searchId
-    console.log("Search for Supplier ID:", searchId);
+    // Filter suppliers based on search term
+    const filtered = suppliers.filter((supplier) =>
+      supplier.supplierId.toLowerCase().includes(searchTerm.toLowerCase())
+    );
+    setFilteredSuppliers(filtered);
   };
 
   // Navigate to the "Add New Supplier" page
@@ -37,13 +31,21 @@ const ViewSuppliers = () => {
     <EmployeeLayout>
       <div className="view-supplier-container">
         <div className="content-header">
-          <h3>View Suppliers</h3>
+          <h3>View Suppliers</h3> {/*View Suppliers title */}
 
           <div className="header-activity">
             <div className="search-box">
-              <input type="text" placeholder="Search by Supplier ID" />
+              <input
+                type="text"
+                placeholder="Search by Supplier ID"
+                value={searchId}
+                onChange={handleSearchChange}
+              />
               <BiSearch className="icon" />
             </div>
+            <button className="add-supplier-btn" onClick={handleAddSupplier}>
+              Add New Supplier
+            </button>
           </div>
         </div>
 
@@ -53,18 +55,26 @@ const ViewSuppliers = () => {
               <th>Supplier ID</th>
               <th>Supplier Name</th>
               <th>Contact Number</th>
-              <th>Size of Land</th>
-              <th>Land Address</th>
+              <th>Land Details</th>
             </tr>
           </thead>
           <tbody>
-            {suppliers.map((supplier) => (
-              <tr key={supplier.id}>
-                <td>{supplier.id}</td>
-                <td>{supplier.name}</td>
-                <td>{supplier.contact}</td>
-                <td>{supplier.size}</td>
-                <td>{supplier.address}</td>
+            {filteredSuppliers.map((supplier) => (
+              <tr key={supplier.supplierId}>
+                <td>{supplier.supplierId}</td>
+                <td>{supplier.supplierName}</td>
+                <td>{supplier.supplierContactNumber}</td>
+                <td>
+                  <ul>
+                    {supplier.landDetails.map((land, index) => (
+                      <li key={index}>
+                        <strong>Land No:</strong> {land.landNo},{" "}
+                        <strong>Size:</strong> {land.landSize},{" "}
+                        <strong>Address:</strong> {land.landAddress}
+                      </li>
+                    ))}
+                  </ul>
+                </td>
               </tr>
             ))}
           </tbody>
