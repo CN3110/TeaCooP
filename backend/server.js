@@ -1,31 +1,26 @@
 const express = require("express");
 const cors = require("cors");
-const db = require("./config/database");
+const db = require("./config/database"); // ✅ Just require the database (don't call db.connect() again)
 const middleware = require("./config/middleware");
 
 const app = express();
 
-// Middleware
 middleware(app);
 
-// Database connection
-db.connect((err) => {
-  if (err) {
-    console.error("Error connecting to the database:", err);
-    return;
-  }
-  console.log("Connected to the database");
-});
+app.use(express.json());
 
-// Routes
+app.use(cors({
+  origin: 'http://localhost:5173', //frontend URL
+  credentials: true,
+}));
+
 app.use("/api/suppliers", require("./routes/supplierRoutes"));
+app.use("/api/deliveries", require("./routes/deliveryRoutes"));
 
-// Default route
 app.get("/", (req, res) => {
   res.json("Hello from backend");
 });
 
-// Start the server
 const PORT = process.env.PORT || 3001;
 app.listen(PORT, () => {
   console.log(`Server is running on port ${PORT}`);

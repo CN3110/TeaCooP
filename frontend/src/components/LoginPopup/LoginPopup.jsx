@@ -73,8 +73,8 @@ const LoginPopup = ({ show, handleClose }) => {
             <Form.Group className="mb-2">
               <Form.Control
                 type="text"
-                name="employeeId"
-                placeholder="Employee ID"
+                name="userId"
+                placeholder="User ID"
                 value={formData.employeeId}
                 onChange={handleChange}
                 required

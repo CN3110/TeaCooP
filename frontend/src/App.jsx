@@ -12,6 +12,8 @@ import AddSupplier from "./pages/AddSupplier/AddSupplier.jsx";
 import ViewSuppliers from "./pages/ViewSuppliers/ViewSuppliers.jsx";
 import AddDriver from "./pages/AddDriver/AddDriver.jsx";
 import ViewDrivers from "./pages/ViewDrivers/ViewDrivers.jsx";
+import AddNewDeliveryRecord from "./pages/ManageDeliveriesEM/AddNewDeliveryRecord/AddNewDeliveryRecord/AddNewDeliveryRecord.jsx";
+import ViewDeliveryRecords from "./pages/ManageDeliveriesEM/ViewDeliveryRecords/ViewDeliveryRecords.jsx";
 
 const App = () => {
   const [showLogin, setShowLogin] = useState(false); // Add state for LoginPopup
@@ -29,6 +31,8 @@ const App = () => {
           <Route path="/view-suppliers" element={<ViewSuppliers/>} />
           <Route path="/add-driver" element={<AddDriver />} />
           <Route path="/view-drivers" element={<ViewDrivers/>}/>
+          <Route path="/add-new-delivery-record" element={<AddNewDeliveryRecord/>} />
+          <Route path="/view-delivery-records" element={<ViewDeliveryRecords />} />
         </Routes>
       </div>
 

@@ -1,0 +1,135 @@
+.view-delivery-container {
+  max-width: 1200px;
+  margin: 20px auto;
+  padding: 20px;
+  background-color: #f9f9f9;
+  border-radius: 8px;
+  box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+}
+
+.content-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 20px;
+}
+
+.content-header h3 {
+  text-align: center;
+  color: #154734;
+  margin-bottom: 20px;
+}
+
+.header-activity {
+  display: flex;
+  align-items: center;
+  gap: 15px;
+}
+
+.search-box {
+  display: flex;
+  align-items: center;
+  background-color: white;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  padding: 5px 10px;
+}
+
+.search-box input {
+  border: none;
+  outline: none;
+  font-size: 16px;
+  width: 200px;
+}
+
+.search-box .icon {
+  color: #154734;
+  cursor: pointer;
+}
+
+.add-delivery-btn .btn-success {
+  padding: 10px 20px;
+  background-color: #154734;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  font-size: 16px;
+  cursor: pointer;
+}
+
+.add-delivery-btn .btn-success:hover {
+  background-color: #0f361f;
+}
+
+.table-container {
+  overflow-x: auto; /*horizontal scrollbar */
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  margin-top: 10px;
+  box-shadow: 0 0 5px rgba(0, 0, 0, 0.1);
+}
+
+.delivery-table {
+  width: 100%;
+  min-width: 1200px;
+  border-collapse: collapse;
+}
+
+.delivery-table th,
+.delivery-table td {
+  padding: 10px;
+  text-align: left;
+  border-bottom: 1px solid #ddd;
+  white-space: nowrap; /*prevent text wrapping*/
+}
+
+.delivery-table th {
+  background-color: #154734;
+  color: white;
+}
+
+.delivery-table tbody tr:hover {
+  background-color: #f1f1f1;
+}
+
+.btn-view {
+  background-color: #216d508f;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  font-size: 16px;
+  cursor: pointer;
+  padding: 5px 10px;
+  margin-left: 5px;
+  margin-right: 5px;
+}
+
+.btn-view:hover {
+  background-color: #216d50b6;
+}
+
+.btn-edit {
+  background-color: #004a2cb7;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  font-size: 16px;
+  cursor: pointer;
+  padding: 5px 10px;
+  margin-right: 5px;
+}
+
+.btn-delete {
+  background-color: #a43a3aba;
+  margin-right: 5px;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  font-size: 16px;
+  cursor: pointer;
+  padding: 5px 10px;
+}
+
+.btn-delete:hover {
+  background-color: #a43a3ae7;
+}

@@ -39,8 +39,8 @@ const SidebarEM = () => {
           </button>
           {openDropdown === "deliveries" && (
             <div className="dropdown-content">
-              <Link to="#">Add New Delivery Record</Link>
-              <Link to="#">View Delivery Records</Link>
+              <Link to="/add-new-delivery-record">Add New Delivery Record</Link>
+              <Link to="/view-delivery-records">View Delivery Records</Link>
              </div>
           )}
         </div>

@@ -1,17 +1,15 @@
 const express = require("express");
+const db = require("../config/database"); // ✅ Use require() instead of import
 const router = express.Router();
-const db = require("../config/database");
 
-//add a new supplier with routing
+// Add a new supplier
 router.post("/add", (req, res) => {
   const { supplierId, name, contact, landDetails } = req.body;
 
-  //check the all input fields are filled
   if (!supplierId || !name || !contact) {
     return res.status(400).json({ error: "Missing required fields" });
   }
 
-  //insert supplier into the database - supplier table
   const query = `
     INSERT INTO supplier (supplierId, supplierName, supplierContactNumber)
     VALUES (?, ?, ?)
@@ -23,7 +21,6 @@ router.post("/add", (req, res) => {
       return res.status(500).json({ error: "Failed to add supplier" });
     }
 
-    //insert land details into another table (land_details) - not woking now, check the error
     if (Array.isArray(landDetails) && landDetails.length > 0) {
       const landQuery = `
         INSERT INTO land_details (supplierId, landNo, landSize, landAddress)
@@ -31,24 +28,26 @@ router.post("/add", (req, res) => {
       `;
 
       const landValues = landDetails.map((land) => [
-        supplierId, //add foreign key supplierId
+        supplierId,
         land.landNo,
         land.landSize,
         land.landAddress,
       ]);
 
-      db.query(landQuery, [landValues], (err, result) => { //error handling 
+      db.query(landQuery, [landValues], (err, result) => {
         if (err) {
           console.error("Error inserting land details:", err);
           return res.status(500).json({ error: "Failed to add land details" });
         }
 
-        res.status(201).json({ message: "Supplier and land details added successfully" });
+        return res
+          .status(201)
+          .json({ message: "Supplier and land details added successfully" });
       });
     } else {
-      res.status(201).json({ message: "Supplier added successfully" });
+      return res.status(201).json({ message: "Supplier added successfully" });
     }
   });
 });
 
-module.exports = router;
+module.exports = router; // ✅ Use CommonJS export
