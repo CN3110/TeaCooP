@@ -1,3 +1,4 @@
+//connecting to the database  using mysql
 const mysql = require("mysql");
 
 const db = mysql.createConnection({
@@ -10,7 +11,7 @@ const db = mysql.createConnection({
 db.connect((err) => {
   if (err) {
     console.error("Error connecting to the database:", err);
-    process.exit(1); //Exit the process if the connection fails
+    process.exit(1);
   }
   console.log("Connected to the database");
 });

@@ -2,16 +2,16 @@ const express = require("express");
 const router = express.Router();
 const db = require("../config/database");
 
-// Add a new supplier
+//add a new supplier with routing
 router.post("/add", (req, res) => {
   const { supplierId, name, contact, landDetails } = req.body;
 
-  // Validate required fields
+  //check the all input fields are filled
   if (!supplierId || !name || !contact) {
     return res.status(400).json({ error: "Missing required fields" });
   }
 
-  // Insert supplier into the database
+  //insert supplier into the database - supplier table
   const query = `
     INSERT INTO supplier (supplierId, supplierName, supplierContactNumber)
     VALUES (?, ?, ?)
@@ -23,7 +23,7 @@ router.post("/add", (req, res) => {
       return res.status(500).json({ error: "Failed to add supplier" });
     }
 
-    // Insert land details into another table (if provided)
+    //insert land details into another table (land_details) - not woking now, check the error
     if (Array.isArray(landDetails) && landDetails.length > 0) {
       const landQuery = `
         INSERT INTO land_details (supplierId, landNo, landSize, landAddress)
@@ -31,13 +31,13 @@ router.post("/add", (req, res) => {
       `;
 
       const landValues = landDetails.map((land) => [
-        supplierId,
+        supplierId, //add foreign key supplierId
         land.landNo,
         land.landSize,
         land.landAddress,
       ]);
 
-      db.query(landQuery, [landValues], (err, result) => {
+      db.query(landQuery, [landValues], (err, result) => { //error handling 
         if (err) {
           console.error("Error inserting land details:", err);
           return res.status(500).json({ error: "Failed to add land details" });
