@@ -1,3 +1,4 @@
+//rebuilt with new folder structure plsss
 const express = require("express");
 const db = require("../config/database"); // ✅ Use require() instead of import
 const router = express.Router();

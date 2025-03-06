@@ -3,13 +3,20 @@ import EmployeeLayout from "../../../components/EmployeeLayout/EmployeeLayout";
 import { BiSearch } from "react-icons/bi"; // Ensure this package is installed
 import "./ViewDeliveryRecords.css";
 import { Link } from "react-router-dom";
+import EditDeliveryRecord from "./EditDeliveryRecord";
 
 function ViewDeliveryRecords() {
   const [deliveryRecords, setDeliveryRecords] = useState([]);
   const [supplierId, setSupplierId] = useState(""); // State for search input
+  const [isEditDeliveryRecordModalOpen, setIsEditDeliveryRecordModalOpen] = useState(false);
+  const [selectedDeliveryId, setSelectedDeliveryId] = useState(null); // Track the selected delivery ID
 
   // Fetch delivery records from API
   useEffect(() => {
+    fetchDeliveryRecords();
+  }, []);
+
+  const fetchDeliveryRecords = () => {
     console.log("Fetching data..."); // Log to verify useEffect is triggered
     fetch("http://localhost:3001/api/deliveries")
       .then((response) => {
@@ -26,7 +33,7 @@ function ViewDeliveryRecords() {
       .catch((error) => {
         console.error("Error fetching delivery records:", error); // Log any errors
       });
-  }, []);
+  };
 
   // Handle search input change
   const handleSearchChange = (event) => {
@@ -40,6 +47,19 @@ function ViewDeliveryRecords() {
     );
     console.log("Filtered records:", filteredRecords); // Log the filtered records
     setDeliveryRecords(filteredRecords);
+  };
+
+  // Open the edit modal and set the selected delivery ID
+  const openEditDeliveryRecordModal = (deliveryId) => {
+    setSelectedDeliveryId(deliveryId);
+    setIsEditDeliveryRecordModalOpen(true);
+  };
+
+  // Close the edit modal and refresh the data
+  const closeEditDeliveryRecordModal = () => {
+    setIsEditDeliveryRecordModalOpen(false);
+    setSelectedDeliveryId(null); // Reset the selected delivery ID
+    fetchDeliveryRecords(); // Refresh the data after closing the modal
   };
 
   return (
@@ -100,8 +120,13 @@ function ViewDeliveryRecords() {
                     <td>{delivery.randalu}</td>
                     <td>{delivery.greenTeaLeaves}</td>
                     <td>
-                      <button className="btn-view">View</button>
-                      <button className="btn-edit">Edit</button>
+                      {/* Open the edit modal with the selected delivery ID */}
+                      <button
+                        className="btn-edit"
+                        onClick={() => openEditDeliveryRecordModal(delivery.id)}
+                      >
+                        Edit
+                      </button>
                       <button className="btn-delete">Delete</button>
                     </td>
                   </tr>
@@ -114,20 +139,17 @@ function ViewDeliveryRecords() {
             </tbody>
           </table>
         </div>
+
+        {/* Render the EditDeliveryRecord modal if it's open */}
+        {isEditDeliveryRecordModalOpen && (
+          <EditDeliveryRecord
+            closeModal={closeEditDeliveryRecordModal}
+            deliveryId={selectedDeliveryId}
+          />
+        )}
       </div>
     </EmployeeLayout>
   );
 }
 
 export default ViewDeliveryRecords;
-
-/* 
-  handle search function correctly 
-    when the user clears the search bar the results should be all the delivery table(normal table)
-
-  create view (popup)
-         edit (popup)
-         delete  functions 
-          
-          
-*/

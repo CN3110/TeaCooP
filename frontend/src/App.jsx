@@ -14,6 +14,7 @@ import AddDriver from "./pages/AddDriver/AddDriver.jsx";
 import ViewDrivers from "./pages/ViewDrivers/ViewDrivers.jsx";
 import AddNewDeliveryRecord from "./pages/ManageDeliveriesEM/AddNewDeliveryRecord/AddNewDeliveryRecord/AddNewDeliveryRecord.jsx";
 import ViewDeliveryRecords from "./pages/ManageDeliveriesEM/ViewDeliveryRecords/ViewDeliveryRecords.jsx";
+//import EditDeliveryRecord from "./pages/ManageDeliveriesEM/ViewDeliveryRecords/EditDeliveryRecord.jsx";
 
 const App = () => {
   const [showLogin, setShowLogin] = useState(false); // Add state for LoginPopup
@@ -33,6 +34,7 @@ const App = () => {
           <Route path="/view-drivers" element={<ViewDrivers/>}/>
           <Route path="/add-new-delivery-record" element={<AddNewDeliveryRecord/>} />
           <Route path="/view-delivery-records" element={<ViewDeliveryRecords />} />
+          {/*<Route path="/edit-delivery-record" element={<EditDeliveryRecord />} /> {/* Add route for EditDeliveryRecord in view records screen - edit button*/}
         </Routes>
       </div>
 
