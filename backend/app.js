@@ -21,6 +21,7 @@ app.use("/api/drivers", require("./routes/driverRoutes"));
 app.use("/api/vehicles", require("./routes/vehicleRoutes"));
 app.use("/api/brokers", require("./routes/brokerRoutes"));
 
+
 app.get("/", (req, res) => {
   res.json("Hello from backend");
 });

@@ -81,17 +81,17 @@ const AddNewDeliveryRecord = () => {
       !deliveryData.greenTeaLeaves ||
       !deliveryData.randalu
     ) {
-      alert('Please fill in all required fields.');
+      alert("Please fill in all required fields.");
       return;
     }
   
     // Convert date from mm/dd/yyyy to YYYY-MM-DD
     const date = new Date(deliveryData.date);
     if (isNaN(date.getTime())) {
-      alert('Please enter a valid date.');
+      alert("Please enter a valid date.");
       return;
     }
-    const formattedDate = date.toISOString().split('T')[0];
+    const formattedDate = date.toISOString().split("T")[0];
   
     // Create the payload with the formatted date and parsed numeric fields
     const payload = {
@@ -109,39 +109,40 @@ const AddNewDeliveryRecord = () => {
     console.log("Payload being sent:", payload); // Log the payload
   
     try {
-      const response = await fetch('http://localhost:3001/api/deliveries', {
-        method: 'POST',
+      const response = await fetch("http://localhost:3001/api/deliveries", {
+        method: "POST",
         headers: {
-          'Content-Type': 'application/json',
+          "Content-Type": "application/json",
         },
         body: JSON.stringify(payload),
       });
   
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.error || "Failed to add delivery");
+      }
+  
       const result = await response.json();
       console.log("Response from server:", result);
   
-      if (response.ok) {
-        alert('Delivery added successfully!');
-        // Optionally, reset the form
-        setDeliveryData({
-          supplierId: '',
-          transport: '',
-          date: '', 
-          route: '',
-          totalWeight: '',
-          totalSackWeight: '',
-          forWater: '',
-          forWitheredLeaves: '',
-          forRipeLeaves: '',
-          greenTeaLeaves: '',
-          randalu: ''
-        });
-      } else {
-        alert('Failed to add delivery: ' + (result.error || 'Unknown error'));
-      }
+      alert("Delivery added successfully!");
+      // Optionally, reset the form
+      setDeliveryData({
+        supplierId: "",
+        transport: "",
+        date: "",
+        route: "",
+        totalWeight: "",
+        totalSackWeight: "",
+        forWater: "",
+        forWitheredLeaves: "",
+        forRipeLeaves: "",
+        greenTeaLeaves: "",
+        randalu: "",
+      });
     } catch (error) {
-      console.error('Error:', error);
-      alert('An error occurred while adding the delivery');
+      console.error("Error:", error);
+      alert("An error occurred while adding the delivery: " + error.message);
     }
   };
 
@@ -306,6 +307,9 @@ export default AddNewDeliveryRecord;
         weights can be zero (can: totalSackWeight, forWater, forWitheredLeaves, forRipeLeaves, randalu)
                             (cannot: totalWeight, greenTeaLeaves) they should be  > 0
         date should not be in the future (should be today)
+
+        trasport menu : shold get drivers from the database that have been added to the system
+        route menu : should get routes are the hardcorded routes in the system
 
         alternative : (if the user enter supplierId that is not in the database, the user should be notified that the supplierId is not in the database )
                       when the user enter the begining of the supplierId, the system should suggest the supplierId that is in the database

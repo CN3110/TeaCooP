@@ -1,103 +1,159 @@
-const DeliveryRecord = require("../models/DeliveryRecord");
+const db = require("../config/database");
+
+// Fetch all delivery records
+exports.getAllDeliveryRecords = async (req, res) => {
+  try {
+    const [deliveryRecords] = await db.query("SELECT * FROM delivery");
+    res.status(200).json(deliveryRecords);
+  } catch (error) {
+    console.error("Error fetching delivery records:", error);
+    res.status(500).json({ error: "Failed to fetch delivery records" });
+  }
+};
 
 // Add a new delivery record
-exports.create = (req, res) => {
-  const record = req.body;
+exports.addDeliveryRecord = async (req, res) => {
+  const {
+    supplierId,
+    transport,
+    date,
+    route,
+    totalWeight,
+    totalSackWeight,
+    forWater,
+    forWitheredLeaves,
+    forRipeLeaves,
+    greenTeaLeaves,
+    randalu,
+  } = req.body;
 
   // Validate required fields
   if (
-    !record.supplierId ||
-    !record.transport ||
-    !record.date ||
-    !record.route ||
-    !record.totalWeight ||
-    !record.totalSackWeight ||
-    !record.forWater ||
-    !record.forWitheredLeaves ||
-    !record.forRipeLeaves ||
-    !record.greenTeaLeaves ||
-    !record.randalu
+    !supplierId ||
+    !transport ||
+    !date ||
+    !route ||
+    !totalWeight ||
+    !totalSackWeight ||
+    !forWater ||
+    !forWitheredLeaves ||
+    !forRipeLeaves ||
+    !greenTeaLeaves ||
+    !randalu
   ) {
     return res.status(400).json({ error: "Missing required fields" });
   }
 
-  DeliveryRecord.create(record, (err, id) => {
-    if (err) {
-      console.error("Error creating delivery record:", err);
-      return res.status(500).json({ error: "Failed to create delivery record" });
-    }
-    return res.status(201).json({ message: "Delivery record created successfully", id });
-  });
-};
-
-// Fetch all delivery records
-exports.getAll = (req, res) => {
-  DeliveryRecord.getAll((err, results) => {
-    if (err) {
-      console.error("Error fetching delivery records:", err);
-      return res.status(500).json({ error: "Failed to fetch delivery records" });
-    }
-    return res.status(200).json(results);
-  });
+  try {
+    // Insert delivery record into the delivery table
+    const [deliveryResult] = await db.query(
+      "INSERT INTO delivery (supplierId, transport, date, route, totalWeight, totalSackWeight, forWater, forWitheredLeaves, forRipeLeaves, greenTeaLeaves, randalu) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
+      [
+        supplierId,
+        transport,
+        date,
+        route,
+        totalWeight,
+        totalSackWeight,
+        forWater,
+        forWitheredLeaves,
+        forRipeLeaves,
+        greenTeaLeaves,
+        randalu,
+      ]
+    );
+    res.status(201).json({ message: "Delivery record added successfully" });
+  } catch (error) {
+    console.error("Error adding delivery record:", error);
+    res.status(500).json({ error: "Failed to add delivery record" });
+  }
 };
 
 // Fetch a single delivery record by ID
-exports.getById = (req, res) => {
-  const id = req.params.id;
+exports.getDeliveryRecordById = async (req, res) => {
+  const { deliveryId } = req.params;
 
-  if (!id) {
-    return res.status(400).json({ error: "Delivery ID is required" });
-  }
+  try {
+    const [delivery] = await db.query("SELECT * FROM delivery WHERE deliveryId = ?", [deliveryId]);
 
-  DeliveryRecord.getById(id, (err, result) => {
-    if (err) {
-      console.error("Error fetching delivery record:", err);
-      return res.status(500).json({ error: "Failed to fetch delivery record" });
-    }
-    if (!result) {
+    if (delivery.length === 0) {
       return res.status(404).json({ error: "Delivery record not found" });
     }
-    return res.status(200).json(result);
-  });
+
+    res.status(200).json(delivery[0]);
+  } catch (error) {
+    console.error("Error fetching delivery record:", error);
+    res.status(500).json({ error: "Failed to fetch delivery record" });
+  }
 };
 
 // Update a delivery record by ID
-exports.update = (req, res) => {
-  const id = req.params.id;
-  const record = req.body;
+exports.updateDeliveryRecord = async (req, res) => {
+  const { deliveryId } = req.params;
+  const {
+    supplierId,
+    transport,
+    date,
+    route,
+    totalWeight,
+    totalSackWeight,
+    forWater,
+    forWitheredLeaves,
+    forRipeLeaves,
+    greenTeaLeaves,
+    randalu,
+  } = req.body;
 
-  if (!id) {
-    return res.status(400).json({ error: "Delivery ID is required" });
+  if (
+    !supplierId ||
+    !transport ||
+    !date ||
+    !route ||
+    !totalWeight ||
+    !totalSackWeight ||
+    !forWater ||
+    !forWitheredLeaves ||
+    !forRipeLeaves ||
+    !greenTeaLeaves ||
+    !randalu
+  ) {
+    return res.status(400).json({ error: "Missing required fields" });
   }
 
-  DeliveryRecord.update(id, record, (err, affectedRows) => {
-    if (err) {
-      console.error("Error updating delivery record:", err);
-      return res.status(500).json({ error: "Failed to update delivery record" });
-    }
-    if (affectedRows === 0) {
-      return res.status(404).json({ error: "Delivery record not found" });
-    }
-    return res.status(200).json({ message: "Delivery record updated successfully" });
-  });
+  try {
+    await db.query(
+      "UPDATE delivery SET supplierId = ?, transport = ?, date = ?, route = ?, totalWeight = ?, totalSackWeight = ?, forWater = ?, forWitheredLeaves = ?, forRipeLeaves = ?, greenTeaLeaves = ?, randalu = ? WHERE deliveryId = ?",
+      [
+        supplierId,
+        transport,
+        date,
+        route,
+        totalWeight,
+        totalSackWeight,
+        forWater,
+        forWitheredLeaves,
+        forRipeLeaves,
+        greenTeaLeaves,
+        randalu,
+        deliveryId,
+      ]
+    );
+    res.status(200).json({ message: "Delivery record updated successfully" });
+  } catch (error) {
+    console.error("Error updating delivery record:", error);
+    res.status(500).json({ error: "Failed to update delivery record" });
+  }
 };
 
 // Delete a delivery record by ID
-exports.delete = (req, res) => {
-  const id = req.params.id;
+exports.deleteDeliveryRecord = async (req, res) => {
+  const { deliveryId } = req.params;
 
-  if (!id) {
-    return res.status(400).json({ error: "Delivery ID is required" });
+  try {
+    await db.query("DELETE FROM delivery WHERE deliveryId = ?", [deliveryId]);
+    res.status(200).json({ message: "Delivery record deleted successfully" });
+  } catch (error) {
+    console.error("Error deleting delivery record:", error);
+    res.status(500).json({ error: "Failed to delete delivery record" });
   }
-
-  DeliveryRecord.delete(id, (err, affectedRows) => {
-    if (err) {
-      console.error("Error deleting delivery record:", err);
-      return res.status(500).json({ error: "Failed to delete delivery record" });
-    }
-    if (affectedRows === 0) {
-      return res.status(404).json({ error: "Delivery record not found" });
-    }
-    return res.status(200).json({ message: "Delivery record deleted successfully" });
-  });
 };

@@ -1,20 +1,19 @@
 const express = require("express");
+const {
+  getAllDeliveryRecords,
+  addDeliveryRecord,
+  getDeliveryRecordById,
+  updateDeliveryRecord,
+  deleteDeliveryRecord,
+} = require("../controllers/deliveryController");
+
 const router = express.Router();
-const deliveryController = require("../controllers/deliveryController");
 
-// POST route to add a new delivery record
-router.post("/", deliveryController.create);
-
-// GET route to fetch all delivery records
-router.get("/", deliveryController.getAll);
-
-// GET route to fetch a single delivery record by ID
-router.get("/:id", deliveryController.getById);
-
-// PUT route to update a delivery record by ID
-router.put("/:id", deliveryController.update);
-
-// DELETE route to delete a delivery record by ID
-router.delete("/:id", deliveryController.delete);
+// CRUD routes for delivery records
+router.get("/", getAllDeliveryRecords); // Get all delivery records
+router.post("/", addDeliveryRecord); // Add a new delivery record
+router.get("/:deliveryId", getDeliveryRecordById); // Get a single delivery record by ID
+router.put("/:deliveryId", updateDeliveryRecord); // Update a delivery record
+router.delete("/:deliveryId", deleteDeliveryRecord); // Delete a delivery record
 
 module.exports = router;
