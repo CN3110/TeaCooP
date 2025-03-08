@@ -32,7 +32,7 @@ const SidebarEM = () => {
     <div className="menu">
       <div className="menu-list">
         <Link to="/employeedashboard" className="item">Dashboard</Link>
-
+        {/* Manage Deliveries Dropdown */}
         <div className="dropdown">
           <button className="dropdown-btn" onClick={() => toggleDropdown("deliveries")}>
             Manage Deliveries 
@@ -45,7 +45,47 @@ const SidebarEM = () => {
           )}
         </div>
 
-        {/* Manage Suppliers Dropdown */}
+          {/* Manage Sales Dropdown */}
+        <div className="dropdown">
+          <button className="dropdown-btn" onClick={() => toggleDropdown("sales")}>
+            Manage Sales Records 
+          </button>
+          {openDropdown === "suppliers" && (
+            <div className="dropdown-content">
+              <Link to="#">Add New Sale</Link>
+              <Link to="#">View Sales Records</Link>
+             </div>
+          )}
+        </div>
+
+        {/* Manage Transport Requests Dropdown */}
+        <div className="dropdown">
+          <button className="dropdown-btn" onClick={() => toggleDropdown("transportRequests")}>
+            Transport Requests 
+          </button>
+          {openDropdown === "transportRequests" && (
+            <div className="dropdown-content">
+              <Link to="#">View Transport Requests</Link>
+            </div>
+          )}
+        </div>
+
+        {/* Manage Tea types Dropdown */}
+        <div className="dropdown">
+          <button className="dropdown-btn" onClick={() => toggleDropdown("teaTypes")}>
+            Tea Types 
+          </button>
+          {openDropdown === "teaTypes" && (
+            <div className="dropdown-content">
+              <Link to="#">Add Tea Type</Link>
+              <Link to="#">View Tea Types</Link>
+            </div>
+          )}
+        </div>
+
+
+
+          {/* Manage Suppliers Dropdown */}
         <div className="dropdown">
           <button className="dropdown-btn" onClick={() => toggleDropdown("suppliers")}>
             Manage Suppliers 
@@ -78,11 +118,13 @@ const SidebarEM = () => {
           </button>
           {openDropdown === "brokers" && (
             <div className="dropdown-content">
-              <Link to="#">Add Broker</Link>
-              <Link to="#">View Brokers</Link>
+              <Link to="/add-broker">Add Broker</Link>
+              <Link to="/view-brokers">View Brokers</Link>
             </div>
           )}
         </div>
+
+        <Link to="#" className="item">Report Generate</Link> 
 
         <Link to="#" className="item" onClick={openProfileModal}>Your Profile</Link> 
 

@@ -8,12 +8,7 @@ const AddDriver = () => {
     driverId: "",
     driverName: "",
     contactNumber: "",
-    vehicleDetails: [
-      {
-        vehicleNo: "",
-        vehicleType: "",
-      },
-    ],
+    vehicleDetails: [{ vehicleNo: "", vehicleType: "" }],
   });
 
   const navigate = useNavigate();
@@ -38,22 +33,56 @@ const AddDriver = () => {
       ...driverData,
       vehicleDetails: [
         ...driverData.vehicleDetails,
-        { vehicleNo: "", vehicleType: "", route: "" },
+        { vehicleNo: "", vehicleType: "" },
       ],
     });
   };
 
   // Handle form submission
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    console.log("Driver Data:", driverData);
-    alert("Driver added successfully!");
-    navigate("/manage-drivers");
-  };
 
-  // Handle cancel button click
-  const handleCancel = () => {
-    navigate("/manage-drivers"); // Redirect to the drivers list page
+    // Validate required fields
+    if (!driverData.driverId || !driverData.driverName || !driverData.contactNumber) {
+      alert("Please fill in all required fields.");
+      return;
+    }
+
+    // Validate vehicle details
+    if (driverData.vehicleDetails.some((vehicle) => !vehicle.vehicleNo || !vehicle.vehicleType)) {
+      alert("Please fill in all vehicle details.");
+      return;
+    }
+
+    // Log the request body for debugging
+    const requestBody = {
+      driverId: driverData.driverId,
+      driverName: driverData.driverName,
+      driverContactNumber: driverData.contactNumber,
+      vehicleDetails: driverData.vehicleDetails,
+    };
+    console.log("Request Body:", requestBody);
+
+    try {
+      const response = await fetch("http://localhost:3001/api/drivers/add", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(requestBody),
+      });
+
+      if (response.ok) {
+        alert("Driver added successfully!");
+        navigate("/view-drivers");
+      } else {
+        const errorData = await response.json();
+        alert(`Error adding driver: ${errorData.message}`);
+      }
+    } catch (error) {
+      console.error("Error adding driver:", error);
+      alert("An error occurred while adding the driver");
+    }
   };
 
   return (
@@ -145,7 +174,7 @@ const AddDriver = () => {
 
           {/* Buttons */}
           <div className="form-buttons">
-            <button type="button" className="cancel-btn" onClick={handleCancel}>
+            <button type="button" className="cancel-btn" onClick={() => navigate("/view-drivers")}>
               Cancel
             </button>
             <button type="submit" className="submit-btn">

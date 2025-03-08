@@ -1,9 +1,19 @@
 const express = require("express");
-const { getAllSuppliers } = require("../controllers/supplierController");
+const {
+  getAllSuppliers,
+  addSupplier,
+  updateSupplier,
+  deleteSupplier,
+  getSupplierById, 
+} = require("../controllers/supplierController");
 
 const router = express.Router();
 
-// Define the route for fetching all suppliers
-router.get("/", getAllSuppliers);
+// CRUD routes for suppliers
+router.get("/", getAllSuppliers); // Get all suppliers
+router.post("/add", addSupplier); // Add a new supplier
+router.put("/:supplierId", updateSupplier); // Update a supplier
+router.delete("/:supplierId", deleteSupplier); // Delete a supplier
+router.get("/:supplierId", getSupplierById); // Get a single supplier by ID
 
 module.exports = router;

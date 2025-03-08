@@ -1,6 +1,6 @@
 const express = require("express");
 const cors = require("cors");
-const db = require("./config/database"); // ✅ Just require the database (don't call db.connect() again)
+const db = require("./config/database");
 const middleware = require("./config/middleware");
 
 const app = express();
@@ -17,6 +17,9 @@ app.use(cors({
 app.use("/api/suppliers", require("./routes/supplierRoutes"));
 app.use("/api/deliveries", require("./routes/deliveryRoutes"));
 app.use("/api/lands", require("./routes/landRoutes"));
+app.use("/api/drivers", require("./routes/driverRoutes"));
+app.use("/api/vehicles", require("./routes/vehicleRoutes"));
+app.use("/api/brokers", require("./routes/brokerRoutes"));
 
 app.get("/", (req, res) => {
   res.json("Hello from backend");

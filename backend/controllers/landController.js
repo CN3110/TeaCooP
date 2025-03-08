@@ -69,18 +69,18 @@ exports.updateLandDetails = async (req, res) => {
 
 // Delete land details
 exports.deleteLandDetails = async (req, res) => {
-    const { landId } = req.params;
-  
-    if (!landId) {
-      return res.status(400).json({ error: "Land ID is required" });
-    }
-  
-    try {
-      await db.query("DELETE FROM land WHERE landId = ?", [landId]);
-  
-      res.status(200).json({ message: "Land details deleted successfully" });
-    } catch (error) {
-      console.error("Error deleting land details:", error);
-      res.status(500).json({ error: "Failed to delete land details" });
-    }
-  };
+  const { landId } = req.params;
+
+  if (!landId) {
+    return res.status(400).json({ error: "Land ID is required" });
+  }
+
+  try {
+    await db.query("DELETE FROM land WHERE landId = ?", [landId]);
+
+    res.status(200).json({ message: "Land details deleted successfully" });
+  } catch (error) {
+    console.error("Error deleting land details:", error);
+    res.status(500).json({ error: "Failed to delete land details" });
+  }
+};

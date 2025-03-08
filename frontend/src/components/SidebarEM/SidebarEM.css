@@ -4,7 +4,7 @@
     flex-direction: column;
     gap: 2.3rem;
     height: 100vh;
-    width: 250px; /* Adjust width as needed */
+    width: 280px; /* Adjust width as needed */
     background-color: #f4f4f4; /* Light grey background */
     padding: 1rem 0;
     box-shadow: 2px 0 10px rgba(0, 0, 0, 0.1); /* Subtle shadow effect */
