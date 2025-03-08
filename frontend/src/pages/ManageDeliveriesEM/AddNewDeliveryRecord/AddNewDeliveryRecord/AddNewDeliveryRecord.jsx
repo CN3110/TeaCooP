@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { useNavigate } from "react-router-dom";
 import EmployeeLayout from '../../../../components/EmployeeLayout/EmployeeLayout';
 import './AddNewDeliveryRecord.css';
 
@@ -32,6 +33,8 @@ const AddNewDeliveryRecord = () => {
     { value: 'route4', label: 'Route 4' }
   ];
 
+  const navigate = useNavigate();
+  
   const handleInputChange = (e) => {
     const { name, value } = e.target;
     const updatedData = {
@@ -289,8 +292,8 @@ const AddNewDeliveryRecord = () => {
           </div>
 
           <div className="form-buttons">
-            <button type="submit" className="submit-btn">Submit</button>
-            <button type="button" className="cancel-btn">Cancel</button>
+            <button type="submit" className="submit-btn" onClick={() => navigate("/view-delivery-records")}>Submit</button>
+            <button type="button" className="cancel-btn" onClick={() => navigate("/view-delivery-records")}>Cancel</button>
           </div>
         </form>
       </div>

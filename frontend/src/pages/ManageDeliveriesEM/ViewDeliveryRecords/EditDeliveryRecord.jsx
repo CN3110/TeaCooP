@@ -1,7 +1,11 @@
 import React, { useState, useEffect } from "react";
+import { useParams, useNavigate } from "react-router-dom";
+import "./EditDeliveryRecord.css";
 
-const EditDeliveryRecord = ({ closeModal, deliveryId }) => {
-  const [deliveryRecord, setDeliveryRecord] = useState({
+const EditDeliveryRecord = () => {
+  const { deliveryId } = useParams(); // Extract deliveryId from URL parameters
+  const navigate = useNavigate(); // Initialize the navigate function
+  const [formData, setFormData] = useState({
     supplierId: "",
     date: "",
     transport: "",
@@ -11,183 +15,209 @@ const EditDeliveryRecord = ({ closeModal, deliveryId }) => {
     forWater: "",
     forWitheredLeaves: "",
     forRipeLeaves: "",
-    randalu: "",
     greenTeaLeaves: "",
+    randalu: "",
   });
 
-  const [isEditing, setIsEditing] = useState(false);
+  console.log("Delivery ID from URL:", deliveryId);
 
   // Fetch the delivery record data when the component mounts or when deliveryId changes
   useEffect(() => {
+    const fetchDeliveryRecord = async () => {
+      try {
+        const response = await fetch(
+          `http://localhost:3001/api/deliveries/${deliveryId}`
+        );
+        if (response.ok) {
+          const data = await response.json();
+          console.log("Fetched Delivery Record Data:", data);
+
+          // Format the date to "yyyy-MM-dd"
+          const formattedDate = data.date.split("T")[0];
+
+          // Update the formData with the formatted date
+          setFormData({
+            ...data,
+            date: formattedDate,
+          });
+        } else {
+          console.error("Failed to fetch delivery record data");
+        }
+      } catch (error) {
+        console.error("Error fetching delivery record:", error);
+      }
+    };
+
     if (deliveryId) {
-      fetch(`http://localhost:3001/api/deliveries/${deliveryId}`)
-        .then((response) => {
-          if (!response.ok) {
-            throw new Error("Failed to fetch delivery record");
-          }
-          return response.json();
-        })
-        .then((data) => {
-          setDeliveryRecord(data); // Populate the form with fetched data
-        })
-        .catch((error) => {
-          console.error("Error fetching delivery record:", error);
-          alert("Failed to fetch delivery record. Please try again.");
-        });
+      fetchDeliveryRecord();
     }
   }, [deliveryId]);
 
-  const handleChange = (e) => {
-    setDeliveryRecord({ ...deliveryRecord, [e.target.name]: e.target.value });
+  // Handle form input changes
+  const handleInputChange = (e) => {
+    const { name, value } = e.target;
+    setFormData({
+      ...formData,
+      [name]: value,
+    });
   };
 
-  const handleSave = () => {
-    // Perform the update operation here
-    fetch(`http://localhost:3001/api/deliveries/${deliveryId}`, {
-      method: "PUT",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify(deliveryRecord),
-    })
-      .then((response) => {
-        if (!response.ok) {
-          throw new Error("Failed to update delivery record");
+  // Handle form submission
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    try {
+      const response = await fetch(
+        `http://localhost:3001/api/deliveries/${deliveryId}`,
+        {
+          method: "PUT",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify(formData),
         }
-        return response.json();
-      })
-      .then((data) => {
+      );
+
+      if (!response.ok) {
+        alert("Failed to update delivery record");
+        navigate("/view-deliveries");
+      } else {
         alert("Delivery record updated successfully!");
-        setIsEditing(false);
-        closeModal(); // Close the modal after successful update
-      })
-      .catch((error) => {
-        console.error("Error updating delivery record:", error);
-        alert("Failed to update delivery record. Please try again.");
-      });
+        navigate("/view-deliveries");
+      }
+    } catch (error) {
+      console.error("Error updating delivery record:", error);
+      alert("Failed to update delivery record");
+    }
   };
 
   return (
-    <div className="profile-modal-overlay">
-      <div className="profile-modal">
-        <h4>Edit Delivery Record</h4>
-
-        <div className="profile-details">
+    <div className="edit-delivery-record-container">
+      <h3>Edit Delivery Record</h3>
+      <form onSubmit={handleSubmit}>
+        <div className="form-group">
           <label>Supplier ID:</label>
           <input
             type="text"
             name="supplierId"
-            value={deliveryRecord.supplierId}
-            onChange={handleChange}
-            disabled={!isEditing}
+            value={formData.supplierId}
+            onChange={handleInputChange}
           />
+        </div>
 
+        <div className="form-group">
           <label>Date:</label>
           <input
             type="date"
             name="date"
-            value={deliveryRecord.date}
-            onChange={handleChange}
-            disabled={!isEditing}
+            value={formData.date}
+            onChange={handleInputChange}
           />
+        </div>
 
+        <div className="form-group">
           <label>Transport:</label>
           <input
             type="text"
             name="transport"
-            value={deliveryRecord.transport}
-            onChange={handleChange}
-            disabled={!isEditing}
+            value={formData.transport}
+            onChange={handleInputChange}
           />
+        </div>
 
+        <div className="form-group">
           <label>Route:</label>
           <input
             type="text"
             name="route"
-            value={deliveryRecord.route}
-            onChange={handleChange}
-            disabled={!isEditing}
+            value={formData.route}
+            onChange={handleInputChange}
           />
+        </div>
 
-          <label>Total Weight:</label>
+        <div className="form-group">
+          <label>Total Weight (kg):</label>
           <input
             type="number"
             name="totalWeight"
-            value={deliveryRecord.totalWeight}
-            onChange={handleChange}
-            disabled={!isEditing}
+            value={formData.totalWeight}
+            onChange={handleInputChange}
           />
+        </div>
 
-          <label>Total Sack Weight:</label>
+        <div className="form-group">
+          <label>Total Sack Weight (kg):</label>
           <input
             type="number"
             name="totalSackWeight"
-            value={deliveryRecord.totalSackWeight}
-            onChange={handleChange}
-            disabled={!isEditing}
+            value={formData.totalSackWeight}
+            onChange={handleInputChange}
           />
+        </div>
 
-          <label>For Water:</label>
+        <div className="form-group">
+          <label>For Water (kg):</label>
           <input
             type="number"
             name="forWater"
-            value={deliveryRecord.forWater}
-            onChange={handleChange}
-            disabled={!isEditing}
+            value={formData.forWater}
+            onChange={handleInputChange}
           />
+        </div>
 
-          <label>For Withered Leaves:</label>
+        <div className="form-group">
+          <label>For Withered Leaves (kg):</label>
           <input
             type="number"
             name="forWitheredLeaves"
-            value={deliveryRecord.forWitheredLeaves}
-            onChange={handleChange}
-            disabled={!isEditing}
+            value={formData.forWitheredLeaves}
+            onChange={handleInputChange}
           />
+        </div>
 
-          <label>For Ripe Leaves:</label>
+        <div className="form-group">
+          <label>For Ripe Leaves (kg):</label>
           <input
             type="number"
             name="forRipeLeaves"
-            value={deliveryRecord.forRipeLeaves}
-            onChange={handleChange}
-            disabled={!isEditing}
+            value={formData.forRipeLeaves}
+            onChange={handleInputChange}
           />
+        </div>
 
-          <label>Randalu:</label>
+        <div className="form-group">
+          <label>Randalu (kg):</label>
           <input
             type="number"
             name="randalu"
-            value={deliveryRecord.randalu}
-            onChange={handleChange}
-            disabled={!isEditing}
+            value={formData.randalu}
+            onChange={handleInputChange}
           />
+        </div>
 
-          <label>Green Tea Leaves:</label>
+        <div className="form-group">
+          <label>Green Tea Leaves (kg):</label>
           <input
             type="number"
             name="greenTeaLeaves"
-            value={deliveryRecord.greenTeaLeaves}
-            onChange={handleChange}
-            disabled={!isEditing}
+            value={formData.greenTeaLeaves}
+            onChange={handleInputChange}
           />
         </div>
 
-        <div className="button-group">
-          {isEditing ? (
-            <button className="save-button" onClick={handleSave}>
-              Save
-            </button>
-          ) : (
-            <button className="edit-button" onClick={() => setIsEditing(true)}>
-              Edit
-            </button>
-          )}
-          <button className="close-button" onClick={closeModal}>
-            Close
+        <div className="form-actions">
+          <button type="submit" className="save-btn" 
+          onClick={() => navigate("/view-delivery-records")}>
+            Save Changes
+          </button>
+          <button
+            type="button"
+            className="cancel-btn"
+            onClick={() => navigate("/view-delivery-records")}
+          >
+            Cancel
           </button>
         </div>
-      </div>
+      </form>
     </div>
   );
 };

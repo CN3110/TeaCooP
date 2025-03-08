@@ -1,10 +1,11 @@
-.view-delivery-container {
+.view-delivery-records-container {
   max-width: 1200px;
   margin: 20px auto;
   padding: 20px;
   background-color: #f9f9f9;
   border-radius: 8px;
   box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+   /* Enable horizontal scrolling */
 }
 
 .content-header {
@@ -17,7 +18,7 @@
 .content-header h3 {
   text-align: center;
   color: #154734;
-  margin-bottom: 20px;
+  margin: 0;
 }
 
 .header-activity {
@@ -47,7 +48,7 @@
   cursor: pointer;
 }
 
-.add-delivery-btn .btn-success {
+.add-delivery-btn {
   padding: 10px 20px;
   background-color: #154734;
   color: white;
@@ -55,66 +56,149 @@
   border-radius: 4px;
   font-size: 16px;
   cursor: pointer;
+  transition: background-color 0.3s ease;
 }
 
-.add-delivery-btn .btn-success:hover {
+.add-delivery-btn:hover {
   background-color: #0f361f;
 }
 
-.table-container {
-  overflow-x: auto; /*horizontal scrollbar */
-  border: 1px solid #ddd;
-  border-radius: 8px;
-  margin-top: 10px;
-  box-shadow: 0 0 5px rgba(0, 0, 0, 0.1);
-}
-
-.delivery-table {
+.deliveries-table {
   width: 100%;
-  min-width: 1200px;
   border-collapse: collapse;
+  min-width: 1000px; /* Ensure the table is wider than the container */
+  overflow-x: auto;
 }
 
-.delivery-table th,
-.delivery-table td {
-  padding: 10px;
+.deliveries-table th,
+.deliveries-table td {
+  padding: 12px;
   text-align: left;
   border-bottom: 1px solid #ddd;
-  white-space: nowrap; /*prevent text wrapping*/
+  white-space: nowrap; /* Prevent text wrapping */
 }
 
-.delivery-table th {
+/* Set fixed widths for columns */
+.deliveries-table th:nth-child(1),
+.deliveries-table td:nth-child(1) {
+  width: 100px; /* Supplier ID */
+}
+
+.deliveries-table th:nth-child(2),
+.deliveries-table td:nth-child(2) {
+  width: 120px; /* Date */
+}
+
+.deliveries-table th:nth-child(3),
+.deliveries-table td:nth-child(3) {
+  width: 120px; /* Transport */
+}
+
+.deliveries-table th:nth-child(4),
+.deliveries-table td:nth-child(4) {
+  width: 120px; /* Route */
+}
+
+.deliveries-table th:nth-child(5),
+.deliveries-table td:nth-child(5) {
+  width: 120px; /* Total Weight */
+}
+
+.deliveries-table th:nth-child(6),
+.deliveries-table td:nth-child(6) {
+  width: 120px; /* Total Sack Weight */
+}
+
+.deliveries-table th:nth-child(7),
+.deliveries-table td:nth-child(7) {
+  width: 100px; /* For Water */
+}
+
+.deliveries-table th:nth-child(8),
+.deliveries-table td:nth-child(8) {
+  width: 140px; /* For Withered Leaves */
+}
+
+.deliveries-table th:nth-child(9),
+.deliveries-table td:nth-child(9) {
+  width: 120px; /* For Ripe Leaves */
+}
+
+.deliveries-table th:nth-child(10),
+.deliveries-table td:nth-child(10) {
+  width: 100px; /* Randalu */
+}
+
+.deliveries-table th:nth-child(11),
+.deliveries-table td:nth-child(11) {
+  width: 140px; /* Green Tea Leaves */
+}
+
+.deliveries-table th:nth-child(12),
+.deliveries-table td:nth-child(12) {
+  width: 120px; /* Actions */
+}
+
+.deliveries-table th {
   background-color: #154734;
   color: white;
+  font-weight: 600;
 }
 
-.delivery-table tbody tr:hover {
+.deliveries-table tbody tr:hover {
   background-color: #f1f1f1;
 }
 
-.btn-edit {
+.edit-btn {
   background-color: #004a2cb7;
   color: white;
   border: none;
   border-radius: 4px;
-  font-size: 16px;
+  font-size: 14px;
   cursor: pointer;
-  padding: 5px 10px;
+  padding: 6px 12px;
   margin-right: 5px;
-  margin-left: 5px;
+  transition: background-color 0.3s ease;
 }
 
-.btn-delete {
+.edit-btn:hover {
+  background-color: #004a2c;
+}
+
+.delete-btn {
   background-color: #a43a3aba;
-  margin-right: 5px;
   color: white;
   border: none;
   border-radius: 4px;
-  font-size: 16px;
+  font-size: 14px;
   cursor: pointer;
-  padding: 5px 10px;
+  padding: 6px 12px;
+  transition: background-color 0.3s ease;
 }
 
-.btn-delete:hover {
+.delete-btn:hover {
   background-color: #a43a3ae7;
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+  .content-header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 10px;
+  }
+
+  .search-box input {
+    width: 150px;
+  }
+
+  .add-delivery-btn {
+    width: 100%;
+    text-align: center;
+  }
+
+  .deliveries-table th,
+  .deliveries-table td {
+    padding: 8px;
+  }
 }

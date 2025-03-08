@@ -1,73 +1,90 @@
-import React, { useEffect, useState } from "react";
+import React, { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
+import { BiSearch } from "react-icons/bi";
 import EmployeeLayout from "../../../components/EmployeeLayout/EmployeeLayout";
-import { BiSearch } from "react-icons/bi"; // Ensure this package is installed
-import "./ViewDeliveryRecords.css";
-import { Link } from "react-router-dom";
-import EditDeliveryRecord from "./EditDeliveryRecord";
+import "./ViewDeliveryRecords.css"; // Ensure this file exists
 
-function ViewDeliveryRecords() {
-  const [deliveryRecords, setDeliveryRecords] = useState([]);
+const ViewDeliveryRecords = () => {
   const [supplierId, setSupplierId] = useState(""); // State for search input
-  const [isEditDeliveryRecordModalOpen, setIsEditDeliveryRecordModalOpen] = useState(false);
-  const [selectedDeliveryId, setSelectedDeliveryId] = useState(null); // Track the selected delivery ID
+  const [deliveries, setDeliveries] = useState([]); // State for all delivery records
+  const [filteredDeliveries, setFilteredDeliveries] = useState([]); // State for filtered delivery records
+  const navigate = useNavigate();
 
-  // Fetch delivery records from API
+  // Fetch delivery records when the component mounts
   useEffect(() => {
+    const fetchDeliveryRecords = async () => {
+      try {
+        const response = await fetch("http://localhost:3001/api/deliveries");
+        if (response.ok) {
+          const data = await response.json();
+          setDeliveries(data); // Set all delivery records
+          setFilteredDeliveries(data); // Set filtered delivery records
+        } else {
+          console.error("Failed to fetch delivery records");
+        }
+      } catch (error) {
+        console.error("Error fetching delivery records:", error);
+      }
+    };
+
     fetchDeliveryRecords();
   }, []);
 
-  const fetchDeliveryRecords = () => {
-    console.log("Fetching data..."); // Log to verify useEffect is triggered
-    fetch("http://localhost:3001/api/deliveries")
-      .then((response) => {
-        console.log("Response:", response); // Log the response object
-        if (!response.ok) {
-          throw new Error("Failed to fetch data");
-        }
-        return response.json(); // Parse the response as JSON
-      })
-      .then((data) => {
-        console.log("Fetched data:", data); // Log the fetched data
-        setDeliveryRecords(data);
-      })
-      .catch((error) => {
-        console.error("Error fetching delivery records:", error); // Log any errors
-      });
-  };
-
   // Handle search input change
-  const handleSearchChange = (event) => {
-    setSupplierId(event.target.value);
-  };
+  const handleSearchChange = (e) => {
+    const searchTerm = e.target.value;
+    setSupplierId(searchTerm);
 
-  // Handle search submit (Filter results)
-  const handleSearchSubmit = () => {
-    const filteredRecords = deliveryRecords.filter((record) =>
-      record.supplierId.toString().includes(supplierId)
+    // Filter deliveries based on supplierId
+    const filtered = deliveries.filter((delivery) =>
+      delivery.supplierId.toLowerCase().includes(searchTerm.toLowerCase())
     );
-    console.log("Filtered records:", filteredRecords); // Log the filtered records
-    setDeliveryRecords(filteredRecords);
+    setFilteredDeliveries(filtered);
   };
 
-  // Open the edit modal and set the selected delivery ID
-  const openEditDeliveryRecordModal = (deliveryId) => {
-    setSelectedDeliveryId(deliveryId);
-    setIsEditDeliveryRecordModalOpen(true);
+  // Handle "Add New Delivery Record" button click
+  const handleAddDeliveryRecord = () => {
+    navigate("/add-delivery-record");
   };
 
-  // Close the edit modal and refresh the data
-  const closeEditDeliveryRecordModal = () => {
-    setIsEditDeliveryRecordModalOpen(false);
-    setSelectedDeliveryId(null); // Reset the selected delivery ID
-    fetchDeliveryRecords(); // Refresh the data after closing the modal
+  // Handle "Edit" button click
+  const handleEdit = (deliveryId) => {
+    navigate(`/edit-delivery-record/${deliveryId}`);
+  };
+
+  // Handle "Delete" button click
+  const handleDelete = async (deliveryId) => {
+    if (window.confirm("Are you sure you want to delete this delivery record?")) {
+      try {
+        const response = await fetch(
+          `http://localhost:3001/api/deliveries/${deliveryId}`,
+          {
+            method: "DELETE",
+          }
+        );
+
+        if (response.ok) {
+          // Remove the deleted record from the state
+          const updatedDeliveries = deliveries.filter(
+            (delivery) => delivery.deliveryId !== deliveryId
+          );
+          setDeliveries(updatedDeliveries);
+          setFilteredDeliveries(updatedDeliveries);
+          alert("Delivery record deleted successfully!");
+        } else {
+          console.error("Failed to delete delivery record");
+        }
+      } catch (error) {
+        console.error("Error deleting delivery record:", error);
+      }
+    }
   };
 
   return (
     <EmployeeLayout>
-      <div className="view-delivery-container">
+      <div className="view-delivery-records-container">
         <div className="content-header">
           <h3>View Delivery Records</h3>
-
           <div className="header-activity">
             <div className="search-box">
               <input
@@ -76,80 +93,75 @@ function ViewDeliveryRecords() {
                 value={supplierId}
                 onChange={handleSearchChange}
               />
-              <BiSearch className="icon" onClick={handleSearchSubmit} />
+              <BiSearch className="icon" />
             </div>
-            <div className="add-delivery-btn">
-              <Link to="/add-new-delivery-record" className="btn btn-success">
-                Add New Delivery Record
-              </Link>
-            </div>
+            <button
+              className="add-delivery-btn"
+              onClick={() => navigate("/add-new-delivery-record")}
+            >
+              Add New Delivery Record
+            </button>
           </div>
         </div>
 
-        <div className="table-container">
-          <table className="delivery-table">
-            <thead>
-              <tr>
-                <th>Supplier ID</th>
-                <th>Date</th>
-                <th>Transport</th>
-                <th>Route</th>
-                <th>Total Weight</th>
-                <th>Total Sack Weight</th>
-                <th>For Water</th>
-                <th>For Withered Leaves</th>
-                <th>For Ripe Leaves</th>
-                <th>Randalu</th>
-                <th>Green Tea Leaves</th>
-                <th>Actions</th>
-              </tr>
-            </thead>
-            <tbody>
-              {Array.isArray(deliveryRecords) && deliveryRecords.length > 0 ? (
-                deliveryRecords.map((delivery, index) => (
-                  <tr key={index}>
-                    <td>{delivery.supplierId}</td>
-                    <td>{delivery.date}</td>
-                    <td>{delivery.transport}</td>
-                    <td>{delivery.route}</td>
-                    <td>{delivery.totalWeight}</td>
-                    <td>{delivery.totalSackWeight}</td>
-                    <td>{delivery.forWater}</td>
-                    <td>{delivery.forWitheredLeaves}</td>
-                    <td>{delivery.forRipeLeaves}</td>
-                    <td>{delivery.randalu}</td>
-                    <td>{delivery.greenTeaLeaves}</td>
-                    <td>
-                      {/* Open the edit modal with the selected delivery ID */}
-                      <button
-                        className="btn-edit"
-                        onClick={() => openEditDeliveryRecordModal(delivery.id)}
-                      >
-                        Edit
-                      </button>
-                      <button className="btn-delete">Delete</button>
-                    </td>
-                  </tr>
-                ))
-              ) : (
-                <tr>
-                  <td colSpan="12">No delivery records found.</td>
+        <table className="deliveries-table">
+          <thead>
+            <tr>
+              <th>Supplier ID</th>
+              <th>Date</th>
+              <th>Transport</th>
+              <th>Route</th>
+              <th>Total Weight (kg)</th>
+              <th>Total Sack Weight (kg)</th>
+              <th>For Water (kg)</th>
+              <th>For Withered Leaves (kg)</th>
+              <th>For Ripe Leaves (kg)</th>
+              <th>Randalu (kg)</th>
+              <th>Green Tea Leaves (kg)</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            {filteredDeliveries.length > 0 ? (
+              filteredDeliveries.map((delivery) => (
+                <tr key={delivery.deliveryId}>
+                  <td>{delivery.supplierId}</td>
+                  <td>{delivery.date}</td>
+                  <td>{delivery.transport}</td>
+                  <td>{delivery.route}</td>
+                  <td>{delivery.totalWeight}</td>
+                  <td>{delivery.totalSackWeight}</td>
+                  <td>{delivery.forWater}</td>
+                  <td>{delivery.forWitheredLeaves}</td>
+                  <td>{delivery.forRipeLeaves}</td>
+                  <td>{delivery.randalu}</td>
+                  <td>{delivery.greenTeaLeaves}</td>
+                  <td>
+                    <button
+                      className="edit-btn"
+                      onClick={() => handleEdit(delivery.deliveryId)}
+                    >
+                      Edit
+                    </button>
+                    <button
+                      className="delete-btn"
+                      onClick={() => handleDelete(delivery.deliveryId)}
+                    >
+                      Delete
+                    </button>
+                  </td>
                 </tr>
-              )}
-            </tbody>
-          </table>
-        </div>
-
-        {/* Render the EditDeliveryRecord modal if it's open */}
-        {isEditDeliveryRecordModalOpen && (
-          <EditDeliveryRecord
-            closeModal={closeEditDeliveryRecordModal}
-            deliveryId={selectedDeliveryId}
-          />
-        )}
+              ))
+            ) : (
+              <tr>
+                <td colSpan="12">No delivery records found.</td>
+              </tr>
+            )}
+          </tbody>
+        </table>
       </div>
     </EmployeeLayout>
   );
-}
+};
 
 export default ViewDeliveryRecords;

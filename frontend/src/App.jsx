@@ -14,12 +14,12 @@ import AddDriver from "./pages/AddDriver/AddDriver.jsx";
 import ViewDrivers from "./pages/ViewDrivers/ViewDrivers.jsx";
 import AddNewDeliveryRecord from "./pages/ManageDeliveriesEM/AddNewDeliveryRecord/AddNewDeliveryRecord/AddNewDeliveryRecord.jsx";
 import ViewDeliveryRecords from "./pages/ManageDeliveriesEM/ViewDeliveryRecords/ViewDeliveryRecords.jsx";
-//import EditDeliveryRecord from "./pages/ManageDeliveriesEM/ViewDeliveryRecords/EditDeliveryRecord.jsx";
 import EditSupplier from "./pages/ViewSuppliers/EditSupplier.jsx";
 import EditDriver from "./pages/ViewDrivers/EditDriver.jsx";
 import AddBroker from "./pages/ManageBrokers/AddBroker/AddBroker.jsx";
 import ViewBrokers from "./pages/ManageBrokers/ViewBrokers/ViewBrokers.jsx";
 import EditBroker from "./pages/ManageBrokers/EditBroker/EditBroker.jsx";
+import EditDeliveryRecord from "./pages/ManageDeliveriesEM/ViewDeliveryRecords/EditDeliveryRecord.jsx";
 
 const App = () => {
   const [showLogin, setShowLogin] = useState(false); // Add state for LoginPopup
@@ -39,7 +39,7 @@ const App = () => {
           <Route path="/view-drivers" element={<ViewDrivers/>}/>
           <Route path="/add-new-delivery-record" element={<AddNewDeliveryRecord/>} />
           <Route path="/view-delivery-records" element={<ViewDeliveryRecords />} />
-          {/*<Route path="/edit-delivery-record" element={<EditDeliveryRecord />} /> {/* Add route for EditDeliveryRecord in view records screen - edit button*/}
+          <Route path="/edit-delivery-record/:deliveryId" element={<EditDeliveryRecord />} /> {/* Add route for EditDeliveryRecord in view records screen - edit button*/}
           <Route path="/edit-supplier/:supplierId" element={<EditSupplier />} /> {/* Add route for EditSupplierPage */}
           <Route path="/edit-driver/:driverId" element={<EditDriver />} />
           <Route path="/add-broker" element={<AddBroker />} />
