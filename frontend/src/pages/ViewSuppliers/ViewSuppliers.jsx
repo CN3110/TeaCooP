@@ -10,7 +10,27 @@ const ViewSuppliers = () => {
   const [filteredSuppliers, setFilteredSuppliers] = useState([]);
   const navigate = useNavigate();
 
-  //handle search input change
+  // Fetch supplier data from the backend
+  useEffect(() => {
+    const fetchSuppliers = async () => {
+      try {
+        const response = await fetch("http://localhost:3001/api/suppliers");
+        if (response.ok) {
+          const data = await response.json();
+          setSuppliers(data);
+          setFilteredSuppliers(data); // Initialize filteredSuppliers with all suppliers
+        } else {
+          console.error("Failed to fetch suppliers");
+        }
+      } catch (error) {
+        console.error("Error fetching suppliers:", error);
+      }
+    };
+
+    fetchSuppliers();
+  }, []);
+
+  // Handle search input change
   const handleSearchChange = (e) => {
     const searchTerm = e.target.value;
     setSearchId(searchTerm);
@@ -31,7 +51,7 @@ const ViewSuppliers = () => {
     <EmployeeLayout>
       <div className="view-supplier-container">
         <div className="content-header">
-          <h3>View Suppliers</h3> {/*View Suppliers title */}
+          <h3>View Suppliers</h3> {/* View Suppliers title */}
 
           <div className="header-activity">
             <div className="search-box">
@@ -68,7 +88,7 @@ const ViewSuppliers = () => {
                   <ul>
                     {supplier.landDetails.map((land, index) => (
                       <li key={index}>
-                        <strong>Land No:</strong> {land.landNo},{" "}
+                        <strong>Land No:</strong> {index + 1},{" "}
                         <strong>Size:</strong> {land.landSize},{" "}
                         <strong>Address:</strong> {land.landAddress}
                       </li>

@@ -16,6 +16,7 @@ app.use(cors({
 
 app.use("/api/suppliers", require("./routes/supplierRoutes"));
 app.use("/api/deliveries", require("./routes/deliveryRoutes"));
+app.use("/api/lands", require("./routes/landRoutes"));
 
 app.get("/", (req, res) => {
   res.json("Hello from backend");

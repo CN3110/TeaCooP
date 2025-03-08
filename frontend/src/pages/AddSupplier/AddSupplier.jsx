@@ -10,22 +10,21 @@ const AddSupplier = () => {
     contact: "",
     landDetails: [
       {
-        landNo: "",
-        size: "",
-        address: "",
+        landSize: "",
+        landAddress: "",
       },
     ],
   });
 
   const navigate = useNavigate();
 
-  //handle input changes for supplier details
+  // Handle input changes for supplier details
   const handleInputChange = (e) => {
     const { name, value } = e.target;
     setSupplierData({ ...supplierData, [name]: value });
   };
 
-  //handle input changes for land details
+  // Handle input changes for land details
   const handleLandDetailsChange = (index, e) => {
     const { name, value } = e.target;
     const updatedLandDetails = [...supplierData.landDetails];
@@ -33,23 +32,23 @@ const AddSupplier = () => {
     setSupplierData({ ...supplierData, landDetails: updatedLandDetails });
   };
 
-  //Add a new land detail field
+  // Add a new land detail field
   const addLandDetail = () => {
     setSupplierData({
       ...supplierData,
       landDetails: [
         ...supplierData.landDetails,
-        { landNo: "", size: "", address: "" },
+        { landSize: "", landAddress: "" },
       ],
     });
   };
 
-  //handle form submission
+  // Handle form submission
   const handleSubmit = async (e) => {
     e.preventDefault();
 
-    try { //backend API call to add a new supplier
-      const response = await fetch("http://localhost:3001/api/suppliers/add", {
+    try {
+      const response = await fetch("http://localhost:3001/api/suppliers/add",{  
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -59,7 +58,7 @@ const AddSupplier = () => {
 
       if (response.ok) {
         alert("Supplier added successfully!");
-        navigate("/manage-suppliers");
+        navigate("/view-suppliers");
       } else {
         const errorData = await response.json();
         alert(`Failed to add supplier: ${errorData.error}`);
@@ -70,9 +69,9 @@ const AddSupplier = () => {
     }
   };
 
-  //handle cancel button click
+  // Handle cancel button click
   const handleCancel = () => {
-    navigate("/view-suppliers"); //redirect to the suppliers view page
+    navigate("/view-suppliers"); // Redirect to the suppliers view page
   };
 
   return (
@@ -125,12 +124,14 @@ const AddSupplier = () => {
                   <small>Land No. {index + 1}</small>
                 </div>
 
+                
+
                 <div className="form-group">
                   <label>Size of Land</label>
                   <input
                     type="text"
-                    name="size"
-                    value={land.size}
+                    name="landSize"
+                    value={land.landSize}
                     onChange={(e) => handleLandDetailsChange(index, e)}
                     required
                   />
@@ -140,8 +141,8 @@ const AddSupplier = () => {
                   <label>Address of Land</label>
                   <input
                     type="text"
-                    name="address"
-                    value={land.address}
+                    name="landAddress"
+                    value={land.landAddress}
                     onChange={(e) => handleLandDetailsChange(index, e)}
                     required
                   />
