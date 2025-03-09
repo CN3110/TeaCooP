@@ -1,4 +1,4 @@
-.add-broker-container {
+.add-tea-type-container{
     max-width: 500px;
     margin: 15px auto;
     padding: 15px;
@@ -7,7 +7,7 @@
     box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
 }
 
-.add-broker-container h2 {
+.add-tea-type-container h2 {
     text-align: center;
     color: #154734;
     margin-bottom: 15px;
@@ -60,15 +60,15 @@
     color: #333;
 }
 
+.submit-button {
+    background-color: #154734;
+    color: #fff;
+}
+
 .cancel-button:hover {
     background-color: #bbb;
 }
 
-.submit-button {
-    background-color: #154734;
-    color: white;
-}
-
 .submit-button:hover {
-    background-color: #0f361f;
+    background-color: #123924;
 }

@@ -77,7 +77,7 @@ const SidebarEM = () => {
           </button>
           {openDropdown === "teaTypes" && (
             <div className="dropdown-content">
-              <Link to="#">Add Tea Type</Link>
+              <Link to="/add-tea-type">Add Tea Type</Link>
               <Link to="#">View Tea Types</Link>
             </div>
           )}

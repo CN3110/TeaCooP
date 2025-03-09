@@ -20,6 +20,7 @@ import AddBroker from "./pages/ManageBrokers/AddBroker/AddBroker.jsx";
 import ViewBrokers from "./pages/ManageBrokers/ViewBrokers/ViewBrokers.jsx";
 import EditBroker from "./pages/ManageBrokers/EditBroker/EditBroker.jsx";
 import EditDeliveryRecord from "./pages/ManageDeliveriesEM/ViewDeliveryRecords/EditDeliveryRecord.jsx";
+import AddTeaType from "./pages/TeaTypes/AddTeaType/AddTeaType.jsx";
 
 const App = () => {
   const [showLogin, setShowLogin] = useState(false); // Add state for LoginPopup
@@ -45,6 +46,7 @@ const App = () => {
           <Route path="/add-broker" element={<AddBroker />} />
           <Route path="/view-brokers" element={<ViewBrokers />} />
           <Route path="/edit-broker/:brokerId" element={<EditBroker />} />
+          <Route path="/add-tea-type" element={<AddTeaType />} />
           
         </Routes>
       </div>
