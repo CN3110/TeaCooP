@@ -104,8 +104,12 @@ const ViewTeaTypes = () => {
                 <td>{teaType.teaTypeName}</td>
                 <td>{teaType.teaTypeDescription}</td>
                 <td>
-                  <button onClick={() => handleEdit(teaType)}>Edit</button>
-                  <button onClick={() => handleDelete(teaType.teaTypeId)}>
+                  <button 
+                  className="edit-btn"
+                  onClick={() => handleEdit(teaType)}>Edit</button>
+
+                  <button 
+                  className="delete-btn"onClick={() => handleDelete(teaType.teaTypeId)}>
                     Delete
                   </button>
                 </td>
