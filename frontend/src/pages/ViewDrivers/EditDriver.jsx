@@ -150,7 +150,11 @@ const EditDriver = () => {
                 placeholder="Vehicle Number"
                 value={vehicle.vehicleNumber || ""}
                 onChange={(e) =>
-                  handleVehicleDetailsChange(index, "vehicleNumber", e.target.value)
+                  handleVehicleDetailsChange(
+                    index,
+                    "vehicleNumber",
+                    e.target.value
+                  )
                 }
               />
               <input
@@ -158,7 +162,11 @@ const EditDriver = () => {
                 placeholder="Vehicle Type"
                 value={vehicle.vehicleType || ""}
                 onChange={(e) =>
-                  handleVehicleDetailsChange(index, "vehicleType", e.target.value)
+                  handleVehicleDetailsChange(
+                    index,
+                    "vehicleType",
+                    e.target.value
+                  )
                 }
               />
               {/* Remove Vehicle Button */}

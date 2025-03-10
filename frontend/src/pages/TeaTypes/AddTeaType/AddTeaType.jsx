@@ -5,7 +5,6 @@ import "./AddTeaType.css";
 
 const AddTeaType = () => {
   const [teaTypeData, setTeaTypeData] = useState({
-    teaTypeId: "",
     teaTypeName: "",
     teaTypeDescription: "",
   });
@@ -22,17 +21,12 @@ const AddTeaType = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
 
-    if (
-      !teaTypeData.teaTypeId ||
-      !teaTypeData.teaTypeName ||
-      !teaTypeData.teaTypeDescription
-    ) {
+    if (!teaTypeData.teaTypeName || !teaTypeData.teaTypeDescription) {
       alert("Please fill in all required fields.");
       return;
     }
 
     const requestBody = {
-      teaTypeId: teaTypeData.teaTypeId,
       teaTypeName: teaTypeData.teaTypeName,
       teaTypeDescription: teaTypeData.teaTypeDescription,
     };
@@ -65,16 +59,6 @@ const AddTeaType = () => {
         <h2>Add Tea Type</h2>
         <form onSubmit={handleSubmit}>
           <div className="form-group">
-            <label htmlFor="teaTypeId">Tea Type ID</label>
-            <input
-              type="text"
-              id="teaTypeId"
-              name="teaTypeId"
-              value={teaTypeData.teaTypeId}
-              onChange={handleInputChange}
-            />
-          </div>
-          <div className="form-group">
             <label htmlFor="teaTypeName">Tea Type Name</label>
             <input
               type="text"
@@ -84,10 +68,10 @@ const AddTeaType = () => {
               onChange={handleInputChange}
             />
           </div>
-          <div class="form-group">
-            <label for="teaTypeDescription">Tea Type Description</label>
+          <div className="form-group">
+            <label htmlFor="teaTypeDescription">Tea Type Description</label>
             <textarea
-              class="form-control"
+              className="form-control"
               id="teaTypeDescription"
               name="teaTypeDescription"
               rows="4"
@@ -103,11 +87,7 @@ const AddTeaType = () => {
             >
               Cancel
             </button>
-            <button
-              type="submit"
-              className="submit-button"
-              onClick={() => navigate("/view-tea-types")}
-            >
+            <button type="submit" className="submit-button">
               Save
             </button>
           </div>

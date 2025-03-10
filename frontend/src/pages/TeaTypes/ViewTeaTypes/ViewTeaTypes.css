@@ -1,0 +1,100 @@
+.view-tea-types-container{
+    max-width: 1200px;
+    margin: 20px auto;
+    padding: 20px;
+    background-color: #f9f9f9;
+    border-radius: 8px;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+}
+
+.view-tea-types-container h3{
+    text-align: center;
+    color: #154734;
+    margin-bottom: 20px;
+}
+
+.add-tea-type-btn{
+    padding: 10px 20px;
+    background-color: #154734;
+    color: white;
+    border: none;
+    border-radius: 4px;
+    font-size: 16px;
+    cursor: pointer;
+}
+
+.add-tea-type-btn:hover{
+    background-color: #0f361f;
+}
+
+.content-header{
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px;
+}
+
+.header-activity{
+    display: flex;
+    align-items: center;
+    gap: 15px;
+}   
+
+.search-box{
+    display: flex;
+    align-items: center;
+    background-color: white;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    padding: 5px 10px;
+}
+
+.search-box input{
+    border: none;
+    outline: none;
+    font-size: 16px;
+    width: 200px;
+}   
+
+.search-box .icon{
+    color: #154734;
+}
+
+.tea-types-table{
+    width: 100%;
+    border-collapse: collapse;
+    background-color: white;
+    border-radius: 8px;
+    overflow: hidden;
+    margin-top: 20px;
+    box-shadow: 0 0 5px rgba(0, 0, 0, 0.1);
+}
+
+.tea-types-table th, .tea-types-table td{
+    padding: 12px;
+    text-align: left;
+    border-bottom: 1px solid #ddd;
+}
+
+.tea-types-table th{
+    background-color: #154734;
+  color: white;
+}
+
+.tea-types-table tbody tr:hover{
+    background-color: #f9f9f9;
+}
+
+.tea-types-table .action-btn{
+    padding: 5px 10px;
+    background-color: #154734;
+    color: white;
+    border: none;
+    border-radius: 4px;
+    font-size: 14px;
+    cursor: pointer;
+}
+
+.tea-types-table .action-btn:hover{
+    background-color: #0f361f;
+}
