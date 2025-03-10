@@ -22,6 +22,7 @@ import EditBroker from "./pages/ManageBrokers/EditBroker/EditBroker.jsx";
 import EditDeliveryRecord from "./pages/ManageDeliveriesEM/ViewDeliveryRecords/EditDeliveryRecord.jsx";
 import AddTeaType from "./pages/TeaTypes/AddTeaType/AddTeaType.jsx";
 import ViewTeaTypes from "./pages/TeaTypes/ViewTeaTypes/ViewTeaTypes.jsx";
+import EditTeaType from "./pages/TeaTypes/EditTeaType/EditTeaType.jsx";
 
 const App = () => {
   const [showLogin, setShowLogin] = useState(false); // Add state for LoginPopup
@@ -49,6 +50,7 @@ const App = () => {
           <Route path="/edit-broker/:brokerId" element={<EditBroker />} />
           <Route path="/add-tea-type" element={<AddTeaType />} />
           <Route path="/view-tea-types" element={<ViewTeaTypes />} /> 
+          <Route path="/edit-tea-type/:teaTypeId" element={<EditTeaType />} /> {/* Add route for EditTeaType */}
         </Routes>
       </div>
 

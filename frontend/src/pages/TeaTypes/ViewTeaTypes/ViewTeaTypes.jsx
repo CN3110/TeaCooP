@@ -13,7 +13,7 @@ const ViewTeaTypes = () => {
   useEffect(() => {
     const fetchTeaTypes = async () => {
       try {
-        const response = await fetch("http://localhost:3001/api/tea-types");
+        const response = await fetch("http://localhost:3001/api/teaTypes");
         if (response.ok) {
           const data = await response.json();
           setTeaTypes(data);
@@ -50,7 +50,7 @@ const ViewTeaTypes = () => {
     if (window.confirm("Are you sure you want to delete this tea type?")) {
       try {
         const response = await fetch(
-          `http://localhost:3001/api/tea-types/${teaTypeId}`,
+          `http://localhost:3001/api/teaTypes/${teaTypeId}`,
           {
             method: "DELETE",
           }

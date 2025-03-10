@@ -20,7 +20,7 @@ app.use("/api/lands", require("./routes/landRoutes"));
 app.use("/api/drivers", require("./routes/driverRoutes"));
 app.use("/api/vehicles", require("./routes/vehicleRoutes"));
 app.use("/api/brokers", require("./routes/brokerRoutes"));
-
+app.use("/api/teaTypes", require("./routes/teaTypesRoutes"));
 
 app.get("/", (req, res) => {
   res.json("Hello from backend");

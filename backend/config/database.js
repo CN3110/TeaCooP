@@ -1,23 +1,18 @@
-const mysql = require("mysql2/promise"); // Use the promise-compatible version
+const mysql = require("mysql2");
 
-const db = mysql.createPool({
-  host: "localhost",
-  user: "root",
-  password: "CHAThuni12345*",
-  database: "tea_coop",
+// Create a connection pool
+const pool = mysql.createPool({
+  host: "localhost", // Database host
+  user: "root",      // Database username
+  password: "CHAThuni12345*",      // Database password
+  database: "tea_coop", // Database name
   waitForConnections: true,
   connectionLimit: 10,
   queueLimit: 0,
 });
 
-db.getConnection()
-  .then((connection) => {
-    console.log("Connected to the database");
-    connection.release();
-  })
-  .catch((err) => {
-    console.error("Error connecting to the database:", err);
-    process.exit(1);
-  });
+// Log the pool to verify it's created
+console.log("Database pool created:", pool);
 
-module.exports = db;
+// Export the pool for use in other files
+module.exports = pool.promise();

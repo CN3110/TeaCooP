@@ -32,7 +32,7 @@ const AddTeaType = () => {
     };
 
     try {
-      const response = await fetch("http://localhost:3001/api/tea-types", {
+      const response = await fetch("http://localhost:3001/api/teaTypes", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",

@@ -18,7 +18,7 @@ const EditTeaType = () => {
     const fetchTeaType = async () => {
       try {
         const response = await fetch(
-          `http://localhost:3001/api/tea-types/${teaTypeId}` // Use teaTypeId from URL
+          `http://localhost:3001/api/teaTypes/${teaTypeId}` // Use teaTypeId from URL
         );
         if (response.ok) {
           const data = await response.json();
@@ -51,7 +51,7 @@ const EditTeaType = () => {
     e.preventDefault();
     try {
       const response = await fetch(
-        `http://localhost:3001/api/tea-types/${teaTypeId}`,
+        `http://localhost:3001/api/teaTypes/${teaTypeId}`,
         {
           method: "PUT",
           headers: {
