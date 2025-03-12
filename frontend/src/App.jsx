@@ -23,6 +23,8 @@ import EditDeliveryRecord from "./pages/ManageDeliveriesEM/ViewDeliveryRecords/E
 import AddTeaType from "./pages/TeaTypes/AddTeaType/AddTeaType.jsx";
 import ViewTeaTypes from "./pages/TeaTypes/ViewTeaTypes/ViewTeaTypes.jsx";
 import EditTeaType from "./pages/TeaTypes/EditTeaType/EditTeaType.jsx";
+import CreateLot from "./pages/SalesEM/CreateLotPage/CreateLot.jsx"
+
 
 const App = () => {
   const [showLogin, setShowLogin] = useState(false); // Add state for LoginPopup
@@ -51,6 +53,7 @@ const App = () => {
           <Route path="/add-tea-type" element={<AddTeaType />} />
           <Route path="/view-tea-types" element={<ViewTeaTypes />} /> 
           <Route path="/edit-tea-type/:teaTypeId" element={<EditTeaType />} /> {/* Add route for EditTeaType */}
+          <Route path="/employee-dashboard-create-lot" element={<CreateLot/>} />
         </Routes>
       </div>
 
