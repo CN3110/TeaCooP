@@ -1,0 +1,106 @@
+/* Container for the edit tea type form */
+.edit-tea-type-container {
+    max-width: 600px;
+    margin: 0 auto;
+    padding: 20px;
+    background-color: #f9f9f9;
+    border-radius: 8px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  }
+  
+  /* Form heading */
+  .edit-tea-type-container h3 {
+    font-size: 24px;
+    margin-bottom: 20px;
+    color: #333;
+    text-align: center;
+  }
+  
+  /* Form group styling */
+  .form-group {
+    margin-bottom: 20px;
+  }
+  
+  .form-group label {
+    display: block;
+    font-size: 16px;
+    font-weight: 500;
+    margin-bottom: 8px;
+    color: #555;
+  }
+  
+  .form-group input,
+  .form-group textarea {
+    width: 100%;
+    padding: 10px;
+    font-size: 16px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    box-sizing: border-box;
+    transition: border-color 0.3s ease;
+  }
+  
+  .form-group input:focus,
+  .form-group textarea:focus {
+    border-color: #007bff;
+    outline: none;
+  }
+  
+  .form-group textarea {
+    resize: vertical;
+    min-height: 120px;
+  }
+  
+  /* Form actions (buttons) */
+  .form-actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: 10px;
+    margin-top: 20px;
+  }
+  
+  .form-actions button {
+    padding: 10px 20px;
+    font-size: 16px;
+    font-weight: 500;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: background-color 0.3s ease, transform 0.2s ease;
+  }
+  
+  .form-actions button.save-btn {
+    background-color:#004a2cb7;
+    color: #fff;
+  }
+  
+  .form-actions button.save-btn:hover {
+    background-color: #00341f;
+    transform: translateY(-1px);
+  }
+  
+  .form-actions button.cancel-btn {
+    background-color: #6c757d;
+    color: #fff;
+  }
+  
+  .form-actions button.cancel-btn:hover {
+    background-color: #5a6268;
+    transform: translateY(-1px);
+  }
+  
+  /* Responsive design */
+  @media (max-width: 768px) {
+    .edit-tea-type-container {
+      padding: 15px;
+    }
+  
+    .form-actions {
+      flex-direction: column;
+    }
+  
+    .form-actions button {
+      width: 100%;
+      margin-bottom: 10px;
+    }
+  }

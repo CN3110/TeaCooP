@@ -1,13 +1,19 @@
 .carousel-inner {
-    height: 100vh; /* Make the carousel take full viewport height */
+    height: 75vh; 
 }
 
 .carousel-item {
-    height: 100vh; /* Ensures each image fits the screen */
+    height: 75vh; 
 }
 
 .carousel-item img {
     width: 100%;
     height: 100%;
-    object-fit: cover; /* Prevents distortion and keeps images properly displayed */
+    object-fit: cover; 
+}
+
+.carousel-control-prev,
+.carousel-control-next {
+  background-color: transparent !important; /*remove the background color of prev and next-*/
+  border: none !important; 
 }

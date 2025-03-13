@@ -1,8 +1,8 @@
 .footer {
-    background-color: #0b1b15;
+    background-color: #0b1b15; /*dark green*/
     color: white;
-    padding: 10px;           /* Padding for left, right, and bottom */
-    padding-top: 10px;        /* Specific padding for the top */
+    padding: 10px;           
+    padding-top: 10px; 
     margin-top: 10px;
     text-align: center;
     width: 100%;

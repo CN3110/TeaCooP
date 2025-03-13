@@ -8,7 +8,7 @@ const EmployeeLayout = ({ children }) => {
       <SidebarEM />
       <div className="employee-layout-content">
         <div className="content-wrapper">
-          {children} {/* This will render the page content */}
+          {children}  {/*use to render the employee page contents*/}
         </div>
       </div>
     </div>

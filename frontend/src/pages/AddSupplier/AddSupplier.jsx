@@ -10,9 +10,8 @@ const AddSupplier = () => {
     contact: "",
     landDetails: [
       {
-        landNo: "",
-        size: "",
-        address: "",
+        landSize: "",
+        landAddress: "",
       },
     ],
   });
@@ -39,22 +38,40 @@ const AddSupplier = () => {
       ...supplierData,
       landDetails: [
         ...supplierData.landDetails,
-        { landNo: "", size: "", address: "" },
+        { landSize: "", landAddress: "" },
       ],
     });
   };
 
   // Handle form submission
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    console.log("Supplier Data:", supplierData);
-    alert("Supplier added successfully!");
-    navigate("/manage-suppliers");
+
+    try {
+      const response = await fetch("http://localhost:3001/api/suppliers/add",{  
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(supplierData),
+      });
+
+      if (response.ok) {
+        alert("Supplier added successfully!");
+        navigate("/view-suppliers");
+      } else {
+        const errorData = await response.json();
+        alert(`Failed to add supplier: ${errorData.error}`);
+      }
+    } catch (error) {
+      console.error("Error submitting supplier data:", error);
+      alert("An error occurred while submitting the form.");
+    }
   };
 
   // Handle cancel button click
   const handleCancel = () => {
-    navigate("/manage-suppliers"); // Redirect to the suppliers list page
+    navigate("/view-suppliers"); // Redirect to the suppliers view page
   };
 
   return (
@@ -104,16 +121,17 @@ const AddSupplier = () => {
             {supplierData.landDetails.map((land, index) => (
               <div key={index} className="land-detail-group">
                 <div className="form-group">
-                <small>Land No. {index + 1}</small>
-                  
+                  <small>Land No. {index + 1}</small>
                 </div>
+
+                
 
                 <div className="form-group">
                   <label>Size of Land</label>
                   <input
                     type="text"
-                    name="size"
-                    value={land.size}
+                    name="landSize"
+                    value={land.landSize}
                     onChange={(e) => handleLandDetailsChange(index, e)}
                     required
                   />
@@ -123,8 +141,8 @@ const AddSupplier = () => {
                   <label>Address of Land</label>
                   <input
                     type="text"
-                    name="address"
-                    value={land.address}
+                    name="landAddress"
+                    value={land.landAddress}
                     onChange={(e) => handleLandDetailsChange(index, e)}
                     required
                   />
@@ -133,19 +151,18 @@ const AddSupplier = () => {
             ))}
 
             {/* Button to add more land details */}
-            <button type="button" className="btn btn-outline-secondary" onClick={addLandDetail}> Add More Land</button>
-          
-             
-            
+            <button
+              type="button"
+              className="btn btn-outline-secondary"
+              onClick={addLandDetail}
+            >
+              Add More Land
+            </button>
           </div>
 
           {/* Buttons */}
           <div className="form-buttons">
-            <button
-              type="button"
-              className="cancel-btn"
-              onClick={handleCancel}
-            >
+            <button type="button" className="cancel-btn" onClick={handleCancel}>
               Cancel
             </button>
             <button type="submit" className="submit-btn">
