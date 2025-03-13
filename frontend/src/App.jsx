@@ -24,6 +24,8 @@ import AddTeaType from "./pages/TeaTypes/AddTeaType/AddTeaType.jsx";
 import ViewTeaTypes from "./pages/TeaTypes/ViewTeaTypes/ViewTeaTypes.jsx";
 import EditTeaType from "./pages/TeaTypes/EditTeaType/EditTeaType.jsx";
 import CreateLot from "./pages/SalesEM/CreateLot/CreateLot.jsx";
+import ViewLots from "./pages/SalesEM/ViewLots/ViewLots.jsx";
+import EditLot from "./pages/SalesEM/EditLot/EditLot.jsx"
 
 
 const App = () => {
@@ -54,6 +56,8 @@ const App = () => {
           <Route path="/view-tea-types" element={<ViewTeaTypes />} /> 
           <Route path="/edit-tea-type/:teaTypeId" element={<EditTeaType />} /> {/* Add route for EditTeaType */}
           <Route path="/employee-dashboard-create-lot" element={<CreateLot/>} />
+          <Route path="/view-lots" element={<ViewLots/>} />
+          <Route path="/edit-lot/:lotNumber" element={<EditLot/>} />
         </Routes>
       </div>
 

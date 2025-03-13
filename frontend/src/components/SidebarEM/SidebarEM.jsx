@@ -53,7 +53,7 @@ const SidebarEM = () => {
           {openDropdown === "sales" && (
             <div className="dropdown-content">
               <Link to="/employee-dashboard-create-lot">Add New Sale</Link>
-              <Link to="#">View Sales Records</Link>
+              <Link to="/view-lots">View Sales Records</Link>
               <Link to="#">Confirm Sale Orders</Link>
               
              </div>
