@@ -23,7 +23,7 @@ import EditDeliveryRecord from "./pages/ManageDeliveriesEM/ViewDeliveryRecords/E
 import AddTeaType from "./pages/TeaTypes/AddTeaType/AddTeaType.jsx";
 import ViewTeaTypes from "./pages/TeaTypes/ViewTeaTypes/ViewTeaTypes.jsx";
 import EditTeaType from "./pages/TeaTypes/EditTeaType/EditTeaType.jsx";
-import CreateLot from "./pages/SalesEM/CreateLotPage/CreateLot.jsx"
+import CreateLot from "./pages/SalesEM/CreateLot/CreateLot.jsx";
 
 
 const App = () => {

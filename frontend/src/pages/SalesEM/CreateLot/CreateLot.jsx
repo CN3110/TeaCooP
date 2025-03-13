@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import EmployeeLayout from "../../../components/EmployeeLayout/EmployeeLayout";
 import DatePicker from 'react-datepicker'; // Date picker library
@@ -9,7 +9,7 @@ const CreateLot = () => {
   const [lotData, setLotData] = useState({
     lotNumber: '',
     invoiceNumber: '',
-    manufacturingDate: new Date(),
+    manufacturingDate: new Date(), // Initialize with current date
     teaGrade: '',
     noOfBags: '',
     netWeight: '',
@@ -17,12 +17,32 @@ const CreateLot = () => {
     valuationPrice: '',
   });
 
+  const teaGradeOptions = [
+    { value: 'BOP', label: 'BOP' },
+    { value: 'BOPF', label: 'BOPF' },
+    { value: 'OP', label: 'OP' },
+    { value: 'FBOP', label: 'FBOP' },
+    { value: 'Pekoe', label: 'Pekoe' }
+  ];
+
   const navigate = useNavigate();
 
   // Handle input changes
   const handleInputChange = (e) => {
     const { name, value } = e.target;
-    setLotData({ ...lotData, [name]: value });
+    const updatedData = {
+      ...lotData,
+      [name]: value,
+    };
+
+    // Calculate totalNetWeight if noOfBags or netWeight changes
+    if (name === 'noOfBags' || name === 'netWeight') {
+      const noOfBags = name === 'noOfBags' ? parseFloat(value) : parseFloat(lotData.noOfBags);
+      const netWeight = name === 'netWeight' ? parseFloat(value) : parseFloat(lotData.netWeight);
+      updatedData.totalNetWeight = (noOfBags * netWeight).toFixed(2); // Calculate and round to 2 decimal places
+    }
+
+    setLotData(updatedData);
   };
 
   // Handle date changes
@@ -49,16 +69,30 @@ const CreateLot = () => {
       return;
     }
 
-    const requestBody = {
-      lotNumber: lotData.lotNumber,
-      invoiceNumber: lotData.invoiceNumber,
-      manufacturingDate: lotData.manufacturingDate,
-      teaGrade: lotData.teaGrade,
-      noOfBags: lotData.noOfBags,
-      netWeight: lotData.netWeight,
-      totalNetWeight: lotData.totalNetWeight,
-      valuationPrice: lotData.valuationPrice,
+    // Validate numeric fields (must be greater than zero)
+    if (
+      parseFloat(lotData.noOfBags) <= 0 ||
+      parseFloat(lotData.netWeight) <= 0 ||
+      parseFloat(lotData.totalNetWeight) <= 0 ||
+      parseFloat(lotData.valuationPrice) <= 0
+    ) {
+      alert("All numeric fields must be greater than zero.");
+      return;
+    }
+
+    // Format the date as YYYY-MM-DD
+    const formattedDate = new Date(lotData.manufacturingDate).toISOString().split('T')[0];
+
+    const payload = {
+      ...lotData,
+      manufacturingDate: formattedDate,
+      noOfBags: parseFloat(lotData.noOfBags),
+      netWeight: parseFloat(lotData.netWeight),
+      totalNetWeight: parseFloat(lotData.totalNetWeight),
+      valuationPrice: parseFloat(lotData.valuationPrice),
     };
+
+    console.log("Payload being sent:", payload); // Log the payload
 
     try {
       const response = await fetch("http://localhost:3001/api/lots", {
@@ -66,19 +100,34 @@ const CreateLot = () => {
         headers: {
           "Content-Type": "application/json",
         },
-        body: JSON.stringify(requestBody),
+        body: JSON.stringify(payload),
       });
 
-      if (response.ok) {
-        alert("Lot added successfully!");
-        navigate("/view-lots"); // Redirect to the view lots page
-      } else {
+      if (!response.ok) {
         const errorData = await response.json();
-        alert(`Error adding Lot: ${errorData.message}`);
+        throw new Error(errorData.error || "Failed to add lot");
       }
+
+      const result = await response.json();
+      console.log("Response from server:", result);
+
+      alert("Lot added successfully!");
+
+      // Reset the form
+      setLotData({
+        lotNumber: "",
+        invoiceNumber: "",
+        manufacturingDate: new Date(),
+        teaGrade: "",
+        noOfBags: "",
+        netWeight: "",
+        totalNetWeight: "",
+        valuationPrice: "",
+      });
+
     } catch (error) {
       console.error("Error adding Lot:", error);
-      alert("An error occurred while adding the Lot.");
+      alert("An error occurred while adding the Lot: " + error.message);
     }
   };
 
@@ -119,10 +168,11 @@ const CreateLot = () => {
                 required
               >
                 <option value="">Select Grade</option>
-                <option value="Grade 1">Grade 1</option>
-                <option value="Grade 2">Grade 2</option>
-                <option value="Grade 3">Grade 3</option>
-                <option value="Grade 4">Grade 4</option>
+                {teaGradeOptions.map((option) => (
+                  <option key={option.value} value={option.value}>
+                    {option.label}
+                  </option>
+                ))}
               </select>
             </div>
 
@@ -133,6 +183,7 @@ const CreateLot = () => {
                 name="noOfBags"
                 value={lotData.noOfBags}
                 onChange={handleInputChange}
+                min="1"
                 required
               />
             </div>
@@ -144,6 +195,8 @@ const CreateLot = () => {
                 name="netWeight"
                 value={lotData.netWeight}
                 onChange={handleInputChange}
+                min="0.01"
+                step="0.01"
                 required
               />
             </div>
@@ -154,7 +207,7 @@ const CreateLot = () => {
                 type="number"
                 name="totalNetWeight"
                 value={lotData.totalNetWeight}
-                onChange={handleInputChange}
+                readOnly // Make it read-only since it's calculated
                 required
               />
             </div>
@@ -166,6 +219,8 @@ const CreateLot = () => {
                 name="valuationPrice"
                 value={lotData.valuationPrice}
                 onChange={handleInputChange}
+                min="0.01"
+                step="0.01"
                 required
               />
             </div>
