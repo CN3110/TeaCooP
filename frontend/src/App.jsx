@@ -25,8 +25,10 @@ import ViewTeaTypes from "./pages/TeaTypes/ViewTeaTypes/ViewTeaTypes.jsx";
 import EditTeaType from "./pages/TeaTypes/EditTeaType/EditTeaType.jsx";
 import CreateLot from "./pages/SalesEM/CreateLot/CreateLot.jsx";
 import ViewLots from "./pages/SalesEM/ViewLots/ViewLots.jsx";
-import EditLot from "./pages/SalesEM/EditLot/EditLot.jsx"
-
+import EditLot from "./pages/SalesEM/EditLot/EditLot.jsx";
+import ViewTeaTypesHome from "./pages/About Us/View Tea Types_Home/ViewTeaTypesHome.jsx"; 
+import SupplierDashboard from "./pages/SupplierView/Dashboard/SupplierDashboard.jsx";
+import RequestTransport from "./pages/SupplierView/RequestTransport/RequestTransport.jsx";
 
 const App = () => {
   const [showLogin, setShowLogin] = useState(false); // Add state for LoginPopup
@@ -38,6 +40,7 @@ const App = () => {
         <Routes>
           <Route path="/" element={<Home />} />
           <Route path="/aboutus" element={<AboutUs />} />
+          <Route path="/aboutus-view-tea-varieties" element={<ViewTeaTypesHome/>} />
           <Route path="/contact" element={<Contact />} />
           <Route path="/employeedashboard" element={<EmployeeDashboard />} />
           <Route path="/add-supplier" element={<AddSupplier/>} />
@@ -58,6 +61,9 @@ const App = () => {
           <Route path="/employee-dashboard-create-lot" element={<CreateLot/>} />
           <Route path="/view-lots" element={<ViewLots/>} />
           <Route path="/edit-lot/:lotNumber" element={<EditLot/>} />
+          <Route path="/supplierdashboard" element={<SupplierDashboard/>} />
+          <Route path="/supplier-request-transport" element={<RequestTransport/>}/>
+          
         </Routes>
       </div>
 

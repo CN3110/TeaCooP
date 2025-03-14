@@ -1,8 +1,14 @@
 import React from 'react';
+import { useNavigate } from "react-router-dom";
 import './AboutUs.css';
 import backgroundImage from '../../assets/about-us-background-img.jpg';
 
+
+
 const AboutUs = () => {
+
+  const navigate = useNavigate();
+  
   return (
     <div className='aboutus'>
       <div className='aboutus-container' style={{ backgroundImage: `url(${backgroundImage})` }}>
@@ -25,7 +31,7 @@ const AboutUs = () => {
         <div className='our-tea-varieties-container'>
           <h3>Our Tea Varieties & The Taste of Ceylon</h3>
           <p>We offer a diverse selection of premium tea types, each carefully crafted to highlight the finest flavors of Ceylon tea. Our range includes orthodox black teas, green teas, and specialty blends, all produced with expertise and passion. From our lush plantations to your cup, Morawakkorale Tea Factory ensures that every sip is a celebration of quality, heritage, and sustainability. Join us in exploring the world of authentic Ceylon tea and discover the exquisite flavors that make our teas truly special.</p>
-          <button>Discover Our Tea Varieties</button>
+          <button onClick={() => navigate("/aboutus-view-tea-varieties")}>Discover Our Tea Varieties</button>
         </div>
       </div>
     </div>
