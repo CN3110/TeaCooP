@@ -4,6 +4,7 @@ import "./RequestTransport.css";
 
 const RequestTransport = () => {
   const [reqDeliveryData, setReqDeliveryData] = useState({
+    supplierId: "",  // Add supplierId field if needed
     reqDate: "",
     reqTime: "",
     reqNumberOfSacks: "",
@@ -19,12 +20,49 @@ const RequestTransport = () => {
     });
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    // Here you can handle the form submission, e.g., send data to an API
-    console.log("Delivery Data:", reqDeliveryData);
-    alert("Transport request submitted successfully!");
+  
+    // Convert date to YYYY-MM-DD format (if needed)
+    const formattedDate = new Date(reqDeliveryData.reqDate)
+      .toISOString()
+      .split("T")[0]; // Extracts only YYYY-MM-DD part
+  
+    // Ensure time is in HH:MM:SS format
+    const formattedTime = reqDeliveryData.reqTime + ":00"; // Adds seconds if missing
+  
+    const requestData = {
+      ...reqDeliveryData,
+      reqDate: formattedDate,
+      reqTime: formattedTime,
+    };
+  
+    try {
+      const response = await fetch("http://localhost:3001/api/transportRequests", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(requestData),
+      });
+  
+      if (response.ok) {
+        alert("Transport request submitted successfully!");
+        setReqDeliveryData({
+          supplierId: "",
+          reqDate: "",
+          reqTime: "",
+          reqNumberOfSacks: "",
+          reqWeight: "",
+          reqAddress: "",
+        });
+      } else {
+        alert("Failed to submit transport request");
+      }
+    } catch (error) {
+      console.error("Error submitting request:", error);
+      alert("An error occurred while submitting the request");
+    }
   };
+  
 
   return (
     <SupplierLayout>
@@ -32,7 +70,17 @@ const RequestTransport = () => {
         <h3>Requesting Transport</h3>
         <form onSubmit={handleSubmit}>
           <div className="form-group">
-            <label>Date: </label>
+            <label>Supplier ID:</label>
+            <input
+              type="text"
+              name="supplierId"
+              value={reqDeliveryData.supplierId}
+              onChange={handleInputChange}
+              required
+            />
+          </div>
+          <div className="form-group">
+            <label>Date:</label>
             <input
               type="date"
               name="reqDate"
@@ -42,7 +90,7 @@ const RequestTransport = () => {
             />
           </div>
           <div className="form-group">
-            <label>Time: </label>
+            <label>Time:</label>
             <input
               type="time"
               name="reqTime"
@@ -52,7 +100,7 @@ const RequestTransport = () => {
             />
           </div>
           <div className="form-group">
-            <label>Number of Sacks: </label>
+            <label>Number of Sacks:</label>
             <input
               type="number"
               name="reqNumberOfSacks"
@@ -62,7 +110,7 @@ const RequestTransport = () => {
             />
           </div>
           <div className="form-group">
-            <label>Weight: </label>
+            <label>Weight:</label>
             <input
               type="number"
               name="reqWeight"
@@ -72,7 +120,7 @@ const RequestTransport = () => {
             />
           </div>
           <div className="form-group">
-            <label>Address/Location: </label>
+            <label>Address/Location:</label>
             <input
               type="text"
               name="reqAddress"
@@ -82,13 +130,19 @@ const RequestTransport = () => {
             />
           </div>
           <div className="form-actions">
-            <button type="button" onClick={() => setReqDeliveryData({
-              reqDate: "",
-              reqTime: "",
-              reqNumberOfSacks: "",
-              reqWeight: "",
-              reqAddress: ""
-            })}>
+            <button
+              type="button"
+              onClick={() =>
+                setReqDeliveryData({
+                  supplierId: "",
+                  reqDate: "",
+                  reqTime: "",
+                  reqNumberOfSacks: "",
+                  reqWeight: "",
+                  reqAddress: ""
+                })
+              }
+            >
               Cancel
             </button>
             <button type="submit">Save</button>
