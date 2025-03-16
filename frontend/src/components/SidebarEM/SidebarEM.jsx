@@ -1,6 +1,6 @@
 import React, { useState } from "react";
-import { Link } from "react-router-dom";  // Import Link from React Router
-import ProfileEM from "../../pages/Employee/ProfileEM/ProfileEM";  // Import ProfileEM
+import { Link } from "react-router-dom"; // Import Link from React Router
+import ProfileEM from "../../pages/Employee/ProfileEM/ProfileEM"; // Import ProfileEM
 import "./SidebarEM.css";
 
 const SidebarEM = () => {
@@ -31,51 +31,66 @@ const SidebarEM = () => {
   return (
     <div className="menu">
       <div className="menu-list">
-        <Link to="/employeedashboard" className="item">Dashboard</Link>
+        <Link to="/employeedashboard" className="item">
+          Dashboard
+        </Link>
         {/* Manage Deliveries Dropdown */}
         <div className="dropdown">
-          <button className="dropdown-btn" onClick={() => toggleDropdown("deliveries")}>
-            Manage Deliveries 
+          <button
+            className="dropdown-btn"
+            onClick={() => toggleDropdown("deliveries")}
+          >
+            Manage Deliveries
           </button>
           {openDropdown === "deliveries" && (
             <div className="dropdown-content">
               <Link to="/add-new-delivery-record">Add New Delivery Record</Link>
               <Link to="/view-delivery-records">View Delivery Records</Link>
-             </div>
+            </div>
           )}
         </div>
 
-          {/* Manage Sales Dropdown */}
+        {/* Manage Sales Dropdown */}
         <div className="dropdown">
-          <button className="dropdown-btn" onClick={() => toggleDropdown("sales")}>
-            Manage Sales Records 
+          <button
+            className="dropdown-btn"
+            onClick={() => toggleDropdown("sales")}
+          >
+            Manage Sales Records
           </button>
           {openDropdown === "sales" && (
             <div className="dropdown-content">
               <Link to="/employee-dashboard-create-lot">Add New Sale</Link>
               <Link to="/view-lots">View Sales Records</Link>
               <Link to="#">Confirm Sale Orders</Link>
-              
-             </div>
+            </div>
           )}
         </div>
 
         {/* Manage Transport Requests Dropdown */}
         <div className="dropdown">
-          <button className="dropdown-btn" onClick={() => toggleDropdown("transportRequests")}>
-            Transport Requests 
+          <button
+            className="dropdown-btn"
+            onClick={() => toggleDropdown("transportRequests")}
+          >
+            Transport Requests
           </button>
           {openDropdown === "transportRequests" && (
             <div className="dropdown-content">
-              <Link to="#">View Transport Requests</Link>
+              <Link to="/employee-view-transport-requests">
+                View Transport Requests
+              </Link>
             </div>
           )}
         </div>
 
         {/* Manage Tea types Dropdown */}
         <div className="dropdown">
-          <button className="dropdown-btn" onClick={() => toggleDropdown("teaTypes")}>
-            Tea Types 
+          <button
+            className="dropdown-btn"
+            onClick={() => toggleDropdown("teaTypes")}
+          >
+            Tea Types
           </button>
           {openDropdown === "teaTypes" && (
             <div className="dropdown-content">
@@ -85,24 +100,28 @@ const SidebarEM = () => {
           )}
         </div>
 
-
-
-          {/* Manage Suppliers Dropdown */}
+        {/* Manage Suppliers Dropdown */}
         <div className="dropdown">
-          <button className="dropdown-btn" onClick={() => toggleDropdown("suppliers")}>
-            Manage Suppliers 
+          <button
+            className="dropdown-btn"
+            onClick={() => toggleDropdown("suppliers")}
+          >
+            Manage Suppliers
           </button>
           {openDropdown === "suppliers" && (
             <div className="dropdown-content">
               <Link to="/add-supplier">Add Supplier</Link>
               <Link to="/view-suppliers">View Suppliers</Link>
-             </div>
+            </div>
           )}
         </div>
 
         {/* Manage Drivers Dropdown */}
         <div className="dropdown">
-          <button className="dropdown-btn" onClick={() => toggleDropdown("drivers")}>
+          <button
+            className="dropdown-btn"
+            onClick={() => toggleDropdown("drivers")}
+          >
             Manage Drivers
           </button>
           {openDropdown === "drivers" && (
@@ -115,7 +134,10 @@ const SidebarEM = () => {
 
         {/* Manage Brokers Dropdown */}
         <div className="dropdown">
-          <button className="dropdown-btn" onClick={() => toggleDropdown("brokers")}>
+          <button
+            className="dropdown-btn"
+            onClick={() => toggleDropdown("brokers")}
+          >
             Manage Brokers
           </button>
           {openDropdown === "brokers" && (
@@ -126,12 +148,14 @@ const SidebarEM = () => {
           )}
         </div>
 
-        <Link to="#" className="item">Report Generate</Link> 
-
-        <Link to="#" className="item" onClick={openProfileModal}>Your Profile</Link> 
+        <Link to="#" className="item" onClick={openProfileModal}>
+          Your Profile
+        </Link>
 
         {/* Log Out Button */}
-        <button className="logout-btn" onClick={handleLogout}>Log Out</button>
+        <button className="logout-btn" onClick={handleLogout}>
+          Log Out
+        </button>
       </div>
 
       {isProfileModalOpen && <ProfileEM closeModal={closeProfileModal} />}

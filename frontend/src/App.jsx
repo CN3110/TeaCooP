@@ -29,6 +29,7 @@ import EditLot from "./pages/SalesEM/EditLot/EditLot.jsx";
 import ViewTeaTypesHome from "./pages/About Us/View Tea Types_Home/ViewTeaTypesHome.jsx"; 
 import SupplierDashboard from "./pages/SupplierView/Dashboard/SupplierDashboard.jsx";
 import RequestTransport from "./pages/SupplierView/RequestTransport/RequestTransport.jsx";
+import ViewTransportRequests from "./pages/ViewTransportRequests/ViewTransportRequests.jsx";
 
 const App = () => {
   const [showLogin, setShowLogin] = useState(false); // Add state for LoginPopup
@@ -63,6 +64,7 @@ const App = () => {
           <Route path="/edit-lot/:lotNumber" element={<EditLot/>} />
           <Route path="/supplierdashboard" element={<SupplierDashboard/>} />
           <Route path="/supplier-request-transport" element={<RequestTransport/>}/>
+          <Route path="/employee-view-transport-requests" element={<ViewTransportRequests/>}/>
           
         </Routes>
       </div>
