@@ -1,7 +1,7 @@
 import React from "react";
 import EmployeeLayout from "../../components/EmployeeLayout/EmployeeLayout"; // Import EmployeeLayout
 import ContentEM from "../../components/ContentEM/ContentEM";
-import "./EmployeeDashboard.css"; // Import your CSS file
+import "./EmployeeDashboard.css"; 
 
 const EmployeeDashboard = () => {
   return (
@@ -12,3 +12,4 @@ const EmployeeDashboard = () => {
 };
 
 export default EmployeeDashboard;
+
