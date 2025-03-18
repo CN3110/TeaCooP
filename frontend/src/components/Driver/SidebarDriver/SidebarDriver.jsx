@@ -1,6 +1,6 @@
 import React from "react";
 import { Link } from "react-router-dom";
-import "./SidebarSupplier.css"; 
+import "./SidebarDriver.css";
 
 import {
   MdDashboard as DashboardIcon,
@@ -10,33 +10,33 @@ import {
   MdPerson as ProfileIcon,
 } from "react-icons/md";
 
-const SidebarSupplier = () => {
+const SidebarDriver = () => {
   return (
     <div className="sidebar-container">
-      <h2>Supplier Panel</h2>
+      <h2>Driver Panel</h2>
       <ul className="nav flex-column">
         <li className="nav-item">
-          <Link to="/supplierdashboard" className="nav-link">
+          <Link to="/driverdashboard" className="nav-link">
             <DashboardIcon /> Dashboard
           </Link>
         </li>
         <li className="nav-item">
-          <Link to="/supplier-delivery-history" className="nav-link">
+          <Link to="/driver-requested-tranport" className="nav-link">
+            <TransportIcon /> Requested Transport
+          </Link>
+        </li>
+        <li className="nav-item">
+          <Link to="/driver-delivery-history" className="nav-link">
             <DeliveryIcon /> Delivery History
           </Link>
         </li>
         <li className="nav-item">
-          <Link to="/supplier-payment-records" className="nav-link">
+          <Link to="/driver-payment-records" className="nav-link">
             <PaymentIcon /> Payment Records
           </Link>
         </li>
         <li className="nav-item">
-          <Link to="/supplier-request-transport" className="nav-link">
-            <TransportIcon /> Transport Request
-          </Link>
-        </li>
-        <li className="nav-item">
-          <Link to="/supplier-profile" className="nav-link">
+          <Link to="/driver-profile" className="nav-link">
             <ProfileIcon /> Profile
           </Link>
         </li>
@@ -50,4 +50,4 @@ const SidebarSupplier = () => {
   );
 };
 
-export default SidebarSupplier;
+export default SidebarDriver;
