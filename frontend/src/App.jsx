@@ -30,6 +30,7 @@ import ViewTeaTypesHome from "./pages/About Us/View Tea Types_Home/ViewTeaTypesH
 import SupplierDashboard from "./pages/SupplierView/Dashboard/SupplierDashboard.jsx";
 import RequestTransport from "./pages/SupplierView/RequestTransport/RequestTransport.jsx";
 import ViewTransportRequests from "./pages/ViewTransportRequests/ViewTransportRequests.jsx";
+import DriverDashboard from "./pages/DriverView/DashboardDriver/DashboardDriver.jsx";
 
 const App = () => {
   const [showLogin, setShowLogin] = useState(false); // Add state for LoginPopup
@@ -65,6 +66,7 @@ const App = () => {
           <Route path="/supplierdashboard" element={<SupplierDashboard/>} />
           <Route path="/supplier-request-transport" element={<RequestTransport/>}/>
           <Route path="/employee-view-transport-requests" element={<ViewTransportRequests/>}/>
+          <Route path="/driverdashboard" element={<DriverDashboard/>} />
           
         </Routes>
       </div>

@@ -21,8 +21,8 @@ const SidebarDriver = () => {
           </Link>
         </li>
         <li className="nav-item">
-          <Link to="/driver-requested-tranport" className="nav-link">
-            <TransportIcon /> Requested Transport
+          <Link to="/driver-requested-tranport-records" className="nav-link">
+            <TransportIcon /> Requested Transport Records
           </Link>
         </li>
         <li className="nav-item">
