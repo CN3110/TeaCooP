@@ -4,7 +4,7 @@ import "./RequestTransport.css";
 
 const RequestTransport = () => {
   const [reqDeliveryData, setReqDeliveryData] = useState({
-    supplierId: "",  // Add supplierId field if needed
+    supplierId: "",  // Add supplierId field for now
     reqDate: "",
     reqTime: "",
     reqNumberOfSacks: "",
