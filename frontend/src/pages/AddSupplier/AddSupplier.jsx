@@ -47,7 +47,7 @@ const AddSupplier = () => {
   // Handle form submission
   const handleSubmit = async (e) => {
     e.preventDefault();
-
+  
     try {
       const response = await fetch("http://localhost:3001/api/suppliers/add", {
         method: "POST",
@@ -56,7 +56,7 @@ const AddSupplier = () => {
         },
         body: JSON.stringify(supplierData),
       });
-
+  
       if (response.ok) {
         alert("Supplier added successfully!");
         navigate("/view-suppliers");

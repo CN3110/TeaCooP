@@ -2,13 +2,13 @@ const db = require("../config/database");
 const Land = require("./land");
 
 class Supplier {
-  static addSupplier(supplierId, name, contact, email, landDetails, callback) { 
+  static addSupplier(supplierId, name, contact, email, passcode, landDetails, callback) {
     const query = `
-      INSERT INTO supplier (supplierId, supplierName, supplierContactNumber, supplierEmail)
-      VALUES (?, ?, ?, ?)
+      INSERT INTO supplier (supplierId, supplierName, supplierContactNumber, supplierEmail, passcode)
+      VALUES (?, ?, ?, ?, ?)
     `;
 
-    db.query(query, [supplierId, name, contact, email], (err, result) => { 
+    db.query(query, [supplierId, name, contact, email, passcode], (err, result) => {
       if (err) {
         return callback(err, null);
       }

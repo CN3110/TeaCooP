@@ -1,4 +1,19 @@
 const db = require("../config/database");
+const nodemailer = require("nodemailer");
+
+// Generate a random 6-digit passcode
+const generatePasscode = () => {
+  return Math.floor(100000 + Math.random() * 900000).toString();
+};
+
+// Configure Nodemailer
+const transporter = nodemailer.createTransport({
+  service: "gmail", // Use Gmail as the email service
+  auth: {
+    user: "mkteacoop@gmail.com", // Sender's email address
+    pass: "sinr fmza uvxa soww", // Sender's email password
+  },
+});
 
 // Fetch all suppliers
 exports.getAllSuppliers = async (req, res) => {
@@ -24,17 +39,20 @@ exports.getAllSuppliers = async (req, res) => {
 
 // Add a new supplier
 exports.addSupplier = async (req, res) => {
-  const { supplierId, name, contact, email, landDetails } = req.body; // Add email
+  const { supplierId, name, contact, email, landDetails } = req.body;
 
-  if (!supplierId || !name || !contact || !email) { // Add email validation
+  if (!supplierId || !name || !contact || !email) {
     return res.status(400).json({ error: "Missing required fields" });
   }
+
+  // Generate a passcode
+  const passcode = generatePasscode();
 
   try {
     // Insert supplier into the supplier table
     const [supplierResult] = await db.query(
-      "INSERT INTO supplier (supplierId, supplierName, supplierContactNumber, supplierEmail) VALUES (?, ?, ?, ?)", // Add supplierEmail
-      [supplierId, name, contact, email] // Add email
+      "INSERT INTO supplier (supplierId, supplierName, supplierContactNumber, supplierEmail, passcode) VALUES (?, ?, ?, ?, ?)",
+      [supplierId, name, contact, email, passcode]
     );
 
     // Insert land details into the land table
@@ -47,7 +65,37 @@ exports.addSupplier = async (req, res) => {
       }
     }
 
-    res.status(201).json({ message: "Supplier added successfully" });
+    // Send email with passcode
+    const mailOptions = {
+      from: "mkteacoop@gmail.com", // Sender email
+      to: email, // Supplier's email (from the form)
+      subject: "Morawakkorale Tea CooP - Your Login Credentials", // Email subject
+      text: `Dear ${name}, 
+
+            Your login credentials for the system are as follows:
+
+            User ID: ${supplierId}
+            Passcode: ${passcode}
+
+            Please use the above passcode as your password during your first login. After logging in, you will be able to create your own password.
+
+            If you have any questions, please contact us.
+
+            Best regards,
+            Morawakkorale Tea Co-op
+            041-2271400`, 
+    };
+
+    // Send the email
+    transporter.sendMail(mailOptions, (error, info) => {
+      if (error) {
+        console.error("Error sending email:", error);
+        res.status(500).json({ error: "Failed to send email" });
+      } else {
+        console.log("Email sent:", info.response);
+        res.status(201).json({ message: "Supplier added successfully" });
+      }
+    });
   } catch (error) {
     console.error("Error adding supplier:", error);
     res.status(500).json({ error: "Failed to add supplier" });
@@ -88,7 +136,7 @@ exports.getSupplierById = async (req, res) => {
 // Update a supplier
 exports.updateSupplier = async (req, res) => {
   const { supplierId } = req.params;
-  const { name, contact, email, landDetails } = req.body; 
+  const { name, contact, email, landDetails } = req.body;
 
   console.log("Request Body:", req.body); // Debugging log
 
@@ -96,15 +144,17 @@ exports.updateSupplier = async (req, res) => {
     return res.status(400).json({ error: "Supplier ID is required" });
   }
 
-  if (!name || !contact || !email) { 
-    return res.status(400).json({ error: "Missing required fields: name, contact, and email" });
+  if (!name || !contact || !email) {
+    return res
+      .status(400)
+      .json({ error: "Missing required fields: name, contact, and email" });
   }
 
   try {
     // Update supplier details
     await db.query(
-      "UPDATE supplier SET supplierName = ?, supplierContactNumber = ?, supplierEmail = ? WHERE supplierId = ?", // Add supplierEmail
-      [name, contact, email, supplierId] 
+      "UPDATE supplier SET supplierName = ?, supplierContactNumber = ?, supplierEmail = ? WHERE supplierId = ?",
+      [name, contact, email, supplierId]
     );
 
     // Update land details if provided
