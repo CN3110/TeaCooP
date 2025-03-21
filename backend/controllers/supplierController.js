@@ -24,17 +24,17 @@ exports.getAllSuppliers = async (req, res) => {
 
 // Add a new supplier
 exports.addSupplier = async (req, res) => {
-  const { supplierId, name, contact, landDetails } = req.body;
+  const { supplierId, name, contact, email, landDetails } = req.body; // Add email
 
-  if (!supplierId || !name || !contact) {
+  if (!supplierId || !name || !contact || !email) { // Add email validation
     return res.status(400).json({ error: "Missing required fields" });
   }
 
   try {
     // Insert supplier into the supplier table
     const [supplierResult] = await db.query(
-      "INSERT INTO supplier (supplierId, supplierName, supplierContactNumber) VALUES (?, ?, ?)",
-      [supplierId, name, contact]
+      "INSERT INTO supplier (supplierId, supplierName, supplierContactNumber, supplierEmail) VALUES (?, ?, ?, ?)", // Add supplierEmail
+      [supplierId, name, contact, email] // Add email
     );
 
     // Insert land details into the land table
@@ -88,7 +88,7 @@ exports.getSupplierById = async (req, res) => {
 // Update a supplier
 exports.updateSupplier = async (req, res) => {
   const { supplierId } = req.params;
-  const { name, contact, landDetails } = req.body;
+  const { name, contact, email, landDetails } = req.body; // Add email
 
   console.log("Request Body:", req.body); // Debugging log
 
@@ -96,15 +96,15 @@ exports.updateSupplier = async (req, res) => {
     return res.status(400).json({ error: "Supplier ID is required" });
   }
 
-  if (!name || !contact) {
-    return res.status(400).json({ error: "Missing required fields: name and contact" });
+  if (!name || !contact || !email) { // Add email validation
+    return res.status(400).json({ error: "Missing required fields: name, contact, and email" });
   }
 
   try {
     // Update supplier details
     await db.query(
-      "UPDATE supplier SET supplierName = ?, supplierContactNumber = ? WHERE supplierId = ?",
-      [name, contact, supplierId]
+      "UPDATE supplier SET supplierName = ?, supplierContactNumber = ?, supplierEmail = ? WHERE supplierId = ?", // Add supplierEmail
+      [name, contact, email, supplierId] // Add email
     );
 
     // Update land details if provided

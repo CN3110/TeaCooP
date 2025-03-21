@@ -8,6 +8,7 @@ const AddSupplier = () => {
     supplierId: "",
     name: "",
     contact: "",
+    email: "", // Added email field
     landDetails: [
       {
         landSize: "",
@@ -48,7 +49,7 @@ const AddSupplier = () => {
     e.preventDefault();
 
     try {
-      const response = await fetch("http://localhost:3001/api/suppliers/add",{  
+      const response = await fetch("http://localhost:3001/api/suppliers/add", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -115,6 +116,18 @@ const AddSupplier = () => {
             />
           </div>
 
+          {/* Email Address */}
+          <div className="form-group">
+            <label>Email Address</label>
+            <input
+              type="email"
+              name="email"
+              value={supplierData.email}
+              onChange={handleInputChange}
+              required
+            />
+          </div>
+
           {/* Land Details */}
           <div className="land-details">
             <h4>Land Details</h4>
@@ -123,8 +136,6 @@ const AddSupplier = () => {
                 <div className="form-group">
                   <small>Land No. {index + 1}</small>
                 </div>
-
-                
 
                 <div className="form-group">
                   <label>Size of Land</label>
