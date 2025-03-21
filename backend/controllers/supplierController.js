@@ -88,7 +88,7 @@ exports.getSupplierById = async (req, res) => {
 // Update a supplier
 exports.updateSupplier = async (req, res) => {
   const { supplierId } = req.params;
-  const { name, contact, email, landDetails } = req.body; // Add email
+  const { name, contact, email, landDetails } = req.body; 
 
   console.log("Request Body:", req.body); // Debugging log
 
@@ -96,7 +96,7 @@ exports.updateSupplier = async (req, res) => {
     return res.status(400).json({ error: "Supplier ID is required" });
   }
 
-  if (!name || !contact || !email) { // Add email validation
+  if (!name || !contact || !email) { 
     return res.status(400).json({ error: "Missing required fields: name, contact, and email" });
   }
 
@@ -104,7 +104,7 @@ exports.updateSupplier = async (req, res) => {
     // Update supplier details
     await db.query(
       "UPDATE supplier SET supplierName = ?, supplierContactNumber = ?, supplierEmail = ? WHERE supplierId = ?", // Add supplierEmail
-      [name, contact, email, supplierId] // Add email
+      [name, contact, email, supplierId] 
     );
 
     // Update land details if provided

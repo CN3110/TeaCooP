@@ -9,6 +9,7 @@ const EditSupplierPage = () => {
     supplierId: "",
     supplierName: "",
     supplierContactNumber: "",
+    supplierEmail: "", // Add supplierEmail
     landDetails: [],
   });
 
@@ -71,6 +72,7 @@ const EditSupplierPage = () => {
     const updatedSupplier = {
       name: formData.supplierName,
       contact: formData.supplierContactNumber,
+      email: formData.supplierEmail, // Include supplierEmail
       landDetails: formData.landDetails,
     };
 
@@ -132,6 +134,15 @@ const EditSupplierPage = () => {
           />
         </div>
         <div className="form-group">
+          <label>Email</label>
+          <input
+            type="email"
+            name="supplierEmail"
+            value={formData.supplierEmail || ""}
+            onChange={handleInputChange}
+          />
+        </div>
+        <div className="form-group">
           <label>Land Details</label>
           {formData.landDetails && formData.landDetails.length > 0 ? (
             formData.landDetails.map((land, index) => (
@@ -153,7 +164,6 @@ const EditSupplierPage = () => {
                     handleLandDetailsChange(index, "landAddress", e.target.value)
                   }
                 />
-                
               </div>
             ))
           ) : (

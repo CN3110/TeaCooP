@@ -50,11 +50,11 @@ const ViewSuppliers = () => {
     navigate("/add-supplier");
   };
 
-   // Handle edit button click
-const handleEdit = (supplier) => {
-  console.log("Edit button clicked, navigating to edit page"); // Debugging log
-  navigate(`/edit-supplier/${supplier.supplierId}`); // Navigate to the edit page
-};
+  // Handle edit button click
+  const handleEdit = (supplier) => {
+    console.log("Edit button clicked, navigating to edit page"); // Debugging log
+    navigate(`/edit-supplier/${supplier.supplierId}`); // Navigate to the edit page
+  };
 
   // Handle delete button click
   const handleDelete = async (supplierId) => {
@@ -126,6 +126,7 @@ const handleEdit = (supplier) => {
               <th>Supplier ID</th>
               <th>Supplier Name</th>
               <th>Contact Number</th>
+              <th>Email</th> {/* Add Email column */}
               <th>Land Details</th>
               <th>Actions</th>
             </tr>
@@ -137,6 +138,7 @@ const handleEdit = (supplier) => {
                 <td>{supplier.supplierId}</td>
                 <td>{supplier.supplierName}</td>
                 <td>{supplier.supplierContactNumber}</td>
+                <td>{supplier.supplierEmail}</td> {/* Display Email */}
                 <td>
                   <ul>
                     {supplier.landDetails && supplier.landDetails.length > 0 ? (

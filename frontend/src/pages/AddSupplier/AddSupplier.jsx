@@ -8,7 +8,7 @@ const AddSupplier = () => {
     supplierId: "",
     name: "",
     contact: "",
-    email: "", // Added email field
+    email: "", 
     landDetails: [
       {
         landSize: "",
