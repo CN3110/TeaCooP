@@ -1,6 +1,22 @@
+//after editing users' email by the emolyee - it should be send the passcode to the new email
 const db = require("../config/database");
+const nodemailer = require("nodemailer");
 
-//to fetch all brokers
+// Generate a random 6-digit passcode
+const generatePasscode = () => {
+  return Math.floor(100000 + Math.random() * 900000).toString();
+};
+
+// Configure Nodemailer
+const transporter = nodemailer.createTransport({
+  service: "gmail", // Use Gmail as the email service
+  auth: {
+    user: "mkteacoop@gmail.com", // Sender's email address
+    pass: "sinr fmza uvxa soww", // Sender's email password
+  },
+});
+
+// Fetch all brokers
 exports.getAllBrokers = async (req, res) => {
   try {
     const [brokers] = await db.query("SELECT * FROM broker");
@@ -9,9 +25,9 @@ exports.getAllBrokers = async (req, res) => {
     console.error("Error fetching brokers:", error);
     res.status(500).json({ error: "Failed to fetch brokers" });
   }
-}
+};
 
-//to add a broker
+// Add a broker
 exports.addBroker = async (req, res) => {
   const { brokerId, brokerName, brokerContact, brokerEmail, brokerCompanyName, brokerCompanyContact, brokerCompanyEmail, brokerCompanyAddress } = req.body;
 
@@ -20,20 +36,54 @@ exports.addBroker = async (req, res) => {
     return res.status(400).json({ error: "Missing required fields" });
   }
 
+  // Generate a passcode
+  const passcode = generatePasscode();
+
   try {
     // Insert broker into the broker table
     const [brokerResult] = await db.query(
-      "INSERT INTO broker (brokerId, brokerName, brokerContactNumber, brokerEmail, brokerCompanyName, brokerCompanyContact, brokerCompanyEmail, brokerCompanyAddress) VALUES (?, ?, ?, ?, ?, ?, ?, ?)",
-      [brokerId, brokerName, brokerContact, brokerEmail, brokerCompanyName, brokerCompanyContact, brokerCompanyEmail, brokerCompanyAddress]
+      "INSERT INTO broker (brokerId, brokerName, brokerContactNumber, brokerEmail, brokerCompanyName, brokerCompanyContact, brokerCompanyEmail, brokerCompanyAddress, passcode) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)",
+      [brokerId, brokerName, brokerContact, brokerEmail, brokerCompanyName, brokerCompanyContact, brokerCompanyEmail, brokerCompanyAddress, passcode]
     );
-    res.status(201).json({ message: "Broker added successfully" });
+
+    // Send email with passcode
+    const mailOptions = {
+      from: "mkteacoop@gmail.com",
+      to: brokerEmail,
+      subject: "Morawakkorale Tea CooP - Your Login Credentials",
+      text: `Dear ${brokerName}, 
+
+            Your login credentials for the system are as follows:
+
+            User ID: ${brokerId}
+            Passcode: ${passcode}
+
+            Please use the above passcode as your password during your first login. After logging in, you will be able to create your own password.
+
+            If you have any questions, please contact us.
+
+            Best regards,
+            Morawakkorale Tea Co-op
+            041-2271400`,
+    };
+
+    // Send the email
+    transporter.sendMail(mailOptions, (error, info) => {
+      if (error) {
+        console.error("Error sending email:", error);
+        return res.status(500).json({ error: "Failed to send email" });
+      } else {
+        console.log("Email sent:", info.response);
+        res.status(201).json({ message: "Broker added successfully" });
+      }
+    });
   } catch (error) {
     console.error("Error adding broker:", error);
     res.status(500).json({ error: "Failed to add broker" });
   }
 };
 
-//to fetch a single broker by ID
+// Fetch a single broker by ID
 exports.getBrokerById = async (req, res) => {
   const { brokerId } = req.params;
 
@@ -51,7 +101,7 @@ exports.getBrokerById = async (req, res) => {
   }
 };
 
-//to update a broker by ID
+// Update a broker by ID
 exports.updateBroker = async (req, res) => {
   const { brokerId } = req.params;
   const { brokerName, brokerContact, brokerEmail, brokerCompanyName, brokerCompanyContact, brokerCompanyEmail, brokerCompanyAddress } = req.body;
@@ -72,7 +122,7 @@ exports.updateBroker = async (req, res) => {
   }
 };
 
-//to delete a broker by ID
+// Delete a broker by ID
 exports.deleteBroker = async (req, res) => {
   const { brokerId } = req.params;
 
@@ -84,4 +134,3 @@ exports.deleteBroker = async (req, res) => {
     res.status(500).json({ error: "Failed to delete broker" });
   }
 };
-
