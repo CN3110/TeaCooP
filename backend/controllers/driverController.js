@@ -1,11 +1,26 @@
 const db = require("../config/database");
+const nodemailer = require("nodemailer");
 
-//to fetch all drivers
+// Generate a random 6-digit passcode
+const generatePasscode = () => {
+  return Math.floor(100000 + Math.random() * 900000).toString();
+};
+
+// Configure Nodemailer
+const transporter = nodemailer.createTransport({
+  service: "gmail", // Use Gmail as the email service
+  auth: {
+    user: "mkteacoop@gmail.com", // Sender's email address
+    pass: "sinr fmza uvxa soww", // Sender's email password
+  },
+});
+
+// Fetch all drivers
 exports.getAllDrivers = async (req, res) => {
   try {
     const [drivers] = await db.query("SELECT * FROM driver");
 
-    //to fetch vehicle details for each driver
+    // Fetch vehicle details for each driver
     for (let driver of drivers) {
       const [vehicleDetails] = await db.query(
         "SELECT * FROM vehicle WHERE driverId = ?",
@@ -21,12 +36,12 @@ exports.getAllDrivers = async (req, res) => {
   }
 };
 
-//to add a new driver
+// Add a new driver
 exports.addDriver = async (req, res) => {
-  const { driverId, driverName, driverContactNumber, vehicleDetails } = req.body;
+  const { driverId, driverName, driverContactNumber, driverEmail, vehicleDetails } = req.body;
 
   // Validate required fields
-  if (!driverId || !driverName || !driverContactNumber) {
+  if (!driverId || !driverName || !driverContactNumber || !driverEmail) {
     return res.status(400).json({ error: "Missing required fields" });
   }
 
@@ -35,36 +50,82 @@ exports.addDriver = async (req, res) => {
     return res.status(400).json({ error: "Invalid vehicle details" });
   }
 
+  let connection;
   try {
+    // Get a connection from the pool
+    connection = await db.getConnection();
+
+    // Start a transaction
+    await connection.beginTransaction();
+
+    // Generate passcode
+    const passcode = generatePasscode();
+
     // Insert driver into the driver table
-    const [driverResult] = await db.query(
-      "INSERT INTO driver (driverId, driverName, driverContactNumber) VALUES (?, ?, ?)",
-      [driverId, driverName, driverContactNumber]
+    await connection.query(
+      "INSERT INTO driver (driverId, driverName, driverContactNumber, driverEmail, passcode) VALUES (?, ?, ?, ?, ?)",
+      [driverId, driverName, driverContactNumber, driverEmail, passcode]
     );
 
     // Insert vehicle details into the vehicle table
     for (const vehicle of vehicleDetails) {
-      await db.query(
+      await connection.query(
         "INSERT INTO vehicle (driverId, vehicleNumber, vehicleType) VALUES (?, ?, ?)",
         [driverId, vehicle.vehicleNo, vehicle.vehicleType]
       );
     }
 
-    res.status(201).json({ message: "Driver added successfully" });
+    // Commit the transaction
+    await connection.commit();
+
+    // Send email with passcode
+    const mailOptions = {
+      from: "mkteacoop@gmail.com",
+      to: driverEmail,
+      subject: "Morawakkorale Tea CooP - Your Login Credentials",
+      text: `Dear ${driverName}, 
+
+            Your login credentials for the system are as follows:
+
+            User ID: ${driverId}
+            Passcode: ${passcode}
+
+            Please use the above passcode as your password during your first login. After logging in, you will be able to create your own password.
+
+            If you have any questions, please contact us.
+
+            Best regards,
+            Morawakkorale Tea Co-op
+            041-2271400`,
+    };
+
+    // Send the email
+    transporter.sendMail(mailOptions, (error, info) => {
+      if (error) {
+        console.error("Error sending email:", error);
+        return res.status(500).json({ error: "Failed to send email" });
+      } else {
+        console.log("Email sent:", info.response);
+        res.status(201).json({ message: "Driver added successfully" });
+      }
+    });
   } catch (error) {
+    // Roll back the transaction in case of error
+    if (connection) await connection.rollback();
     console.error("Error adding driver:", error);
     res.status(500).json({ error: "Failed to add driver" });
+  } finally {
+    // Release the connection
+    if (connection) connection.release();
   }
 };
 
-//to fetch a single driver by ID
+// Fetch a single driver by ID
 exports.getDriverById = async (req, res) => {
   const { driverId } = req.params;
 
   try {
-    const [driver] = await db.query("SELECT * FROM driver WHERE driverId = ?", 
-      [driverId]
-    );
+    const [driver] = await db.query("SELECT * FROM driver WHERE driverId = ?", [driverId]);
 
     if (driver.length === 0) {
       return res.status(404).json({ error: "Driver not found" });
@@ -83,7 +144,7 @@ exports.getDriverById = async (req, res) => {
   }
 };
 
-//to update a driver
+// Update a driver
 exports.updateDriver = async (req, res) => {
   const { driverId } = req.params;
   const { driverName, driverContactNumber, vehicleDetails } = req.body;
@@ -93,13 +154,13 @@ exports.updateDriver = async (req, res) => {
   }
 
   try {
-    //to update driver details
+    // Update driver details
     await db.query(
       "UPDATE driver SET driverName = ?, driverContactNumber = ? WHERE driverId = ?",
       [driverName, driverContactNumber, driverId]
     );
 
-    //to update vehicle details
+    // Update vehicle details
     if (Array.isArray(vehicleDetails) && vehicleDetails.length > 0) {
       await db.query("DELETE FROM vehicle WHERE driverId = ?", [driverId]);
 
@@ -118,7 +179,7 @@ exports.updateDriver = async (req, res) => {
   }
 };
 
-//to delete a driver
+// Delete a driver
 exports.deleteDriver = async (req, res) => {
   const { driverId } = req.params;
 

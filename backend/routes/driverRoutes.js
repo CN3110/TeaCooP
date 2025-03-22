@@ -3,8 +3,9 @@ const { getAllDrivers, addDriver, updateDriver, deleteDriver, getDriverById } = 
 
 const router = express.Router();
 
+//crud
 router.get("/", getAllDrivers);
-router.post("/add", addDriver);  // ✅ Matches frontend
+router.post("/add", addDriver);
 router.put("/:driverId", updateDriver);
 router.delete("/:driverId", deleteDriver);
 router.get("/:driverId", getDriverById);

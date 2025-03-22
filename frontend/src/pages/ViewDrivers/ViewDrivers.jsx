@@ -112,9 +112,9 @@ const ViewDrivers = () => {
               <th>Driver ID</th>
               <th>Driver Name</th>
               <th>Contact Number</th>
+              <th>Email</th> 
               <th>Vehicle Details</th>
-              <th>Actions</th>
-            </tr>
+              <th>Actions</th></tr>
           </thead>
           <tbody>
             {filteredDrivers.map((driver) => (
@@ -122,6 +122,7 @@ const ViewDrivers = () => {
                 <td>{driver.driverId}</td>
                 <td>{driver.driverName}</td>
                 <td>{driver.driverContactNumber}</td>
+                <td>{driver.driverEmail}</td> 
                 <td>
                   <ul>
                     {driver.vehicleDetails && driver.vehicleDetails.length > 0 ? (

@@ -9,6 +9,7 @@ const EditDriver = () => {
     driverId: "",
     driverName: "",
     driverContactNumber: "",
+    email: "", // Added email field
     vehicleDetails: [],
   });
 
@@ -137,6 +138,15 @@ const EditDriver = () => {
             type="text"
             name="driverContactNumber"
             value={formData.driverContactNumber || ""}
+            onChange={handleInputChange}
+          />
+        </div>
+        <div className="form-group">
+          <label>Email</label>
+          <input
+            type="email"
+            name="email"
+            value={formData.driverEmail || ""}
             onChange={handleInputChange}
           />
         </div>

@@ -7,10 +7,12 @@ const AddDriver = () => {
   const [driverData, setDriverData] = useState({
     driverId: "",
     driverName: "",
-    contactNumber: "",
+    driverContactNumber: "", // Fixed: Renamed from contactNumber
+    email: "",
     vehicleDetails: [{ vehicleNo: "", vehicleType: "" }],
   });
 
+  const [error, setError] = useState(""); // State for error messages
   const navigate = useNavigate();
 
   // Handle input changes for driver details
@@ -23,7 +25,7 @@ const AddDriver = () => {
   const handleVehicleDetailsChange = (index, e) => {
     const { name, value } = e.target;
     const updatedVehicleDetails = [...driverData.vehicleDetails];
-    updatedVehicleDetails[index][name] = value;
+    updatedVehicleDetails[index][name] = value.trim(); // Trim whitespace
     setDriverData({ ...driverData, vehicleDetails: updatedVehicleDetails });
   };
 
@@ -43,14 +45,14 @@ const AddDriver = () => {
     e.preventDefault();
 
     // Validate required fields
-    if (!driverData.driverId || !driverData.driverName || !driverData.contactNumber) {
-      alert("Please fill in all required fields.");
+    if (!driverData.driverId || !driverData.driverName || !driverData.driverContactNumber || !driverData.email) {
+      setError("Please fill in all required fields.");
       return;
     }
 
     // Validate vehicle details
-    if (driverData.vehicleDetails.some((vehicle) => !vehicle.vehicleNo || !vehicle.vehicleType)) {
-      alert("Please fill in all vehicle details.");
+    if (driverData.vehicleDetails.some((vehicle) => !vehicle.vehicleNo.trim() || !vehicle.vehicleType.trim())) {
+      setError("Please fill in all vehicle details.");
       return;
     }
 
@@ -58,7 +60,8 @@ const AddDriver = () => {
     const requestBody = {
       driverId: driverData.driverId,
       driverName: driverData.driverName,
-      driverContactNumber: driverData.contactNumber,
+      driverContactNumber: driverData.driverContactNumber,
+      driverEmail: driverData.email,
       vehicleDetails: driverData.vehicleDetails,
     };
     console.log("Request Body:", requestBody);
@@ -77,11 +80,11 @@ const AddDriver = () => {
         navigate("/view-drivers");
       } else {
         const errorData = await response.json();
-        alert(`Error adding driver: ${errorData.message}`);
+        setError(`Error adding driver: ${errorData.message}`);
       }
     } catch (error) {
       console.error("Error adding driver:", error);
-      alert("An error occurred while adding the driver");
+      setError("An error occurred while adding the driver");
     }
   };
 
@@ -89,6 +92,7 @@ const AddDriver = () => {
     <EmployeeLayout>
       <div className="add-driver-container">
         <h2>Add New Driver</h2>
+        {error && <div className="error-message">{error}</div>} {/* Display error message */}
         <form onSubmit={handleSubmit}>
           {/* Driver ID */}
           <div className="form-group">
@@ -119,8 +123,20 @@ const AddDriver = () => {
             <label>Contact Number</label>
             <input
               type="text"
-              name="contactNumber"
-              value={driverData.contactNumber}
+              name="driverContactNumber"
+              value={driverData.driverContactNumber}
+              onChange={handleInputChange}
+              required
+            />
+          </div>
+
+          {/* Email */}
+          <div className="form-group">
+            <label>Email</label>
+            <input
+              type="email"
+              name="email"
+              value={driverData.email}
               onChange={handleInputChange}
               required
             />
