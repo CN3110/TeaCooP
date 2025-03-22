@@ -67,8 +67,8 @@ exports.addSupplier = async (req, res) => {
 
     // Send email with passcode
     const mailOptions = {
-      from: "mkteacoop@gmail.com", // Sender email
-      to: email, // Supplier's email (from the form)
+      from: "mkteacoop@gmail.com", 
+      to: email, 
       subject: "Morawakkorale Tea CooP - Your Login Credentials", // Email subject
       text: `Dear ${name}, 
 

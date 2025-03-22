@@ -9,10 +9,10 @@ const generatePasscode = () => {
 
 // Configure Nodemailer
 const transporter = nodemailer.createTransport({
-  service: "gmail", // Use Gmail as the email service
+  service: "gmail", //email service
   auth: {
-    user: "mkteacoop@gmail.com", // Sender's email address
-    pass: "sinr fmza uvxa soww", // Sender's email password
+    user: "mkteacoop@gmail.com", 
+    pass: "sinr fmza uvxa soww", 
   },
 });
 
