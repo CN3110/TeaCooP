@@ -28,12 +28,14 @@ const ManageDeliveryRoutes = () => {
     if (!routeName) return;
     try {
       const response = await axios.post("http://localhost:3001/api/deliveryRoutes", {
-        delivery_routeName: routeName, 
+        delivery_routeName: routeName,
       });
+
+      // Update the state with the new route
       setRoutes([...routes, response.data]);
-      setRouteName("");
+      setRouteName(""); // Clear the input field
     } catch (error) {
-      console.error("Error adding delivery route:", error);
+      console.error("Error adding delivery route:", error.response?.data);
     }
   };
 
@@ -44,13 +46,15 @@ const ManageDeliveryRoutes = () => {
       const response = await axios.put(`http://localhost:3001/api/deliveryRoutes/${id}`, {
         delivery_routeName: editRouteName,
       });
-    setRoutes(
-      routes.map((route) =>
-        route.delivery_routeId === id ? response.data : route
-      )
-    );
-      setEditRouteId(null);
-      setEditRouteName("");
+
+      // Update the state with the updated route
+      setRoutes(
+        routes.map((route) =>
+          route.delivery_routeId === id ? response.data : route
+        )
+      );
+      setEditRouteId(null); // Clear the edit mode
+      setEditRouteName(""); // Clear the input field
     } catch (error) {
       console.error("Error updating delivery route:", error);
     }
@@ -60,6 +64,8 @@ const ManageDeliveryRoutes = () => {
   const deleteRoute = async (id) => {
     try {
       await axios.delete(`http://localhost:3001/api/deliveryRoutes/${id}`);
+
+      // Update the state by removing the deleted route
       setRoutes(routes.filter((route) => route.delivery_routeId !== id));
     } catch (error) {
       console.error("Error deleting delivery route:", error);

@@ -148,6 +148,10 @@ const SidebarEM = () => {
           )}
         </div>
 
+        <Link to="/employee-dashboard-manage-delivery-routes" className="item">
+          Manage Delivery Routes
+        </Link>
+
         <Link to="#" className="item" onClick={openProfileModal}>
           Your Profile
         </Link>
