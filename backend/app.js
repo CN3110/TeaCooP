@@ -14,7 +14,7 @@ app.use(cors({
   credentials: true,
 }));
 
-// Routes
+//Routes
 app.use("/api/auth", require("./routes/authRoutes"));
 app.use("/api/suppliers", require("./routes/supplierRoutes"));
 app.use("/api/deliveries", require("./routes/deliveryRoutes"));
@@ -25,9 +25,10 @@ app.use("/api/brokers", require("./routes/brokerRoutes"));
 app.use("/api/teaTypes", require("./routes/teaTypesRoutes"));
 app.use("/api/lots", require("./routes/lotRoutes"));
 app.use("/api/transportRequests", require("./routes/requestTransportRoutes"));
+app.use("api/deliveryRoutes" , require("./routes/deliveryRoutesRoutes"))
 
 app.get("/", (req, res) => {
   res.json("backend connected");
 });
 
-module.exports = app; // Export the app for use in server.js
+module.exports = app; 
