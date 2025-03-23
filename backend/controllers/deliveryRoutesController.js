@@ -3,8 +3,9 @@ const db = require("../config/database");
 // Fetch all delivery routes
 exports.getAllDeliveryRoutes = async (req, res) => {
   try {
-    const [deliveryRoutes] = await db.query("SELECT * FROM delivery_route");
-    res.status(200).json(deliveryRoutes);
+    const [routes] = await db.query("SELECT * FROM delivery_route");
+    console.log("Fetched routes:", routes); // Debugging log
+    res.status(200).json(routes);
   } catch (error) {
     console.error("Error fetching delivery routes:", error);
     res.status(500).json({ error: "Failed to fetch delivery routes" });
@@ -13,21 +14,26 @@ exports.getAllDeliveryRoutes = async (req, res) => {
 
 // Add a new delivery route
 exports.addDeliveryRoute = async (req, res) => {
-  const { deliveryRouteName } = req.body;
+  const { delivery_routeName } = req.body;
 
-  // Validate required fields
-  if (!deliveryRouteName) {
+  console.log("Request body:", req.body); // Debugging log
+
+  if (!delivery_routeName) {
     return res.status(400).json({ error: "Missing required fields" });
   }
 
   try {
-    // Insert delivery route into the delivery_route table (deliveryRouteId is auto-incremented)
-    const [deliveryRouteResult] = await db.query(
-      "INSERT INTO delivery_route (deliveryRouteName) VALUES (?)",
-      [deliveryRouteName]
+    const [result] = await db.query(
+      "INSERT INTO delivery_route (delivery_routeName) VALUES (?)",
+      [delivery_routeName]
     );
 
-    res.status(201).json({ message: "Delivery route added successfully" });
+    console.log("Insert result:", result); // Debugging log
+
+    res.status(201).json({
+      message: "Delivery route added successfully",
+      delivery_routeId: result.insertId,
+    });
   } catch (error) {
     console.error("Error adding delivery route:", error);
     res.status(500).json({ error: "Failed to add delivery route" });
@@ -36,19 +42,23 @@ exports.addDeliveryRoute = async (req, res) => {
 
 // Fetch a single delivery route by name
 exports.getDeliveryRouteByName = async (req, res) => {
-  const { deliveryRouteName } = req.params;
+  const { delivery_routeName } = req.params;
+
+  console.log("Fetching route by name:", delivery_routeName); // Debugging log
 
   try {
-    const [deliveryRoute] = await db.query(
-      "SELECT * FROM delivery_route WHERE deliveryRouteName = ?",
-      [deliveryRouteName]
+    const [route] = await db.query(
+      "SELECT * FROM delivery_route WHERE delivery_routeName = ?",
+      [delivery_routeName]
     );
 
-    if (deliveryRoute.length === 0) {
+    console.log("Fetched route:", route); // Debugging log
+
+    if (route.length === 0) {
       return res.status(404).json({ error: "Delivery route not found" });
     }
 
-    res.status(200).json(deliveryRoute[0]);
+    res.status(200).json(route[0]);
   } catch (error) {
     console.error("Error fetching delivery route:", error);
     res.status(500).json({ error: "Failed to fetch delivery route" });
@@ -57,22 +67,24 @@ exports.getDeliveryRouteByName = async (req, res) => {
 
 // Update a delivery route by ID
 exports.updateDeliveryRoute = async (req, res) => {
-  const { deliveryRouteId } = req.params;
-  const { deliveryRouteName } = req.body;
+  const delivery_routeId = parseInt(req.params.delivery_routeId, 10);
+  const { delivery_routeName } = req.body;
 
-  // Validate required fields
-  if (!deliveryRouteName) {
+  console.log("Request body:", req.body); // Debugging log
+
+  if (!delivery_routeName) {
     return res.status(400).json({ error: "Missing required fields" });
   }
 
   try {
-    // Update the delivery route in the delivery_route table
-    const [deliveryRouteResult] = await db.query(
-      "UPDATE delivery_route SET deliveryRouteName = ? WHERE deliveryRouteId = ?",
-      [deliveryRouteName, deliveryRouteId]
+    const [result] = await db.query(
+      "UPDATE delivery_route SET delivery_routeName = ? WHERE delivery_routeId = ?",
+      [delivery_routeName, delivery_routeId]
     );
 
-    if (deliveryRouteResult.affectedRows === 0) {
+    console.log("Update result:", result); // Debugging log
+
+    if (result.affectedRows === 0) {
       return res.status(404).json({ error: "Delivery route not found" });
     }
 
@@ -85,16 +97,19 @@ exports.updateDeliveryRoute = async (req, res) => {
 
 // Delete a delivery route by ID
 exports.deleteDeliveryRoute = async (req, res) => {
-  const { deliveryRouteId } = req.params;
+  const delivery_routeId = parseInt(req.params.delivery_routeId, 10);
+
+  console.log("Deleting route with ID:", delivery_routeId); // Debugging log
 
   try {
-    // Delete the delivery route from the delivery_route table
-    const [deliveryRouteResult] = await db.query(
-      "DELETE FROM delivery_route WHERE deliveryRouteId = ?",
-      [deliveryRouteId]
+    const [result] = await db.query(
+      "DELETE FROM delivery_route WHERE delivery_routeId = ?",
+      [delivery_routeId]
     );
 
-    if (deliveryRouteResult.affectedRows === 0) {
+    console.log("Delete result:", result); // Debugging log
+
+    if (result.affectedRows === 0) {
       return res.status(404).json({ error: "Delivery route not found" });
     }
 

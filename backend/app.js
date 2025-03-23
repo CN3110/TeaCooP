@@ -25,7 +25,7 @@ app.use("/api/brokers", require("./routes/brokerRoutes"));
 app.use("/api/teaTypes", require("./routes/teaTypesRoutes"));
 app.use("/api/lots", require("./routes/lotRoutes"));
 app.use("/api/transportRequests", require("./routes/requestTransportRoutes"));
-app.use("api/deliveryRoutes" , require("./routes/deliveryRoutesRoutes"))
+app.use("/api/deliveryRoutes" , require("./routes/deliveryRoutesRoutes"));
 
 app.get("/", (req, res) => {
   res.json("backend connected");

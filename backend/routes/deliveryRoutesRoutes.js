@@ -1,20 +1,11 @@
 const express = require("express");
-
-const {
-    getAllDeliveryRoutes, 
-    addDeliveryRoute, 
-    getDeliveryRouteByName, 
-    updateDeliveryRoute,
-    deleteDeliveryRoute,
-} = require("../controllers/deliveryRoutesController");
-
 const router = express.Router();
+const deliveryRoutesController = require("../controllers/deliveryRoutesController");
 
 // CRUD routes for delivery routes
-router.get("/", getAllDeliveryRoutes); 
-router.post("/", addDeliveryRoute); 
-router.get("/:deliveryRouteName", getDeliveryRouteByName); 
-router.put("/:deliveryRouteId", updateDeliveryRoute); 
-router.delete("/:deliveryRouteId", deleteDeliveryRoute); 
-
+router.get("/", deliveryRoutesController.getAllDeliveryRoutes);
+router.post("/", deliveryRoutesController.addDeliveryRoute);
+router.get("/:delivery_routeName", deliveryRoutesController.getDeliveryRouteByName);
+router.put("/:delivery_routeId", deliveryRoutesController.updateDeliveryRoute);
+router.delete("/:delivery_routeId", deliveryRoutesController.deleteDeliveryRoute);
 module.exports = router;

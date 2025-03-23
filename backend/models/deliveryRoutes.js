@@ -16,7 +16,7 @@ class DeliveryRoutes {
                 return callback(err, null);
             }
 
-            return callback(null, {deliveryRouteId: result.insertId, deliveryRouteName });
+            return callback(null, {deliveryRouteId: result.insertId, delivery_routeName });
         });
     }
 }

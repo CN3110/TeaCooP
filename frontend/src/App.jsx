@@ -32,6 +32,7 @@ import RequestTransport from "./pages/SupplierView/RequestTransport/RequestTrans
 import ViewTransportRequests from "./pages/ViewTransportRequests/ViewTransportRequests.jsx";
 import DriverDashboard from "./pages/DriverView/DashboardDriver/DashboardDriver.jsx";
 import BrokerDashboard from "./pages/BrokerView/DashboardBroker/DashboardBroker.jsx";
+import ManageDeliveryRoutes from "./pages/ManageDeliveryRoutes/ManageDeliveryRoutes.jsx";
 
 const App = () => {
   const [showLogin, setShowLogin] = useState(false); // Add state for LoginPopup
@@ -52,15 +53,15 @@ const App = () => {
           <Route path="/view-drivers" element={<ViewDrivers/>}/>
           <Route path="/add-new-delivery-record" element={<AddNewDeliveryRecord/>} />
           <Route path="/view-delivery-records" element={<ViewDeliveryRecords />} />
-          <Route path="/edit-delivery-record/:deliveryId" element={<EditDeliveryRecord />} /> {/* Add route for EditDeliveryRecord in view records screen - edit button*/}
-          <Route path="/edit-supplier/:supplierId" element={<EditSupplier />} /> {/* Add route for EditSupplierPage */}
+          <Route path="/edit-delivery-record/:deliveryId" element={<EditDeliveryRecord />} /> 
+          <Route path="/edit-supplier/:supplierId" element={<EditSupplier />} /> 
           <Route path="/edit-driver/:driverId" element={<EditDriver />} />
           <Route path="/add-broker" element={<AddBroker />} />
           <Route path="/view-brokers" element={<ViewBrokers />} />
           <Route path="/edit-broker/:brokerId" element={<EditBroker />} />
           <Route path="/add-tea-type" element={<AddTeaType />} />
           <Route path="/view-tea-types" element={<ViewTeaTypes />} /> 
-          <Route path="/edit-tea-type/:teaTypeId" element={<EditTeaType />} /> {/* Add route for EditTeaType */}
+          <Route path="/edit-tea-type/:teaTypeId" element={<EditTeaType />} /> 
           <Route path="/employee-dashboard-create-lot" element={<CreateLot/>} />
           <Route path="/view-lots" element={<ViewLots/>} />
           <Route path="/edit-lot/:lotNumber" element={<EditLot/>} />
@@ -69,6 +70,7 @@ const App = () => {
           <Route path="/employee-view-transport-requests" element={<ViewTransportRequests/>}/>
           <Route path="/driverdashboard" element={<DriverDashboard/>} />
           <Route path="/brokerdashboard" element={<BrokerDashboard/>}/>
+          <Route path="/employee-dashboard-manage-delivery-routes" element={<ManageDeliveryRoutes/>} />
           
         </Routes>
       </div>
