@@ -1,10 +1,12 @@
-const express = require("express");
-const authController = require("../controllers/authController");
-
+const express = require('express');
 const router = express.Router();
+const authController = require('../controllers/authController');
+const authMiddleware = require('../middleware/authMiddleware');
 
-router.post("/login", authController.login);
-router.post("/set-password", authController.setPassword);
-router.get("/dashboard", authController.getDashboard);
+// Login route
+router.post('/login', authController.login);
+
+// Set password route (protected)
+router.post('/set-password', authMiddleware, authController.setPassword);
 
 module.exports = router;

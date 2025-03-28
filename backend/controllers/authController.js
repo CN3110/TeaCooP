@@ -1,135 +1,135 @@
-const bcrypt = require("bcryptjs");
-const jwt = require("jsonwebtoken");
-const dotenv = require("dotenv");
-const User = require("../models/user");
+const jwt = require('jsonwebtoken');
+const bcrypt = require('bcryptjs');
+const { 
+  getEmployeeById, 
+  getSupplierById, 
+  getDriverById, 
+  getBrokerById,
+  updateUserPassword
+} = require('../models/user');
 
-dotenv.config();
+const JWT_SECRET = process.env.JWT_SECRET || 'your-secret-key';
 
-exports.login = async (req, res) => {
-    try {
-        const { userId, passcode } = req.body;
-        
-        // Input validation
-        if (!userId || !passcode) {
-            console.log(`Login attempt with missing fields - userId: ${userId}`);
-            return res.status(400).json({ message: "User ID and passcode are required" });
-        }
+// Helper function to determine user type based on ID prefix
+function getUserType(userId) {
+  const prefix = userId.charAt(0).toUpperCase();
+  switch(prefix) {
+    case 'E': return 'employee';
+    case 'S': return 'supplier';
+    case 'D': return 'driver';
+    case 'B': return 'broker';
+    default: throw new Error('Invalid user ID format');
+  }
+}
 
-        User.getUserById(userId, async (err, results) => {
-            if (err) {
-                console.error("Database error:", err);
-                return res.status(500).json({ message: "Internal server error" });
-            }
-
-            if (results.length === 0) {
-                console.log(`Login attempt for non-existent user: ${userId}`);
-                return res.status(401).json({ message: "Invalid credentials" });
-            }
-
-            const user = results[0];
-            console.log(`Login attempt for ${userId}`, { 
-                hasPasscode: !!user.passcode,
-                hasPassword: !!user.password 
-            });
-
-            // Temporary passcode flow
-            if (user.passcode && user.passcode === passcode) {
-                console.log(`Temporary passcode login successful for ${userId}`);
-                const token = jwt.sign({ userId }, process.env.JWT_SECRET, { expiresIn: "1h" });
-                return res.json({ 
-                    message: "Login successful", 
-                    token, 
-                    firstLogin: true 
-                });
-            }
-            
-            // Hashed password flow
-            if (user.password) {
-                const isMatch = await bcrypt.compare(passcode, user.password);
-                console.log(`Password comparison result for ${userId}: ${isMatch}`);
-                
-                if (isMatch) {
-                    const token = jwt.sign({ userId }, process.env.JWT_SECRET, { expiresIn: "1h" });
-                    return res.json({ 
-                        message: "Login successful", 
-                        token, 
-                        firstLogin: false 
-                    });
-                }
-            }
-
-            console.log(`Failed login attempt for ${userId}`);
-            return res.status(401).json({ message: "Invalid credentials" });
-        });
-    } catch (error) {
-        console.error("Unexpected error in login:", error);
-        return res.status(500).json({ message: "Internal server error" });
+// Login controller
+const login = async (req, res) => {
+  const { userId, passcode } = req.body;
+  
+  try {
+    // Determine user type based on ID prefix
+    const userType = getUserType(userId);
+    
+    // Get user from appropriate table
+    let user;
+    switch(userType) {
+      case 'employee':
+        user = await getEmployeeById(userId);
+        break;
+      case 'supplier':
+        user = await getSupplierById(userId);
+        break;
+      case 'driver':
+        user = await getDriverById(userId);
+        break;
+      case 'broker':
+        user = await getBrokerById(userId);
+        break;
     }
+    
+    if (!user) {
+      return res.status(404).json({ message: 'User not found' });
+    }
+    
+    // Check if this is first login (using passcode)
+    if (!user.password) {
+      if (user.passcode !== passcode) {
+        return res.status(401).json({ message: 'Invalid passcode' });
+      }
+      
+      // Generate token for first login (redirect to profile page to set password)
+      const token = jwt.sign(
+        { userId: user[`${userType}Id`], userType, needsPassword: true },
+        JWT_SECRET,
+        { expiresIn: '1h' }
+      );
+      
+      return res.json({ 
+        token,
+        userType,
+        needsPassword: true,
+        message: 'Please set your password'
+      });
+    }
+    
+    // Regular login with password
+    const isMatch = await bcrypt.compare(passcode, user.password);
+    if (!isMatch) {
+      return res.status(401).json({ message: 'Invalid credentials' });
+    }
+    
+    // Generate token for regular login
+    const token = jwt.sign(
+      { userId: user[`${userType}Id`], userType },
+      JWT_SECRET,
+      { expiresIn: '8h' }
+    );
+    
+    res.json({ 
+      token,
+      userType,
+      needsPassword: false,
+      message: 'Login successful'
+    });
+    
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: 'Server error' });
+  }
 };
 
-exports.setPassword = async (req, res) => {
-    try {
-        const { userId, newPassword, confirmPassword } = req.body;
-        
-        // Validation
-        if (!userId || !newPassword || !confirmPassword) {
-            return res.status(400).json({ message: "All fields are required" });
-        }
-        
-        if (newPassword !== confirmPassword) {
-            return res.status(400).json({ message: "Passwords do not match" });
-        }
-        
-        if (newPassword.length < 8) {
-            return res.status(400).json({ message: "Password must be at least 8 characters" });
-        }
-
-        const hashedPassword = await bcrypt.hash(newPassword, 12); // Increased salt rounds
-        
-        User.updateUserPassword(userId, hashedPassword, (err) => {
-            if (err) {
-                console.error("Password update error:", err);
-                return res.status(500).json({ message: "Failed to update password" });
-            }
-            
-            console.log(`Password updated successfully for ${userId}`);
-            res.json({ message: "Password set successfully" });
-        });
-    } catch (error) {
-        console.error("Error in setPassword:", error);
-        res.status(500).json({ message: "Internal server error" });
-    }
+// Set password controller (after first login)
+const setPassword = async (req, res) => {
+  const { userId, newPassword } = req.body;
+  const userType = req.user.userType; // From JWT
+  
+  try {
+    // Hash the new password
+    const salt = await bcrypt.genSalt(10);
+    const hashedPassword = await bcrypt.hash(newPassword, salt);
+    
+    // Update password in appropriate table
+    await updateUserPassword(userType, userId, hashedPassword);
+    
+    // Generate new token without needsPassword flag
+    const token = jwt.sign(
+      { userId, userType },
+      JWT_SECRET,
+      { expiresIn: '8h' }
+    );
+    
+    res.json({ 
+      token,
+      message: 'Password set successfully'
+    });
+    
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: 'Server error' });
+  }
 };
 
-exports.getDashboard = (req, res) => {
-    try {
-        const authHeader = req.headers.authorization;
-        if (!authHeader || !authHeader.startsWith("Bearer ")) {
-            return res.status(401).json({ message: "Authorization token required" });
-        }
-
-        const token = authHeader.split(" ")[1];
-        jwt.verify(token, process.env.JWT_SECRET, (err, decoded) => {
-            if (err) {
-                console.error("JWT verification error:", err);
-                return res.status(403).json({ message: "Invalid or expired token" });
-            }
-
-            const { userId } = decoded;
-            let dashboardURL;
-            
-            if (userId.startsWith("S")) dashboardURL = "/supplierdashboard";
-            else if (userId.startsWith("D")) dashboardURL = "/driverdashboard";
-            else if (userId.startsWith("B")) dashboardURL = "/brokerdashboard";
-            else {
-                console.error(`Invalid role prefix in userId: ${userId}`);
-                return res.status(400).json({ message: "Invalid user role" });
-            }
-
-            res.json({ dashboardURL });
-        });
-    } catch (error) {
-        console.error("Error in getDashboard:", error);
-        res.status(500).json({ message: "Internal server error" });
-    }
+module.exports = {
+  login,
+  setPassword
 };

@@ -15,21 +15,27 @@ const LoginPopup = ({ show, handleClose }) => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-
+  
     try {
       const url = "http://localhost:3001/api/auth/login";
       const payload = {
         userId: formData.userId,
         passcode: formData.passcode,
       };
-
+  
       const response = await axios.post(url, payload);
-
-      console.log(response.data);
-      alert("Login successful!");
-      localStorage.setItem("token", response.data.token); // Save token for future requests
-
-      handleClose(); // Close the modal after login
+  
+      localStorage.setItem("token", response.data.token);
+      localStorage.setItem("userType", response.data.userType);
+  
+      if (response.data.needsPassword) {
+        // Redirect to profile page to set password
+        window.location.href = `/profile/${formData.userId}`;
+      } else {
+        // Redirect to dashboard based on user type
+        window.location.href = `/${response.data.userType}-dashboard`;
+        handleClose();
+      }
     } catch (error) {
       console.error(error);
       alert(error.response?.data?.message || "An error occurred");
@@ -58,7 +64,7 @@ const LoginPopup = ({ show, handleClose }) => {
             />
           </Form.Group>
 
-          // Change the password input to this:
+         
 <Form.Control
     type="password"
     name="passcode"

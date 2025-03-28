@@ -1,31 +1,56 @@
-const db = require("../config/database");
+const pool = require('../config/database');
 
-const getUserById = (userId, callback) => {
-    let table;
-    if (userId.startsWith("S")) table = "supplier";
-    else if (userId.startsWith("D")) table = "driver";
-    else if (userId.startsWith("B")) table = "broker";
-    else return callback("Invalid User ID", null);
-
-    const query = `SELECT * FROM ${table} WHERE ${table}Id = ?`;
-    db.query(query, [userId], (err, results) => {
-        if (err) return callback(err, null);
-        callback(null, results);
-    });
+// Employee
+const getEmployeeById = async (employeeId) => {
+  const [rows] = await pool.query('SELECT * FROM employee WHERE employeeId = ?', [employeeId]);
+  return rows[0];
 };
 
-const updateUserPassword = (userId, hashedPassword, callback) => {
-    let table;
-    if (userId.startsWith("S")) table = "supplier";
-    else if (userId.startsWith("D")) table = "driver";
-    else if (userId.startsWith("B")) table = "broker";
-    else return callback("Invalid User ID", null);
-
-    const query = `UPDATE ${table} SET passcode = NULL, password = ? WHERE ${table}Id = ?`;
-    db.query(query, [hashedPassword, userId], (err, results) => {
-        if (err) return callback(err, null);
-        callback(null, results);
-    });
+// Supplier
+const getSupplierById = async (supplierId) => {
+  const [rows] = await pool.query('SELECT * FROM supplier WHERE supplierId = ?', [supplierId]);
+  return rows[0];
 };
 
-module.exports = { getUserById, updateUserPassword };
+// Driver
+const getDriverById = async (driverId) => {
+  const [rows] = await pool.query('SELECT * FROM driver WHERE driverId = ?', [driverId]);
+  return rows[0];
+};
+
+// Broker
+const getBrokerById = async (brokerId) => {
+  const [rows] = await pool.query('SELECT * FROM broker WHERE brokerId = ?', [brokerId]);
+  return rows[0];
+};
+
+// Update password in appropriate table
+const updateUserPassword = async (userType, userId, hashedPassword) => {
+  let query;
+  switch(userType) {
+    case 'employee':
+      query = 'UPDATE employee SET password = ? WHERE employeeId = ?';
+      break;
+    case 'supplier':
+      query = 'UPDATE supplier SET password = ? WHERE supplierId = ?';
+      break;
+    case 'driver':
+      query = 'UPDATE driver SET password = ? WHERE driverId = ?';
+      break;
+    case 'broker':
+      query = 'UPDATE broker SET password = ? WHERE brokerId = ?';
+      break;
+    default:
+      throw new Error('Invalid user type');
+  }
+  
+  await pool.query(query, [hashedPassword, userId]);
+};
+
+module.exports = {
+  getEmployeeById,
+  getSupplierById,
+  getDriverById,
+  getBrokerById,
+  updateUserPassword
+};
