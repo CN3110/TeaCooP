@@ -33,6 +33,7 @@ import ViewTransportRequests from "./pages/ViewTransportRequests/ViewTransportRe
 import DriverDashboard from "./pages/DriverView/DashboardDriver/DashboardDriver.jsx";
 import BrokerDashboard from "./pages/BrokerView/DashboardBroker/DashboardBroker.jsx";
 import ManageDeliveryRoutes from "./pages/ManageDeliveryRoutes/ManageDeliveryRoutes.jsx";
+import BrokerLotManagement from "./pages/BrokerView/BrokerLotManagement/BrokerLotManagement.jsx";
 
 const App = () => {
   const [showLogin, setShowLogin] = useState(false); // Add state for LoginPopup
@@ -71,6 +72,7 @@ const App = () => {
           <Route path="/driverdashboard" element={<DriverDashboard/>} />
           <Route path="/brokerdashboard" element={<BrokerDashboard/>}/>
           <Route path="/employee-dashboard-manage-delivery-routes" element={<ManageDeliveryRoutes/>} />
+          <Route path="/broker-manage-lots" element={<BrokerLotManagement/>}/>
           
         </Routes>
       </div>

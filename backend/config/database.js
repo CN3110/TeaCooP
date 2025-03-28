@@ -1,18 +1,18 @@
+require("dotenv").config(); //loading .env variables
+
 const mysql = require("mysql2");
 
 // Create a connection pool
 const pool = mysql.createPool({
-  host: "localhost", // Database host
-  user: "root",      // Database username
-  password: "CHAThuni12345*",      // Database password
-  database: "tea_coop", // Database name
+  host: process.env.DB_HOST,
+  user: process.env.DB_USER,
+  password: process.env.DB_PASS,
+  database: process.env.DB_NAME,
   waitForConnections: true,
   connectionLimit: 10,
   queueLimit: 0,
 });
 
-// Log the pool to verify it's created
-console.log("Database pool created:", pool);
+console.log("Database pool created successfully");
 
-// Export the pool for use in other files
 module.exports = pool.promise();

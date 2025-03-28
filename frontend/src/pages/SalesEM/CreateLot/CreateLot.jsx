@@ -3,7 +3,7 @@ import { useNavigate } from "react-router-dom";
 import EmployeeLayout from "../../../components/EmployeeLayout/EmployeeLayout";
 import DatePicker from 'react-datepicker'; // Date picker library
 import 'react-datepicker/dist/react-datepicker.css'; // Date picker styles
-import './CreateLot.css'; // Import your custom styles
+import './CreateLot.css'; 
 
 const CreateLot = () => {
   const [lotData, setLotData] = useState({
