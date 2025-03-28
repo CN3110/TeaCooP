@@ -18,9 +18,9 @@ const Sidebar = () => {
         <FaUsers size={24} style={{ marginRight: 10 }} /> Manage Employees
         </NavLink>
 
-        <div className="sidebar-option">
+        <NavLink to='/manage-notices' className="sidebar-option">
         <MdNotifications size={24} style={{ marginRight: 10 }} /> Manage Notices
-        </div>
+        </NavLink>
 
         <div className="sidebar-option">
         <AiOutlineFileText size={24} style={{ marginRight: 10 }} /> Generate Reports
