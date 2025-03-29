@@ -34,6 +34,7 @@ import DriverDashboard from "./pages/DriverView/DashboardDriver/DashboardDriver.
 import BrokerDashboard from "./pages/BrokerView/DashboardBroker/DashboardBroker.jsx";
 import ManageDeliveryRoutes from "./pages/ManageDeliveryRoutes/ManageDeliveryRoutes.jsx";
 import BrokerLotManagement from "./pages/BrokerView/BrokerLotManagement/BrokerLotManagement.jsx";
+import ProfileEM from "./pages/Employee/ProfileEM/ProfileEM.jsx";
 
 const App = () => {
   const [showLogin, setShowLogin] = useState(false); // Add state for LoginPopup
@@ -47,7 +48,7 @@ const App = () => {
           <Route path="/aboutus" element={<AboutUs />} />
           <Route path="/aboutus-view-tea-varieties" element={<ViewTeaTypesHome/>} />
           <Route path="/contact" element={<Contact />} />
-          <Route path="/employeedashboard" element={<EmployeeDashboard />} />
+          <Route path="/employee-dashboard" element={<EmployeeDashboard />} />
           <Route path="/add-supplier" element={<AddSupplier/>} />
           <Route path="/view-suppliers" element={<ViewSuppliers/>} />
           <Route path="/add-driver" element={<AddDriver />} />
@@ -73,6 +74,8 @@ const App = () => {
           <Route path="/brokerdashboard" element={<BrokerDashboard/>}/>
           <Route path="/employee-dashboard-manage-delivery-routes" element={<ManageDeliveryRoutes/>} />
           <Route path="/broker-manage-lots" element={<BrokerLotManagement/>}/>
+          <Route path="/profile/:userId" element={<ProfileEM />} />
+          
           
         </Routes>
       </div>

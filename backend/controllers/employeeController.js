@@ -1,32 +1,29 @@
 const Employee = require("../models/employee");
 const nodemailer = require("nodemailer");
+const { generateRandomPassword } = require('../utils/helpers');
 
-// Configure Nodemailer
+// Configure Nodemailer (move to config file in production)
 const transporter = nodemailer.createTransport({
   service: "gmail",
   auth: {
-    user: "mkteacoop@gmail.com",
-    pass: "sinr fmza uvxa soww",
+    user: process.env.EMAIL_USER,
+    pass: process.env.EMAIL_PASS,
   },
 });
 
-// Generate a random 6-digit passcode
-const generatePasscode = () => {
-  return Math.floor(100000 + Math.random() * 900000).toString();
-};
-
 const employeeController = {
-  // Get all employees
+  // Get all employees (for admin view)
   getAllEmployees: async (req, res) => {
     try {
       const employees = await Employee.getAll();
       res.json(employees);
     } catch (error) {
-      res.status(500).json({ message: error.message });
+      console.error("Error fetching employees:", error);
+      res.status(500).json({ message: "Server error while fetching employees" });
     }
   },
 
-  // Get single employee
+  // Get single employee (for profile view)
   getEmployeeById: async (req, res) => {
     try {
       const employee = await Employee.getById(req.params.id);
@@ -35,7 +32,8 @@ const employeeController = {
       }
       res.json(employee);
     } catch (error) {
-      res.status(500).json({ message: error.message });
+      console.error(`Error fetching employee ${req.params.id}:`, error);
+      res.status(500).json({ message: "Server error while fetching employee" });
     }
   },
 
@@ -43,89 +41,133 @@ const employeeController = {
   createEmployee: async (req, res) => {
     try {
       // Validate required fields
-      if (
-        !req.body.employeeId ||
-        !req.body.employeeName ||
-        !req.body.employeeContact_no ||
-        !req.body.employeeEmail
-      ) {
-        return res.status(400).json({ message: "All fields are required" });
+      const requiredFields = ['employeeId', 'employeeName', 'employeeContact_no', 'employeeEmail'];
+      const missingFields = requiredFields.filter(field => !req.body[field]);
+      
+      if (missingFields.length > 0) {
+        return res.status(400).json({ 
+          message: "Missing required fields",
+          missingFields
+        });
       }
 
-      // Generate passcode
-      const passcode = generatePasscode();
+      // Validate email format
+      if (!/^\S+@\S+\.\S+$/.test(req.body.employeeEmail)) {
+        return res.status(400).json({ message: "Invalid email format" });
+      }
 
-      // Create employee with passcode
+      // Generate initial passcode
+      const passcode = generateRandomPassword(6);
+
+      // Create employee
       const employeeData = {
         ...req.body,
-        passcode: passcode,
+        passcode
       };
 
       const newEmployee = await Employee.create(employeeData);
 
-      // Prepare email
-      const mailOptions = {
-        from: "mkteacoop@gmail.com",
-        to: newEmployee.employeeEmail,
-        subject: "Morawakkorale Tea CooP - Your Login Credentials",
-        text: `Dear ${newEmployee.employeeName}, 
-
-Your login credentials for the system are as follows:
-
-Employee ID: ${newEmployee.employeeId}
-Passcode: ${passcode}
-
-Please use the above passcode during your first login. After logging in, you will be able to create your own password.
-
-If you have any questions, please contact us.
-
-Best regards,
-Morawakkorale Tea Co-op
-041-2271400`,
-      };
-
-      // Send email
-      transporter.sendMail(mailOptions, (error, info) => {
-        if (error) {
-          console.error("Error sending email:", error);
-          // Even if email fails, we still created the employee
-          return res.status(201).json({
-            message: "Employee created but email failed to send",
-            employee: newEmployee,
-          });
-        }
-        console.log("Email sent:", info.response);
-        res.status(201).json({
-          message: "Employee created successfully and email sent",
-          employee: newEmployee,
+      // Send email with credentials
+      try {
+        await transporter.sendMail({
+          from: `"Morawakkorale Tea Co-op" <${process.env.EMAIL_USER}>`,
+          to: newEmployee.employeeEmail,
+          subject: "Your Login Credentials",
+          html: `
+            <p>Dear ${newEmployee.employeeName},</p>
+            <p>Your account has been created with the following credentials:</p>
+            <ul>
+              <li><strong>Employee ID:</strong> ${newEmployee.employeeId}</li>
+              <li><strong>Temporary Passcode:</strong> ${passcode}</li>
+            </ul>
+            <p>Please use this passcode for your first login. After logging in, you will be able to create your own password.</p>
+            <p>If you didn't request this, please contact the administrator immediately.</p>
+            <p>Best regards,<br>Morawakkorale Tea Co-op</p>
+          `
         });
+      } catch (emailError) {
+        console.error("Failed to send email:", emailError);
+        // Continue even if email fails
+      }
+
+      res.status(201).json({
+        message: "Employee created successfully",
+        employee: {
+          employeeId: newEmployee.employeeId,
+          employeeName: newEmployee.employeeName,
+          employeeEmail: newEmployee.employeeEmail
+        }
       });
     } catch (error) {
       console.error("Error creating employee:", error);
-      res.status(400).json({
+      
+      if (error.code === 'ER_DUP_ENTRY') {
+        return res.status(409).json({ message: "Employee ID already exists" });
+      }
+      
+      res.status(500).json({ 
         message: error.message || "Failed to create employee",
+        error: process.env.NODE_ENV === 'development' ? error : undefined
       });
     }
   },
 
-  // Update employee
+  // Update employee profile
   updateEmployee: async (req, res) => {
     try {
-      if (
-        !req.body.employeeName ||
-        !req.body.employeeContact_no ||
-        !req.body.employeeEmail
-      ) {
+      const { employeeName, employeeContact_no, employeeEmail } = req.body;
+      
+      // Basic validation
+      if (!employeeName || !employeeContact_no || !employeeEmail) {
         return res.status(400).json({ message: "All fields are required" });
       }
 
       const updatedEmployee = await Employee.update(req.params.id, req.body);
+      
       if (!updatedEmployee) {
         return res.status(404).json({ message: "Employee not found" });
       }
-      res.json(updatedEmployee);
+      
+      res.json({
+        message: "Employee updated successfully",
+        employee: updatedEmployee
+      });
     } catch (error) {
-      res.status(400).json({ message: error.message });
+      console.error(`Error updating employee ${req.params.id}:`, error);
+      res.status(500).json({ message: "Failed to update employee" });
+    }
+  },
+
+  // Update employee password
+  updateEmployeePassword: async (req, res) => {
+    try {
+      const { currentPassword, newPassword } = req.body;
+      
+      if (!currentPassword || !newPassword) {
+        return res.status(400).json({ message: "Both current and new passwords are required" });
+      }
+      
+      if (newPassword.length < 6) {
+        return res.status(400).json({ message: "Password must be at least 6 characters" });
+      }
+      
+      // Verify current password
+      const isValid = await Employee.verifyPasscode(req.params.id, currentPassword);
+      if (!isValid) {
+        return res.status(401).json({ message: "Current password is incorrect" });
+      }
+      
+      // Update to new password
+      const success = await Employee.updatePassword(req.params.id, newPassword);
+      
+      if (!success) {
+        return res.status(404).json({ message: "Employee not found" });
+      }
+      
+      res.json({ message: "Password updated successfully" });
+    } catch (error) {
+      console.error(`Error updating password for employee ${req.params.id}:`, error);
+      res.status(500).json({ message: "Failed to update password" });
     }
   },
 
@@ -133,14 +175,17 @@ Morawakkorale Tea Co-op
   deleteEmployee: async (req, res) => {
     try {
       const success = await Employee.delete(req.params.id);
+      
       if (!success) {
         return res.status(404).json({ message: "Employee not found" });
       }
+      
       res.json({ message: "Employee deleted successfully" });
     } catch (error) {
-      res.status(500).json({ message: error.message });
+      console.error(`Error deleting employee ${req.params.id}:`, error);
+      res.status(500).json({ message: "Failed to delete employee" });
     }
-  },
+  }
 };
 
 module.exports = employeeController;
