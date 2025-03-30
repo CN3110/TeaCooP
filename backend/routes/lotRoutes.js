@@ -6,6 +6,7 @@ const {
   getLotByLotNumber,
   updateLot,
   deleteLot,
+  updateBrokerValuation
 } = require("../controllers/lotController");
 
 const router = express.Router();
@@ -16,5 +17,7 @@ router.post("/", addLot);
 router.put("/:lotNumber", updateLot);
 router.delete("/:lotNumber", deleteLot);
 router.get("/:lotNumber", getLotByLotNumber);
+
+router.patch('/:lotNumber/valuation', updateBrokerValuation);
 
 module.exports = router;

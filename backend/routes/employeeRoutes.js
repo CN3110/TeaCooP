@@ -8,7 +8,7 @@ const roleMiddleware = require('../middleware/roleMiddleware');
 router.post('/', employeeController.createEmployee);
 
 // Admin-only routes
-router.get('/', authMiddleware, roleMiddleware('admin'), employeeController.getAllEmployees);
+//router.get('/', authMiddleware, roleMiddleware('admin'), employeeController.getAllEmployees);
 
 router.delete('/:id', 
   authMiddleware, roleMiddleware('admin'), employeeController.deleteEmployee);
@@ -19,5 +19,6 @@ router.get('/:id', authMiddleware, employeeController.getEmployeeById);
 router.put('/:id', authMiddleware, employeeController.updateEmployee);
 
 router.put('/:id/password', authMiddleware, employeeController.updateEmployeePassword);
-
+// In your employeeRoutes.js
+router.get('/', authMiddleware, roleMiddleware('admin'), employeeController.getAllEmployees);
 module.exports = router;

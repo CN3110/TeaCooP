@@ -43,7 +43,8 @@ const SetPassword = () => {
     try {
       const tempToken = localStorage.getItem('tempToken');
       
-      const response = await axios.post('/api/auth/set-password', {
+      // Update the API endpoint to match your backend route
+      const response = await axios.post('http://localhost:3001/api/auth/set-password', {
         newPassword,
         confirmPassword
       }, {
@@ -61,6 +62,7 @@ const SetPassword = () => {
       }, 3000);
       
     } catch (err) {
+      console.error('Error setting password:', err);
       setError(err.response?.data?.message || 'Failed to set password. Please try again.');
     } finally {
       setIsLoading(false);
@@ -118,6 +120,11 @@ const SetPassword = () => {
             value={newPassword}
             onChange={(e) => setNewPassword(e.target.value)}
             required
+            autoComplete="new-password"
+            inputProps={{
+              'aria-label': 'New Password',
+              minLength: 6
+            }}
           />
           <TextField
             label="Confirm Password"
@@ -128,6 +135,11 @@ const SetPassword = () => {
             value={confirmPassword}
             onChange={(e) => setConfirmPassword(e.target.value)}
             required
+            autoComplete="new-password"
+            inputProps={{
+              'aria-label': 'Confirm Password',
+              minLength: 6
+            }}
           />
           <Button
             type="submit"
@@ -154,6 +166,8 @@ const SetPassword = () => {
             value={newPassword}
             onChange={(e) => setNewPassword(e.target.value)}
             required
+            minLength="6"
+            autoComplete="new-password"
           />
         </Form.Group>
         <Form.Group className="mb-3">
@@ -163,6 +177,8 @@ const SetPassword = () => {
             value={confirmPassword}
             onChange={(e) => setConfirmPassword(e.target.value)}
             required
+            minLength="6"
+            autoComplete="new-password"
           />
         </Form.Group>
         <Button 

@@ -35,6 +35,7 @@ import DriverDashboard from "./pages/DriverView/DashboardDriver/DashboardDriver.
 import BrokerDashboard from "./pages/BrokerView/DashboardBroker/DashboardBroker.jsx";
 import ManageDeliveryRoutes from "./pages/ManageDeliveryRoutes/ManageDeliveryRoutes.jsx";
 import BrokerLotManagement from "./pages/BrokerView/BrokerLotManagement/BrokerLotManagement.jsx";
+import SetPassword from "./pages/SetPassword/SetPassword.jsx";
 
 
 const App = () => {
@@ -49,6 +50,7 @@ const App = () => {
           <Route path="/aboutus-view-tea-varieties" element={<ViewTeaTypesHome/>} />
           <Route path="/contact" element={<Contact />} />
           <Route path="/login" element={<Login/>}/>
+
           <Route path="/employee-dashboard" element={<EmployeeDashboard />} />
           <Route path="/add-supplier" element={<AddSupplier/>} />
           <Route path="/view-suppliers" element={<ViewSuppliers/>} />
@@ -68,14 +70,19 @@ const App = () => {
           <Route path="/employee-dashboard-create-lot" element={<CreateLot/>} />
           <Route path="/view-lots" element={<ViewLots/>} />
           <Route path="/edit-lot/:lotNumber" element={<EditLot/>} />
+          <Route path="/employee-dashboard-manage-delivery-routes" element={<ManageDeliveryRoutes/>} />
+          <Route path="/profile/:userId" element={<EmployeeProfile />} />
+
           <Route path="/supplier-dashboard" element={<SupplierDashboard/>} />
           <Route path="/supplier-request-transport" element={<RequestTransport/>}/>
           <Route path="/employee-view-transport-requests" element={<ViewTransportRequests/>}/>
+
           <Route path="/driver-dashboard" element={<DriverDashboard/>} />
+
           <Route path="/broker-dashboard" element={<BrokerDashboard/>}/>
-          <Route path="/employee-dashboard-manage-delivery-routes" element={<ManageDeliveryRoutes/>} />
           <Route path="/broker-manage-lots" element={<BrokerLotManagement/>}/>
-          <Route path="/profile/:userId" element={<EmployeeProfile />} />
+          
+          <Route path="/set-password" element={<SetPassword/>} />
           
           
           

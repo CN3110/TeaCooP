@@ -1,7 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import BrokerLayout from "../../../components/Broker/BrokerLayout/BrokerLayout";
-import DatePicker from 'react-datepicker';
 import 'react-datepicker/dist/react-datepicker.css';
 //import './BrokerLotManagement.css';
 
@@ -9,10 +8,9 @@ const BrokerLotManagement = () => {
   const [lots, setLots] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-  const [editingLot, setEditingLot] = useState(null);
-  const [brokerValuation, setBrokerValuation] = useState("");
-  const [soldPrice, setSoldPrice] = useState("");
+  const [brokerValuations, setBrokerValuations] = useState({});
   const [searchTerm, setSearchTerm] = useState("");
+  const [saving, setSaving] = useState({});
 
   const navigate = useNavigate();
 
@@ -26,6 +24,14 @@ const BrokerLotManagement = () => {
         }
         const data = await response.json();
         setLots(data);
+        
+        // Initialize broker valuations with existing values or empty strings
+        const initialValuations = {};
+        data.forEach(lot => {
+          initialValuations[lot.lotNumber] = lot.brokerValuationPrice || "";
+        });
+        setBrokerValuations(initialValuations);
+        
         setLoading(false);
       } catch (err) {
         setError(err.message);
@@ -36,42 +42,39 @@ const BrokerLotManagement = () => {
     fetchLots();
   }, []);
 
-  // Handle edit button click
-  const handleEdit = (lot) => {
-    setEditingLot(lot.lotNumber);
-    setBrokerValuation(lot.brokerValuationPrice || "");
-    setSoldPrice(lot.soldPrice || "");
+  // Handle broker valuation input changes
+  const handleValuationChange = (lotNumber, value) => {
+    setBrokerValuations(prev => ({
+      ...prev,
+      [lotNumber]: value
+    }));
   };
 
-  // Handle cancel edit
-  const handleCancelEdit = () => {
-    setEditingLot(null);
-    setBrokerValuation("");
-    setSoldPrice("");
-  };
-
-  // Handle save changes
-  const handleSave = async (lotNumber) => {
-    if (!brokerValuation || parseFloat(brokerValuation) <= 0) {
+  // Handle save broker valuation
+  const handleSaveValuation = async (lotNumber) => {
+    const valuation = brokerValuations[lotNumber];
+    
+    if (!valuation || parseFloat(valuation) <= 0) {
       alert("Please enter a valid broker valuation price (greater than 0)");
       return;
     }
 
+    setSaving(prev => ({ ...prev, [lotNumber]: true }));
+
     try {
-      const response = await fetch(`http://localhost:3001/api/lots/${lotNumber}`, {
+      const response = await fetch(`http://localhost:3001/api/lots/${lotNumber}/valuation`, {
         method: "PATCH",
         headers: {
           "Content-Type": "application/json",
         },
         body: JSON.stringify({
-          brokerValuationPrice: parseFloat(brokerValuation),
-          soldPrice: soldPrice ? parseFloat(soldPrice) : null,
+          brokerValuationPrice: parseFloat(valuation)
         }),
       });
 
       if (!response.ok) {
         const errorData = await response.json();
-        throw new Error(errorData.error || "Failed to update lot");
+        throw new Error(errorData.error || "Failed to update valuation");
       }
 
       const updatedLot = await response.json();
@@ -81,15 +84,12 @@ const BrokerLotManagement = () => {
         lot.lotNumber === lotNumber ? updatedLot : lot
       ));
 
-      // Reset editing state
-      setEditingLot(null);
-      setBrokerValuation("");
-      setSoldPrice("");
-
-      alert("Lot updated successfully!");
+      alert("Valuation saved successfully!");
     } catch (error) {
-      console.error("Error updating lot:", error);
-      alert("An error occurred while updating the lot: " + error.message);
+      console.error("Error saving valuation:", error);
+      alert("An error occurred while saving the valuation: " + error.message);
+    } finally {
+      setSaving(prev => ({ ...prev, [lotNumber]: false }));
     }
   };
 
@@ -100,8 +100,8 @@ const BrokerLotManagement = () => {
     lot.teaGrade.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
-  if (loading) return <div>Loading...</div>;
-  if (error) return <div>Error: {error}</div>;
+  if (loading) return <div className="loading">Loading...</div>;
+  if (error) return <div className="error">Error: {error}</div>;
 
   return (
     <BrokerLayout>
@@ -114,6 +114,7 @@ const BrokerLotManagement = () => {
             placeholder="Search by Lot Number, Invoice, or Grade..."
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
+            className="search-input"
           />
         </div>
 
@@ -130,7 +131,6 @@ const BrokerLotManagement = () => {
                 <th>Total Net Weight (kg)</th>
                 <th>Employee Valuation (LKR)</th>
                 <th>Broker Valuation (LKR)</th>
-                <th>Sold Price (LKR)</th>
                 <th>Actions</th>
               </tr>
             </thead>
@@ -142,60 +142,32 @@ const BrokerLotManagement = () => {
                   <td>{new Date(lot.manufacturingDate).toLocaleDateString()}</td>
                   <td>{lot.teaGrade}</td>
                   <td>{lot.noOfBags}</td>
-                  <td>{lot.netWeight}</td>
-                  <td>{lot.totalNetWeight}</td>
-                  <td>{lot.valuationPrice}</td>
-                  
-                  {editingLot === lot.lotNumber ? (
-                    <>
-                      <td>
-                        <input
-                          type="number"
-                          value={brokerValuation}
-                          onChange={(e) => setBrokerValuation(e.target.value)}
-                          min="0.01"
-                          step="0.01"
-                          required
-                        />
-                      </td>
-                      <td>
-                        <input
-                          type="number"
-                          value={soldPrice}
-                          onChange={(e) => setSoldPrice(e.target.value)}
-                          min="0.01"
-                          step="0.01"
-                        />
-                      </td>
-                      <td className="action-buttons">
-                        <button 
-                          className="save-button"
-                          onClick={() => handleSave(lot.lotNumber)}
-                        >
-                          Save
-                        </button>
-                        <button 
-                          className="cancel-button"
-                          onClick={handleCancelEdit}
-                        >
-                          Cancel
-                        </button>
-                      </td>
-                    </>
-                  ) : (
-                    <>
-                      <td>{lot.brokerValuationPrice || "-"}</td>
-                      <td>{lot.soldPrice || "-"}</td>
-                      <td>
-                        <button 
-                          className="edit-button"
-                          onClick={() => handleEdit(lot)}
-                        >
-                          Edit
-                        </button>
-                      </td>
-                    </>
-                  )}
+                  <td>{lot.netWeight} kg</td>
+                  <td>{lot.totalNetWeight} kg</td>
+                  <td>{lot.valuationPrice.toLocaleString()} LKR</td>
+                  <td>
+                    <div className="valuation-input-container">
+                      <input
+                        type="number"
+                        value={brokerValuations[lot.lotNumber] || ""}
+                        onChange={(e) => handleValuationChange(lot.lotNumber, e.target.value)}
+                        min="0.01"
+                        step="0.01"
+                        className="valuation-input"
+                        placeholder="Enter valuation"
+                      />
+                      <span>LKR/kg</span>
+                    </div>
+                  </td>
+                  <td>
+                    <button 
+                      onClick={() => handleSaveValuation(lot.lotNumber)}
+                      disabled={saving[lot.lotNumber]}
+                      className="save-button"
+                    >
+                      {saving[lot.lotNumber] ? "Saving..." : "Save"}
+                    </button>
+                  </td>
                 </tr>
               ))}
             </tbody>

@@ -136,3 +136,36 @@ exports.deleteLot = async (req, res) => {
     res.status(500).json({ error: "Failed to delete lot record" });
   }
 };
+
+// Update broker valuation for a lot
+exports.updateBrokerValuation = async (req, res) => {
+  const { lotNumber } = req.params;
+  const { brokerValuationPrice } = req.body;
+
+  // Validate input - Missing closing parenthesis was here
+  if (!brokerValuationPrice || isNaN(brokerValuationPrice)) {
+    return res.status(400).json({ error: 'Valid broker valuation price is required' });
+  }
+
+  try {
+    // First check if the lot exists
+    const [lot] = await db.query("SELECT * FROM lot WHERE lotNumber = ?", [lotNumber]);
+    
+    if (lot.length === 0) {
+      return res.status(404).json({ error: 'Lot not found' });
+    }
+
+    // Update the broker valuation
+    await db.query(
+      "UPDATE lot SET brokerValuationPrice = ? WHERE lotNumber = ?",
+      [brokerValuationPrice, lotNumber]
+    );
+
+    // Return the updated lot
+    const [updatedLot] = await db.query("SELECT * FROM lot WHERE lotNumber = ?", [lotNumber]);
+    res.status(200).json(updatedLot[0]);
+  } catch (error) {
+    console.error('Error updating broker valuation:', error);
+    res.status(500).json({ error: 'Internal server error' });
+  }
+};

@@ -55,7 +55,7 @@ const Login = () => {
             navigate('/driverdashboard');
             break;
           case 'broker':
-            navigate('/brokerdashboard');
+            navigate('/broker-dashboard');
             break;
           default:
             navigate('/');

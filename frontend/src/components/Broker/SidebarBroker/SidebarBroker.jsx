@@ -15,12 +15,12 @@ import {
               <h2>Broker Panel</h2>
               <ul className="nav flex-column">
                 <li className="nav-item">
-                  <Link to="/brokerdashboard" className="nav-link">
+                  <Link to="/broker-dashboard" className="nav-link">
                     <DashboardIcon /> Dashboard
                   </Link>
                 </li>
                 <li className="nav-item">
-                  <Link to="/broker-view-new-lots" className="nav-link">
+                  <Link to="/broker-manage-lots" className="nav-link">
                     <DeliveryIcon /> View New Lots
                   </Link>
                 </li>

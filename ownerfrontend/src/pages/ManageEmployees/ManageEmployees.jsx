@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useMemo } from 'react';
+import axios from 'axios';
 import { 
   getEmployees as fetchEmployeesApi, 
   createEmployee as createEmployeeApi,
@@ -6,6 +7,7 @@ import {
   deleteEmployee as deleteEmployeeApi
 } from '../../api/employeeApi';
 import './ManageEmployee.css';
+
 // Material-UI Components
 import Button from '@mui/material/Button';
 import TextField from '@mui/material/TextField';
@@ -62,7 +64,16 @@ const ManageEmployees = () => {
       try {
         setLoading(true);
         setError(null);
-        const response = await fetchEmployeesApi();
+        
+        // Get the token from localStorage
+        const token = localStorage.getItem('token');
+        
+        const response = await axios.get('http://localhost:3001/api/employees', {
+          headers: {
+            Authorization: `Bearer ${token}`
+          }
+        });
+        
         const data = Array.isArray(response?.data) ? response.data : [];
         setEmployees(data);
       } catch (err) {
@@ -72,6 +83,12 @@ const ManageEmployees = () => {
         setError(errorMessage);
         showSnackbar(errorMessage, 'error');
         setEmployees([]);
+        
+        // If unauthorized, redirect to login
+        if (err.response?.status === 401) {
+          localStorage.removeItem('token');
+          window.location.href = '/login';
+        }
       } finally {
         setLoading(false);
       }
@@ -170,19 +187,19 @@ const ManageEmployees = () => {
       }
 
       // Email format validation
-    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    if (!emailRegex.test(newEmployee.employeeEmail)) {
-      showSnackbar('Please enter a valid email address', 'error');
-      return;
-    }
+      const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+      if (!emailRegex.test(newEmployee.employeeEmail)) {
+        showSnackbar('Please enter a valid email address', 'error');
+        return;
+      }
 
-    setError(null);
-    const response = await createEmployeeApi(newEmployee);
-    
-    setEmployees(prev => [...prev, response.data.employee]);
-    showSnackbar(response.data.message || 'Employee added successfully', 'success');
-    handleAddDialogClose();
-  } catch (error) {
+      setError(null);
+      const response = await createEmployeeApi(newEmployee);
+      
+      setEmployees(prev => [...prev, response.data.employee]);
+      showSnackbar(response.data.message || 'Employee added successfully', 'success');
+      handleAddDialogClose();
+    } catch (error) {
       const errorMessage = error.response?.data?.message || 
                          'Failed to add employee';
       showSnackbar(errorMessage, 'error');
