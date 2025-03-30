@@ -7,17 +7,21 @@ import {
   Button, 
   Paper, 
   Alert,
-  Avatar 
+  Avatar,
+  List,
+  ListItem,
+  ListItemText
 } from '@mui/material';
-import { deepPurple } from '@mui/material/colors';
+import { blue } from '@mui/material/colors';
 
-const EmployeeProfile = () => {
+const DriverProfile = () => {
   const [profile, setProfile] = useState(null);
   const [formData, setFormData] = useState({
-    employeeName: '',
-    employeeContact_no: '',
-    employeeEmail: ''
+    driverName: '',
+    driverContactNumber: '',
+    driverEmail: ''
   });
+  const [vehicleDetails, setVehicleDetails] = useState([]);
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
   const [isLoading, setIsLoading] = useState(true);
@@ -34,10 +38,15 @@ const EmployeeProfile = () => {
         
         setProfile(response.data);
         setFormData({
-          employeeName: response.data.employeeName,
-          employeeContact_no: response.data.employeeContact_no,
-          employeeEmail: response.data.employeeEmail
+          driverName: response.data.driverName,
+          driverContactNumber: response.data.driverContactNumber,
+          driverEmail: response.data.driverEmail
         });
+        
+        // Fetch vehicle details if available
+        if (response.data.vehicleDetails) {
+          setVehicleDetails(response.data.vehicleDetails);
+        }
       } catch (err) {
         setError(err.response?.data?.message || 'Failed to fetch profile');
       } finally {
@@ -64,7 +73,7 @@ const EmployeeProfile = () => {
     
     try {
       const token = localStorage.getItem('token');
-      await axios.put(`/api/employees/${profile.employeeId}`, formData, {
+      await axios.put(`/api/drivers/${profile.driverId}`, formData, {
         headers: {
           Authorization: `Bearer ${token}`
         }
@@ -94,15 +103,15 @@ const EmployeeProfile = () => {
         <Box display="flex" alignItems="center" mb={3}>
           <Avatar 
             sx={{ 
-              bgcolor: deepPurple[500], 
+              bgcolor: blue[500], 
               width: 56, 
               height: 56,
               mr: 2
             }}
           >
-            {profile.employeeName.charAt(0)}
+            {profile.driverName.charAt(0)}
           </Avatar>
-          <Typography variant="h4">Employee Profile</Typography>
+          <Typography variant="h4">Driver Profile</Typography>
         </Box>
         
         {error && <Alert severity="error" sx={{ mb: 2 }}>{error}</Alert>}
@@ -110,41 +119,41 @@ const EmployeeProfile = () => {
         
         <form onSubmit={handleSubmit}>
           <TextField
-            label="Employee ID"
+            label="Driver ID"
             variant="outlined"
             fullWidth
             margin="normal"
-            value={profile.employeeId}
+            value={profile.driverId}
             disabled
           />
           <TextField
             label="Full Name"
-            name="employeeName"
+            name="driverName"
             variant="outlined"
             fullWidth
             margin="normal"
-            value={formData.employeeName}
+            value={formData.driverName}
             onChange={handleChange}
             required
           />
           <TextField
             label="Contact Number"
-            name="employeeContact_no"
+            name="driverContactNumber"
             variant="outlined"
             fullWidth
             margin="normal"
-            value={formData.employeeContact_no}
+            value={formData.driverContactNumber}
             onChange={handleChange}
             required
           />
           <TextField
             label="Email"
-            name="employeeEmail"
+            name="driverEmail"
             type="email"
             variant="outlined"
             fullWidth
             margin="normal"
-            value={formData.employeeEmail}
+            value={formData.driverEmail}
             onChange={handleChange}
             required
           />
@@ -159,9 +168,27 @@ const EmployeeProfile = () => {
             {isLoading ? 'Updating...' : 'Update Profile'}
           </Button>
         </form>
+        
+        {vehicleDetails.length > 0 && (
+          <Box mt={4}>
+            <Typography variant="h6" gutterBottom>
+              Vehicle Details
+            </Typography>
+            <List>
+              {vehicleDetails.map((vehicle, index) => (
+                <ListItem key={index}>
+                  <ListItemText
+                    primary={`Vehicle ${index + 1}`}
+                    secondary={`Number: ${vehicle.vehicleNumber} | Type: ${vehicle.vehicleType}`}
+                  />
+                </ListItem>
+              ))}
+            </List>
+          </Box>
+        )}
       </Paper>
     </Box>
   );
 };
 
-export default EmployeeProfile;
+export default DriverProfile;

@@ -7,16 +7,20 @@ import {
   Button, 
   Paper, 
   Alert,
-  Avatar 
+  Avatar
 } from '@mui/material';
-import { deepPurple } from '@mui/material/colors';
+import { orange } from '@mui/material/colors';
 
-const EmployeeProfile = () => {
+const BrokerProfile = () => {
   const [profile, setProfile] = useState(null);
   const [formData, setFormData] = useState({
-    employeeName: '',
-    employeeContact_no: '',
-    employeeEmail: ''
+    brokerName: '',
+    brokerContactNumber: '',
+    brokerEmail: '',
+    brokerCompanyName: '',
+    brokerCompanyContact: '',
+    brokerCompanyEmail: '',
+    brokerCompanyAddress: ''
   });
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
@@ -34,9 +38,13 @@ const EmployeeProfile = () => {
         
         setProfile(response.data);
         setFormData({
-          employeeName: response.data.employeeName,
-          employeeContact_no: response.data.employeeContact_no,
-          employeeEmail: response.data.employeeEmail
+          brokerName: response.data.brokerName,
+          brokerContactNumber: response.data.brokerContactNumber,
+          brokerEmail: response.data.brokerEmail,
+          brokerCompanyName: response.data.brokerCompanyName,
+          brokerCompanyContact: response.data.brokerCompanyContact,
+          brokerCompanyEmail: response.data.brokerCompanyEmail,
+          brokerCompanyAddress: response.data.brokerCompanyAddress
         });
       } catch (err) {
         setError(err.response?.data?.message || 'Failed to fetch profile');
@@ -64,7 +72,7 @@ const EmployeeProfile = () => {
     
     try {
       const token = localStorage.getItem('token');
-      await axios.put(`/api/employees/${profile.employeeId}`, formData, {
+      await axios.put(`/api/brokers/${profile.brokerId}`, formData, {
         headers: {
           Authorization: `Bearer ${token}`
         }
@@ -94,15 +102,15 @@ const EmployeeProfile = () => {
         <Box display="flex" alignItems="center" mb={3}>
           <Avatar 
             sx={{ 
-              bgcolor: deepPurple[500], 
+              bgcolor: orange[500], 
               width: 56, 
               height: 56,
               mr: 2
             }}
           >
-            {profile.employeeName.charAt(0)}
+            {profile.brokerName.charAt(0)}
           </Avatar>
-          <Typography variant="h4">Employee Profile</Typography>
+          <Typography variant="h4">Broker Profile</Typography>
         </Box>
         
         {error && <Alert severity="error" sx={{ mb: 2 }}>{error}</Alert>}
@@ -110,41 +118,89 @@ const EmployeeProfile = () => {
         
         <form onSubmit={handleSubmit}>
           <TextField
-            label="Employee ID"
+            label="Broker ID"
             variant="outlined"
             fullWidth
             margin="normal"
-            value={profile.employeeId}
+            value={profile.brokerId}
             disabled
           />
           <TextField
             label="Full Name"
-            name="employeeName"
+            name="brokerName"
             variant="outlined"
             fullWidth
             margin="normal"
-            value={formData.employeeName}
+            value={formData.brokerName}
             onChange={handleChange}
             required
           />
           <TextField
             label="Contact Number"
-            name="employeeContact_no"
+            name="brokerContactNumber"
             variant="outlined"
             fullWidth
             margin="normal"
-            value={formData.employeeContact_no}
+            value={formData.brokerContactNumber}
             onChange={handleChange}
             required
           />
           <TextField
             label="Email"
-            name="employeeEmail"
+            name="brokerEmail"
             type="email"
             variant="outlined"
             fullWidth
             margin="normal"
-            value={formData.employeeEmail}
+            value={formData.brokerEmail}
+            onChange={handleChange}
+            required
+          />
+          
+          <Typography variant="h6" sx={{ mt: 3, mb: 2 }}>
+            Company Information
+          </Typography>
+          
+          <TextField
+            label="Company Name"
+            name="brokerCompanyName"
+            variant="outlined"
+            fullWidth
+            margin="normal"
+            value={formData.brokerCompanyName}
+            onChange={handleChange}
+            required
+          />
+          <TextField
+            label="Company Contact"
+            name="brokerCompanyContact"
+            variant="outlined"
+            fullWidth
+            margin="normal"
+            value={formData.brokerCompanyContact}
+            onChange={handleChange}
+            required
+          />
+          <TextField
+            label="Company Email"
+            name="brokerCompanyEmail"
+            type="email"
+            variant="outlined"
+            fullWidth
+            margin="normal"
+            value={formData.brokerCompanyEmail}
+            onChange={handleChange}
+            required
+          />
+          <TextField
+            label="Company Address"
+            name="brokerCompanyAddress"
+            variant="outlined"
+            fullWidth
+            margin="normal"
+            multiline
+            rows={3}
+            value={formData.brokerCompanyAddress}
             onChange={handleChange}
             required
           />
@@ -164,4 +220,4 @@ const EmployeeProfile = () => {
   );
 };
 
-export default EmployeeProfile;
+export default BrokerProfile;

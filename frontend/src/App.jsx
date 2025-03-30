@@ -5,8 +5,9 @@ import Navbar from "./components/Navbar/Navbar";
 import Home from "./pages/Home/Home";
 import AboutUs from "./pages/About Us/AboutUs.jsx";
 import Contact from "./pages/Contact/Contact";
-import Footer from "./components/Footer/Footer.jsx";
-import LoginPopup from "./components/LoginPopup/LoginPopup"; 
+import Footer from "./components/Footer/Footer.jsx"; 
+import Login from "./pages/Login/Login.jsx";
+import EmployeeProfile from "./pages/Employee/ProfileEM/ProfileEM.jsx";
 import EmployeeDashboard from "./pages/Employee/EmployeeDashboard.jsx";
 import AddSupplier from "./pages/AddSupplier/AddSupplier.jsx";
 import ViewSuppliers from "./pages/ViewSuppliers/ViewSuppliers.jsx";
@@ -34,20 +35,20 @@ import DriverDashboard from "./pages/DriverView/DashboardDriver/DashboardDriver.
 import BrokerDashboard from "./pages/BrokerView/DashboardBroker/DashboardBroker.jsx";
 import ManageDeliveryRoutes from "./pages/ManageDeliveryRoutes/ManageDeliveryRoutes.jsx";
 import BrokerLotManagement from "./pages/BrokerView/BrokerLotManagement/BrokerLotManagement.jsx";
-import ProfileEM from "./pages/Employee/ProfileEM/ProfileEM.jsx";
+
 
 const App = () => {
-  const [showLogin, setShowLogin] = useState(false); // Add state for LoginPopup
-
   return (
     <>
       <div className="app">
-        <Navbar setShowLogin={setShowLogin} /> {/* Pass setShowLogin to Navbar */}
-        <Routes>
+        <Navbar/>
+        
+        <Routes> 
           <Route path="/" element={<Home />} />
           <Route path="/aboutus" element={<AboutUs />} />
           <Route path="/aboutus-view-tea-varieties" element={<ViewTeaTypesHome/>} />
           <Route path="/contact" element={<Contact />} />
+          <Route path="/login" element={<Login/>}/>
           <Route path="/employee-dashboard" element={<EmployeeDashboard />} />
           <Route path="/add-supplier" element={<AddSupplier/>} />
           <Route path="/view-suppliers" element={<ViewSuppliers/>} />
@@ -67,22 +68,21 @@ const App = () => {
           <Route path="/employee-dashboard-create-lot" element={<CreateLot/>} />
           <Route path="/view-lots" element={<ViewLots/>} />
           <Route path="/edit-lot/:lotNumber" element={<EditLot/>} />
-          <Route path="/supplierdashboard" element={<SupplierDashboard/>} />
+          <Route path="/supplier-dashboard" element={<SupplierDashboard/>} />
           <Route path="/supplier-request-transport" element={<RequestTransport/>}/>
           <Route path="/employee-view-transport-requests" element={<ViewTransportRequests/>}/>
-          <Route path="/driverdashboard" element={<DriverDashboard/>} />
-          <Route path="/brokerdashboard" element={<BrokerDashboard/>}/>
+          <Route path="/driver-dashboard" element={<DriverDashboard/>} />
+          <Route path="/broker-dashboard" element={<BrokerDashboard/>}/>
           <Route path="/employee-dashboard-manage-delivery-routes" element={<ManageDeliveryRoutes/>} />
           <Route path="/broker-manage-lots" element={<BrokerLotManagement/>}/>
-          <Route path="/profile/:userId" element={<ProfileEM />} />
+          <Route path="/profile/:userId" element={<EmployeeProfile />} />
+          
           
           
         </Routes>
       </div>
 
-      {/* Include LoginPopup with show/hide logic */}
-      <LoginPopup show={showLogin} handleClose={() => setShowLogin(false)} />
-
+      
       <Footer />
     </>
   );

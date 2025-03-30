@@ -1,41 +1,49 @@
 const jwt = require('jsonwebtoken');
 const bcrypt = require('bcryptjs');
-const { 
-  getEmployeeById, 
-  getSupplierById, 
-  getDriverById, 
-  getBrokerById,
-  updateUserPassword,
-  getUserByCredentials
-} = require('../models/user');
+const pool = require('../config/database');
 
-const JWT_SECRET = process.env.JWT_SECRET || 'your-secret-key';
+const JWT_SECRET = process.env.JWT_SECRET || 'df9258e5d63a3390807b01376451a14aab0998c663b19c827e1f18b1a48765871b9224025559289302afdd3727c271eae9d2dc5cfd672cc049b1c1dc9dcade85';
 
-// Enhanced login controller
-const login = async (req, res) => {
+// Helper function to determine user type
+function getUserType(userId) {
+  const prefix = userId.charAt(0).toUpperCase();
+  switch(prefix) {
+    case 'E': return { userType: 'employee', tableName: 'employees', idField: 'employeeId' };
+    case 'S': return { userType: 'supplier', tableName: 'suppliers', idField: 'supplierId' };
+    case 'D': return { userType: 'driver', tableName: 'drivers', idField: 'driverId' };
+    case 'B': return { userType: 'broker', tableName: 'brokers', idField: 'brokerId' };
+    default: throw new Error('Invalid user ID format');
+  }
+}
+
+exports.login = async (req, res) => {
   const { userId, passcode } = req.body;
-  
+
   try {
-    // Determine user type based on ID prefix
-    const userType = getUserType(userId);
-    
-    // Get user from appropriate table
-    let user = await getUserByCredentials(userType, userId);
-    
-    if (!user) {
+    // Get user type and table info
+    const { userType, tableName, idField } = getUserType(userId);
+
+    // Get user from database
+    const [rows] = await pool.query(
+      `SELECT * FROM ${tableName} WHERE ${idField} = ?`, 
+      [userId]
+    );
+
+    if (rows.length === 0) {
       return res.status(404).json({ message: 'User not found' });
     }
-    
-    // Check if this is first login (using passcode)
+
+    const user = rows[0];
+
+    // First login flow (no password set)
     if (!user.password) {
       if (user.passcode !== passcode) {
         return res.status(401).json({ message: 'Invalid passcode' });
       }
-      
-      // Generate token for first login (redirect to profile page to set password)
+
       const token = jwt.sign(
         { 
-          userId: user[`${userType}Id`], 
+          userId: user[idField], 
           userType, 
           needsPassword: true,
           firstLogin: true 
@@ -43,7 +51,7 @@ const login = async (req, res) => {
         JWT_SECRET,
         { expiresIn: '1h' }
       );
-      
+
       return res.json({ 
         token,
         userType,
@@ -52,40 +60,38 @@ const login = async (req, res) => {
         message: 'Please set your password'
       });
     }
-    
-    // Regular login with password or passcode
-    const isPasscodeMatch = passcode === user.passcode;
-    const isPasswordMatch = user.password && await bcrypt.compare(passcode, user.password);
-    
-    if (!isPasscodeMatch && !isPasswordMatch) {
+
+    // Regular login flow
+    const isMatch = await bcrypt.compare(passcode, user.password);
+    if (!isMatch) {
       return res.status(401).json({ message: 'Invalid credentials' });
     }
-    
-    // Generate token for regular login
+
     const token = jwt.sign(
       { 
-        userId: user[`${userType}Id`], 
+        userId: user[idField], 
         userType 
       },
       JWT_SECRET,
       { expiresIn: '8h' }
     );
-    
+
     res.json({ 
       token,
       userType,
-      needsPassword: false,
       message: 'Login successful'
     });
     
   } catch (error) {
     console.error(error);
+    if (error.message === 'Invalid user ID format') {
+      return res.status(400).json({ message: error.message });
+    }
     res.status(500).json({ message: 'Server error' });
   }
 };
 
-// Enhanced set password controller
-const setPassword = async (req, res) => {
+exports.setPassword = async (req, res) => {
   const { newPassword, confirmPassword } = req.body;
   const { userId, userType } = req.user;
   
@@ -103,10 +109,16 @@ const setPassword = async (req, res) => {
     // Hash the new password
     const hashedPassword = await bcrypt.hash(newPassword, 10);
     
-    // Update password in database
-    await updateUserPassword(userType, userId, hashedPassword);
+    // Get table info
+    const { tableName, idField } = getUserType(userId);
     
-    // Generate new token without needsPassword flag
+    // Update password in database
+    await pool.query(
+      `UPDATE ${tableName} SET password = ? WHERE ${idField} = ?`,
+      [hashedPassword, userId]
+    );
+    
+    // Generate new token
     const token = jwt.sign(
       { userId, userType },
       JWT_SECRET,
@@ -115,7 +127,7 @@ const setPassword = async (req, res) => {
     
     res.json({ 
       token,
-      message: 'Password set successfully. Please login with your new password.',
+      message: 'Password set successfully',
       redirectTo: `/${userType}-dashboard`
     });
     
@@ -125,34 +137,22 @@ const setPassword = async (req, res) => {
   }
 };
 
-// Profile controller
-const getProfile = async (req, res) => {
+exports.getProfile = async (req, res) => {
   const { userId, userType } = req.user;
   
   try {
-    let user;
-    switch(userType) {
-      case 'employee':
-        user = await getEmployeeById(userId);
-        break;
-      case 'supplier':
-        user = await getSupplierById(userId);
-        break;
-      case 'driver':
-        user = await getDriverById(userId);
-        break;
-      case 'broker':
-        user = await getBrokerById(userId);
-        break;
-      default:
-        return res.status(400).json({ message: 'Invalid user type' });
-    }
+    const { tableName, idField } = getUserType(userId);
     
-    if (!user) {
+    const [rows] = await pool.query(
+      `SELECT * FROM ${tableName} WHERE ${idField} = ?`,
+      [userId]
+    );
+    
+    if (rows.length === 0) {
       return res.status(404).json({ message: 'User not found' });
     }
     
-    // Remove sensitive data before sending
+    const user = rows[0];
     const { password, passcode, ...profileData } = user;
     
     res.json(profileData);
@@ -161,22 +161,4 @@ const getProfile = async (req, res) => {
     console.error(error);
     res.status(500).json({ message: 'Server error' });
   }
-};
-
-// Helper function to determine user type
-function getUserType(userId) {
-  const prefix = userId.charAt(0).toUpperCase();
-  switch(prefix) {
-    case 'E': return 'employee';
-    case 'S': return 'supplier';
-    case 'D': return 'driver';
-    case 'B': return 'broker';
-    default: throw new Error('Invalid user ID format');
-  }
-}
-
-module.exports = {
-  login,
-  setPassword,
-  getProfile
 };

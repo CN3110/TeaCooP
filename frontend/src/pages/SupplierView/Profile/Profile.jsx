@@ -7,17 +7,21 @@ import {
   Button, 
   Paper, 
   Alert,
-  Avatar 
+  Avatar,
+  List,
+  ListItem,
+  ListItemText
 } from '@mui/material';
-import { deepPurple } from '@mui/material/colors';
+import { green } from '@mui/material/colors';
 
-const EmployeeProfile = () => {
+const SupplierProfile = () => {
   const [profile, setProfile] = useState(null);
   const [formData, setFormData] = useState({
-    employeeName: '',
-    employeeContact_no: '',
-    employeeEmail: ''
+    supplierName: '',
+    supplierContactNumber: '',
+    supplierEmail: ''
   });
+  const [landDetails, setLandDetails] = useState([]);
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
   const [isLoading, setIsLoading] = useState(true);
@@ -34,10 +38,15 @@ const EmployeeProfile = () => {
         
         setProfile(response.data);
         setFormData({
-          employeeName: response.data.employeeName,
-          employeeContact_no: response.data.employeeContact_no,
-          employeeEmail: response.data.employeeEmail
+          supplierName: response.data.supplierName,
+          supplierContactNumber: response.data.supplierContactNumber,
+          supplierEmail: response.data.supplierEmail
         });
+        
+        // Fetch land details if available
+        if (response.data.landDetails) {
+          setLandDetails(response.data.landDetails);
+        }
       } catch (err) {
         setError(err.response?.data?.message || 'Failed to fetch profile');
       } finally {
@@ -64,7 +73,7 @@ const EmployeeProfile = () => {
     
     try {
       const token = localStorage.getItem('token');
-      await axios.put(`/api/employees/${profile.employeeId}`, formData, {
+      await axios.put(`/api/suppliers/${profile.supplierId}`, formData, {
         headers: {
           Authorization: `Bearer ${token}`
         }
@@ -94,15 +103,15 @@ const EmployeeProfile = () => {
         <Box display="flex" alignItems="center" mb={3}>
           <Avatar 
             sx={{ 
-              bgcolor: deepPurple[500], 
+              bgcolor: green[500], 
               width: 56, 
               height: 56,
               mr: 2
             }}
           >
-            {profile.employeeName.charAt(0)}
+            {profile.supplierName.charAt(0)}
           </Avatar>
-          <Typography variant="h4">Employee Profile</Typography>
+          <Typography variant="h4">Supplier Profile</Typography>
         </Box>
         
         {error && <Alert severity="error" sx={{ mb: 2 }}>{error}</Alert>}
@@ -110,41 +119,41 @@ const EmployeeProfile = () => {
         
         <form onSubmit={handleSubmit}>
           <TextField
-            label="Employee ID"
+            label="Supplier ID"
             variant="outlined"
             fullWidth
             margin="normal"
-            value={profile.employeeId}
+            value={profile.supplierId}
             disabled
           />
           <TextField
             label="Full Name"
-            name="employeeName"
+            name="supplierName"
             variant="outlined"
             fullWidth
             margin="normal"
-            value={formData.employeeName}
+            value={formData.supplierName}
             onChange={handleChange}
             required
           />
           <TextField
             label="Contact Number"
-            name="employeeContact_no"
+            name="supplierContactNumber"
             variant="outlined"
             fullWidth
             margin="normal"
-            value={formData.employeeContact_no}
+            value={formData.supplierContactNumber}
             onChange={handleChange}
             required
           />
           <TextField
             label="Email"
-            name="employeeEmail"
+            name="supplierEmail"
             type="email"
             variant="outlined"
             fullWidth
             margin="normal"
-            value={formData.employeeEmail}
+            value={formData.supplierEmail}
             onChange={handleChange}
             required
           />
@@ -159,9 +168,27 @@ const EmployeeProfile = () => {
             {isLoading ? 'Updating...' : 'Update Profile'}
           </Button>
         </form>
+        
+        {landDetails.length > 0 && (
+          <Box mt={4}>
+            <Typography variant="h6" gutterBottom>
+              Land Details
+            </Typography>
+            <List>
+              {landDetails.map((land, index) => (
+                <ListItem key={index}>
+                  <ListItemText
+                    primary={`Land ${index + 1}`}
+                    secondary={`Size: ${land.landSize} acres | Address: ${land.landAddress}`}
+                  />
+                </ListItem>
+              ))}
+            </List>
+          </Box>
+        )}
       </Paper>
     </Box>
   );
 };
 
-export default EmployeeProfile;
+export default SupplierProfile;

@@ -9,4 +9,7 @@ router.post('/login', authController.login);
 // Set password route (protected)
 router.post('/set-password', authMiddleware, authController.setPassword);
 
+// Get user profile (protected)
+router.get('/profile', authMiddleware, authController.getProfile);
+
 module.exports = router;

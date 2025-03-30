@@ -1,4 +1,34 @@
 const pool = require('../config/database');
+const bcrypt = require('bcryptjs');
+
+// Generic function to get user by credentials
+const getUserByCredentials = async (userType, userId) => {
+  let tableName, idField;
+  
+  switch(userType) {
+    case 'employee':
+      tableName = 'employee';
+      idField = 'employeeId';
+      break;
+    case 'supplier':
+      tableName = 'supplier';
+      idField = 'supplierId';
+      break;
+    case 'driver':
+      tableName = 'driver';
+      idField = 'driverId';
+      break;
+    case 'broker':
+      tableName = 'broker';
+      idField = 'brokerId';
+      break;
+    default:
+      throw new Error('Invalid user type');
+  }
+  
+  const [rows] = await pool.query(`SELECT * FROM ${tableName} WHERE ${idField} = ?`, [userId]);
+  return rows[0];
+};
 
 // Employee
 const getEmployeeById = async (employeeId) => {
@@ -26,25 +56,33 @@ const getBrokerById = async (brokerId) => {
 
 // Update password in appropriate table
 const updateUserPassword = async (userType, userId, hashedPassword) => {
-  let query;
+  let tableName, idField;
+  
   switch(userType) {
     case 'employee':
-      query = 'UPDATE employee SET password = ? WHERE employeeId = ?';
+      tableName = 'employee';
+      idField = 'employeeId';
       break;
     case 'supplier':
-      query = 'UPDATE supplier SET password = ? WHERE supplierId = ?';
+      tableName = 'supplier';
+      idField = 'supplierId';
       break;
     case 'driver':
-      query = 'UPDATE driver SET password = ? WHERE driverId = ?';
+      tableName = 'driver';
+      idField = 'driverId';
       break;
     case 'broker':
-      query = 'UPDATE broker SET password = ? WHERE brokerId = ?';
+      tableName = 'broker';
+      idField = 'brokerId';
       break;
     default:
       throw new Error('Invalid user type');
   }
   
-  await pool.query(query, [hashedPassword, userId]);
+  await pool.query(
+    `UPDATE ${tableName} SET password = ? WHERE ${idField} = ?`, 
+    [hashedPassword, userId]
+  );
 };
 
 module.exports = {
@@ -52,5 +90,6 @@ module.exports = {
   getSupplierById,
   getDriverById,
   getBrokerById,
-  updateUserPassword
+  updateUserPassword,
+  getUserByCredentials
 };

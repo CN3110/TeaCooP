@@ -16,8 +16,10 @@ app.use(cors({
 app.use(express.json());
 
 //Routes
-app.use('/api/auth', require("./routes/authRoutes"));
+app.use('/api/auth', require('./routes/authRoutes'));
+app.use('/api/dashboard', require("./routes/dashboardRoutes"));
 app.use("/api/deliveries", require("./routes/deliveryRoutes"));
+app.use("/api/suppliers", require("./routes/supplierRoutes"));
 app.use("/api/lands", require("./routes/landRoutes"));
 app.use("/api/drivers", require("./routes/driverRoutes"));
 app.use("/api/vehicles", require("./routes/vehicleRoutes"));
