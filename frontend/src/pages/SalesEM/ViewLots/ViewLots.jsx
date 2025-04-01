@@ -35,13 +35,18 @@ const ViewLots = () => {
 
   // Handle Delete button click
   const handleDelete = async (lotNumber) => {
-    const confirmDelete = window.confirm("Are you sure you want to delete this lot?");
+    const confirmDelete = window.confirm(
+      "Are you sure you want to delete this lot?"
+    );
     if (!confirmDelete) return;
 
     try {
-      const response = await fetch(`http://localhost:3001/api/lots/${lotNumber}`, {
-        method: "DELETE",
-      });
+      const response = await fetch(
+        `http://localhost:3001/api/lots/${lotNumber}`,
+        {
+          method: "DELETE",
+        }
+      );
 
       if (!response.ok) {
         throw new Error("Failed to delete lot");
@@ -127,6 +132,15 @@ const ViewLots = () => {
                       onClick={() => handleDelete(lot.lotNumber)}
                     >
                       Delete
+                    </button>
+
+                    <button
+                      className="view-valuations-button"
+                      onClick={() =>
+                        navigate(`/view-valuations/${lot.lotNumber}`)
+                      }
+                    >
+                      View Valuations
                     </button>
                   </div>
                 </td>

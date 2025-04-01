@@ -199,3 +199,22 @@ exports.deleteSupplier = async (req, res) => {
     res.status(500).json({ error: "Failed to delete supplier" });
   }
 };
+
+
+exports.getProfile = async (req, res) => {
+  try {
+    const [supplier] = await pool.query(
+      'SELECT * FROM supplier WHERE supplierId = ?',
+      [req.user.userId]  // Using the authenticated user's ID
+    );
+    
+    if (!supplier.length) {
+      return res.status(404).send({ error: 'Supplier not found' });
+    }
+    
+    res.send(supplier[0]);
+  } catch (error) {
+    console.error(error);
+    res.status(500).send({ error: 'Server error' });
+  }
+};

@@ -134,3 +134,27 @@ exports.deleteBroker = async (req, res) => {
     res.status(500).json({ error: "Failed to delete broker" });
   }
 };
+
+// Get confirmed lots for a broker
+exports.getBrokerConfirmedLots = async (req, res) => {
+  const { brokerId } = req.params;
+  
+  try {
+    const [lots] = await db.query(`
+      SELECT 
+        l.lotNumber, l.teaGrade, l.noOfBags, l.totalNetWeight,
+        cl.valuationPrice, cl.confirmedAt,
+        sl.saleId, sl.soldPrice, sl.paymentStatus, sl.paymentDate
+      FROM confirmed_lot cl
+      JOIN lot l ON cl.lotNumber = l.lotNumber
+      LEFT JOIN sold_lot sl ON cl.lotNumber = sl.lotNumber AND cl.brokerId = sl.brokerId
+      WHERE cl.brokerId = ?
+      ORDER BY cl.confirmedAt DESC
+    `, [brokerId]);
+    
+    res.status(200).json(lots);
+  } catch (error) {
+    console.error("Error fetching broker confirmed lots:", error);
+    res.status(500).json({ error: "Failed to fetch confirmed lots" });
+  }
+};

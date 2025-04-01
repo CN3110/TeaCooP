@@ -1,19 +1,18 @@
 const express = require("express");
-const {
-  getAllBrokers,
-  addBroker,
-  updateBroker,
-  deleteBroker,
-  getBrokerById,
-} = require("../controllers/brokerController");
-
 const router = express.Router();
+const brokerController = require("../controllers/brokerController");
 
-// CRUD routes for brokers
-router.get("/", getAllBrokers); // Get all brokers
-router.post("/", addBroker); // Add a new broker *****
-router.put("/:brokerId", updateBroker); // Update a broker
-router.delete("/:brokerId", deleteBroker); // Delete a broker
-router.get("/:brokerId", getBrokerById); // Get a single broker by ID
+
+
+
+// CRUD routes
+router.get("/", brokerController.getAllBrokers);
+router.post("/", brokerController.addBroker);
+router.get("/:brokerId", brokerController.getBrokerById);
+router.put("/:brokerId", brokerController.updateBroker);
+router.delete("/:brokerId", brokerController.deleteBroker);
+
+// Broker-specific routes
+router.get("/:brokerId/confirmed-lots", brokerController.getBrokerConfirmedLots);
 
 module.exports = router;

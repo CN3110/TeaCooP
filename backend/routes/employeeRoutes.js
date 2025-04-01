@@ -1,24 +1,38 @@
 const express = require('express');
 const router = express.Router();
 const employeeController = require('../controllers/employeeController');
-const authMiddleware = require('../middleware/authMiddleware');
-const roleMiddleware = require('../middleware/roleMiddleware');
+const { authenticate, authorize } = require('../middleware/authMiddleware');
 
-// Public routes
+// Public routes (no authentication required)
 router.post('/', employeeController.createEmployee);
 
 // Admin-only routes
-//router.get('/', authMiddleware, roleMiddleware('admin'), employeeController.getAllEmployees);
+router.get('/', 
+  authenticate, 
+  authorize('admin'), 
+  employeeController.getAllEmployees
+);
 
 router.delete('/:id', 
-  authMiddleware, roleMiddleware('admin'), employeeController.deleteEmployee);
+  authenticate, 
+  authorize('admin'), 
+  employeeController.deleteEmployee
+);
 
-// Authenticated employee routes
-router.get('/:id', authMiddleware, employeeController.getEmployeeById);
+// Authenticated employee routes (any authenticated user)
+router.get('/:id', 
+  authenticate, 
+  employeeController.getEmployeeById
+);
 
-router.put('/:id', authMiddleware, employeeController.updateEmployee);
+router.put('/:id', 
+  authenticate, 
+  employeeController.updateEmployee
+);
 
-router.put('/:id/password', authMiddleware, employeeController.updateEmployeePassword);
-// In your employeeRoutes.js
-router.get('/', authMiddleware, roleMiddleware('admin'), employeeController.getAllEmployees);
+router.put('/:id/password', 
+  authenticate, 
+  employeeController.updateEmployeePassword
+);
+
 module.exports = router;

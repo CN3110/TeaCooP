@@ -1,127 +1,74 @@
-import React, { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
-import axios from 'axios';
-import { 
-  Box, 
-  TextField,  // Make sure this is imported
-  Button, 
-  Typography, 
-  Paper, 
-  Alert as MuiAlert 
-} from '@mui/material';
-import { useTheme } from '@mui/material/styles';
+import React, { useState } from "react";
+import { useAuth } from "../../contexts/AuthContext";
+import { useNavigate } from "react-router-dom";
 
 const Login = () => {
-  const [userId, setUserId] = useState('');
-  const [passcode, setPasscode] = useState('');
-  const [error, setError] = useState('');
-  const [isLoading, setIsLoading] = useState(false);
+  const [userId, setUserId] = useState("");
+  const [password, setPassword] = useState("");
+  const [error, setError] = useState("");
+  const { login } = useAuth();
   const navigate = useNavigate();
-  const theme = useTheme();
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    setIsLoading(true);
-    setError('');
-  
+    setError("");
     try {
-      console.log('Attempting login with:', { userId, passcode });
-      const response = await axios.post('http://localhost:3001/api/auth/login', { 
-        userId, 
-        passcode 
-      }, {
-        headers: {
-          'Content-Type': 'application/json'
-        }
-      });
-      
-      console.log('Login response:', response.data);
-      
-      if (response.data.needsPassword) {
-        localStorage.setItem('tempToken', response.data.token);
-        navigate('/set-password');
+      const user = await login(userId, password);
+      if (user.isFirstLogin) {
+        navigate("/set-password");
       } else {
-        localStorage.setItem('token', response.data.token);
-        localStorage.setItem('userType', response.data.userType);
-        
-        switch(response.data.userType) {
-          case 'employee':
-            navigate('/employee-dashboard');
-            break;
-          case 'supplier':
-            navigate('/supplierdashboard');
-            break;
-          case 'driver':
-            navigate('/driverdashboard');
-            break;
-          case 'broker':
-            navigate('/broker-dashboard');
-            break;
-          default:
-            navigate('/');
-        }
+        navigate(`/${user.userType}-dashboard`);
       }
     } catch (err) {
-        console.error('Login error:', err);
-        const errorMessage = err.response?.data?.message || 
-                            err.response?.data?.error || 
-                            'Login failed. Please try again.';
-        setError(errorMessage);
-      } finally {
-        setIsLoading(false);
-      }
-    };
+      setError(
+        err.response?.data?.error ||
+          err.message ||
+          "Login failed. Please try again."
+      );
+    }
+  };
 
   return (
-    <Box
-      display="flex"
-      justifyContent="center"
-      alignItems="center"
-      minHeight="100vh"
-      bgcolor={theme.palette.background.default}
-    >
-      <Paper elevation={3} sx={{ p: 4, width: 400 }}>
-        <Typography variant="h4" align="center" gutterBottom>
-          Tea Supply Management
-        </Typography>
-        
-        {error && <MuiAlert severity="error" sx={{ mb: 2 }}>{error}</MuiAlert>}
-        
-        <form onSubmit={handleSubmit}>
-          <TextField
-            label="User ID"
-            variant="outlined"
-            fullWidth
-            margin="normal"
+    <div className="login-container">
+      <h2>Tea Factory Management System</h2>
+      <form onSubmit={handleSubmit}>
+        {error && (
+          <div className="alert alert-danger" role="alert">
+            {error}
+          </div>
+        )}
+        <div className="mb-3">
+          <label htmlFor="userId" className="form-label">
+            User ID:
+          </label>
+          <input
+            id="userId"
+            type="text"
+            className="form-control"
             value={userId}
             onChange={(e) => setUserId(e.target.value)}
             required
-            autoComplete="username"  // Fixes Chrome warning
           />
-          <TextField
-            label="Passcode/Password"
+        </div>
+        <div className="mb-3">
+          <label htmlFor="password" className="form-label">
+            Password:
+          </label>
+          <input
+            id="password"
             type="password"
-            variant="outlined"
-            fullWidth
-            margin="normal"
-            value={passcode}
-            onChange={(e) => setPasscode(e.target.value)}
+            className="form-control"
+            value={password}
+            onChange={(e) => setPassword(e.target.value)}
             required
-            autoComplete="current-password"  // Fixes Chrome warning
+            autoComplete="current-password" 
           />
-          <Button
-            type="submit"
-            variant="contained"
-            color="primary"
-            fullWidth
-            sx={{ mt: 2 }}
-            disabled={isLoading}
-          >
-            {isLoading ? 'Logging in...' : 'Login'}
-          </Button>
-        </form>
-      </Paper>
-    </Box>
+        </div>
+        <button type="submit" className="btn btn-primary">
+          Login
+        </button>
+      </form>
+    </div>
   );
 };
 
