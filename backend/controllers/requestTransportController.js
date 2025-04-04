@@ -68,6 +68,29 @@ exports.updateTransportRequest = async (req, res) => {
   }
 };
 
+// Update transport request status
+exports.updateTransportRequestStatus = async (req, res) => {
+  const { requestId } = req.params;
+  const { status } = req.body;
+
+  if (!status) {
+    return res.status(400).json({ error: "Missing status field" });
+  }
+
+  try {
+    const query =
+      "UPDATE transport_request SET status = ? WHERE requestId = ?";
+    await db.query(query, [status, requestId]);
+
+    res.status(200).json({ message: "Status updated successfully" });
+  } catch (error) {
+    console.error("Error updating transport request status:", error);
+    res.status(500).json({ error: "Failed to update status" });
+  }
+};
+
+
+
 // Delete a transport request
 exports.deleteTransportRequest = async (req, res) => {
   const { requestId } = req.params;

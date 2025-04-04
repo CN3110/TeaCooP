@@ -1,102 +1,90 @@
-import React, { useState, useEffect } from "react";
-import { useNavigate } from "react-router-dom";
-import { BiSearch } from "react-icons/bi";
-import EmployeeLayout from "../../components/EmployeeLayout/EmployeeLayout";
-import "./ViewTransportRequests.css";
+import React, { useEffect, useState } from "react";
+import EmployeeLayout from '../../components/EmployeeLayout/EmployeeLayout'
+import "./ViewTransportRequests.css"; // For styling (optional)
 
 const ViewTransportRequests = () => {
-  const [searchId, setSearchId] = useState("");
-  const [transportRequests, setTransportRequests] = useState([]);
-  const [filteredRequests, setFilteredRequests] = useState([]);
-  const navigate = useNavigate();
+  const [requests, setRequests] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [statusFilter, setStatusFilter] = useState("all");
 
-  // Fetch all transport requests from the server
   useEffect(() => {
-    const fetchTransportRequests = async () => {
-      try {
-        const response = await fetch("http://localhost:3001/api/transportRequests");
-        if (response.ok) {
-          const data = await response.json();
-          setTransportRequests(data);
-          setFilteredRequests(data); // Initially, show all requests
-        } else {
-          console.error("Failed to fetch transport requests");
-        }
-      } catch (error) {
-        console.error("Error fetching transport requests:", error);
-      }
-    };
-
-    fetchTransportRequests();
+    fetchRequests();
   }, []);
 
-  // Handle search by supplier ID
-  const handleSearch = () => {
-    if (searchId.trim() === "") {
-      setFilteredRequests(transportRequests); // If search is empty, show all requests
-    } else {
-      const filtered = transportRequests.filter(request =>
-        request.supplierId.toLowerCase().includes(searchId.toLowerCase())
-      );
-      setFilteredRequests(filtered);
+  const fetchRequests = async () => {
+    try {
+      const res = await fetch("http://localhost:3001/api/transportRequests");
+      const data = await res.json();
+      setRequests(Array.isArray(data) ? data : []);
+    } catch (error) {
+      console.error("Error fetching transport requests:", error);
+    } finally {
+      setLoading(false);
     }
   };
 
-  // Handle input change for search
-  const handleInputChange = (e) => {
-    setSearchId(e.target.value);
-  };
-
-  // Handle key press for search (e.g., pressing Enter)
-  const handleKeyPress = (e) => {
-    if (e.key === "Enter") {
-      handleSearch();
-    }
-  };
+  const filteredRequests =
+    statusFilter === "all"
+      ? requests
+      : requests.filter((req) => req.status === statusFilter);
 
   return (
     <EmployeeLayout>
-      <div className="view-transport-requests">
-        <h3>View Transport Requests</h3>
-        <div className="search-bar">
-          <input
-            type="text"
-            placeholder="Search by Supplier ID"
-            value={searchId}
-            onChange={handleInputChange}
-            onKeyPress={handleKeyPress}
-          />
-          <button onClick={handleSearch}>
-            <BiSearch />
-          </button>
-        </div>
-        <div className="requests-table">
-          <table>
-            <thead>
-              <tr>
-                <th>Supplier ID</th>
-                <th>Date</th>
-                <th>Time</th>
-                <th>Number of Sacks</th>
-                <th>Weight</th>
-                <th>Address</th>
-              </tr>
-            </thead>
-            <tbody>
-              {filteredRequests.map((request, index) => (
-                <tr key={index}>
-                  <td>{request.supplierId}</td>
-                  <td>{request.reqDate}</td>
-                  <td>{request.reqTime}</td>
-                  <td>{request.reqNumberOfSacks}</td>
-                  <td>{request.reqWeight}</td>
-                  <td>{request.reqAddress}</td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
+    <div className="employee-delivery-container">
+      <h2>Delivery Status Overview</h2>
+
+      <div className="filter-controls">
+        <label>Filter by Status: </label>
+        <select
+          value={statusFilter}
+          onChange={(e) => setStatusFilter(e.target.value)}
+        >
+          <option value="all">All</option>
+          <option value="pending">Pending</option>
+          <option value="done">Done</option>
+        </select>
       </div>
+
+      {loading ? (
+        <p>Loading deliveries...</p>
+      ) : filteredRequests.length === 0 ? (
+        <p>No delivery requests found.</p>
+      ) : (
+        <table className="delivery-table">
+          <thead>
+            <tr>
+              <th>Supplier ID</th>
+              <th>Driver ID</th>
+              <th>Date</th>
+              <th>Sacks</th>
+              <th>Weight (kg)</th>
+              <th>Address</th>
+              <th>Status</th>
+            </tr>
+          </thead>
+          <tbody>
+            {filteredRequests.map((req) => (
+              <tr key={req._id}>
+                <td>{req.supplierId}</td>
+                <td>{req.driverId || "N/A"}</td>
+                <td>{new Date(req.reqDate).toLocaleDateString()}</td>
+                <td>{req.reqNumberOfSacks}</td>
+                <td>{req.reqWeight}</td>
+                <td>{req.reqAddress}</td>
+                <td
+                  style={{
+                    color: req.status === "done" ? "green" : "#d08400",
+                    fontWeight: "bold",
+                  }}
+                >
+                  {req.status}
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      )}
+    </div>
     </EmployeeLayout>
   );
 };

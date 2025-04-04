@@ -5,6 +5,7 @@ const {
     addTransportRequest,
     updateTransportRequest,
     deleteTransportRequest, 
+    updateTransportRequestStatus,
 } = require("../controllers/requestTransportController");
 
 const router = express.Router(); 
@@ -15,6 +16,7 @@ router.get("/:requestId",getTransportRequestById);
 router.post("/",addTransportRequest);
 router.put("/:requestId",updateTransportRequest);
 router.delete("/:requestId",deleteTransportRequest);
+router.put("/:requestId/status", updateTransportRequestStatus);
 
 
 module.exports = router;

@@ -1,5 +1,5 @@
 import React from "react";
-import { BrowserRouter as Router, Routes, Route, Navigate } from "react-router-dom";
+import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 import { AuthProvider } from './contexts/AuthContext.jsx';
 import "bootstrap/dist/css/bootstrap.min.css";
 import Navbar from "./components/Navbar/Navbar";
@@ -40,46 +40,13 @@ import SetPassword from "./pages/SetPassword/SetPassword.jsx";
 import ViewValuations from "./pages/SalesEM/ViewValuations/ViewValuations.jsx";
 import ConfirmedLots from "./pages/BrokerView/BrokerLotManagement/ConfirmedLots.jsx";
 
-// PrivateRoute component for authentication and authorization
-const PrivateRoute = ({ children, allowedRoles = [] }) => {
-  const { user } = useAuth();
-  
-  if (!user) {
-    return <Navigate to="/login" replace />;
-  }
-  
-  // Check if route requires specific roles and user has one of them
-  if (allowedRoles.length > 0 && !allowedRoles.includes(user.userType)) {
-    return <Navigate to="/" replace />;
-  }
-  
-  return children;
-};
-
-// Role-specific route components
-const EmployeeRoute = ({ children }) => (
-  <PrivateRoute allowedRoles={['employee']}>{children}</PrivateRoute>
-);
-
-const SupplierRoute = ({ children }) => (
-  <PrivateRoute allowedRoles={['supplier']}>{children}</PrivateRoute>
-);
-
-const DriverRoute = ({ children }) => (
-  <PrivateRoute allowedRoles={['driver']}>{children}</PrivateRoute>
-);
-
-const BrokerRoute = ({ children }) => (
-  <PrivateRoute allowedRoles={['broker']}>{children}</PrivateRoute>
-);
-
 const App = () => {
   return (
     <AuthProvider>
       <Router>
         <div className="app">
           <Navbar />
-          
+
           <Routes>
             {/* Public Routes */}
             <Route path="/" element={<Home />} />
@@ -87,164 +54,44 @@ const App = () => {
             <Route path="/aboutus-view-tea-varieties" element={<ViewTeaTypesHome />} />
             <Route path="/contact" element={<Contact />} />
             <Route path="/login" element={<Login />} />
-            <Route path="/set-password" element={
-              <PrivateRoute>
-                <SetPassword />
-              </PrivateRoute>
-            } />
+            <Route path="/set-password" element={<SetPassword />} />
+            <Route path="/profile/:userId" element={<EmployeeProfile />} />
 
             {/* Employee Routes */}
-            <Route path="/employee-dashboard" element={
-              <EmployeeRoute>
-                <EmployeeDashboard />
-              </EmployeeRoute>
-            } />
-            <Route path="/add-supplier" element={
-              <EmployeeRoute>
-                <AddSupplier />
-              </EmployeeRoute>
-            } />
-            <Route path="/view-suppliers" element={
-              <EmployeeRoute>
-                <ViewSuppliers />
-              </EmployeeRoute>
-            } />
-            <Route path="/edit-supplier/:supplierId" element={
-              <EmployeeRoute>
-                <EditSupplier />
-              </EmployeeRoute>
-            } />
-            <Route path="/add-driver" element={
-              <EmployeeRoute>
-                <AddDriver />
-              </EmployeeRoute>
-            } />
-            <Route path="/view-drivers" element={
-              <EmployeeRoute>
-                <ViewDrivers />
-              </EmployeeRoute>
-            } />
-            <Route path="/edit-driver/:driverId" element={
-              <EmployeeRoute>
-                <EditDriver />
-              </EmployeeRoute>
-            } />
-            <Route path="/add-new-delivery-record" element={
-              <EmployeeRoute>
-                <AddNewDeliveryRecord />
-              </EmployeeRoute>
-            } />
-            <Route path="/view-delivery-records" element={
-              <EmployeeRoute>
-                <ViewDeliveryRecords />
-              </EmployeeRoute>
-            } />
-            <Route path="/edit-delivery-record/:deliveryId" element={
-              <EmployeeRoute>
-                <EditDeliveryRecord />
-              </EmployeeRoute>
-            } />
-            <Route path="/add-broker" element={
-              <EmployeeRoute>
-                <AddBroker />
-              </EmployeeRoute>
-            } />
-            <Route path="/view-brokers" element={
-              <EmployeeRoute>
-                <ViewBrokers />
-              </EmployeeRoute>
-            } />
-            <Route path="/edit-broker/:brokerId" element={
-              <EmployeeRoute>
-                <EditBroker />
-              </EmployeeRoute>
-            } />
-            <Route path="/add-tea-type" element={
-              <EmployeeRoute>
-                <AddTeaType />
-              </EmployeeRoute>
-            } />
-            <Route path="/view-tea-types" element={
-              <EmployeeRoute>
-                <ViewTeaTypes />
-              </EmployeeRoute>
-            } />
-            <Route path="/edit-tea-type/:teaTypeId" element={
-              <EmployeeRoute>
-                <EditTeaType />
-              </EmployeeRoute>
-            } />
-            <Route path="/employee-dashboard-create-lot" element={
-              <EmployeeRoute>
-                <CreateLot />
-              </EmployeeRoute>
-            } />
-            <Route path="/view-lots" element={
-              <EmployeeRoute>
-                <ViewLots />
-              </EmployeeRoute>
-            } />
-            <Route path="/edit-lot/:lotNumber" element={
-              <EmployeeRoute>
-                <EditLot />
-              </EmployeeRoute>
-            } />
-            <Route path="/view-valuations/:lotNumber" element={
-              <EmployeeRoute>
-                <ViewValuations />
-              </EmployeeRoute>
-            } />
-            <Route path="/employee-dashboard-manage-delivery-routes" element={
-              <EmployeeRoute>
-                <ManageDeliveryRoutes />
-              </EmployeeRoute>
-            } />
-            <Route path="/profile/:userId" element={
-              <PrivateRoute>
-                <EmployeeProfile />
-              </PrivateRoute>
-            } />
-            <Route path="/employee-view-transport-requests" element={
-              <EmployeeRoute>
-                <ViewTransportRequests />
-              </EmployeeRoute>
-            } />
+            <Route path="/employee-dashboard" element={<EmployeeDashboard />} />
+            <Route path="/add-supplier" element={<AddSupplier />} />
+            <Route path="/view-suppliers" element={<ViewSuppliers />} />
+            <Route path="/edit-supplier/:supplierId" element={<EditSupplier />} />
+            <Route path="/add-driver" element={<AddDriver />} />
+            <Route path="/view-drivers" element={<ViewDrivers />} />
+            <Route path="/edit-driver/:driverId" element={<EditDriver />} />
+            <Route path="/add-new-delivery-record" element={<AddNewDeliveryRecord />} />
+            <Route path="/view-delivery-records" element={<ViewDeliveryRecords />} />
+            <Route path="/edit-delivery-record/:deliveryId" element={<EditDeliveryRecord />} />
+            <Route path="/add-broker" element={<AddBroker />} />
+            <Route path="/view-brokers" element={<ViewBrokers />} />
+            <Route path="/edit-broker/:brokerId" element={<EditBroker />} />
+            <Route path="/add-tea-type" element={<AddTeaType />} />
+            <Route path="/view-tea-types" element={<ViewTeaTypes />} />
+            <Route path="/edit-tea-type/:teaTypeId" element={<EditTeaType />} />
+            <Route path="/employee-dashboard-create-lot" element={<CreateLot />} />
+            <Route path="/view-lots" element={<ViewLots />} />
+            <Route path="/edit-lot/:lotNumber" element={<EditLot />} />
+            <Route path="/view-valuations/:lotNumber" element={<ViewValuations />} />
+            <Route path="/employee-dashboard-manage-delivery-routes" element={<ManageDeliveryRoutes />} />
+            <Route path="/employee-view-transport-requests" element={<ViewTransportRequests />} />
 
             {/* Supplier Routes */}
-            <Route path="/supplier-dashboard" element={
-              <SupplierRoute>
-                <SupplierDashboard />
-              </SupplierRoute>
-            } />
-            <Route path="/supplier-request-transport" element={
-              <SupplierRoute>
-                <RequestTransport />
-              </SupplierRoute>
-            } />
+            <Route path="/supplier-dashboard" element={<SupplierDashboard />} />
+            <Route path="/supplier-request-transport" element={<RequestTransport />} />
 
             {/* Driver Routes */}
-            <Route path="/driver-dashboard" element={
-              <DriverRoute>
-                <DriverDashboard />
-              </DriverRoute>
-            } />
+            <Route path="/driver-dashboard" element={<DriverDashboard />} />
 
             {/* Broker Routes */}
-            <Route path="/broker-dashboard" element={
-              <BrokerRoute>
-                <BrokerDashboard />
-              </BrokerRoute>
-            } />
-            <Route path="/broker-manage-lots" element={
-              <BrokerRoute>
-                <BrokerLotManagement />
-              </BrokerRoute>
-            } />
-            <Route path="/broker-confirmed-lots" element={
-              <BrokerRoute>
-                <ConfirmedLots />
-              </BrokerRoute>
-            } />
+            <Route path="/broker-dashboard" element={<BrokerDashboard />} />
+            <Route path="/broker-manage-lots" element={<BrokerLotManagement />} />
+            <Route path="/broker-confirmed-lots" element={<ConfirmedLots />} />
           </Routes>
         </div>
         <Footer />

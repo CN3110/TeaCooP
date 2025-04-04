@@ -183,7 +183,8 @@ const RequestTransport = () => {
             </button>
           </div>
         </form>
-
+        </div>
+        <div className="form-separator">
         {/* View Requests Table */}
         <h3 style={{ marginTop: "2rem" }}>My Transport Requests</h3>
         {isLoading ? (
@@ -220,7 +221,8 @@ const RequestTransport = () => {
             </tbody>
           </table>
         )}
-      </div>
+        </div>
+      
     </SupplierLayout>
   );
 };

@@ -1,0 +1,177 @@
+/* About Section */
+.about-section {
+    background-color: #fff;
+    padding: 4rem 2rem;
+    text-align: center;
+  }
+  
+  .about-section h2 {
+    font-size: 2.5rem;
+    font-weight: 700;
+    color: #333;
+    margin-bottom: 2rem;
+  }
+  
+  .about-section p {
+    font-size: 1.1rem;
+    color: #555;
+    margin-bottom: 2rem;
+  }
+  
+  /* Our Story */
+  .our-story-container {
+    display: flex;
+    flex-direction: column;
+    gap: 2rem;
+    padding: 2rem;
+  }
+  
+  .our-heritage-container, .sustainable-ethical-practices-container, .our-tea-varieties-container {
+    background-color: #fff;
+    padding: 2rem;
+    border-radius: 8px;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+  }
+  
+  h3 {
+    font-size: 1.8rem;
+    font-weight: 700;
+    color: #333;
+  }
+  
+  button {
+    background-color: #f1c40f;
+    border: none;
+    padding: 0.8rem 1.5rem;
+    font-size: 1rem;
+    font-weight: 600;
+    margin-top: 1rem;
+    cursor: pointer;
+    border-radius: 4px;
+    transition: background-color 0.3s ease;
+  }
+  
+  button:hover {
+    background-color: #e67e22;
+    transform: scale(1.05);
+  }
+  
+  button:focus {
+    outline: none;
+  }
+  
+  /* Contact Section */
+  .contact-section {
+    background-color: #f9f9f9;
+    padding: 4rem 2rem;
+    text-align: center;
+  }
+  
+  .contact-section h2 {
+    font-size: 2.5rem;
+    font-weight: 700;
+    color: #333;
+    margin-bottom: 2rem;
+  }
+  
+  .contact-info,
+  .business-hours,
+  .social-media {
+    margin-bottom: 2rem;
+  }
+  
+  .contact-info ul,
+  .business-hours ul {
+    list-style: none;
+    padding: 0;
+  }
+  
+  .contact-info li,
+  .business-hours li {
+    font-size: 1rem;
+    color: #555;
+  }
+  
+  .social-media p {
+    font-size: 1rem;
+    color: #555;
+  }
+  
+  a {
+    color: #f1c40f;
+    text-decoration: none;
+  }
+  
+  a:hover {
+    text-decoration: underline;
+  }
+  
+  /* Login Modal */
+  .login-section {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0, 0, 0, 0.6);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    visibility: hidden;
+    opacity: 0;
+    transition: opacity 0.3s ease;
+  }
+  
+  .login-section.show {
+    visibility: visible;
+    opacity: 1;
+  }
+  
+  .login-modal {
+    background-color: #fff;
+    padding: 2rem;
+    border-radius: 8px;
+    width: 300px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.2);
+  }
+  
+  .login-modal h3 {
+    text-align: center;
+    font-size: 1.8rem;
+    color: #333;
+    margin-bottom: 1.5rem;
+  }
+  
+  .login-modal input {
+    width: 100%;
+    padding: 1rem;
+    margin-bottom: 1rem;
+    font-size: 1rem;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+  }
+  
+  .login-modal button {
+    width: 100%;
+    padding: 1rem;
+    background-color: #f1c40f;
+    border: none;
+    color: #fff;
+    font-size: 1.2rem;
+    border-radius: 4px;
+    cursor: pointer;
+  }
+  
+  .login-modal button:hover {
+    background-color: #e67e22;
+  }
+  
+  /* Close Button */
+  .login-modal button:nth-of-type(2) {
+    background-color: #ddd;
+    margin-top: 1rem;
+  }
+  
+  .login-modal button:nth-of-type(2):hover {
+    background-color: #bbb;
+  }

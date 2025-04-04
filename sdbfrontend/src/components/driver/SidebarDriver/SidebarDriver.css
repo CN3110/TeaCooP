@@ -1,0 +1,32 @@
+.sidebar-container {
+    width: 250px;
+    height: 100vh;
+    background-color: #343a40; /* Dark Bootstrap color */
+    color: white;
+    padding: 20px;
+}
+
+.sidebar-container h2 {
+    text-align: center;
+    margin-bottom: 20px;
+}
+
+.sidebar-container .nav-link {
+    color: white;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 10px;
+    font-size: 18px;
+    transition: background 0.3s ease;
+}
+
+.sidebar-container .nav-link:hover {
+    background: #495057; /* Slightly lighter dark color */
+    border-radius: 5px;
+}
+
+.sidebar-container .nav-link i,
+.sidebar-container .nav-link svg {  /* Applies to both Bootstrap and React Icons */
+    font-size: 24px;  /* Increases icon size */
+}
