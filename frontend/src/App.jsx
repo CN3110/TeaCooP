@@ -32,7 +32,6 @@ import ViewTeaTypesHome from "./pages/About Us/View Tea Types_Home/ViewTeaTypesH
 import SupplierDashboard from "./pages/SupplierView/Dashboard/SupplierDashboard.jsx";
 import RequestTransport from "./pages/SupplierView/RequestTransport/RequestTransport.jsx";
 import ViewTransportRequests from "./pages/ViewTransportRequests/ViewTransportRequests.jsx";
-import DriverDashboard from "./pages/DriverView/DashboardDriver/DashboardDriver.jsx";
 import BrokerDashboard from "./pages/BrokerView/DashboardBroker/DashboardBroker.jsx";
 import ManageDeliveryRoutes from "./pages/ManageDeliveryRoutes/ManageDeliveryRoutes.jsx";
 import BrokerLotManagement from "./pages/BrokerView/BrokerLotManagement/BrokerLotManagement.jsx";
@@ -77,6 +76,7 @@ const App = () => {
             <Route path="/employee-dashboard-create-lot" element={<CreateLot />} />
             <Route path="/view-lots" element={<ViewLots />} />
             <Route path="/edit-lot/:lotNumber" element={<EditLot />} />
+            <Route path="/view-all-brokers-valuation-prices/:lotNumber" element={<ViewValuations/>} />
             <Route path="/view-valuations/:lotNumber" element={<ViewValuations />} />
             <Route path="/employee-dashboard-manage-delivery-routes" element={<ManageDeliveryRoutes />} />
             <Route path="/employee-view-transport-requests" element={<ViewTransportRequests />} />
@@ -85,9 +85,7 @@ const App = () => {
             <Route path="/supplier-dashboard" element={<SupplierDashboard />} />
             <Route path="/supplier-request-transport" element={<RequestTransport />} />
 
-            {/* Driver Routes */}
-            <Route path="/driver-dashboard" element={<DriverDashboard />} />
-
+            
             {/* Broker Routes */}
             <Route path="/broker-dashboard" element={<BrokerDashboard />} />
             <Route path="/broker-manage-lots" element={<BrokerLotManagement />} />

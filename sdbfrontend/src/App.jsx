@@ -14,6 +14,7 @@ import ViewTransportRequests from './pages/Driver/ViewTransportRequests/ViewTran
 import BrokerDashboard from './pages/Broker/BrokerDashboard/BrokerDashboard';
 import BProfile from './pages/Broker/Bprofile/Bprofile';
 import ViewDeliveryRecords from './pages/Driver/ViewDeliveryRecords/ViewDeliveryRecords';
+import ViewNewLots from './pages/Broker/ViewNewLots/ViewNewLots';
 
 const App = () => {
   const [showLogin, setShowLogin] = useState(false); // Move login state here
@@ -40,6 +41,7 @@ const App = () => {
           {/* Broker Routes */}
           <Route path="/broker-dashboard" element={<BrokerDashboard/>} />
           <Route path="/broker-profile" element={<BProfile/>} />
+          <Route path="/broker-view-new-lots" element={<ViewNewLots/>} />
         </Routes>
         <Footer />
       </div>

@@ -36,6 +36,7 @@ app.use("/api/teaTypes", require("./routes/teaTypesRoutes"));
 app.use("/api/transportRequests", require("./routes/requestTransportRoutes"));
 app.use("/api/deliveryRoutes", require("./routes/deliveryRoutesRoutes"));
 app.use('/api/employees', require("./routes/employeeRoutes"));
+app.use('/api/lots', require("./routes/lotRoutes"));
 
 // Test route
 app.get("/", (req, res) => {

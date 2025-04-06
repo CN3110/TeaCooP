@@ -20,7 +20,7 @@ import {
                   </Link>
                 </li>
                 <li className="nav-item">
-                  <Link to="/broker-manage-lots" className="nav-link">
+                  <Link to="/broker-view-new-lots" className="nav-link">
                     <DeliveryIcon /> View New Lots
                   </Link>
                 </li>

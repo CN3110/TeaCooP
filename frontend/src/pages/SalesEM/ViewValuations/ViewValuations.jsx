@@ -38,7 +38,7 @@ const ViewValuations = () => {
 
   const handleConfirmValuation = async (valuationId) => {
     try {
-      const employeeId = "EMP123"; // Replace with actual employee ID from auth
+      const employeeId = "E001"; // Replace with actual employee ID from auth
       const response = await fetch(`http://localhost:3001/api/lots/valuations/${valuationId}/confirm`, {
         method: "POST",
         headers: {
