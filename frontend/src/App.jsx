@@ -38,6 +38,8 @@ import BrokerLotManagement from "./pages/BrokerView/BrokerLotManagement/BrokerLo
 import SetPassword from "./pages/SetPassword/SetPassword.jsx";
 import ViewValuations from "./pages/SalesEM/ViewValuations/ViewValuations.jsx";
 import ConfirmedLots from "./pages/BrokerView/BrokerLotManagement/ConfirmedLots.jsx";
+import ManageBrokerValuations from "./pages/SalesEM/ManageBrokerValuations/ManageBrokerValuations.jsx";
+
 
 const App = () => {
   return (
@@ -76,10 +78,10 @@ const App = () => {
             <Route path="/employee-dashboard-create-lot" element={<CreateLot />} />
             <Route path="/view-lots" element={<ViewLots />} />
             <Route path="/edit-lot/:lotNumber" element={<EditLot />} />
-            <Route path="/view-all-brokers-valuation-prices/:lotNumber" element={<ViewValuations/>} />
-            <Route path="/view-valuations/:lotNumber" element={<ViewValuations />} />
             <Route path="/employee-dashboard-manage-delivery-routes" element={<ManageDeliveryRoutes />} />
             <Route path="/employee-view-transport-requests" element={<ViewTransportRequests />} />
+            <Route path="/employee-view-manage-broker-valuation-price" element={<ManageBrokerValuations/>} />
+            <Route path="/view-valuations/:lotNumber" element={<ViewValuations />} />
 
             {/* Supplier Routes */}
             <Route path="/supplier-dashboard" element={<SupplierDashboard />} />

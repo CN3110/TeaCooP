@@ -135,13 +135,13 @@ const ViewLots = () => {
                     </button>
 
                     <button
-                      className="view-valuations-button"
-                      onClick={() =>
-                        navigate(`/view-valuations/${lot.lotNumber}`)
-                      }
-                    >
-                      View Valuations
-                    </button>
+  className="view-valuations-button"
+  onClick={() =>
+    navigate(`/view-valuations/${lot.lotNumber}`)
+  }
+>
+  View Valuations
+</button>
                   </div>
                 </td>
               </tr>
