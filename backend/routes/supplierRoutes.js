@@ -5,7 +5,7 @@ const {
   updateSupplier,
   deleteSupplier,
   getSupplierById,
-  getProfile  // Make sure this is imported from your controller
+  //getProfile  // Make sure this is imported from your controller
 } = require("../controllers/supplierController");
 const { authenticate, authorize } = require('../middleware/authMiddleware');
 
@@ -19,6 +19,6 @@ router.delete("/:supplierId", deleteSupplier); // Delete a supplier
 router.get("/:supplierId", getSupplierById); // Get a single supplier by ID
 
 // Get supplier profile - protected route
-router.get('/profile', authenticate, getProfile);
+//router.get('/profile', authenticate, getProfile);
 
 module.exports = router;
