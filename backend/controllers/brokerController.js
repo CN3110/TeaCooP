@@ -102,6 +102,7 @@ exports.getBrokerById = async (req, res) => {
 };
 
 // Update a broker by ID
+// Update a broker by ID
 exports.updateBroker = async (req, res) => {
   const { brokerId } = req.params;
   const { brokerName, brokerContact, brokerEmail, brokerCompanyName, brokerCompanyContact, brokerCompanyEmail, brokerCompanyAddress } = req.body;
@@ -111,11 +112,59 @@ exports.updateBroker = async (req, res) => {
   }
 
   try {
+    // Get current broker data to check if email has changed
+    const [currentBroker] = await db.query("SELECT * FROM broker WHERE brokerId = ?", [brokerId]);
+
+    if (!currentBroker.length) {
+      return res.status(404).json({ error: "Broker not found" });
+    }
+
+    const oldEmail = currentBroker[0].brokerEmail;
+
+    // Update broker data
     await db.query(
       "UPDATE broker SET brokerName = ?, brokerContactNumber = ?, brokerEmail = ?, brokerCompanyName = ?, brokerCompanyContact = ?, brokerCompanyEmail = ?, brokerCompanyAddress = ? WHERE brokerId = ?",
       [brokerName, brokerContact, brokerEmail, brokerCompanyName, brokerCompanyContact, brokerCompanyEmail, brokerCompanyAddress, brokerId]
     );
-    res.status(200).json({ message: "Broker updated successfully" });
+
+    // If email has changed, send a passcode to the new email
+    if (oldEmail !== brokerEmail) {
+      const passcode = generatePasscode();
+
+      // Send the email with passcode
+      const mailOptions = {
+        from: "mkteacoop@gmail.com",
+        to: brokerEmail,
+        subject: "Morawakkorale Tea CooP - Your Login Credentials",
+        text: `Dear ${brokerName}, 
+
+              Your login credentials for the system are as follows:
+
+              User ID: ${brokerId}
+              Passcode: ${passcode}
+
+              Please use the above passcode as your password during your first login, after changinf the email. After logging in, you will be able to create your own password.
+
+              If you have any questions, please contact us.
+
+              Best regards,
+              Morawakkorale Tea Co-op
+              041-2271400`,
+      };
+
+      // Send the email
+      transporter.sendMail(mailOptions, (error, info) => {
+        if (error) {
+          console.error("Error sending email:", error);
+          return res.status(500).json({ error: "Failed to send email" });
+        } else {
+          console.log("Email sent:", info.response);
+          res.status(200).json({ message: "Broker updated successfully" });
+        }
+      });
+    } else {
+      res.status(200).json({ message: "Broker updated successfully" });
+    }
   } catch (error) {
     console.error("Error updating broker:", error);
     res.status(500).json({ error: "Failed to update broker" });
