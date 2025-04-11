@@ -10,6 +10,7 @@ class Land {
       INSERT INTO land (supplierId, landSize, landAddress)
       VALUES ?
     `;
+    
 
     const values = landDetails.map((land) => [
       supplierId,

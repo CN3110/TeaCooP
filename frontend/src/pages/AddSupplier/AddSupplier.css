@@ -1,101 +1,165 @@
 .add-supplier-container {
-    max-width: 500px;
-    margin: 15px auto;
-    padding: 15px;
-    background-color: #f9f9f9;
-    border-radius: 8px;
-    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+  padding: 10px;
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+.two-column-form {
+  display: flex;
+  gap: 30px;
+  margin-top: 5px;
+}
+
+.form-column {
+  flex: 1;
+  padding: 20px;
+  background: #efffdd;
+  border-radius: 8px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.supplier-details {
+  min-width: 420px;
+}
+
+.land-details {
+  min-width: 400px;
+}
+
+.land-details-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 10px;
+}
+
+.add-land-btn {
+  padding: 5px 10px;
+  font-size: 0.9rem;
+}
+
+.land-detail-card {
+  background: #f9f9f9;
+  border-radius: 6px;
+  padding: 15px;
+  margin-bottom: 20px;
+  border-left: 4px solid #4CAF50;
+}
+
+.land-card-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 10px;
+}
+
+.remove-land-btn {
+  padding: 3px 8px;
+  font-size: 0.8rem;
+}
+
+.form-group {
+  margin-bottom: 15px;
+}
+
+.form-group label {
+  display: block;
+  margin-bottom: 5px;
+  font-weight: 500;
+  color: #555;
+}
+
+.form-group input,
+.form-group select,
+.form-group textarea {
+  width: 100%;
+  padding: 6px 10px;
+  border: 1px solid #5cc72a;
+  border-radius: 4px;
+  font-size: 14px;
+}
+
+.form-group textarea {
+  resize: vertical;
+}
+
+.read-only-input {
+  background-color: #f5f5f5;
+  color: #666;
+  cursor: not-allowed;
+  border: 1px solid #ddd;
+}
+
+.form-buttons-container {
+  
+  gap: 15px;
+  margin-top: 400px;
+  padding-top: 20px;
+  border-top: 1px solid #eee;
+  width: 100%;
+}
+
+.cancel-btn {
+  padding: 10px 25px;
+  background: #f8f9fa;
+  color: #6c757d;
+  border: 1px solid #ced4da;
+  border-radius: 4px;
+  cursor: pointer;
+  font-weight: 500;
+  transition: all 0.2s ease;
+}
+
+.cancel-btn:hover {
+  background: #e9ecef;
+  border-color: #adb5bd;
+}
+
+.submit-btn {
+  padding: 10px 25px;
+  background: #28a745;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  font-weight: 500;
+  transition: all 0.2s ease;
+}
+
+.submit-btn:hover {
+  background: #218838;
+}
+
+.submit-btn:disabled {
+  background: #94d3a2;
+  cursor: not-allowed;
+}
+
+.alert {
+  padding: 10px 15px;
+  border-radius: 4px;
+  margin-bottom: 20px;
+}
+
+.alert.success {
+  background: #dff0d8;
+  color: #3c763d;
+  border: 1px solid #d6e9c6;
+}
+
+.alert.error {
+  background: #f2dede;
+  color: #a94442;
+  border: 1px solid #ebccd1;
+}
+
+/* Responsive adjustments */
+@media (max-width: 900px) {
+  .two-column-form {
+    flex-direction: column;
   }
   
-  .add-supplier-container h2 {
-    text-align: center;
-    color: #154734;
-    margin-bottom: 15px;
+  .form-column {
+    min-width: auto;
   }
-  
-  .form-group {
-    margin-bottom: 15px;
-  }
-  
-  .form-group label {
-    display: block;
-    margin-bottom: 5px;
-    font-weight: 600;
-    color: #333;
-  }
-  
-  .form-group input {
-    width: 100%;
-    padding: 10px;
-    border: 1px solid #ccc;
-    border-radius: 4px;
-    font-size: 16px;
-  }
-  
-  .land-details {
-    margin-top: 15px;
-  }
-  
-  .land-details h3 {
-    color: #154734;
-    margin-bottom: 15px;
-  }
-  
-  .land-detail-group {
-    margin-bottom: 10px;
-    padding: 15px;
-    background-color: #fff;
-    border-radius: 8px;
-    box-shadow: 0 0 5px rgba(0, 0, 0, 0.1);
-  }
-  
-  .add-land-btn {
-    display: block;
-    width: 100%;
-    padding: 10px;
-    background-color: #154734;
-    color: white;
-    border: none;
-    border-radius: 4px;
-    font-size: 16px;
-    cursor: pointer;
-    margin-top: 10px;
-  }
-  
-  .add-land-btn:hover {
-    background-color: #0f361f;
-  }
-  
-  .form-buttons {
-    display: flex;
-    justify-content: flex-end;
-    gap: 10px;
-    margin-top: 15px;
-  }
-  
-  .cancel-btn,
-  .submit-btn {
-    padding: 10px 20px;
-    border: none;
-    border-radius: 4px;
-    font-size: 16px;
-    cursor: pointer;
-  }
-  
-  .cancel-btn {
-    background-color: #ccc;
-    color: #333;
-  }
-  
-  .cancel-btn:hover {
-    background-color: #bbb;
-  }
-  
-  .submit-btn {
-    background-color: #154734;
-    color: white;
-  }
-  
-  .submit-btn:hover {
-    background-color: #0f361f;
-  }
+}

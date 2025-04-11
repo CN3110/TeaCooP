@@ -72,8 +72,8 @@ exports.addSupplier = async (req, res) => {
     if (Array.isArray(landDetails) && landDetails.length > 0) {
       for (const land of landDetails) {
         await db.query(
-          "INSERT INTO land (supplierId, landSize, landAddress, route) VALUES (?, ?, ?, ?)",
-          [supplierId, land.landSize, land.landAddress, land.route]
+          "INSERT INTO land (supplierId, landSize, landAddress, delivery_routeName) VALUES (?, ?, ?, ?)",
+          [supplierId, land.landSize, land.landAddress, land.delivery_routeName]
         );
       }
     }
@@ -174,8 +174,8 @@ exports.updateSupplier = async (req, res) => {
       // Insert new land details
       for (const land of landDetails) {
         await db.query(
-          "INSERT INTO land (supplierId, landSize, landAddress, route) VALUES (?, ?, ?, ?)",
-          [supplierId, land.landSize, land.landAddress, land.route]
+          "INSERT INTO land (supplierId, landSize, landAddress, delivery_routeName) VALUES (?, ?, ?, ?)",
+          [supplierId, land.landSize, land.landAddress, land.delivery_routeName]
         );
       }
     }
