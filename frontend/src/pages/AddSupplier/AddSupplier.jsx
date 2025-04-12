@@ -1,3 +1,4 @@
+//pending thiyeddi okkom details thiyyenna on naaa... eka hdannaa
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { v4 as uuidv4 } from "uuid";
@@ -198,7 +199,7 @@ const AddSupplier = () => {
           {/* Right Column - Land Details */}
           <div className="form-column land-details">
             <div className="land-details-header">
-              <h4>Land Information</h4>
+              <h5>Land Information</h5>
               <button
                 type="button"
                 className="btn btn-outline-secondary add-land-btn"
@@ -211,7 +212,7 @@ const AddSupplier = () => {
             {supplierData.landDetails.map((land, index) => (
               <div key={land.landId} className="land-detail-card">
                 <div className="land-card-header">
-                  <h5>Land #{index + 1}</h5>
+                  <h5>Land No.{index + 1}</h5>
                   {index > 0 && (
                     <button
                       type="button"
@@ -276,11 +277,10 @@ const AddSupplier = () => {
                     )}
                   </select>
                 </div>
+                
               </div>
             ))}
-          </div>
-
-          <div className="form-buttons-container">
+            <div className="form-buttons-container">
   <button type="button" className="cancel-btn" onClick={handleCancel}>
     Cancel
   </button>
@@ -288,6 +288,10 @@ const AddSupplier = () => {
     Save Supplier
   </button>
 </div>
+            
+          </div>
+
+          
         </form>
       </div>
     </EmployeeLayout>

@@ -146,65 +146,83 @@ exports.getSupplierById = async (req, res) => {
   }
 };
 
+
 // Update a supplier
 exports.updateSupplier = async (req, res) => {
   const { supplierId } = req.params;
-  const { name, contact, email, landDetails } = req.body;
+  const { name, contact, email, status, notes, landDetails } = req.body;
 
   if (!supplierId) {
     return res.status(400).json({ error: "Supplier ID is required" });
   }
 
-  if (!name || !contact || !email) {
-    return res.status(400).json({ error: "Missing required fields: name, contact, and email" });
+  if (!name || !contact || !email || !status) {
+    return res.status(400).json({ 
+      error: "Missing required fields: name, contact, email, and status" 
+    });
+  }
+
+  // Validate status value
+  const validStatuses = ['pending', 'active', 'disabled'];
+  if (!validStatuses.includes(status)) {
+    return res.status(400).json({ 
+      error: "Invalid status value. Must be one of: pending, active, disabled" 
+    });
   }
 
   try {
-    // Update supplier details
+    // First, check if supplier exists
+    const [existingSupplier] = await db.query(
+      "SELECT * FROM supplier WHERE supplierId = ?",
+      [supplierId]
+    );
+
+    if (!existingSupplier || existingSupplier.length === 0) {
+      return res.status(404).json({ error: "Supplier not found" });
+    }
+
+    // Update supplier details including status
     await db.query(
-      "UPDATE supplier SET supplierName = ?, supplierContactNumber = ?, supplierEmail = ? WHERE supplierId = ?",
-      [name, contact, email, supplierId]
+      "UPDATE supplier SET supplierName = ?, supplierContactNumber = ?, supplierEmail = ?, status = ?, notes = ? WHERE supplierId = ?",
+      [name, contact, email, status, notes || null, supplierId]
     );
 
     // Update land details if provided
     if (Array.isArray(landDetails)) {
-      // Delete existing land details
-      await db.query("DELETE FROM land WHERE supplierId = ?", [supplierId]);
+      // Start transaction for land updates
+      await db.query("START TRANSACTION");
 
-      // Insert new land details
-      for (const land of landDetails) {
-        await db.query(
-          "INSERT INTO land (supplierId, landSize, landAddress, delivery_routeName) VALUES (?, ?, ?, ?)",
-          [supplierId, land.landSize, land.landAddress, land.delivery_routeName]
-        );
+      try {
+        // Delete existing land details
+        await db.query("DELETE FROM land WHERE supplierId = ?", [supplierId]);
+
+        // Insert new land details
+        for (const land of landDetails) {
+          if (!land.landSize || !land.landAddress || !land.delivery_routeName) {
+            throw new Error("All land details fields are required");
+          }
+
+          await db.query(
+            "INSERT INTO land (supplierId, landSize, landAddress, delivery_routeName) VALUES (?, ?, ?, ?)",
+            [supplierId, land.landSize, land.landAddress, land.delivery_routeName]
+          );
+        }
+
+        await db.query("COMMIT");
+      } catch (landError) {
+        await db.query("ROLLBACK");
+        throw landError;
       }
     }
 
-    res.status(200).json({ message: "Supplier updated successfully" });
+    res.status(200).json({ 
+      message: `Supplier ${status === 'disabled' ? 'disabled' : 'updated'} successfully`,
+      status: status 
+    });
   } catch (error) {
     console.error("Error updating supplier:", error);
-    res.status(500).json({ error: "Failed to update supplier" });
-  }
-};
-
-// Delete a supplier
-exports.deleteSupplier = async (req, res) => {
-  const { supplierId } = req.params;
-
-  if (!supplierId) {
-    return res.status(400).json({ error: "Supplier ID is required" });
-  }
-
-  try {
-    // Delete land details first (due to foreign key constraint)
-    await db.query("DELETE FROM land WHERE supplierId = ?", [supplierId]);
-
-    // Delete supplier
-    await db.query("DELETE FROM supplier WHERE supplierId = ?", [supplierId]);
-
-    res.status(200).json({ message: "Supplier deleted successfully" });
-  } catch (error) {
-    console.error("Error deleting supplier:", error);
-    res.status(500).json({ error: "Failed to delete supplier" });
+    res.status(500).json({ 
+      error: error.message || "Failed to update supplier" 
+    });
   }
 };

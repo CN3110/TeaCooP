@@ -1,3 +1,4 @@
+//edit ekedi supplier wa disable krama supplierwa table eken remove wenwa, bt mta on eka disabled kyla table eke thiyanna
 import React, { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import "./EditSupplier.css";
@@ -79,7 +80,7 @@ const EditSupplierPage = () => {
   };
 
   const handleRemoveLandDetail = (index) => {
-    if (formData.landDetails.length > 1) {
+    if (window.confirm("Are you sure you want to remove this land detail?")) {
       const updatedLandDetails = [...formData.landDetails];
       updatedLandDetails.splice(index, 1);
       setFormData({
@@ -92,6 +93,14 @@ const EditSupplierPage = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     
+    // Add confirmation for disabling supplier
+    if (formData.status === "disabled") {
+      const confirmDisable = window.confirm(
+        "Are you sure you want to disable this supplier? The record will be kept but marked as inactive."
+      );
+      if (!confirmDisable) return;
+    }
+  
     try {
       const response = await fetch(
         `http://localhost:3001/api/suppliers/${formData.supplierId}`,
@@ -110,9 +119,9 @@ const EditSupplierPage = () => {
           }),
         }
       );
-
+  
       if (response.ok) {
-        alert("Supplier updated successfully!");
+        alert(`Supplier ${formData.status === "disabled" ? "disabled" : "updated"} successfully!`);
         navigate("/view-suppliers");
       } else {
         const errorData = await response.json();
@@ -123,6 +132,7 @@ const EditSupplierPage = () => {
       alert("An error occurred while updating the supplier.");
     }
   };
+  
 
   if (isLoading) {
     return <div className="loading">Loading supplier data...</div>;
@@ -130,7 +140,7 @@ const EditSupplierPage = () => {
 
   return (
     <div className="edit-supplier-container">
-      <h2>Edit Supplier - {formData.supplierId}</h2>
+      <h2>Edit Supplier - {formData.supplierId} {formData.supplierName}</h2>
       
       <form onSubmit={handleSubmit} className="supplier-form">
         <div className="form-section">
@@ -191,9 +201,7 @@ const EditSupplierPage = () => {
                 <option value="active">Active</option>
                 <option value="disabled">Disabled</option>
               </select>
-              <p className="status-help-text">
-                Note: Disabled suppliers will remain visible but marked as inactive
-              </p>
+              
             </div>
           </div>
         </div>
@@ -229,8 +237,8 @@ const EditSupplierPage = () => {
             formData.landDetails.map((land, index) => (
               <div key={index} className="land-card">
                 <div className="land-header">
-                  <h4>Land #{index + 1}</h4>
-                  {formData.landDetails.length > 1 && (
+                  <h4>Land No.{index + 1}</h4>
+                  {formData.landDetails.length > 0 && (
                     <button
                       type="button"
                       className="remove-land-btn"
@@ -243,7 +251,7 @@ const EditSupplierPage = () => {
                 
                 <div className="land-grid">
                   <div className="form-group">
-                    <label>Size (Acres) *</label>
+                    <label>Size(Acres) *</label>
                     <input
                       type="number"
                       name="landSize"

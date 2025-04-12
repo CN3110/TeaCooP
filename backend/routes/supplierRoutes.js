@@ -15,7 +15,6 @@ const router = express.Router();
 router.get("/", getAllSuppliers); // Get all suppliers
 router.post("/add", addSupplier); // Add a new supplier
 router.put("/:supplierId", updateSupplier); // Update a supplier
-router.delete("/:supplierId", deleteSupplier); // Delete a supplier
 router.get("/:supplierId", getSupplierById); // Get a single supplier by ID
 
 // Get supplier profile - protected route
