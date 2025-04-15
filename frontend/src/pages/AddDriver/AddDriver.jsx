@@ -5,66 +5,84 @@ import "./AddDriver.css";
 
 const AddDriver = () => {
   const [driverData, setDriverData] = useState({
-    driverId: "",
+    driverId: "Generating...",
     driverName: "",
-    driverContactNumber: "", // Fixed: Renamed from contactNumber
-    email: "",
-    vehicleDetails: [{ vehicleNo: "", vehicleType: "" }],
+    driverContactNumber: "",
+    driverEmail: "",
+    status: "pending",
+    notes: "",
+    vehicleDetails: [{ vehicleNumber: "", vehicleType: "" }],
   });
 
-  const [error, setError] = useState(""); // State for error messages
+  const [alert, setAlert] = useState(null);
   const navigate = useNavigate();
 
-  // Handle input changes for driver details
   const handleInputChange = (e) => {
     const { name, value } = e.target;
     setDriverData({ ...driverData, [name]: value });
   };
 
-  // Handle input changes for vehicle details
   const handleVehicleDetailsChange = (index, e) => {
     const { name, value } = e.target;
     const updatedVehicleDetails = [...driverData.vehicleDetails];
-    updatedVehicleDetails[index][name] = value.trim(); // Trim whitespace
+    updatedVehicleDetails[index][name] = value;
     setDriverData({ ...driverData, vehicleDetails: updatedVehicleDetails });
   };
 
-  // Add a new vehicle detail field
   const addVehicleDetail = () => {
     setDriverData({
       ...driverData,
-      vehicleDetails: [
-        ...driverData.vehicleDetails,
-        { vehicleNo: "", vehicleType: "" },
-      ],
+      vehicleDetails: [...driverData.vehicleDetails, { vehicleNumber: "", vehicleType: "" }],
     });
   };
 
-  // Handle form submission
+  const removeVehicleDetail = (index) => {
+    const updatedVehicleDetails = driverData.vehicleDetails.filter((_, i) => i !== index);
+    setDriverData({ ...driverData, vehicleDetails: updatedVehicleDetails });
+  };
+
+  const handleCancel = () => {
+    navigate("/view-drivers");
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
 
     // Validate required fields
-    if (!driverData.driverId || !driverData.driverName || !driverData.driverContactNumber || !driverData.email) {
-      setError("Please fill in all required fields.");
+    if (
+      !driverData.driverId ||
+      !driverData.driverName ||
+      !driverData.driverContactNumber ||
+      !driverData.driverEmail
+    ) {
+      setAlert({
+        type: "error",
+        message: "Please fill in all required driver fields.",
+      });
       return;
     }
 
-    // Validate vehicle details
-    if (driverData.vehicleDetails.some((vehicle) => !vehicle.vehicleNo.trim() || !vehicle.vehicleType.trim())) {
-      setError("Please fill in all vehicle details.");
+    if (
+      driverData.vehicleDetails.some(
+        (vehicle) => !vehicle.vehicleNumber.trim() || !vehicle.vehicleType.trim()
+      )
+    ) {
+      setAlert({
+        type: "error",
+        message: "Please fill in all the vehicle details.",
+      });
       return;
     }
 
-    // Log the request body for debugging
     const requestBody = {
-      driverId: driverData.driverId,
+      
       driverName: driverData.driverName,
       driverContactNumber: driverData.driverContactNumber,
-      driverEmail: driverData.email,
+      driverEmail: driverData.driverEmail,
+      status: driverData.status,
+      notes: driverData.notes,
       vehicleDetails: driverData.vehicleDetails,
     };
-    console.log("Request Body:", requestBody);
 
     try {
       const response = await fetch("http://localhost:3001/api/drivers/add", {
@@ -76,15 +94,26 @@ const AddDriver = () => {
       });
 
       if (response.ok) {
-        alert("Driver added successfully!");
-        navigate("/view-drivers");
+        setAlert({
+          type: "success",
+          message: "Driver added successfully!",
+        });
+        setTimeout(() => {
+          setAlert(null);
+          navigate("/view-drivers");
+        }, 2000);
       } else {
         const errorData = await response.json();
-        setError(`Error adding driver: ${errorData.message}`);
+        setAlert({
+          type: "error",
+          message: `Error adding driver: ${errorData.message}`,
+        });
       }
     } catch (error) {
-      console.error("Error adding driver:", error);
-      setError("An error occurred while adding the driver");
+      setAlert({
+        type: "error",
+        message: "An error occurred while adding the driver.",
+      });
     }
   };
 
@@ -92,79 +121,128 @@ const AddDriver = () => {
     <EmployeeLayout>
       <div className="add-driver-container">
         <h2>Add New Driver</h2>
-        {error && <div className="error-message">{error}</div>} {/* Display error message */}
-        <form onSubmit={handleSubmit}>
-          {/* Driver ID */}
-          <div className="form-group">
-            <label>Driver ID</label>
-            <input
-              type="text"
-              name="driverId"
-              value={driverData.driverId}
-              onChange={handleInputChange}
-              required
-            />
+
+        {alert && (
+          <div
+            className={`alert ${
+              alert.type === "error" ? "alert-error" : "alert-success"
+            }`}
+          >
+            {alert.message}
+          </div>
+        )}
+
+        <form onSubmit={handleSubmit} className="two-column-form">
+          <div className="form-column driver-details">
+            <div className="form-group">
+              <h4>Driver Information</h4>
+              <label>Driver ID</label>
+              <input
+                type="text"
+                name="driverId"
+                value={driverData.driverId}
+                readOnly
+                className="read-only-input"
+              />
+            </div>
+
+            <div className="form-group">
+              <label>Driver Name</label>
+              <input
+                type="text"
+                name="driverName"
+                value={driverData.driverName}
+                onChange={handleInputChange}
+                required
+              />
+            </div>
+
+            <div className="form-group">
+              <label>Contact Number</label>
+              <input
+                type="text"
+                name="driverContactNumber"
+                value={driverData.driverContactNumber}
+                onChange={handleInputChange}
+                required
+              />
+            </div>
+
+            <div className="form-group">
+              <label>Email Address</label>
+              <input
+                type="email"
+                name="driverEmail"
+                value={driverData.driverEmail}
+                onChange={handleInputChange}
+                required
+              />
+            </div>
+
+            <div className="form-group">
+              <label>Status</label>
+              <select
+                name="status"
+                value={driverData.status}
+                onChange={handleInputChange}
+                required
+              >
+                <option value="pending">Pending</option>
+                <option value="active">Active</option>
+                <option value="disabled">Disabled</option>
+              </select>
+            </div>
+
+            <div className="form-group">
+              <label>Notes</label>
+              <textarea
+                name="notes"
+                value={driverData.notes}
+                onChange={handleInputChange}
+                rows="3"
+                placeholder="Additional information about the driver..."
+              />
+            </div>
           </div>
 
-          {/* Driver Name */}
-          <div className="form-group">
-            <label>Driver Name</label>
-            <input
-              type="text"
-              name="driverName"
-              value={driverData.driverName}
-              onChange={handleInputChange}
-              required
-            />
-          </div>
+          <div className="form-column vehicle-details">
+            <div className="vehicle-details-header">
+              <h3>Vehicle Details</h3>
+              <button
+                type="button"
+                className="btn btn-outline-secondary add-vehicle-btn"
+                onClick={addVehicleDetail}
+              >
+                Add Vehicle
+              </button>
+            </div>
 
-          {/* Contact Number */}
-          <div className="form-group">
-            <label>Contact Number</label>
-            <input
-              type="text"
-              name="driverContactNumber"
-              value={driverData.driverContactNumber}
-              onChange={handleInputChange}
-              required
-            />
-          </div>
-
-          {/* Email */}
-          <div className="form-group">
-            <label>Email</label>
-            <input
-              type="email"
-              name="email"
-              value={driverData.email}
-              onChange={handleInputChange}
-              required
-            />
-          </div>
-
-          {/* Vehicle Details */}
-          <div className="vehicle-details">
-            <h3>Vehicle Details</h3>
             {driverData.vehicleDetails.map((vehicle, index) => (
-              <div key={index} className="vehicle-detail-group">
-                {/* Vehicle Number Label */}
-                <div className="form-group">
+              <div key={index} className="vehicle-detail-card">
+                <div className="vehicle-card-header">
                   <small>Vehicle No. {index + 1}</small>
+                  {index > 0 && (
+                    <button
+                      type="button"
+                      className="btn btn-outline-danger btn-sm remove-land-btn"
+                      onClick={() => removeVehicleDetail(index)}
+                    >
+                      Remove
+                    </button>
+                  )}
                 </div>
 
-                {/* Vehicle No. */}
                 <div className="form-group">
                   <label>Vehicle Number</label>
                   <input
                     type="text"
-                    name="vehicleNo"
-                    value={vehicle.vehicleNo}
+                    name="vehicleNumber"
+                    value={vehicle.vehicleNumber}
                     onChange={(e) => handleVehicleDetailsChange(index, e)}
                     required
                   />
                 </div>
 
-                {/* Vehicle Type */}
                 <div className="form-group">
                   <label>Vehicle Type</label>
                   <input
@@ -178,24 +256,14 @@ const AddDriver = () => {
               </div>
             ))}
 
-            {/* Button to add more vehicle details */}
-            <button
-              type="button"
-              className="add-vehicle-btn"
-              onClick={addVehicleDetail}
-            >
-              Add More Vehicle
-            </button>
-          </div>
-
-          {/* Buttons */}
-          <div className="form-buttons">
-            <button type="button" className="cancel-btn" onClick={() => navigate("/view-drivers")}>
-              Cancel
-            </button>
-            <button type="submit" className="submit-btn">
-              Save
-            </button>
+            <div className="form-buttons-container">
+              <button type="button" className="cancel-btn" onClick={handleCancel}>
+                Cancel
+              </button>
+              <button type="submit" className="submit-btn">
+                Save Driver
+              </button>
+            </div>
           </div>
         </form>
       </div>

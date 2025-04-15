@@ -7,7 +7,7 @@ const router = express.Router();
 router.get("/", getAllDrivers);
 router.post("/add", addDriver);
 router.put("/:driverId", updateDriver);
-router.delete("/:driverId", deleteDriver);
+
 router.get("/:driverId", getDriverById);
 
 module.exports = router;
