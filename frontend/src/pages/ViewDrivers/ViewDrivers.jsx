@@ -2,18 +2,19 @@ import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { BiSearch } from "react-icons/bi";
 import EmployeeLayout from "../../components/EmployeeLayout/EmployeeLayout";
+import EditDriver from "./EditDriver";
 import "./ViewDrivers.css";
-import EditDriver from "./EditDriver"; // Import the EditDriver component
 
 const ViewDrivers = () => {
   const [searchId, setSearchId] = useState("");
+  const [statusFilter, setStatusFilter] = useState("all");
   const [drivers, setDrivers] = useState([]);
   const [filteredDrivers, setFilteredDrivers] = useState([]);
-  const [isModalOpen, setIsModalOpen] = useState(false); // State for modal visibility
-  const [selectedDriver, setSelectedDriver] = useState(null); // State for selected driver
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [selectedDriver, setSelectedDriver] = useState(null);
   const navigate = useNavigate();
 
-  // Fetch driver data from the backend
+  // Fetch all drivers
   useEffect(() => {
     const fetchDrivers = async () => {
       try {
@@ -21,7 +22,7 @@ const ViewDrivers = () => {
         if (response.ok) {
           const data = await response.json();
           setDrivers(data);
-          setFilteredDrivers(data); // Initialize filteredDrivers with all drivers
+          setFilteredDrivers(data);
         } else {
           console.error("Failed to fetch drivers");
         }
@@ -29,57 +30,40 @@ const ViewDrivers = () => {
         console.error("Error fetching drivers:", error);
       }
     };
-
     fetchDrivers();
   }, []);
 
-  // Handle search input change
-  const handleSearchChange = (e) => {
-    const searchTerm = e.target.value;
-    setSearchId(searchTerm);
+  // Apply filters
+  useEffect(() => {
+    let filtered = [...drivers];
 
-    // Filter drivers based on search term
-    const filtered = drivers.filter((driver) =>
-      driver.driverId.toLowerCase().includes(searchTerm.toLowerCase())
-    );
+    if (searchId) {
+      filtered = filtered.filter((driver) =>
+        driver.driverId.toLowerCase().includes(searchId.toLowerCase())
+      );
+    }
+
+    if (statusFilter !== "all") {
+      filtered = filtered.filter((driver) => driver.status === statusFilter);
+    }
+
     setFilteredDrivers(filtered);
+  }, [searchId, statusFilter, drivers]);
+
+  const handleSearchChange = (e) => {
+    setSearchId(e.target.value);
   };
 
-  // Navigate to the "Add New Driver" page
   const handleAddDriver = () => {
     navigate("/add-driver");
   };
 
-  // Handle edit button click
   const handleEdit = (driver) => {
-    console.log("Edit button clicked, navigating to edit page"); // Debugging log
-    navigate(`/edit-driver/${driver.driverId}`); // Navigate to the edit page
+    navigate(`/edit-driver/${driver.driverId}`);
   };
 
-  // Handle delete button click
-  const handleDelete = async (driverId) => {
-    const confirmDelete = window.confirm("Are you sure you want to delete this driver?");
-    if (confirmDelete) {
-      try {
-        const response = await fetch(`http://localhost:3001/api/drivers/${driverId}`, {
-          method: "DELETE",
-        });
-        if (response.ok) {
-          // Remove the deleted driver from the list of drivers
-          setDrivers((prevDrivers) => prevDrivers.filter((driver) => driver.driverId !== driverId));
-          setFilteredDrivers((prevDrivers) => prevDrivers.filter((driver) => driver.driverId !== driverId));
-          alert("Driver deleted successfully");
-        } else {
-          alert("Failed to delete driver");
-        }
-      } catch (error) {
-        console.error("Error deleting driver:", error);
-        alert("An error occurred while deleting the driver");
-      }
-    }
-  };
+  
 
-  // Close the modal
   const closeModal = () => {
     setIsModalOpen(false);
     setSelectedDriver(null);
@@ -100,9 +84,22 @@ const ViewDrivers = () => {
               />
               <BiSearch className="icon" />
             </div>
-            <button className="add-driver-btn" onClick={handleAddDriver}>
-              Add New Driver
-            </button>
+
+            <div className="filters">
+              <select
+                value={statusFilter}
+                onChange={(e) => setStatusFilter(e.target.value)}
+                className="status-filter"
+              >
+                <option value="all">All Statuses</option>
+                <option value="active">Active</option>
+                <option value="pending">Pending</option>
+                <option value="disabled">Disabled</option>
+              </select>
+              <button className="add-driver-btn" onClick={handleAddDriver}>
+                Add New Driver
+              </button>
+            </div>
           </div>
         </div>
 
@@ -112,52 +109,56 @@ const ViewDrivers = () => {
               <th>Driver ID</th>
               <th>Driver Name</th>
               <th>Contact Number</th>
-              <th>Email</th> 
+              <th>Email</th>
+              <th>Status</th>
               <th>Vehicle Details</th>
-              <th>Actions</th></tr>
+              <th>Notes</th>
+              <th>Actions</th>
+            </tr>
           </thead>
           <tbody>
-            {filteredDrivers.map((driver) => (
-              <tr key={driver.driverId}>
-                <td>{driver.driverId}</td>
-                <td>{driver.driverName}</td>
-                <td>{driver.driverContactNumber}</td>
-                <td>{driver.driverEmail}</td> 
-                <td>
-                  <ul>
-                    {driver.vehicleDetails && driver.vehicleDetails.length > 0 ? (
-                      driver.vehicleDetails.map((vehicle, index) => (
-                        <li key={index}>
-                          <strong>Vehicle No:</strong> {index + 1}, {""}
-                          <strong>Vehicle Number:</strong> {vehicle.vehicleNumber}, {""}
-                          <strong>Vehicle Type:</strong> {vehicle.vehicleType}, {""}
-                        </li>
-                      ))
-                    ) : (
-                      <li>No vehicle details available</li>
-                    )}
-                  </ul>
-                </td>
-                <td>
-                  <button
-                    className="edit-btn"
-                    onClick={() => handleEdit(driver)}
-                  >
-                    Edit
-                  </button>
-                  <button
-                    className="delete-btn"
-                    onClick={() => handleDelete(driver.driverId)}
-                  >
-                    Delete
-                  </button>
+            {filteredDrivers.length > 0 ? (
+              filteredDrivers.map((driver) => (
+                <tr key={driver.driverId}>
+                  <td>{driver.driverId}</td>
+                  <td>{driver.driverName}</td>
+                  <td>{driver.driverContactNumber}</td>
+                  <td>{driver.driverEmail}</td>
+                  <td className={`status-cell status-${driver.status}`}>
+                    {driver.status.charAt(0).toUpperCase() + driver.status.slice(1)}
+                  </td>
+                  <td>
+                    <ul className="vehicle-details-list">
+                      {driver.vehicleDetails && driver.vehicleDetails.length > 0 ? (
+                        driver.vehicleDetails.map((vehicle, index) => (
+                          <li key={index}>
+                            <span>Vehicle {index + 1}: </span>
+                            <span>{vehicle.vehicleNumber} ({vehicle.vehicleType})</span>
+                          </li>
+                        ))
+                      ) : (
+                        <li>No vehicle details available</li>
+                      )}
+                    </ul>
+                  </td>
+                  <td className="driver-notes">
+                    {driver.notes || "No notes available"}
+                  </td>
+                  <td>
+                    <button className="edit-btn" onClick={() => handleEdit(driver)}>Edit</button>
+                  </td>
+                </tr>
+              ))
+            ) : (
+              <tr>
+                <td colSpan="8" className="no-results">
+                  No drivers found matching your criteria
                 </td>
               </tr>
-            ))}
+            )}
           </tbody>
         </table>
 
-        {/* Edit Driver Modal */}
         {isModalOpen && (
           <div className="modal-overlay">
             <div className="modal">
