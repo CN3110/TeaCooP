@@ -1,9 +1,11 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate } from "react-router-dom";
 import EmployeeLayout from '../../../../components/EmployeeLayout/EmployeeLayout';
 import './AddNewDeliveryRecord.css';
 
 const AddNewDeliveryRecord = () => {
+  const [routeOptions, setRouteOptions] = useState([]);
+
   const [deliveryData, setDeliveryData] = useState({
     supplierId: '',
     transport: '',
@@ -18,6 +20,21 @@ const AddNewDeliveryRecord = () => {
     randalu: ''
   });
 
+  useEffect(() => {
+    const fetchRoutes = async () => {
+      try {
+        const response = await fetch("http://localhost:3001/api/deliveryRoutes");
+        const data = await response.json();
+        setRouteOptions(data); // Set the fetched routes
+      } catch (error) {
+        console.error("Error fetching routes:", error);
+      }
+    };
+  
+    fetchRoutes();
+  }, []);
+  
+
   const transportOptions = [
     { value: 'selfTransport', label: 'Self Transport' },
     { value: 'D001', label: 'D001' },
@@ -26,12 +43,7 @@ const AddNewDeliveryRecord = () => {
     { value: 'D004', label: 'D004' }
   ];
 
-  const routeOptions = [
-    { value: 'route1', label: 'Route 1' },
-    { value: 'route2', label: 'Route 2' },
-    { value: 'route3', label: 'Route 3' },
-    { value: 'route4', label: 'Route 4' }
-  ];
+  
 
   const navigate = useNavigate();
   
@@ -197,18 +209,19 @@ const AddNewDeliveryRecord = () => {
             <div className="form-group">
               <label>Route:</label>
               <select
-                name="route"
-                value={deliveryData.route}
-                onChange={handleInputChange}
-                required
-              >
-                <option value="">Select Route</option>
-                {routeOptions.map((option) => (
-                  <option key={option.value} value={option.value}>
-                    {option.label}
-                  </option>
-                ))}
-              </select>
+  name="route"
+  value={deliveryData.route}
+  onChange={handleInputChange}
+  required
+>
+  <option value="">Select Route</option>
+  {routeOptions.map((route) => (
+    <option key={route.delivery_routeId} value={route.delivery_routeName}>
+      {route.delivery_routeName}
+    </option>
+  ))}
+</select>
+
             </div>
 
             <h5>Weights</h5> <br></br>
