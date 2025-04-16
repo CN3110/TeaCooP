@@ -5,11 +5,11 @@ import './AddNewDeliveryRecord.css';
 
 const AddNewDeliveryRecord = () => {
   const [routeOptions, setRouteOptions] = useState([]);
-
+  const [driverOptions, setDriverOptions] = useState([]);
   const [deliveryData, setDeliveryData] = useState({
     supplierId: '',
     transport: '',
-    date: '', 
+    date: '',
     route: '',
     totalWeight: '',
     totalSackWeight: '',
@@ -25,28 +25,49 @@ const AddNewDeliveryRecord = () => {
       try {
         const response = await fetch("http://localhost:3001/api/deliveryRoutes");
         const data = await response.json();
-        setRouteOptions(data); // Set the fetched routes
+        setRouteOptions(data);
       } catch (error) {
         console.error("Error fetching routes:", error);
       }
     };
-  
+
+    const fetchDrivers = async () => {
+      try {
+        const response = await fetch("http://localhost:3001/api/drivers"); // Fetch active drivers -not working, for now i fetch all drivers
+        
+        if (!response.ok) {
+          // Handle HTTP errors (404, 500, etc.)
+          throw new Error(`HTTP error! status: ${response.status}`);
+        }
+        
+        const data = await response.json();
+        
+        // Debugging log
+        console.log("Active drivers response:", data);
+        
+        // Ensure we have an array before proceeding
+        const drivers = Array.isArray(data) ? data : [];
+        
+        const driverOptionsWithSelf = [
+          { driverId: "selfTransport", driverName: "Self Transport" },
+          ...drivers
+        ];
+        
+        setDriverOptions(driverOptionsWithSelf);
+      } catch (error) {
+        console.error("Error fetching drivers:", error);
+        // Set default options with just self transport
+        setDriverOptions([{ driverId: "selfTransport", driverName: "Self Transport" }]);
+      }
+    };
+    
+
     fetchRoutes();
+    fetchDrivers();
   }, []);
-  
-
-  const transportOptions = [
-    { value: 'selfTransport', label: 'Self Transport' },
-    { value: 'D001', label: 'D001' },
-    { value: 'D002', label: 'D002' },
-    { value: 'D003', label: 'D003' },
-    { value: 'D004', label: 'D004' }
-  ];
-
-  
 
   const navigate = useNavigate();
-  
+
   const handleInputChange = (e) => {
     const { name, value } = e.target;
     const updatedData = {
@@ -54,7 +75,6 @@ const AddNewDeliveryRecord = () => {
       [name]: value,
     };
 
-    // Recalculate GreenTeaLeaves if any of the dependent fields change
     if (
       name === 'totalWeight' ||
       name === 'totalSackWeight' ||
@@ -81,8 +101,7 @@ const AddNewDeliveryRecord = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-  
-    // Validate required fields
+
     if (
       !deliveryData.supplierId ||
       !deliveryData.transport ||
@@ -99,16 +118,14 @@ const AddNewDeliveryRecord = () => {
       alert("Please fill in all required fields.");
       return;
     }
-  
-    // Convert date from mm/dd/yyyy to YYYY-MM-DD
+
     const date = new Date(deliveryData.date);
     if (isNaN(date.getTime())) {
       alert("Please enter a valid date.");
       return;
     }
     const formattedDate = date.toISOString().split("T")[0];
-  
-    // Create the payload with the formatted date and parsed numeric fields
+
     const payload = {
       ...deliveryData,
       date: formattedDate,
@@ -120,9 +137,9 @@ const AddNewDeliveryRecord = () => {
       greenTeaLeaves: parseFloat(deliveryData.greenTeaLeaves),
       randalu: parseFloat(deliveryData.randalu),
     };
-  
-    console.log("Payload being sent:", payload); // Log the payload
-  
+
+    console.log("Payload being sent:", payload);
+
     try {
       const response = await fetch("http://localhost:3001/api/deliveries", {
         method: "POST",
@@ -131,17 +148,16 @@ const AddNewDeliveryRecord = () => {
         },
         body: JSON.stringify(payload),
       });
-  
+
       if (!response.ok) {
         const errorData = await response.json();
         throw new Error(errorData.error || "Failed to add delivery");
       }
-  
+
       const result = await response.json();
       console.log("Response from server:", result);
-  
+
       alert("Delivery added successfully!");
-      // Optionally, reset the form
       setDeliveryData({
         supplierId: "",
         transport: "",
@@ -155,6 +171,7 @@ const AddNewDeliveryRecord = () => {
         greenTeaLeaves: "",
         randalu: "",
       });
+      navigate("/view-delivery-records");
     } catch (error) {
       console.error("Error:", error);
       alert("An error occurred while adding the delivery: " + error.message);
@@ -192,39 +209,39 @@ const AddNewDeliveryRecord = () => {
             <div className="form-group">
               <label>Transport:</label>
               <select
-                name="transport"
-                value={deliveryData.transport}
-                onChange={handleInputChange}
-                required
-              >
-                <option value="">Select Transport</option>
-                {transportOptions.map((option) => (
-                  <option key={option.value} value={option.value}>
-                    {option.label}
-                  </option>
-                ))}
-              </select>
-            </div>
-
-            <div className="form-group">
-              <label>Route:</label>
-              <select
-  name="route"
-  value={deliveryData.route}
+  name="transport"
+  value={deliveryData.transport}
   onChange={handleInputChange}
   required
 >
-  <option value="">Select Route</option>
-  {routeOptions.map((route) => (
-    <option key={route.delivery_routeId} value={route.delivery_routeName}>
-      {route.delivery_routeName}
+  <option value="">Select Transport</option>
+  {driverOptions.map((driver) => (
+    <option key={driver.driverId} value={driver.driverId}>
+      {driver.driverName}
     </option>
   ))}
 </select>
 
             </div>
 
-            <h5>Weights</h5> <br></br>
+            <div className="form-group">
+              <label>Route:</label>
+              <select
+                name="route"
+                value={deliveryData.route}
+                onChange={handleInputChange}
+                required
+              >
+                <option value="">Select Route</option>
+                {routeOptions.map((route) => (
+                  <option key={route.delivery_routeId} value={route.delivery_routeName}>
+                    {route.delivery_routeName}
+                  </option>
+                ))}
+              </select>
+            </div>
+
+            <h5>Weights</h5> <br />
 
             <div className="form-group">
               <label>Total Weight (kg):</label>
@@ -279,7 +296,7 @@ const AddNewDeliveryRecord = () => {
                 onChange={handleInputChange}
                 required
               />
-            </div> <br></br>
+            </div>
 
             <div className="form-group">
               <label>Green Tea Leaves (kg):</label>
@@ -288,7 +305,7 @@ const AddNewDeliveryRecord = () => {
                 name="greenTeaLeaves"
                 value={deliveryData.greenTeaLeaves}
                 onChange={handleInputChange}
-                readOnly // Make the field read-only
+                readOnly
               />
             </div>
 
@@ -305,7 +322,7 @@ const AddNewDeliveryRecord = () => {
           </div>
 
           <div className="form-buttons">
-            <button type="submit" className="submit-btn" onClick={() => navigate("/view-delivery-records")}>Submit</button>
+            <button type="submit" className="submit-btn">Submit</button>
             <button type="button" className="cancel-btn" onClick={() => navigate("/view-delivery-records")}>Cancel</button>
           </div>
         </form>

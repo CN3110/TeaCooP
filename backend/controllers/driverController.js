@@ -1,4 +1,5 @@
 const db = require("../config/database");
+const driver = require("../models/driver"); 
 const nodemailer = require("nodemailer");
 
 // Generate random passcode
@@ -15,42 +16,6 @@ const transporter = nodemailer.createTransport({
   },
 });
 
-// Generate new Driver ID
-const generateDriverId = async () => {
-  try {
-    const query = `
-      SELECT MAX(CAST(SUBSTRING(driverId, 2) AS UNSIGNED)) AS lastId 
-      FROM driver
-    `;
-    const [results] = await db.query(query);
-    const lastId = results[0].lastId || 100;
-    return `D${lastId + 1}`;
-  } catch (err) {
-    console.error("Error generating driver ID:", err);
-    throw new Error("Failed to generate Driver ID");
-  }
-};
-
-// Get all drivers with vehicles
-exports.getAllDrivers = async (req, res) => {
-  try {
-    const [drivers] = await db.query("SELECT * FROM driver");
-
-    for (let driver of drivers) {
-      const [vehicleDetails] = await db.query(
-        "SELECT * FROM vehicle WHERE driverId = ?",
-        [driver.driverId]
-      );
-      driver.vehicleDetails = vehicleDetails;
-    }
-
-    res.status(200).json(drivers);
-  } catch (error) {
-    console.error("Error fetching drivers:", error);
-    res.status(500).json({ error: "Failed to fetch drivers" });
-  }
-};
-
 // Add a new driver
 exports.addDriver = async (req, res) => {
   const {
@@ -66,27 +31,20 @@ exports.addDriver = async (req, res) => {
     return res.status(400).json({ error: "Missing required fields" });
   }
 
-  const driverId = await generateDriverId();
-  const passcode = generatePasscode();
-
   try {
-    await db.query(
-      `INSERT INTO driver 
-       (driverId, driverName, driverContactNumber, driverEmail, status, notes) 
-       VALUES (?, ?, ?, ?, ?, ?)`,
-      [driverId, driverName, driverContactNumber, driverEmail, status, notes]
-    );
+    const driverId = await driver.generateDriverId();
+    const passcode = generatePasscode();
 
-    if (Array.isArray(vehicleDetails)) {
-      for (const vehicle of vehicleDetails) {
-        if (!vehicle.vehicleNumber || !vehicle.vehicleType) continue;
+    await driver.createDriver({
+      driverId,
+      driverName,
+      driverContactNumber,
+      driverEmail,
+      status,
+      notes,
+    });
 
-        await db.query(
-          "INSERT INTO vehicle (driverId, vehicleNumber, vehicleType) VALUES (?, ?, ?)",
-          [driverId, vehicle.vehicleNumber, vehicle.vehicleType]
-        );
-      }
-    }
+    await driver.addVehicles(driverId, vehicleDetails);
 
     // Send email if driver is active
     if (status === "active") {
@@ -119,28 +77,28 @@ Morawakkorale Tea Co-op
   }
 };
 
+// Get all drivers
+exports.getAllDrivers = async (req, res) => {
+  try {
+    const drivers = await driver.getAllDrivers();
+    res.status(200).json(drivers);
+  } catch (error) {
+    console.error("Error fetching drivers:", error);
+    res.status(500).json({ error: "Failed to fetch drivers" });
+  }
+};
+
 // Get driver by ID
 exports.getDriverById = async (req, res) => {
   const { driverId } = req.params;
 
   try {
-    const [driver] = await db.query(
-      "SELECT * FROM driver WHERE driverId = ?",
-      [driverId]
-    );
-
-    if (driver.length === 0) {
+    const result = await driver.getDriverById(driverId);
+    if (!result) {
       return res.status(404).json({ error: "Driver not found" });
     }
 
-    const [vehicleDetails] = await db.query(
-      "SELECT * FROM vehicle WHERE driverId = ?",
-      [driverId]
-    );
-
-    driver[0].vehicleDetails = vehicleDetails;
-
-    res.status(200).json(driver[0]);
+    res.status(200).json(result);
   } catch (error) {
     console.error("Error fetching driver:", error);
     res.status(500).json({ error: "Failed to fetch driver" });
@@ -171,45 +129,20 @@ exports.updateDriver = async (req, res) => {
   }
 
   try {
-    const [existingDriver] = await db.query(
-      "SELECT * FROM driver WHERE driverId = ?",
-      [driverId]
-    );
-
-    if (!existingDriver || existingDriver.length === 0) {
+    const existing = await driver.getDriverById(driverId);
+    if (!existing) {
       return res.status(404).json({ error: "Driver not found" });
     }
 
-    await db.query(
-      `UPDATE driver 
-       SET driverName = ?, driverContactNumber = ?, driverEmail = ?, status = ?, notes = ?
-       WHERE driverId = ?`,
-      [driverName, driverContactNumber, driverEmail, status, notes, driverId]
-    );
-
-    if (Array.isArray(vehicleDetails)) {
-      await db.query("START TRANSACTION");
-
-      try {
-        await db.query("DELETE FROM vehicle WHERE driverId = ?", [driverId]);
-
-        for (const vehicle of vehicleDetails) {
-          if (!vehicle.vehicleNumber || !vehicle.vehicleType) {
-            throw new Error("All vehicle fields are required");
-          }
-
-          await db.query(
-            "INSERT INTO vehicle (driverId, vehicleNumber, vehicleType) VALUES (?, ?, ?)",
-            [driverId, vehicle.vehicleNumber, vehicle.vehicleType]
-          );
-        }
-
-        await db.query("COMMIT");
-      } catch (vehicleError) {
-        await db.query("ROLLBACK");
-        throw vehicleError;
-      }
-    }
+    await driver.updateDriver({
+      driverId,
+      driverName,
+      driverContactNumber,
+      driverEmail,
+      status,
+      notes,
+      vehicleDetails,
+    });
 
     res.status(200).json({
       message: `Driver ${
@@ -219,8 +152,28 @@ exports.updateDriver = async (req, res) => {
     });
   } catch (error) {
     console.error("Error updating Driver:", error);
-    res
-      .status(500)
-      .json({ error: error.message || "Failed to update Driver" });
+    res.status(500).json({ error: error.message || "Failed to update Driver" });
+  }
+};
+
+exports.getActiveDrivers = async (req, res) => {
+  try {
+    const drivers = await driver.getActiveDrivers();
+    
+    if (!drivers || drivers.length === 0) {
+      // Return empty array instead of error when no drivers found
+      return res.status(200).json([]);
+    }
+    
+    // Format response consistently
+    const response = drivers.map(d => ({
+      driverId: d.driverId,
+      driverName: d.driverName
+    }));
+    
+    res.status(200).json(response);
+  } catch (error) {
+    console.error("Error fetching active drivers:", error);
+    res.status(500).json({ error: "Internal server error" });
   }
 };

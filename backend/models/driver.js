@@ -104,6 +104,20 @@ const updateDriver = async ({ driverId, driverName, driverContactNumber, driverE
   }
 };
 
+//get active drivers
+const getActiveDrivers = async () => {
+  try {
+    const [rows] = await db.execute(
+      "SELECT driverId, driverName FROM driver WHERE status = 'active'"
+    );
+    return rows; // Will be empty array if no results
+  } catch (error) {
+    console.error("Error in getActiveDrivers:", error);
+    throw error; // Let controller handle the error
+  }
+};
+
+
 // Export all model functions
 module.exports = {
   generateDriverId,
@@ -112,4 +126,5 @@ module.exports = {
   getAllDrivers,
   getDriverById,
   updateDriver,
+  getActiveDrivers,
 };
