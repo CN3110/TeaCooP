@@ -221,7 +221,7 @@ const AddDriver = () => {
               <div key={index} className="vehicle-detail-card">
                 <div className="vehicle-card-header">
                   <small>Vehicle No. {index + 1}</small>
-                  {index > 0 && (
+                  {index > -1 && (
                     <button
                       type="button"
                       className="btn btn-outline-danger btn-sm remove-land-btn"
