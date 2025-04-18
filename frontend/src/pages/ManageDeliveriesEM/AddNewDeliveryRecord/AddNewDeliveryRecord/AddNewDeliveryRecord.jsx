@@ -111,11 +111,13 @@ const AddNewDeliveryRecord = () => {
     if (name === 'supplierId') {
       const input = value.toLowerCase();
       const suggestions = suppliers.filter(s =>
-        s.supplierId.toLowerCase().startsWith(input)
+        s.supplierId.toLowerCase().includes(input) ||
+        s.supplierName.toLowerCase().includes(input)
       );
       setFilteredSuggestions(suggestions);
       setSelectedSupplier(null);
     }
+    
 
     if (name === 'transport') {
       const selected = driverOptions.find(d => d.driverId === value);
@@ -414,6 +416,21 @@ const AddNewDeliveryRecord = () => {
                 <p><strong>ID:</strong> {selectedDriver.driverId}</p>
                 <p><strong>Name:</strong> {selectedDriver.driverName}</p>
                 <p><strong>Contact:</strong> {selectedDriver.driverContactNumber}</p>
+                <h5>Vehicle Details:</h5>
+                {selectedDriver.vehicleDetails && selectedDriver.vehicleDetails.length > 0 ? (
+                  <ul>
+                    {selectedDriver.vehicleDetails.map((vehicle, idx) => (
+                      <li key={idx}>
+                        <h6>Vehicle No. {idx + 1}</h6>
+                        <p><strong>Vehicle Number:</strong> {vehicle.vehicleNumber}<br />
+                          <strong>Vehicle Type:</strong> {vehicle.vehicleType} acres</p>
+                        <hr />
+                      </li>
+                    ))}
+                  </ul>
+                ) : (
+                  <p>No vehicle details available.</p>
+                )}
               </div>
             )}
           </div>
