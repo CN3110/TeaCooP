@@ -46,7 +46,7 @@ const App = () => {
     <AuthProvider>
       <Router>
         <div className="app">
-          <Navbar />
+          
 
           <Routes>
             {/* Public Routes */}

@@ -32,15 +32,54 @@ exports.addDeliveryRecord = async (req, res) => {
     !transport ||
     !date ||
     !route ||
-    !totalWeight ||
-    !totalSackWeight ||
-    !forWater ||
-    !forWitheredLeaves ||
-    !forRipeLeaves ||
-    !greenTeaLeaves ||
-    !randalu
+    totalWeight === undefined ||
+    totalSackWeight === undefined ||
+    forWater === undefined ||
+    forWitheredLeaves === undefined ||
+    forRipeLeaves === undefined ||
+    greenTeaLeaves === undefined ||
+    randalu === undefined
   ) {
     return res.status(400).json({ error: "Missing required fields." });
+  }
+
+  // Convert to numbers for validation
+  const totalWeightNum = parseFloat(totalWeight);
+  const totalSackWeightNum = parseFloat(totalSackWeight);
+  const forWaterNum = parseFloat(forWater);
+  const forWitheredLeavesNum = parseFloat(forWitheredLeaves);
+  const forRipeLeavesNum = parseFloat(forRipeLeaves);
+  const greenTeaLeavesNum = parseFloat(greenTeaLeaves);
+  const randaluNum = parseFloat(randalu);
+
+  // Validate weight values
+  if (
+    totalSackWeightNum < 0 ||
+    totalWeightNum < 0 ||
+    forWaterNum < 0 ||
+    forWitheredLeavesNum < 0 ||
+    forRipeLeavesNum < 0 ||
+    greenTeaLeavesNum < 0 ||
+    randaluNum < 0
+  ) {
+    return res.status(400).json({ error: "Weight values cannot be negative." });
+  }
+
+  if (totalWeightNum <= 0) {
+    return res.status(400).json({ error: "Total weight must be greater than zero." });
+  }
+
+  if (totalWeightNum < totalSackWeightNum) {
+    return res.status(400).json({ error: "Total weight cannot be less than total sack weight." });
+  }
+
+  const sumOfComponents = totalSackWeightNum + forWaterNum + forWitheredLeavesNum + 
+                         forRipeLeavesNum + greenTeaLeavesNum + randaluNum;
+  
+  if (Math.abs(totalWeightNum - sumOfComponents) > 0.01) { // Allowing small floating point differences
+    return res.status(400).json({ 
+      error: `Total weight (${totalWeightNum}) must equal the sum of all components (${sumOfComponents}).` 
+    });
   }
 
   try {
@@ -52,13 +91,13 @@ exports.addDeliveryRecord = async (req, res) => {
         transport,
         date,
         route,
-        totalWeight,
-        totalSackWeight,
-        forWater,
-        forWitheredLeaves,
-        forRipeLeaves,
-        greenTeaLeaves,
-        randalu,
+        totalWeightNum,
+        totalSackWeightNum,
+        forWaterNum,
+        forWitheredLeavesNum,
+        forRipeLeavesNum,
+        greenTeaLeavesNum,
+        randaluNum,
       ]
     );
     res.status(201).json({ message: "Delivery record added successfully" });
@@ -103,20 +142,60 @@ exports.updateDeliveryRecord = async (req, res) => {
     randalu,
   } = req.body;
 
+  // Validate required fields
   if (
     !supplierId ||
     !transport ||
     !date ||
     !route ||
-    !totalWeight ||
-    !totalSackWeight ||
-    !forWater ||
-    !forWitheredLeaves ||
-    !forRipeLeaves ||
-    !greenTeaLeaves ||
-    !randalu
+    totalWeight === undefined ||
+    totalSackWeight === undefined ||
+    forWater === undefined ||
+    forWitheredLeaves === undefined ||
+    forRipeLeaves === undefined ||
+    greenTeaLeaves === undefined ||
+    randalu === undefined
   ) {
     return res.status(400).json({ error: "Missing required fields" });
+  }
+
+  // Convert to numbers for validation
+  const totalWeightNum = parseFloat(totalWeight);
+  const totalSackWeightNum = parseFloat(totalSackWeight);
+  const forWaterNum = parseFloat(forWater);
+  const forWitheredLeavesNum = parseFloat(forWitheredLeaves);
+  const forRipeLeavesNum = parseFloat(forRipeLeaves);
+  const greenTeaLeavesNum = parseFloat(greenTeaLeaves);
+  const randaluNum = parseFloat(randalu);
+
+  // Validate weight values
+  if (
+    totalSackWeightNum < 0 ||
+    totalWeightNum < 0 ||
+    forWaterNum < 0 ||
+    forWitheredLeavesNum < 0 ||
+    forRipeLeavesNum < 0 ||
+    greenTeaLeavesNum < 0 ||
+    randaluNum < 0
+  ) {
+    return res.status(400).json({ error: "Weight values cannot be negative." });
+  }
+
+  if (totalWeightNum <= 0) {
+    return res.status(400).json({ error: "Total weight must be greater than zero." });
+  }
+
+  if (totalWeightNum < totalSackWeightNum) {
+    return res.status(400).json({ error: "Total weight cannot be less than total sack weight." });
+  }
+
+  const sumOfComponents = totalSackWeightNum + forWaterNum + forWitheredLeavesNum + 
+                         forRipeLeavesNum + greenTeaLeavesNum + randaluNum;
+  
+  if (Math.abs(totalWeightNum - sumOfComponents) > 0.01) {
+    return res.status(400).json({ 
+      error: `Total weight (${totalWeightNum}) must equal the sum of all components (${sumOfComponents}).` 
+    });
   }
 
   try {
@@ -127,13 +206,13 @@ exports.updateDeliveryRecord = async (req, res) => {
         transport,
         date,
         route,
-        totalWeight,
-        totalSackWeight,
-        forWater,
-        forWitheredLeaves,
-        forRipeLeaves,
-        greenTeaLeaves,
-        randalu,
+        totalWeightNum,
+        totalSackWeightNum,
+        forWaterNum,
+        forWitheredLeavesNum,
+        forRipeLeavesNum,
+        greenTeaLeavesNum,
+        randaluNum,
         deliveryId,
       ]
     );
@@ -149,7 +228,12 @@ exports.deleteDeliveryRecord = async (req, res) => {
   const { deliveryId } = req.params;
 
   try {
-    await db.query("DELETE FROM delivery WHERE deliveryId = ?", [deliveryId]);
+    const [result] = await db.query("DELETE FROM delivery WHERE deliveryId = ?", [deliveryId]);
+    
+    if (result.affectedRows === 0) {
+      return res.status(404).json({ error: "Delivery record not found" });
+    }
+    
     res.status(200).json({ message: "Delivery record deleted successfully" });
   } catch (error) {
     console.error("Error deleting delivery record:", error);

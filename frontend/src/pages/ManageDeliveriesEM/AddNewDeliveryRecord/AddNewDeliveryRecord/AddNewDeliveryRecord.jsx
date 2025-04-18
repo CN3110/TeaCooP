@@ -1,6 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from "react-router-dom";
 import EmployeeLayout from '../../../../components/EmployeeLayout/EmployeeLayout';
+import Snackbar from '@mui/material/Snackbar';
+import MuiAlert from '@mui/material/Alert';
 import './AddNewDeliveryRecord.css';
 
 const AddNewDeliveryRecord = () => {
@@ -10,7 +12,26 @@ const AddNewDeliveryRecord = () => {
   const [filteredSuggestions, setFilteredSuggestions] = useState([]);
   const [selectedSupplier, setSelectedSupplier] = useState(null);
   const [selectedDriver, setSelectedDriver] = useState(null);
-  const [errorMessage, setErrorMessage] = useState("");
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [snackbar, setSnackbar] = useState({
+    open: false,
+    message: '',
+    severity: 'success', // success | error | warning | info
+  });
+   
+  const showAlert = (message, severity = 'success') => {
+    setSnackbar({
+      open: true,
+      message,
+      severity,
+    });
+  };
+  
+  const handleCloseSnackbar = (event, reason) => {
+    if (reason === 'clickaway') return;
+    setSnackbar(prev => ({ ...prev, open: false }));
+  };
+  
 
   const [deliveryData, setDeliveryData] = useState({
     supplierId: '',
@@ -36,6 +57,7 @@ const AddNewDeliveryRecord = () => {
         setRouteOptions(data);
       } catch (error) {
         console.error("Error fetching routes:", error);
+        showAlert('Failed to fetch delivery routes. Please try again later.', 'warning');
       }
     };
 
@@ -51,6 +73,7 @@ const AddNewDeliveryRecord = () => {
       } catch (error) {
         console.error("Error fetching drivers:", error);
         setDriverOptions([{ driverId: "selfTransport", driverName: "Self Transport" }]);
+        showAlert('Failed to fetch drivers. Using default options.', 'warning');
       }
     };
 
@@ -61,6 +84,7 @@ const AddNewDeliveryRecord = () => {
         setSuppliers(data);
       } catch (error) {
         console.error("Error fetching suppliers:", error);
+        showAlert('Failed to fetch suppliers. Please try again later.', 'warning');
       }
     };
 
@@ -120,22 +144,41 @@ const AddNewDeliveryRecord = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    setIsSubmitting(true);
+    setSnackbar(prev => ({ ...prev, open: false }));
 
+
+    // Validate supplier
     const validSupplier = suppliers.find(s => s.supplierId === deliveryData.supplierId);
     if (!validSupplier) {
-      setErrorMessage("Supplier ID not found in database.");
-      } else {
-        setErrorMessage(""); // clear error message if valid
-    }
-
-    if (parseFloat(deliveryData.totalWeight) <= 0 || parseFloat(deliveryData.greenTeaLeaves) <= 0) {
-      alert("Total weight and green tea leaves must be greater than 0.");
+      showAlert('Supplier ID is not found.', 'error');
+      setIsSubmitting(false);
       return;
     }
 
+    // Validate weights
+    if (parseFloat(deliveryData.totalWeight)  <= 0) {
+      showAlert('Total weight must be greater than 0.', 'error');
+      setIsSubmitting(false);
+      return;
+    }
+
+    if (parseFloat(deliveryData.totalSackWeight || deliveryData.forWater || deliveryData.forRipeLeaves || deliveryData.forWitheredLeaves || deliveryData.greenTeaLeaves || deliveryData.randalu) < 0) {
+      showAlert('Weights cannot be negative.', 'error');
+      setIsSubmitting(false);
+      return;
+    }
+    if (parseFloat(deliveryData.totalWeight) < totalDeductions) {
+      showAlert('Total weight must be greater than total deductions.', 'error');
+      setIsSubmitting(false);
+      return;
+    }
+
+    // Validate date
     const today = new Date().toISOString().split('T')[0];
     if (deliveryData.date !== today) {
-      alert("Date must be today.");
+      showAlert('Date must be today.', 'error');
+      setIsSubmitting(false);
       return;
     }
 
@@ -164,10 +207,14 @@ const AddNewDeliveryRecord = () => {
         throw new Error(errorData.error || "Failed to add delivery");
       }
 
-      alert("Delivery added successfully!");
-      navigate("/view-delivery-records");
+      showAlert('Delivery added successfully!', 'success');
+      setTimeout(() => {
+        navigate("/view-delivery-records");
+      }, 1500);
     } catch (error) {
-      alert("An error occurred: " + error.message);
+      showAlert(`An error occurred: ${error.message}`, 'error');
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
@@ -176,6 +223,40 @@ const AddNewDeliveryRecord = () => {
       <div className='add-new-delivery-container'>
         <h3>Add New Tea Delivery</h3>
         <div className='add-new-delivery'>
+          
+          
+          <Snackbar
+  open={snackbar.open}
+  autoHideDuration={4000}
+  onClose={handleCloseSnackbar}
+  anchorOrigin={{ vertical: 'top', horizontal: 'center' }}
+>
+<MuiAlert
+  onClose={handleCloseSnackbar}
+  severity={snackbar.severity}
+  sx={{
+    width: '100%',
+    fontWeight: 'bold',
+    fontSize: '1rem',
+    backgroundColor:
+      snackbar.severity === 'success'
+        ? 'rgb(14, 152, 16)'
+        : snackbar.severity === 'error'
+        ? 'rgb(211,47,47)'
+        : snackbar.severity === 'warning'
+        ? 'rgb(237, 201, 72)'
+        : '#1976d2',
+    color: 'white',
+    boxShadow: 3,
+  }}
+  elevation={6}
+  variant="filled"
+>
+  {snackbar.message}
+</MuiAlert>
+
+</Snackbar>
+
           <form onSubmit={handleSubmit}>
             <div className="form-grid">
               <div className="form-group autocomplete">
@@ -253,50 +334,52 @@ const AddNewDeliveryRecord = () => {
                 <input type="number" name="totalWeight" value={deliveryData.totalWeight} onChange={handleInputChange} required />
               </div>
 
-
               <div className="total-deductions">
                 <h5>Deductions</h5>
-              <div className="form-group">
-                <label>Total Sack Weight (kg):</label>
-                <input type="number" name="totalSackWeight" value={deliveryData.totalSackWeight} onChange={handleInputChange} required />
-              </div>
+                <div className="form-group">
+                  <label>Total Sack Weight (kg):</label>
+                  <input type="number" name="totalSackWeight" value={deliveryData.totalSackWeight} onChange={handleInputChange} required />
+                </div>
 
-              <div className="form-group">
-                <label>For Water (kg):</label>
-                <input type="number" name="forWater" value={deliveryData.forWater} onChange={handleInputChange} required />
-              </div>
+                <div className="form-group">
+                  <label>For Water (kg):</label>
+                  <input type="number" name="forWater" value={deliveryData.forWater} onChange={handleInputChange} required />
+                </div>
 
-              <div className="form-group">
-                <label>For Withered Leaves (kg):</label>
-                <input type="number" name="forWitheredLeaves" value={deliveryData.forWitheredLeaves} onChange={handleInputChange} required />
-              </div>
+                <div className="form-group">
+                  <label>For Withered Leaves (kg):</label>
+                  <input type="number" name="forWitheredLeaves" value={deliveryData.forWitheredLeaves} onChange={handleInputChange} required />
+                </div>
 
-              <div className="form-group">
-                <label>For Ripe Leaves (kg):</label>
-                <input type="number" name="forRipeLeaves" value={deliveryData.forRipeLeaves} onChange={handleInputChange} required />
-              </div> 
+                <div className="form-group">
+                  <label>For Ripe Leaves (kg):</label>
+                  <input type="number" name="forRipeLeaves" value={deliveryData.forRipeLeaves} onChange={handleInputChange} required />
+                </div> 
 
-              <label >Total Deductions: {totalDeductions.toFixed(2)}</label>
+                <label>Total Deductions: {totalDeductions.toFixed(2)} kg</label>
               </div>
 
               <div className="tea-leaves-weights">
                 <h5>Tea Leaves Weights: </h5>
-              <div className="form-group">
-                <label>Randalu (kg):</label>
-                <input type="number" name="randalu" value={deliveryData.randalu} onChange={handleInputChange} required />
-              </div>
+                <div className="form-group">
+                  <label>Randalu (kg):</label>
+                  <input type="number" name="randalu" value={deliveryData.randalu} onChange={handleInputChange} required />
+                </div>
 
-              <div className="form-group">
-                <label>Green Tea Leaves (kg):</label>
-                <input type="number" name="greenTeaLeaves" value={deliveryData.greenTeaLeaves} onChange={handleInputChange} readOnly />
+                <div className="form-group">
+                  <label>Green Tea Leaves (kg):</label>
+                  <input type="number" name="greenTeaLeaves" value={deliveryData.greenTeaLeaves} onChange={handleInputChange} readOnly />
+                </div>
               </div>
-              </div>
-              
             </div>
 
             <div className="form-buttons">
-              <button type="submit" className="submit-btn">Submit</button>
-              <button type="button" className="cancel-btn" onClick={() => navigate("/view-delivery-records")}>Cancel</button>
+              <button type="submit" className="submit-btn" disabled={isSubmitting}>
+                {isSubmitting ? 'Submitting...' : 'Submit'}
+              </button>
+              <button type="button" className="cancel-btn" onClick={() => navigate("/view-delivery-records")} disabled={isSubmitting}>
+                Cancel
+              </button>
             </div>
           </form>
 
@@ -336,9 +419,6 @@ const AddNewDeliveryRecord = () => {
           </div>
         </div>
       </div>
-      <div className="alert alert-danger" role="alert">
-          {errorMessage}
-        </div>
     </EmployeeLayout>
   );
 };
