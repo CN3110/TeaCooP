@@ -15,6 +15,7 @@ import BrokerDashboard from './pages/Broker/BrokerDashboard/BrokerDashboard';
 import BProfile from './pages/Broker/Bprofile/Bprofile';
 import ViewDeliveryRecords from './pages/Driver/ViewDeliveryRecords/ViewDeliveryRecords';
 import ViewNewLots from './pages/Broker/ViewNewLots/ViewNewLots';
+import ViewTeaTypes from './pages/View Tea Types/ViewTeaTypes';
 
 const App = () => {
   const [showLogin, setShowLogin] = useState(false); // Move login state here
@@ -25,6 +26,7 @@ const App = () => {
         <Routes>
           {/* Common Routes */}
           <Route path="/" element={<HomePage showLogin={showLogin} setShowLogin={setShowLogin} />} />
+          <Route path="/view-tea-varieties" element={<ViewTeaTypes />} />
 
           {/* Supplier Routes */}
           <Route path="/supplier-dashboard" element={<SupplierDashboard/>} />

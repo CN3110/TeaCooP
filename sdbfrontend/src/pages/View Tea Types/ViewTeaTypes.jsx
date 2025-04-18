@@ -1,8 +1,8 @@
 import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import './ViewTeaTypesHome.css';
+import './ViewTeaTypes.css';
 
-const ViewTeaTypesHome = () => {
+const ViewTeaTypes = () => {
   const [teaTypes, setTeaTypes] = useState([]);
   const navigate = useNavigate();
 
@@ -30,7 +30,7 @@ const ViewTeaTypesHome = () => {
   return (
     <div className='tea-varieties-container'>
       <h1>Our Tea Varieties</h1> 
-      <button onClick={() => navigate('/aboutus')}>Back </button>
+      <button onClick={() => navigate('/')}>Back </button>
       <div className='tea-type-cards'>
         {teaTypes.map((teaType) => (
           <div key={teaType.teaTypeName} className='tea-type-card'>
@@ -44,4 +44,4 @@ const ViewTeaTypesHome = () => {
   );
 };
 
-export default ViewTeaTypesHome;
+export default ViewTeaTypes;
