@@ -2,7 +2,6 @@ import React from "react";
 import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 import { AuthProvider } from './contexts/AuthContext.jsx';
 import "bootstrap/dist/css/bootstrap.min.css";
-import Navbar from "./components/Navbar/Navbar";
 import Home from "./pages/Home/Home";
 import AboutUs from "./pages/About Us/AboutUs.jsx";
 import Contact from "./pages/Contact/Contact";
@@ -28,16 +27,10 @@ import EditTeaType from "./pages/TeaTypes/EditTeaType/EditTeaType.jsx";
 import CreateLot from "./pages/SalesEM/CreateLot/CreateLot.jsx";
 import ViewLots from "./pages/SalesEM/ViewLots/ViewLots.jsx";
 import EditLot from "./pages/SalesEM/EditLot/EditLot.jsx";
-import ViewTeaTypesHome from "./pages/About Us/View Tea Types_Home/ViewTeaTypesHome.jsx";
-import SupplierDashboard from "./pages/SupplierView/Dashboard/SupplierDashboard.jsx";
-import RequestTransport from "./pages/SupplierView/RequestTransport/RequestTransport.jsx";
 import ViewTransportRequests from "./pages/ViewTransportRequests/ViewTransportRequests.jsx";
-import BrokerDashboard from "./pages/BrokerView/DashboardBroker/DashboardBroker.jsx";
 import ManageDeliveryRoutes from "./pages/ManageDeliveryRoutes/ManageDeliveryRoutes.jsx";
-import BrokerLotManagement from "./pages/BrokerView/BrokerLotManagement/BrokerLotManagement.jsx";
 import SetPassword from "./pages/SetPassword/SetPassword.jsx";
 import ViewValuations from "./pages/SalesEM/ViewValuations/ViewValuations.jsx";
-import ConfirmedLots from "./pages/BrokerView/BrokerLotManagement/ConfirmedLots.jsx";
 import ManageBrokerValuations from "./pages/SalesEM/ManageBrokerValuations/ManageBrokerValuations.jsx";
 
 
@@ -50,11 +43,7 @@ const App = () => {
 
           <Routes>
             {/* Public Routes */}
-            <Route path="/" element={<Home />} />
-            <Route path="/aboutus" element={<AboutUs />} />
-            <Route path="/aboutus-view-tea-varieties" element={<ViewTeaTypesHome />} />
-            <Route path="/contact" element={<Contact />} />
-            <Route path="/login" element={<Login />} />
+            
             <Route path="/set-password" element={<SetPassword />} />
             <Route path="/profile/:userId" element={<EmployeeProfile />} />
 
@@ -83,15 +72,7 @@ const App = () => {
             <Route path="/employee-view-manage-broker-valuation-price" element={<ManageBrokerValuations/>} />
             <Route path="/view-valuations/:lotNumber" element={<ViewValuations />} />
 
-            {/* Supplier Routes */}
-            <Route path="/supplier-dashboard" element={<SupplierDashboard />} />
-            <Route path="/supplier-request-transport" element={<RequestTransport />} />
-
-            
-            {/* Broker Routes */}
-            <Route path="/broker-dashboard" element={<BrokerDashboard />} />
-            <Route path="/broker-manage-lots" element={<BrokerLotManagement />} />
-            <Route path="/broker-confirmed-lots" element={<ConfirmedLots />} />
+           
           </Routes>
         </div>
         <Footer />
