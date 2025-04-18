@@ -6,7 +6,6 @@ exports.getAllDeliveryRecords = async (req, res) => {
     const [deliveryRecords] = await db.query("SELECT * FROM delivery");
     res.status(200).json(deliveryRecords);
   } catch (error) {
-    console.error("Error fetching delivery records:", error);
     res.status(500).json({ error: "Failed to fetch delivery records" });
   }
 };
@@ -41,7 +40,7 @@ exports.addDeliveryRecord = async (req, res) => {
     !greenTeaLeaves ||
     !randalu
   ) {
-    return res.status(400).json({ error: "Missing required fields" });
+    return res.status(400).json({ error: "Missing required fields." });
   }
 
   try {

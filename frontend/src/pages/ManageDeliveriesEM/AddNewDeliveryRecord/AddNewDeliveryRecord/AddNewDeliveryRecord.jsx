@@ -10,6 +10,7 @@ const AddNewDeliveryRecord = () => {
   const [filteredSuggestions, setFilteredSuggestions] = useState([]);
   const [selectedSupplier, setSelectedSupplier] = useState(null);
   const [selectedDriver, setSelectedDriver] = useState(null);
+  const [errorMessage, setErrorMessage] = useState("");
 
   const [deliveryData, setDeliveryData] = useState({
     supplierId: '',
@@ -122,8 +123,9 @@ const AddNewDeliveryRecord = () => {
 
     const validSupplier = suppliers.find(s => s.supplierId === deliveryData.supplierId);
     if (!validSupplier) {
-      alert("Supplier ID not found in database.");
-      return;
+      setErrorMessage("Supplier ID not found in database.");
+      } else {
+        setErrorMessage(""); // clear error message if valid
     }
 
     if (parseFloat(deliveryData.totalWeight) <= 0 || parseFloat(deliveryData.greenTeaLeaves) <= 0) {
@@ -334,6 +336,9 @@ const AddNewDeliveryRecord = () => {
           </div>
         </div>
       </div>
+      <div className="alert alert-danger" role="alert">
+          {errorMessage}
+        </div>
     </EmployeeLayout>
   );
 };
