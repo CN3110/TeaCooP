@@ -1,10 +1,17 @@
 import React, { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
+import Snackbar from "@mui/material/Snackbar";
+import MuiAlert from "@mui/material/Alert";
 import "./EditDriver.css";
+
+const Alert = React.forwardRef(function Alert(props, ref) {
+  return <MuiAlert elevation={6} ref={ref} variant="filled" {...props} />;
+});
 
 const EditDriverPage = () => {
   const { driverId } = useParams();
   const navigate = useNavigate();
+
   const [formData, setFormData] = useState({
     driverId: "",
     driverName: "",
@@ -14,7 +21,20 @@ const EditDriverPage = () => {
     notes: "",
     vehicleDetails: [],
   });
+
   const [isLoading, setIsLoading] = useState(true);
+  const [snackbar, setSnackbar] = useState({ open: false, message: "", severity: "info" });
+
+  const validateEmail = (email) => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
+  const validateSLContact = (contact) => /^(?:\+94|0)?(?:7[01245678])[0-9]{7}$/.test(contact);
+
+  const showSnackbar = (message, severity = "info") => {
+    setSnackbar({ open: true, message, severity });
+  };
+
+  const handleSnackbarClose = () => {
+    setSnackbar((prev) => ({ ...prev, open: false }));
+  };
 
   useEffect(() => {
     const fetchDriver = async () => {
@@ -25,7 +45,7 @@ const EditDriverPage = () => {
         setFormData(data);
       } catch (error) {
         console.error("Error fetching driver:", error);
-        alert("Failed to load driver data.");
+        showSnackbar("Failed to load driver data.", "error");
       } finally {
         setIsLoading(false);
       }
@@ -52,10 +72,7 @@ const EditDriverPage = () => {
   const handleAddVehicleDetail = () => {
     setFormData((prev) => ({
       ...prev,
-      vehicleDetails: [
-        ...prev.vehicleDetails,
-        { vehicleNumber: "", vehicleType: "" },
-      ],
+      vehicleDetails: [...prev.vehicleDetails, { vehicleNumber: "", vehicleType: "" }],
     }));
   };
 
@@ -70,6 +87,16 @@ const EditDriverPage = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
 
+    if (!formData.driverName.trim()) return showSnackbar("Driver name is required.", "warning");
+    if (!validateSLContact(formData.driverContactNumber)) return showSnackbar("Invalid contact number.", "warning");
+    if (!validateEmail(formData.driverEmail)) return showSnackbar("Invalid email address.", "warning");
+
+    for (let vehicle of formData.vehicleDetails) {
+      if (!vehicle.vehicleNumber.trim() || !vehicle.vehicleType.trim()) {
+        return showSnackbar("All vehicle details must be filled.", "warning");
+      }
+    }
+
     if (formData.status === "disabled") {
       const confirmDisable = window.confirm(
         "Are you sure you want to disable this driver? The record will be kept but marked as inactive."
@@ -80,22 +107,20 @@ const EditDriverPage = () => {
     try {
       const response = await fetch(`http://localhost:3001/api/drivers/${driverId}`, {
         method: "PUT",
-        headers: {
-          "Content-Type": "application/json",
-        },
+        headers: { "Content-Type": "application/json" },
         body: JSON.stringify(formData),
       });
 
       if (response.ok) {
-        alert(`Driver ${formData.status === "disabled" ? "disabled" : "updated"} successfully!`);
-        navigate("/view-drivers");
+        showSnackbar(`Driver ${formData.status === "disabled" ? "disabled" : "updated"} successfully!`, "success");
+        setTimeout(() => navigate("/view-drivers"), 1500);
       } else {
         const err = await response.json();
-        alert(`Failed to update driver: ${err.message || "Unknown error"}`);
+        showSnackbar(`Failed to update driver: ${err.message || "Unknown error"}`, "error");
       }
     } catch (error) {
       console.error("Update error:", error);
-      alert("An error occurred while updating the driver.");
+      showSnackbar("An error occurred while updating the driver.", "error");
     }
   };
 
@@ -236,6 +261,18 @@ const EditDriverPage = () => {
           </button>
         </div>
       </form>
+
+      {/* Snackbar Alert */}
+      <Snackbar
+        open={snackbar.open}
+        autoHideDuration={4000}
+        onClose={handleSnackbarClose}
+        anchorOrigin={{ vertical: "bottom", horizontal: "center" }}
+      >
+        <Alert onClose={handleSnackbarClose} severity={snackbar.severity} sx={{ width: "100%" }}>
+          {snackbar.message}
+        </Alert>
+      </Snackbar>
     </div>
   );
 };

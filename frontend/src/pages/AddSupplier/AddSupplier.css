@@ -149,10 +149,7 @@
   background: #218838;
 }
 
-.submit-btn:disabled {
-  background: #94d3a2;
-  cursor: not-allowed;
-}
+
 
 /* Alert Styles */
 .alert {

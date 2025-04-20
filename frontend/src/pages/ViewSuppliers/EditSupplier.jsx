@@ -1,11 +1,18 @@
-//edit ekedi supplier wa disable krama supplierwa table eken remove wenwa, bt mta on eka disabled kyla table eke thiyanna
+//diabled or pending nam okkoma details on naaaa - meka hdannaa
 import React, { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
+import Snackbar from "@mui/material/Snackbar";
+import MuiAlert from "@mui/material/Alert";
 import "./EditSupplier.css";
+
+const Alert = React.forwardRef(function Alert(props, ref) {
+  return <MuiAlert elevation={6} ref={ref} variant="filled" {...props} />;
+});
 
 const EditSupplierPage = () => {
   const { supplierId } = useParams();
   const navigate = useNavigate();
+
   const [formData, setFormData] = useState({
     supplierId: "",
     supplierName: "",
@@ -17,28 +24,38 @@ const EditSupplierPage = () => {
   });
   const [routes, setRoutes] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
+  const [alert, setAlert] = useState({ open: false, type: "info", message: "" });
+
+  const showAlert = (message, type = "error") => {
+    setAlert({ open: true, type, message });
+  };
+
+  const handleCloseAlert = (_, reason) => {
+    if (reason === "clickaway") return;
+    setAlert({ ...alert, open: false });
+  };
+
+  const validateEmail = (email) => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
+  const validateSLContact = (contact) =>
+    /^(?:\+94|0)?(?:7[01245678])[0-9]{7}$/.test(contact);
 
   useEffect(() => {
     const fetchData = async () => {
       setIsLoading(true);
       try {
-        const supplierResponse = await fetch(
-          `http://localhost:3001/api/suppliers/${supplierId}`
-        );
+        const supplierResponse = await fetch(`http://localhost:3001/api/suppliers/${supplierId}`);
         if (!supplierResponse.ok) throw new Error("Failed to fetch supplier");
-        
+
         const supplierData = await supplierResponse.json();
-        
-        const routesResponse = await fetch(
-          "http://localhost:3001/api/deliveryRoutes"
-        );
+
+        const routesResponse = await fetch("http://localhost:3001/api/deliveryRoutes");
         const routesData = routesResponse.ok ? await routesResponse.json() : [];
-        
+
         setFormData(supplierData);
         setRoutes(routesData);
       } catch (error) {
         console.error("Error fetching data:", error);
-        alert("Failed to load supplier data");
+        showAlert("Failed to load supplier data");
       } finally {
         setIsLoading(false);
       }
@@ -49,97 +66,96 @@ const EditSupplierPage = () => {
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
-    setFormData({
-      ...formData,
-      [name]: value,
-    });
+    setFormData({ ...formData, [name]: value });
   };
 
   const handleLandDetailsChange = (index, e) => {
     const { name, value } = e.target;
     const updatedLandDetails = [...formData.landDetails];
     updatedLandDetails[index][name] = value;
-    setFormData({
-      ...formData,
-      landDetails: updatedLandDetails,
-    });
+    setFormData({ ...formData, landDetails: updatedLandDetails });
   };
 
   const handleAddLandDetail = () => {
     setFormData({
       ...formData,
-      landDetails: [
-        ...formData.landDetails,
-        { 
-          landSize: "", 
-          landAddress: "",
-          delivery_routeName: "" 
-        },
-      ],
+      landDetails: [...formData.landDetails, { landSize: "", landAddress: "", delivery_routeName: "" }],
     });
   };
 
   const handleRemoveLandDetail = (index) => {
     if (window.confirm("Are you sure you want to remove this land detail?")) {
-      const updatedLandDetails = [...formData.landDetails];
-      updatedLandDetails.splice(index, 1);
-      setFormData({
-        ...formData,
-        landDetails: updatedLandDetails,
-      });
+      const updatedLandDetails = formData.landDetails.filter((_, i) => i !== index);
+      setFormData({ ...formData, landDetails: updatedLandDetails });
     }
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    
-    // Add confirmation for disabling supplier
+
+    // Validation
+    if (!formData.supplierName.trim()) return showAlert("Supplier name is required.");
+    if (!validateSLContact(formData.supplierContactNumber)) return showAlert("Invalid contact number.");
+    if (!validateEmail(formData.supplierEmail)) return showAlert("Invalid email address.");
+
+    for (let land of formData.landDetails) {
+      if (!land.landSize || !land.landAddress.trim() || !land.delivery_routeName) {
+        return showAlert("All land detail fields must be filled.");
+      }
+    }
+
+    // Confirm if disabling
     if (formData.status === "disabled") {
-      const confirmDisable = window.confirm(
-        "Are you sure you want to disable this supplier? The record will be kept but marked as inactive."
-      );
+      const confirmDisable = window.confirm("Are you sure you want to disable this supplier?");
       if (!confirmDisable) return;
     }
-  
+
     try {
-      const response = await fetch(
-        `http://localhost:3001/api/suppliers/${formData.supplierId}`,
-        {
-          method: "PUT",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({
-            name: formData.supplierName,
-            contact: formData.supplierContactNumber,
-            email: formData.supplierEmail,
-            status: formData.status,
-            notes: formData.notes,
-            landDetails: formData.landDetails,
-          }),
-        }
-      );
-  
+      const response = await fetch(`http://localhost:3001/api/suppliers/${formData.supplierId}`, {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          name: formData.supplierName,
+          contact: formData.supplierContactNumber,
+          email: formData.supplierEmail,
+          status: formData.status,
+          notes: formData.notes,
+          landDetails: formData.landDetails,
+        }),
+      });
+
       if (response.ok) {
-        alert(`Supplier ${formData.status === "disabled" ? "disabled" : "updated"} successfully!`);
-        navigate("/view-suppliers");
+        showAlert(
+          `Supplier ${formData.status === "disabled" ? "disabled" : "updated"} successfully!`,
+          "success"
+        );
+        setTimeout(() => navigate("/view-suppliers"), 1500);
       } else {
         const errorData = await response.json();
-        alert(`Failed to update supplier: ${errorData.error || "Unknown error"}`);
+        showAlert(`Failed to update supplier: ${errorData.message || "Unknown error"}`);
       }
     } catch (error) {
       console.error("Error updating supplier:", error);
-      alert("An error occurred while updating the supplier.");
+      showAlert("An error occurred while updating the supplier.");
     }
   };
-  
 
-  if (isLoading) {
-    return <div className="loading">Loading supplier data...</div>;
-  }
+  if (isLoading) return <div className="loading">Loading supplier data...</div>;
 
   return (
     <div className="edit-supplier-container">
+      {/* Snackbar for alerts */}
+      <Snackbar
+        open={alert.open}
+        autoHideDuration={3000}
+        onClose={handleCloseAlert}
+        anchorOrigin={{ vertical: "top", horizontal: "center" }}
+      >
+        <Alert onClose={handleCloseAlert} severity={alert.type} sx={{ width: "100%" }}>
+          {alert.message}
+        </Alert>
+      </Snackbar>
+
       <h2>Edit Supplier - {formData.supplierId} {formData.supplierName}</h2>
       
       <form onSubmit={handleSubmit} className="supplier-form">

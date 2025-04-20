@@ -1,7 +1,13 @@
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import EmployeeLayout from "../../components/EmployeeLayout/EmployeeLayout";
+import Snackbar from "@mui/material/Snackbar";
+import MuiAlert from "@mui/material/Alert";
 import "./AddDriver.css";
+
+const Alert = React.forwardRef(function Alert(props, ref) {
+  return <MuiAlert elevation={6} ref={ref} variant="filled" {...props} />;
+});
 
 const AddDriver = () => {
   const [driverData, setDriverData] = useState({
@@ -14,7 +20,7 @@ const AddDriver = () => {
     vehicleDetails: [{ vehicleNumber: "", vehicleType: "" }],
   });
 
-  const [alert, setAlert] = useState(null);
+  const [alert, setAlert] = useState({ open: false, type: "info", message: "" });
   const navigate = useNavigate();
 
   const handleInputChange = (e) => {
@@ -45,40 +51,40 @@ const AddDriver = () => {
     navigate("/view-drivers");
   };
 
+  const validateEmail = (email) => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
+  const validateSLContact = (contact) => /^(?:\+94|0)?(?:7[01245678])[0-9]{7}$/.test(contact);
+
+  const showAlert = (message, type = "error") => {
+    setAlert({ open: true, type, message });
+  };
+
+  const handleClose = (_, reason) => {
+    if (reason === "clickaway") return;
+    setAlert({ ...alert, open: false });
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
 
-    // Validate required fields
-    if (
-      !driverData.driverId ||
-      !driverData.driverName ||
-      !driverData.driverContactNumber ||
-      !driverData.driverEmail
-    ) {
-      setAlert({
-        type: "error",
-        message: "Please fill in all required driver fields.",
-      });
-      return;
-    }
+    const { driverName, driverContactNumber, driverEmail } = driverData;
 
+    if (!driverName.trim()) return showAlert("Driver name is required.");
+
+    if (!validateSLContact(driverContactNumber)) return showAlert("Invalid contact number.");
+
+    if (!validateEmail(driverEmail)) return showAlert("Invalid email address.");
     if (
       driverData.vehicleDetails.some(
-        (vehicle) => !vehicle.vehicleNumber.trim() || !vehicle.vehicleType.trim()
+        (v) => !v.vehicleNumber.trim() || !v.vehicleType.trim()
       )
     ) {
-      setAlert({
-        type: "error",
-        message: "Please fill in all the vehicle details.",
-      });
-      return;
+      return showAlert("All vehicle fields must be filled.");
     }
 
     const requestBody = {
-      
-      driverName: driverData.driverName,
-      driverContactNumber: driverData.driverContactNumber,
-      driverEmail: driverData.driverEmail,
+      driverName,
+      driverContactNumber,
+      driverEmail,
       status: driverData.status,
       notes: driverData.notes,
       vehicleDetails: driverData.vehicleDetails,
@@ -87,50 +93,40 @@ const AddDriver = () => {
     try {
       const response = await fetch("http://localhost:3001/api/drivers/add", {
         method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
+        headers: { "Content-Type": "application/json" },
         body: JSON.stringify(requestBody),
       });
 
       if (response.ok) {
-        setAlert({
-          type: "success",
-          message: "Driver added successfully!",
-        });
-        setTimeout(() => {
-          setAlert(null);
-          navigate("/view-drivers");
-        }, 2000);
+        showAlert("Driver added successfully!", "success");
+        setTimeout(() => navigate("/view-drivers"), 1500);
       } else {
         const errorData = await response.json();
-        setAlert({
-          type: "error",
-          message: `Error adding driver: ${errorData.message}`,
-        });
+        showAlert(`Error: ${errorData.message}`);
       }
-    } catch (error) {
-      setAlert({
-        type: "error",
-        message: "An error occurred while adding the driver.",
-      });
+    } catch (err) {
+      showAlert("Something went wrong while adding the driver.");
     }
   };
+
 
   return (
     <EmployeeLayout>
       <div className="add-driver-container">
-        <h2>Add New Driver</h2>
 
-        {alert && (
-          <div
-            className={`alert ${
-              alert.type === "error" ? "alert-error" : "alert-success"
-            }`}
-          >
+        {/* Snackbar for alerts */}
+        <Snackbar
+          open={alert.open}
+          autoHideDuration={3000}
+          onClose={handleClose}
+          anchorOrigin={{ vertical: "bottom", horizontal: "center" }}
+        >
+          <Alert onClose={handleClose} severity={alert.type} sx={{ width: "100%" }}>
             {alert.message}
-          </div>
-        )}
+          </Alert>
+        </Snackbar> 
+
+        <h2>Add New Driver</h2>  
 
         <form onSubmit={handleSubmit} className="two-column-form">
           <div className="form-column driver-details">
@@ -153,7 +149,6 @@ const AddDriver = () => {
                 name="driverName"
                 value={driverData.driverName}
                 onChange={handleInputChange}
-                required
               />
             </div>
 
@@ -164,7 +159,6 @@ const AddDriver = () => {
                 name="driverContactNumber"
                 value={driverData.driverContactNumber}
                 onChange={handleInputChange}
-                required
               />
             </div>
 
@@ -175,18 +169,12 @@ const AddDriver = () => {
                 name="driverEmail"
                 value={driverData.driverEmail}
                 onChange={handleInputChange}
-                required
               />
             </div>
 
             <div className="form-group">
               <label>Status</label>
-              <select
-                name="status"
-                value={driverData.status}
-                onChange={handleInputChange}
-                required
-              >
+              <select name="status" value={driverData.status} onChange={handleInputChange}>
                 <option value="pending">Pending</option>
                 <option value="active">Active</option>
                 <option value="disabled">Disabled</option>
@@ -239,7 +227,6 @@ const AddDriver = () => {
                     name="vehicleNumber"
                     value={vehicle.vehicleNumber}
                     onChange={(e) => handleVehicleDetailsChange(index, e)}
-                    required
                   />
                 </div>
 
@@ -250,7 +237,6 @@ const AddDriver = () => {
                     name="vehicleType"
                     value={vehicle.vehicleType}
                     onChange={(e) => handleVehicleDetailsChange(index, e)}
-                    required
                   />
                 </div>
               </div>

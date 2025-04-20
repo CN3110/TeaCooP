@@ -1,13 +1,38 @@
-//pending thiyeddi okkom details thiyyenna on naaa... eka hdannaa
-//supplier validations blnnaaa
-//snackbar alert messages
+//<option value="disabled">Disabled</option> diabled aywa save krnne ai
+//diabled or pending nam okkoma details on naaaa - meka hdannaa
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom"; 
 import { v4 as uuidv4 } from "uuid";
 import EmployeeLayout from "../../components/EmployeeLayout/EmployeeLayout";
+import Snackbar from "@mui/material/Snackbar";
+import MuiAlert from "@mui/material/Alert";
 import "./AddSupplier.css";
 
+const Alert = React.forwardRef(function Alert(props, ref) {
+  return <MuiAlert elevation={6} ref={ref} variant="filled" {...props} />;
+});
+
 const AddSupplier = () => {
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [snackbar, setSnackbar] = useState({
+    open: false,
+    message: "",
+    severity: "success", // success | error | warning | info
+  });
+
+  const showAlert = (message, severity = "success") => {
+    setSnackbar({
+      open: true,
+      message,
+      severity,
+    });
+  };
+
+  const handleCloseSnackbar = (event, reason) => {
+    if (reason === "clickaway") return;
+    setSnackbar((prev) => ({ ...prev, open: false }));
+  };
+
   const [supplierData, setSupplierData] = useState({
     supplierId: "Generating...",
     name: "",
@@ -26,25 +51,17 @@ const AddSupplier = () => {
   });
 
   const [routes, setRoutes] = useState([]);
-  const [alert, setAlert] = useState(null);
   const navigate = useNavigate();
 
   useEffect(() => {
     const fetchRoutes = async () => {
       try {
-        const response = await fetch(
-          "http://localhost:3001/api/deliveryRoutes"
-        );
-        if (response.ok) {
-          const data = await response.json();
-          setRoutes(data);
-        } else {
-          console.error("Failed to fetch routes");
-          setRoutes([]);
-        }
+        const response = await fetch("http://localhost:3001/api/deliveryRoutes");
+        const data = await response.json();
+        if (response.ok) setRoutes(data);
+        else showAlert("Failed to fetch routes", "error");
       } catch (error) {
-        console.error("Error fetching routes:", error);
-        setRoutes([]);
+        showAlert("Error fetching routes", "error");
       }
     };
     fetchRoutes();
@@ -77,136 +94,125 @@ const AddSupplier = () => {
     });
   };
 
+  const removeLandDetail = (index) => {
+    const updatedLandDetails = supplierData.landDetails.filter((_, i) => i !== index);
+    setSupplierData({ ...supplierData, landDetails: updatedLandDetails });
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
+
+    // Validations
+    const contactPattern = /^(0((7[0-8])|([1-9][0-9]))\d{7})$/;
+    if (!contactPattern.test(supplierData.contact)) {
+      showAlert("Invalid contact number. Please enter a valid contact number.", "error");
+      return;
+    }
+    
+
+    const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailPattern.test(supplierData.email)) {
+      showAlert("Please enter a valid email address.", "error");
+      return;
+    }
+
+    if (!supplierData.name.trim() || !/^[A-Za-z\s.&'-]+$/.test(supplierData.name)) {
+      showAlert("Supplier name should only contain letters and common punctuation.", "error");
+      return;
+    }
+
+    for (let i = 0; i < supplierData.landDetails.length; i++) {
+      const land = supplierData.landDetails[i];
+      if (!land.landSize || parseFloat(land.landSize) <= 0) {
+        showAlert(`Enter a valid land size for Land No.${i + 1}.`, "error");
+        return;
+      }
+      if (!land.landAddress.trim()) {
+        showAlert(`Please provide an address for Land No.${i + 1}.`, "error");
+        return;
+      }
+      if (!land.route) {
+        showAlert(`Select a route for Land No.${i + 1}.`, "error");
+        return;
+      }
+    }
+
+    // Submit if valid
     try {
+      setIsSubmitting(true);
       const response = await fetch("http://localhost:3001/api/suppliers/add", {
         method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
+        headers: { "Content-Type": "application/json" },
         body: JSON.stringify(supplierData),
       });
 
       if (response.ok) {
         const result = await response.json();
-        setAlert({
-          type: "success",
-          message: `Supplier ${result.supplierId} added successfully!`,
-        });
+        showAlert(`Supplier ${result.supplierId} added successfully!`, "success");
         setTimeout(() => navigate("/view-suppliers"), 1500);
       } else {
         const errorData = await response.json();
-        setAlert({
-          type: "error",
-          message: `Failed to add supplier: ${
-            errorData.error || "Unknown error"
-          }`,
-        });
+        showAlert(`Failed to add supplier: ${errorData.error || "Unknown error"}`, "error");
       }
     } catch (error) {
-      setAlert({
-        type: "error",
-        message: "An error occurred while submitting the form.",
-      });
+      showAlert("An error occurred while submitting the form.", "error");
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
-  const handleCancel = () => {
-    navigate("/view-suppliers");
-  };
+  const handleCancel = () => navigate("/view-suppliers");
 
   return (
     <EmployeeLayout>
       <div className="add-supplier-container">
         <h3>Add New Supplier</h3>
 
-        {alert && <div className={`alert ${alert.type}`}>{alert.message}</div>}
-
         <form onSubmit={handleSubmit} className="two-column-form">
-          {/* Left Column - Supplier Details */}
+          {/* Supplier Info */}
           <div className="form-column supplier-details">
             <h4>Supplier Information</h4>
-            
+
             <div className="form-group">
               <label>Supplier ID</label>
-              <input
-                type="text"
-                name="supplierId"
-                value={supplierData.supplierId}
-                readOnly
-                className="read-only-input"
-              />
+              <input type="text" value={supplierData.supplierId} readOnly className="read-only-input" />
             </div>
 
             <div className="form-group">
               <label>Supplier Name *</label>
-              <input
-                type="text"
-                name="name"
-                value={supplierData.name}
-                onChange={handleInputChange}
-                required
-              />
+              <input type="text" name="name" value={supplierData.name} onChange={handleInputChange} required />
             </div>
 
             <div className="form-group">
               <label>Contact Number *</label>
-              <input
-                type="text"
-                name="contact"
-                value={supplierData.contact}
-                onChange={handleInputChange}
-                required
-              />
+              <input type="text" name="contact" value={supplierData.contact} onChange={handleInputChange} required />
             </div>
 
             <div className="form-group">
               <label>Email Address *</label>
-              <input
-                type="email"
-                name="email"
-                value={supplierData.email}
-                onChange={handleInputChange}
-                required
-              />
+              <input type="email" name="email" value={supplierData.email} onChange={handleInputChange} required />
             </div>
 
             <div className="form-group">
               <label>Status *</label>
-              <select
-                name="status"
-                value={supplierData.status}
-                onChange={handleInputChange}
-                required
-              >
+              <select name="status" value={supplierData.status} onChange={handleInputChange} required>
                 <option value="pending">Pending</option>
                 <option value="active">Active</option>
-                <option value="disabled">Disabled</option>
+                {/*<option value="disabled">Disabled</option> diabled aywa save krnne ai */}
               </select>
             </div>
 
             <div className="form-group">
               <label>Notes</label>
-              <textarea
-                name="notes"
-                value={supplierData.notes}
-                onChange={handleInputChange}
-                rows="3"
-                placeholder="Additional information about the supplier..."
-              />
+              <textarea name="notes" value={supplierData.notes} onChange={handleInputChange} rows="3" />
             </div>
           </div>
 
-          {/* Right Column - Land Details */}
+          {/* Land Info */}
           <div className="form-column land-details">
             <div className="land-details-header">
               <h5>Land Information</h5>
-              <button
-                type="button"
-                className="btn btn-outline-secondary add-land-btn"
-                onClick={addLandDetail}
-              >
+              <button type="button" onClick={addLandDetail} className="btn btn-outline-secondary add-land-btn">
                 + Add Land
               </button>
             </div>
@@ -216,11 +222,7 @@ const AddSupplier = () => {
                 <div className="land-card-header">
                   <h5>Land No.{index + 1}</h5>
                   {index > 0 && (
-                    <button
-                      type="button"
-                      className="btn btn-outline-danger btn-sm remove-land-btn"
-                      onClick={() => removeLandDetail(index)}
-                    >
+                    <button type="button" onClick={() => removeLandDetail(index)} className="btn btn-outline-danger btn-sm">
                       Remove
                     </button>
                   )}
@@ -236,7 +238,6 @@ const AddSupplier = () => {
                     required
                     step="0.01"
                     min="0"
-                    placeholder="e.g., 2.5"
                   />
                 </div>
 
@@ -248,7 +249,6 @@ const AddSupplier = () => {
                     onChange={(e) => handleLandDetailsChange(index, e)}
                     required
                     rows="2"
-                    placeholder="Full address of the land..."
                   />
                 </div>
 
@@ -261,40 +261,42 @@ const AddSupplier = () => {
                     required
                   >
                     <option value="">Select Route</option>
-                    {routes && routes.length > 0 ? (
-                      routes
-                        .filter((route) => route.delivery_routeId && route.delivery_routeName)
-                        .map((route) => (
-                          <option
-                            key={`route-${route.delivery_routeId}`}
-                            value={route.delivery_routeId}
-                          >
-                            {route.delivery_routeName}
-                          </option>
-                        ))
-                    ) : (
-                      <option value="" disabled>
-                        Loading routes...
+                    {routes.map((route) => (
+                      <option key={route.delivery_routeId} value={route.delivery_routeId}>
+                        {route.delivery_routeName}
                       </option>
-                    )}
+                    ))}
                   </select>
                 </div>
-                
               </div>
             ))}
-            <div className="form-buttons-container">
-  <button type="button" className="cancel-btn" onClick={handleCancel}>
-    Cancel
-  </button>
-  <button type="submit" className="submit-btn">
-    Save Supplier
-  </button>
-</div>
-            
-          </div>
 
-          
+            <div className="form-buttons-container">
+              <button type="button" onClick={handleCancel} className="cancel-btn">Cancel</button>
+              <button type="submit" className="submit-btn" disabled={isSubmitting}>
+                {isSubmitting ? "Saving..." : "Save Supplier"}
+              </button>
+            </div>
+          </div>
         </form>
+
+        <Snackbar
+  open={snackbar.open}
+  autoHideDuration={3000}
+  onClose={handleCloseSnackbar}
+  anchorOrigin={{ vertical: "top", horizontal: "center" }}
+>
+  <MuiAlert
+    elevation={6}
+    variant="filled"
+    onClose={handleCloseSnackbar}
+    severity={snackbar.severity}
+    sx={{ width: '100%' }}
+  >
+    {snackbar.message}
+  </MuiAlert>
+</Snackbar>
+
       </div>
     </EmployeeLayout>
   );
