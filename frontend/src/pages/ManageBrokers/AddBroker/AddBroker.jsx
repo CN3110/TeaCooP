@@ -55,7 +55,6 @@ const AddBroker = () => {
     // If status is 'active', all fields should be filled
     if (brokerData.status === "active") {
       const requiredFields = [
-        "brokerId",
         "brokerName",
         "brokerContact",
         "brokerEmail",
@@ -76,7 +75,7 @@ const AddBroker = () => {
     // Validations
     const contactPattern = /^(0((7[0-8])|([1-9][0-9]))\d{7})$/;
 
-    if (!contactPattern.test(brokerData.brokerContact)) {
+    if (brokerData.brokerContact && !contactPattern.test(brokerData.brokerContact)) {
       showAlert(
         "Invalid broker's contact number. Please enter a valid contact number.",
         "error"
@@ -84,7 +83,7 @@ const AddBroker = () => {
       return;
     }
 
-    if (!contactPattern.test(brokerData.brokerCompanyContact)) {
+    if (brokerData.brokerCompanyContact && !contactPattern.test(brokerData.brokerCompanyContact)) {
       showAlert(
         "Invalid broker company contact number. Please enter a valid contact number.",
         "error"
@@ -95,21 +94,36 @@ const AddBroker = () => {
     const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
     if (
-      !emailPattern.test(brokerData.brokerEmail) ||
-      !emailPattern.test(brokerData.brokerCompanyEmail)
+      brokerData.brokerEmail && !emailPattern.test(brokerData.brokerEmail)
     ) {
-      showAlert("Please enter a valid email address.", "error");
+      showAlert("Please enter a valid broker email address.", "error");
+      return;
+    }
+
+    if (
+      brokerData.brokerCompanyEmail && !emailPattern.test(brokerData.brokerCompanyEmail)
+    ) {
+      showAlert("Please enter a valid company email address.", "error");
       return;
     }
 
     const namePattern = /^[A-Za-z\s.&'-]+$/;
 
     if (
-      !namePattern.test(brokerData.brokerName) ||
-      !namePattern.test(brokerData.brokerCompanyName)
+      brokerData.brokerName && !namePattern.test(brokerData.brokerName)
     ) {
       showAlert(
-        "Names should only contain letters and common punctuation.",
+        "Broker name should only contain letters and common punctuation.",
+        "error"
+      );
+      return;
+    }
+
+    if (
+      brokerData.brokerCompanyName && !namePattern.test(brokerData.brokerCompanyName)
+    ) {
+      showAlert(
+        "Company name should only contain letters and common punctuation.",
         "error"
       );
       return;
@@ -122,12 +136,13 @@ const AddBroker = () => {
         body: JSON.stringify(brokerData),
       });
 
+      const data = await response.json();
+      
       if (response.ok) {
         showAlert("Broker added successfully!", "success");
         setTimeout(() => navigate("/view-brokers"), 1500);
       } else {
-        const errorData = await response.json();
-        showAlert(`Error adding broker: ${errorData.message}`, "error");
+        showAlert(data.error || "Failed to add broker", "error");
       }
     } catch (error) {
       console.error("Error adding broker:", error);
@@ -149,82 +164,111 @@ const AddBroker = () => {
                 id="brokerId"
                 name="brokerId"
                 value={brokerData.brokerId}
-                onChange={handleInputChange}
+                readOnly={true}
+                className="read-only-input"
               />
             </div>
             <div className="form-group">
-              <label htmlFor="brokerName">Broker Name</label>
+              <label htmlFor="brokerName">Broker Name *</label>
               <input
                 type="text"
                 id="brokerName"
                 name="brokerName"
                 value={brokerData.brokerName}
                 onChange={handleInputChange}
+                required
               />
             </div>
             <div className="form-group">
-              <label htmlFor="brokerContact">Broker Contact Number</label>
+              <label htmlFor="brokerContact">Broker Contact Number *</label>
               <input
-                type="number"
+                type="tel"
                 id="brokerContact"
                 name="brokerContact"
                 value={brokerData.brokerContact}
                 onChange={handleInputChange}
+                required
               />
             </div>
             <div className="form-group">
-              <label htmlFor="brokerEmail">Broker Email Address</label>
+              <label htmlFor="brokerEmail">Broker Email Address *</label>
               <input
                 type="email"
                 id="brokerEmail"
                 name="brokerEmail"
                 value={brokerData.brokerEmail}
                 onChange={handleInputChange}
+                required
               />
+            </div>
+            <div className="form-group">
+              <label htmlFor="status">Status</label>
+              <select
+                id="status"
+                name="status"
+                value={brokerData.status}
+                onChange={handleInputChange}
+              >
+                <option value="pending">Pending</option>
+                <option value="active">Active</option>
+                <option value="disabled">Disabled</option>
+              </select>
             </div>
           </div>
 
           <div className="form-column">
             <h3>Company Details</h3>
             <div className="form-group">
-              <label htmlFor="brokerCompanyName">Company Name</label>
+              <label htmlFor="brokerCompanyName">Company Name *</label>
               <input
                 type="text"
                 id="brokerCompanyName"
                 name="brokerCompanyName"
                 value={brokerData.brokerCompanyName}
                 onChange={handleInputChange}
+                required
               />
             </div>
             <div className="form-group">
               <label htmlFor="brokerCompanyContact">
-                Company Contact Number
+                Company Contact Number *
               </label>
               <input
-                type="number"
+                type="tel"
                 id="brokerCompanyContact"
                 name="brokerCompanyContact"
                 value={brokerData.brokerCompanyContact}
                 onChange={handleInputChange}
+                required
               />
             </div>
             <div className="form-group">
-              <label htmlFor="brokerCompanyEmail">Company Email Address</label>
+              <label htmlFor="brokerCompanyEmail">Company Email Address *</label>
               <input
                 type="email"
                 id="brokerCompanyEmail"
                 name="brokerCompanyEmail"
                 value={brokerData.brokerCompanyEmail}
                 onChange={handleInputChange}
+                required
               />
             </div>
             <div className="form-group">
-              <label htmlFor="brokerCompanyAddress">Company Address</label>
-              <input
-                type="text"
+              <label htmlFor="brokerCompanyAddress">Company Address *</label>
+              <textarea
                 id="brokerCompanyAddress"
                 name="brokerCompanyAddress"
                 value={brokerData.brokerCompanyAddress}
+                onChange={handleInputChange}
+                required
+              />
+            </div>
+            <div className="form-group">
+              <label htmlFor="notes">Notes</label>
+              <textarea
+                id="notes"
+                name="notes"
+                value={brokerData.notes}
                 onChange={handleInputChange}
               />
             </div>
@@ -248,6 +292,7 @@ const AddBroker = () => {
           open={snackbar.open}
           autoHideDuration={4000}
           onClose={handleCloseSnackbar}
+          anchorOrigin={{ vertical: "top", horizontal: "center" }}
         >
           <Alert
             onClose={handleCloseSnackbar}

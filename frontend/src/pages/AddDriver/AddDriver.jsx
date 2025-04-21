@@ -119,7 +119,7 @@ const AddDriver = () => {
           open={alert.open}
           autoHideDuration={3000}
           onClose={handleClose}
-          anchorOrigin={{ vertical: "bottom", horizontal: "center" }}
+          anchorOrigin={{ vertical: "top", horizontal: "center" }}
         >
           <Alert onClose={handleClose} severity={alert.type} sx={{ width: "100%" }}>
             {alert.message}

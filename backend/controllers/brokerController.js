@@ -1,5 +1,5 @@
-//after editing users' email by the emolyee - it should be send the passcode to the new email
 const db = require("../config/database");
+const broker = require("../models/broker");
 const nodemailer = require("nodemailer");
 
 // Generate a random 6-digit passcode
@@ -9,77 +9,96 @@ const generatePasscode = () => {
 
 // Configure Nodemailer
 const transporter = nodemailer.createTransport({
-  service: "gmail", //email service
+  service: "gmail",
   auth: {
-    user: "mkteacoop@gmail.com", 
-    pass: "sinr fmza uvxa soww", 
+    user: process.env.EMAIL_USER,
+    pass: process.env.EMAIL_PASS,
   },
 });
+
+// Add a new broker
+exports.addBroker = async (req, res) => {
+  let {
+    brokerName,
+    brokerContact,
+    brokerEmail,
+    brokerCompanyName,
+    brokerCompanyContact,
+    brokerCompanyEmail,
+    brokerCompanyAddress,
+    status = "pending",
+    notes = null,
+  } = req.body;
+
+  if (
+    status === "active" &&
+    (!brokerName ||
+      !brokerContact ||
+      !brokerEmail ||
+      !brokerCompanyName ||
+      !brokerCompanyContact ||
+      !brokerCompanyEmail ||
+      !brokerCompanyAddress)
+  ) {
+    return res.status(400).json({ error: "Missing required fields" });
+  }
+
+  try {
+    const brokerId = await broker.generateBrokerId();
+    const passcode = generatePasscode();
+
+    await broker.createBroker({
+      brokerId,
+      brokerName,
+      brokerContact,
+      brokerEmail,
+      brokerCompanyName,
+      brokerCompanyContact,
+      brokerCompanyEmail,
+      brokerCompanyAddress,
+      status,
+      notes,
+    });
+
+    if (status === "active") {
+      const mailOptions = {
+        from: process.env.EMAIL_USER,
+        to: brokerEmail,
+        subject: "Morawakkorale Tea Co-op - Your Login Credentials",
+        text: `Dear ${brokerName},
+
+Your login credentials for the system are as follows:
+
+User ID: ${brokerId}
+Passcode: ${passcode}
+
+Please use the above passcode as your password during your first login. After logging in, you will be able to create your own password.
+
+If you have any questions, please contact us.
+
+Best regards,
+Morawakkorale Tea Co-op
+041-2271400`,
+      };
+
+      await transporter.sendMail(mailOptions);
+    }
+
+    res.status(201).json({ message: "Broker added successfully" });
+  } catch (error) {
+    console.error("Error adding broker:", error);
+    res.status(500).json({ error: "Failed to add broker" });
+  }
+};
 
 // Fetch all brokers
 exports.getAllBrokers = async (req, res) => {
   try {
-    const [brokers] = await db.query("SELECT * FROM broker");
+    const brokers = await broker.getAllBrokers();
     res.status(200).json(brokers);
   } catch (error) {
     console.error("Error fetching brokers:", error);
     res.status(500).json({ error: "Failed to fetch brokers" });
-  }
-};
-
-// Add a broker
-exports.addBroker = async (req, res) => {
-  const { brokerId, brokerName, brokerContact, brokerEmail, brokerCompanyName, brokerCompanyContact, brokerCompanyEmail, brokerCompanyAddress } = req.body;
-
-  // Validate required fields
-  if (!brokerId || !brokerName || !brokerContact || !brokerEmail || !brokerCompanyName || !brokerCompanyContact || !brokerCompanyEmail || !brokerCompanyAddress) {
-    return res.status(400).json({ error: "Missing required fields" });
-  }
-
-  // Generate a passcode
-  const passcode = generatePasscode();
-
-  try {
-    // Insert broker into the broker table
-    const [brokerResult] = await db.query(
-      "INSERT INTO broker (brokerId, brokerName, brokerContactNumber, brokerEmail, brokerCompanyName, brokerCompanyContact, brokerCompanyEmail, brokerCompanyAddress, passcode) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)",
-      [brokerId, brokerName, brokerContact, brokerEmail, brokerCompanyName, brokerCompanyContact, brokerCompanyEmail, brokerCompanyAddress, passcode]
-    );
-
-    // Send email with passcode
-    const mailOptions = {
-      from: "mkteacoop@gmail.com",
-      to: brokerEmail,
-      subject: "Morawakkorale Tea CooP - Your Login Credentials",
-      text: `Dear ${brokerName}, 
-
-            Your login credentials for the system are as follows:
-
-            User ID: ${brokerId}
-            Passcode: ${passcode}
-
-            Please use the above passcode as your password during your first login. After logging in, you will be able to create your own password.
-
-            If you have any questions, please contact us.
-
-            Best regards,
-            Morawakkorale Tea Co-op
-            041-2271400`,
-    };
-
-    // Send the email
-    transporter.sendMail(mailOptions, (error, info) => {
-      if (error) {
-        console.error("Error sending email:", error);
-        return res.status(500).json({ error: "Failed to send email" });
-      } else {
-        console.log("Email sent:", info.response);
-        res.status(201).json({ message: "Broker added successfully" });
-      }
-    });
-  } catch (error) {
-    console.error("Error adding broker:", error);
-    res.status(500).json({ error: "Failed to add broker" });
   }
 };
 
@@ -88,13 +107,11 @@ exports.getBrokerById = async (req, res) => {
   const { brokerId } = req.params;
 
   try {
-    const [broker] = await db.query("SELECT * FROM broker WHERE brokerId = ?", [brokerId]);
-
-    if (broker.length === 0) {
+    const result = await broker.getBrokerById(brokerId);
+    if (!result) {
       return res.status(404).json({ error: "Broker not found" });
     }
-
-    res.status(200).json(broker[0]);
+    res.status(200).json(result);
   } catch (error) {
     console.error("Error fetching broker:", error);
     res.status(500).json({ error: "Failed to fetch broker" });
@@ -102,85 +119,90 @@ exports.getBrokerById = async (req, res) => {
 };
 
 // Update a broker by ID
-// Update a broker by ID
 exports.updateBroker = async (req, res) => {
   const { brokerId } = req.params;
-  const { brokerName, brokerContact, brokerEmail, brokerCompanyName, brokerCompanyContact, brokerCompanyEmail, brokerCompanyAddress } = req.body;
+  const {
+    brokerName,
+    brokerContact,
+    brokerEmail,
+    brokerCompanyName,
+    brokerCompanyContact,
+    brokerCompanyEmail,
+    brokerCompanyAddress,
+    status,
+    notes,
+  } = req.body;
 
-  if (!brokerName || !brokerContact || !brokerEmail || !brokerCompanyName || !brokerCompanyContact || !brokerCompanyEmail || !brokerCompanyAddress) {
+  if (
+    !brokerName ||
+    !brokerContact ||
+    !brokerEmail ||
+    !brokerCompanyName ||
+    !brokerCompanyContact ||
+    !brokerCompanyEmail ||
+    !brokerCompanyAddress ||
+    !status
+  ) {
     return res.status(400).json({ error: "Missing required fields" });
   }
 
   try {
-    // Get current broker data to check if email has changed
-    const [currentBroker] = await db.query("SELECT * FROM broker WHERE brokerId = ?", [brokerId]);
+    const [result] = await db.query("SELECT * FROM broker WHERE brokerId = ?", [brokerId]);
 
-    if (!currentBroker.length) {
+    if (!result.length) {
       return res.status(404).json({ error: "Broker not found" });
     }
 
-    const oldEmail = currentBroker[0].brokerEmail;
+    const currentBroker = result[0];
+    const oldEmail = currentBroker.brokerEmail;
 
-    // Update broker data
     await db.query(
-      "UPDATE broker SET brokerName = ?, brokerContactNumber = ?, brokerEmail = ?, brokerCompanyName = ?, brokerCompanyContact = ?, brokerCompanyEmail = ?, brokerCompanyAddress = ? WHERE brokerId = ?",
-      [brokerName, brokerContact, brokerEmail, brokerCompanyName, brokerCompanyContact, brokerCompanyEmail, brokerCompanyAddress, brokerId]
+      "UPDATE broker SET brokerName = ?, brokerContactNumber = ?, brokerEmail = ?, brokerCompanyName = ?, brokerCompanyContact = ?, brokerCompanyEmail = ?, brokerCompanyAddress = ?, status = ?, notes = ? WHERE brokerId = ?",
+      [
+        brokerName,
+        brokerContact,
+        brokerEmail,
+        brokerCompanyName,
+        brokerCompanyContact,
+        brokerCompanyEmail,
+        brokerCompanyAddress,
+        status,
+        notes,
+        brokerId,
+      ]
     );
 
-    // If email has changed, send a passcode to the new email
+    // Send passcode if email was changed
     if (oldEmail !== brokerEmail) {
       const passcode = generatePasscode();
 
-      // Send the email with passcode
       const mailOptions = {
-        from: "mkteacoop@gmail.com",
+        from: process.env.EMAIL_USER,
         to: brokerEmail,
-        subject: "Morawakkorale Tea CooP - Your Login Credentials",
-        text: `Dear ${brokerName}, 
+        subject: "Morawakkorale Tea Co-op - Updated Login Credentials",
+        text: `Dear ${brokerName},
 
-              Your login credentials for the system are as follows:
+Your login credentials for the system have been updated:
 
-              User ID: ${brokerId}
-              Passcode: ${passcode}
+User ID: ${brokerId}
+Passcode: ${passcode}
 
-              Please use the above passcode as your password during your first login, after changinf the email. After logging in, you will be able to create your own password.
+Please use the above passcode as your password during your first login after the email change. After logging in, you will be able to create your own password.
 
-              If you have any questions, please contact us.
+If you have any questions, please contact us.
 
-              Best regards,
-              Morawakkorale Tea Co-op
-              041-2271400`,
+Best regards,
+Morawakkorale Tea Co-op
+041-2271400`,
       };
 
-      // Send the email
-      transporter.sendMail(mailOptions, (error, info) => {
-        if (error) {
-          console.error("Error sending email:", error);
-          return res.status(500).json({ error: "Failed to send email" });
-        } else {
-          console.log("Email sent:", info.response);
-          res.status(200).json({ message: "Broker updated successfully" });
-        }
-      });
-    } else {
-      res.status(200).json({ message: "Broker updated successfully" });
+      await transporter.sendMail(mailOptions);
     }
+
+    res.status(200).json({ message: "Broker updated successfully" });
   } catch (error) {
     console.error("Error updating broker:", error);
     res.status(500).json({ error: "Failed to update broker" });
-  }
-};
-
-// Delete a broker by ID
-exports.deleteBroker = async (req, res) => {
-  const { brokerId } = req.params;
-
-  try {
-    await db.query("DELETE FROM broker WHERE brokerId = ?", [brokerId]);
-    res.status(200).json({ message: "Broker deleted successfully" });
-  } catch (error) {
-    console.error("Error deleting broker:", error);
-    res.status(500).json({ error: "Failed to delete broker" });
   }
 };
 

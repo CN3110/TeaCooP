@@ -1,24 +1,81 @@
 const db = require("../config/database");
 
-class Broker {
-    static addBroker(brokerId, brokerName, brokerContact, brokerEmail, brokerCompanyName, brokerCompanyContact, brokerCompanyEmail,brokerComapnyAddress, callback) {
-        if (!brokerId || !brokerName || !brokerContact) {
-            return callback(new Error("Missing required fields"), null);
-        }
+// Generate a new unique broker ID
+const generateBrokerId = async () => {
+  const query = `
+    SELECT MAX(CAST(SUBSTRING(brokerId, 2) AS UNSIGNED)) AS lastId 
+    FROM broker
+  `;
+  const [results] = await db.query(query);
+  const lastId = results[0].lastId || 100;
+    return `B${lastId + 1}`;
+};
 
-        const query = `
-          INSERT INTO broker (brokerId, brokerName, brokerContactNumber, brokerEmail, brokerCompanyName, brokerCompanyContact, brokerCompanyEmail, brokerCompanyAddress)
-          VALUES (?, ?, ?, ?, ?, ?, ?, ?)
-        `;
+// Create a new broker
+const createBroker = async ({ brokerId, brokerName, brokerContact, brokerEmail, brokerCompanyName, brokerCompanyContact, brokerCompanyEmail, brokerCompanyAddress, status, notes }) => {
+  const query = `
+    INSERT INTO broker 
+    (brokerId, brokerName, brokerContactNumber, brokerEmail, brokerCompanyName, brokerCompanyContact, brokerCompanyEmail, brokerCompanyAddress, status, notes)
+    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+  `;
+  await db.query(query, [brokerId, brokerName, brokerContact, brokerEmail, brokerCompanyName, brokerCompanyContact, brokerCompanyEmail, brokerCompanyAddress, status, notes]);
+};
 
-        db.query(query, [brokerId, brokerName, brokerContact, brokerEmail, brokerCompanyName, brokerCompanyContact, brokerCompanyEmail, brokerComapnyAddress], (err, result) => {
-            if (err) {
-                return callback(err, null);
-            }
+//get all brokers with their details
+const getAllBrokers = async () => {
+  const [brokers] = await db.query("SELECT * FROM broker");
 
-            return callback(null, { broker: result });
-        });
-    }
+  for (const broker of brokers) {
+    const [landDetails] = await db.query(
+      "SELECT * FROM land WHERE brokerId = ?",
+      [broker.brokerId]
+    );
 }
+      return brokers;
+    }; 
 
-module.exports = Broker;
+// Get broker and their details by brokerId
+const getBrokerById = async (brokerId) => {
+  const [brokerRows] = await db.query(
+    "SELECT * FROM broker WHERE brokerId = ?",
+    [brokerId]
+  );
+
+  if (brokerRows.length === 0) return null;
+
+  return {
+    ...brokerRows[0],
+  };
+  };
+
+
+// Update broker details by brokerId
+const updateBroker = async (brokerId, brokerDetails) => {
+  const query = `
+    UPDATE broker 
+    SET brokerName = ?, brokerContactNumber = ?, brokerEmail = ?, brokerCompanyName = ?, brokerCompanyContact = ?, brokerCompanyEmail = ?, brokerCompanyAddress = ?, status = ?, notes = ?
+    WHERE brokerId = ?
+  `;
+  await db.query(query, [
+    brokerDetails.brokerName,
+    brokerDetails.brokerContact,
+    brokerDetails.brokerEmail,
+    brokerDetails.brokerCompanyName,
+    brokerDetails.brokerCompanyContact,
+    brokerDetails.brokerCompanyEmail,
+    brokerDetails.brokerCompanyAddress,
+    brokerDetails.status,
+    brokerDetails.notes,
+    brokerId,
+  ]);
+};
+
+
+
+module.exports = {
+    generateBrokerId,
+    createBroker,
+    getAllBrokers,
+    getBrokerById,
+    updateBroker,
+};
