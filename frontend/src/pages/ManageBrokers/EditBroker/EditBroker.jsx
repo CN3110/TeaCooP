@@ -1,175 +1,349 @@
-import React, { useState, useEffect, use } from "react";
+import React, { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
+import Snackbar from "@mui/material/Snackbar";
+import MuiAlert from "@mui/material/Alert";
 import "./EditBroker.css";
 
+const Alert = React.forwardRef(function Alert(props, ref) {
+  return <MuiAlert elevation={6} ref={ref} variant="filled" {...props} />;
+});
+
 const EditBroker = () => {
-  const { brokerId } = useParams(); // Extract brokerId from URL parameters
-  const navigate = useNavigate(); // Initialize the navigate function
-  const [formData, setFormData] = useState({
+  const { brokerId } = useParams();
+  const navigate = useNavigate();
+  const [brokerData, setBrokerData] = useState({
     brokerId: "",
     brokerName: "",
-    brokerContactNumber: "",
+    brokerContact: "",
     brokerEmail: "",
+    status: "pending",
     brokerCompanyName: "",
     brokerCompanyContact: "",
     brokerCompanyEmail: "",
     brokerCompanyAddress: "",
+    notes: "",
   });
 
-  // Debugging log
-  console.log("Broker ID from URL:", brokerId);
+  const [snackbar, setSnackbar] = useState({
+    open: false,
+    message: "",
+    severity: "success",
+  });
 
-  // Fetch the selected broker's data
+  const showAlert = (message, severity = "success") => {
+    setSnackbar({
+      open: true,
+      message,
+      severity,
+    });
+  };
+
+  const handleCloseSnackbar = (event, reason) => {
+    if (reason === "clickaway") return;
+    setSnackbar((prev) => ({ ...prev, open: false }));
+  };
+
   useEffect(() => {
     const fetchBroker = async () => {
       try {
         const response = await fetch(
-          `http://localhost:3001/api/brokers/${brokerId}` // Use brokerId from URL
+          `http://localhost:3001/api/brokers/${brokerId}`
         );
         if (response.ok) {
           const data = await response.json();
-          console.log("Fetched Broker Data:", data); // Debugging log
-          setFormData(data);
+          // Map the data to match our state structure
+          setBrokerData({
+            brokerId: data.brokerId,
+            brokerName: data.brokerName,
+            brokerContact: data.brokerContactNumber || data.brokerContact,
+            brokerEmail: data.brokerEmail,
+            status: data.status || "pending",
+            brokerCompanyName: data.brokerCompanyName,
+            brokerCompanyContact: data.brokerCompanyContactNumber || data.brokerCompanyContact,
+            brokerCompanyEmail: data.brokerCompanyEmail,
+            brokerCompanyAddress: data.brokerCompanyAddress,
+            notes: data.notes || "",
+          });
         } else {
-          console.error("Failed to fetch broker data");
+          const errorData = await response.json();
+          showAlert(errorData.error || "Failed to fetch broker data", "error");
         }
       } catch (error) {
         console.error("Error fetching broker:", error);
+        showAlert("An error occurred while fetching broker data", "error");
       }
     };
 
     if (brokerId) {
-      fetchBroker(); // Fetch broker data only if brokerId is defined
+      fetchBroker();
     }
-  }, [brokerId]); // Add brokerId as a dependency
+  }, [brokerId]);
 
-  // Handle form input changes
   const handleInputChange = (e) => {
     const { name, value } = e.target;
-    setFormData({
-      ...formData,
-      [name]: value,
-    });
+    setBrokerData({ ...brokerData, [name]: value });
   };
 
-  //handle form submission
+  const validateForm = () => {
+    // If status is 'active', all fields should be filled
+    if (brokerData.status === "active") {
+      const requiredFields = [
+        "brokerName",
+        "brokerContact",
+        "brokerEmail",
+        "brokerCompanyName",
+        "brokerCompanyContact",
+        "brokerCompanyEmail",
+        "brokerCompanyAddress",
+      ];
+      const missingFields = requiredFields.filter(
+        (field) => !brokerData[field]
+      );
+      if (missingFields.length > 0) {
+        showAlert("Please fill in all required fields.", "error");
+        return false;
+      }
+    }
+
+    // Contact number validation
+    const contactPattern = /^(0((7[0-8])|([1-9][0-9]))\d{7})$/;
+    if (brokerData.brokerContact && !contactPattern.test(brokerData.brokerContact)) {
+      showAlert(
+        "Invalid broker's contact number. Please enter a valid contact number.",
+        "error"
+      );
+      return false;
+    }
+
+    if (brokerData.brokerCompanyContact && !contactPattern.test(brokerData.brokerCompanyContact)) {
+      showAlert(
+        "Invalid broker company contact number. Please enter a valid contact number.",
+        "error"
+      );
+      return false;
+    }
+
+    // Email validation
+    const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (brokerData.brokerEmail && !emailPattern.test(brokerData.brokerEmail)) {
+      showAlert("Please enter a valid broker email address.", "error");
+      return false;
+    }
+
+    if (brokerData.brokerCompanyEmail && !emailPattern.test(brokerData.brokerCompanyEmail)) {
+      showAlert("Please enter a valid company email address.", "error");
+      return false;
+    }
+
+    // Name validation
+    const namePattern = /^[A-Za-z\s.&'-]+$/;
+    if (brokerData.brokerName && !namePattern.test(brokerData.brokerName)) {
+      showAlert(
+        "Broker name should only contain letters and common punctuation.",
+        "error"
+      );
+      return false;
+    }
+
+    if (brokerData.brokerCompanyName && !namePattern.test(brokerData.brokerCompanyName)) {
+      showAlert(
+        "Company name should only contain letters and common punctuation.",
+        "error"
+      );
+      return false;
+    }
+
+    return true;
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
+
+    if (!validateForm()) {
+      return;
+    }
+
     try {
       const response = await fetch(
         `http://localhost:3001/api/brokers/${brokerId}`,
         {
           method: "PUT",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify(formData),
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            ...brokerData,
+            brokerContactNumber: brokerData.brokerContact,
+            brokerCompanyContactNumber: brokerData.brokerCompanyContact
+          }),
         }
       );
+
+      const data = await response.json();
+      
       if (response.ok) {
-        alert("Broker details updated successfully!");
-        navigate("/view-brokers");
+        showAlert("Broker updated successfully!", "success");
+        setTimeout(() => navigate("/view-brokers"), 1500);
       } else {
-        const errorData = await response.json();
-        alert(`Error updating broker details: ${errorData.message}`);
+        showAlert(data.error || "Failed to update broker", "error");
       }
     } catch (error) {
-      console.error("Error updating broker details:", error);
-      alert("An error occurred. Please try again.");
+      console.error("Error updating broker:", error);
+      showAlert("An error occurred while updating the broker.", "error");
     }
   };
 
   return (
-    <div className="edit-broker-container">
-      <h3>Edit Broker</h3>
-      <form onSubmit={handleSubmit}>
-        <div className="form-group">
-          <label>Broker ID</label>
-          <input
-            type="text"
-            name="brokerId"
-            value={formData.brokerId || ""}
-            onChange={handleInputChange}
-            disabled
-          />
-        </div>
-        <div className="form-group">
-          <label>Broker Name</label>
-          <input
-            type="text"
-            name="brokerName"
-            value={formData.brokerName || ""}
-            onChange={handleInputChange}
-          />
-        </div>
-        <div className="form-group">
-          <label>Broker Contact Number</label>
-          <input
-            type="text"
-            name="brokerContactNumber"
-            value={formData.brokerContactNumber || ""}
-            onChange={handleInputChange}
-          />
-        </div>
-        <div className="form-group">
-          <label>Broker Email</label>
-          <input
-            type="email"
-            name="brokerEmail"
-            value={formData.brokerEmail || ""}
-            onChange={handleInputChange}
-          />
-        </div>
-        <div className="form-group">
-          <label>Broker Company Name</label>
-          <input
-            type="text"
-            name="brokerCompanyName"
-            value={formData.brokerCompanyName || ""}
-            onChange={handleInputChange}
-          />
-        </div>
-        <div className="form-group">
-          <label>Broker Company Contact Number</label>
-          <input
-            type="text"
-            name="brokerCompanyContact"
-            value={formData.brokerCompanyContact || ""}
-            onChange={handleInputChange}
-          />
-        </div>
-        <div className="form-group">
-          <label>Broker Company Email</label>
-          <input
-            type="email"
-            name="brokerCompanyEmail"
-            value={formData.brokerCompanyEmail || ""}
-            onChange={handleInputChange}
-          />
-        </div>
-        <div className="form-group">
-          <label>Broker Company Address</label>
-          <input
-            type="text"
-            name="brokerCompanyAddress"
-            value={formData.brokerCompanyAddress || ""}
-            onChange={handleInputChange}
-          />
-        </div>
-        <div className="form-actions">
-          <button type="submit" className="save-btn">
-            Save Changes
-          </button>
-          <button
-            type="button"
-            className="cancel-btn"
-            onClick={() => navigate("/view-brokers")}
+    
+      <div className="edit-broker-container">
+        <h2>Edit Broker - {brokerData.brokerId} {brokerData.brokerName}</h2>
+        <form onSubmit={handleSubmit} className="two-column-form">
+          <div className="form-column">
+            <h3>Broker Details</h3>
+            <div className="form-group">
+              <label htmlFor="brokerId">Broker ID</label>
+              <input
+                type="text"
+                id="brokerId"
+                name="brokerId"
+                value={brokerData.brokerId}
+                readOnly={true}
+                className="read-only"
+              />
+            </div>
+            <div className="form-group">
+              <label htmlFor="brokerName">Broker Name *</label>
+              <input
+                type="text"
+                id="brokerName"
+                name="brokerName"
+                value={brokerData.brokerName}
+                onChange={handleInputChange}
+                required={brokerData.status === "active"}
+              />
+            </div>
+            <div className="form-group">
+              <label htmlFor="brokerContact">Broker Contact Number *</label>
+              <input
+                type="tel"
+                id="brokerContact"
+                name="brokerContact"
+                value={brokerData.brokerContact}
+                onChange={handleInputChange}
+                required={brokerData.status === "active"}
+              />
+            </div>
+            <div className="form-group">
+              <label htmlFor="brokerEmail">Broker Email Address *</label>
+              <input
+                type="email"
+                id="brokerEmail"
+                name="brokerEmail"
+                value={brokerData.brokerEmail}
+                onChange={handleInputChange}
+                required={brokerData.status === "active"}
+              />
+            </div>
+            <div className="form-group">
+              <label htmlFor="status">Status</label>
+              <select
+                id="status"
+                name="status"
+                value={brokerData.status}
+                onChange={handleInputChange}
+              >
+                <option value="pending">Pending</option>
+                <option value="active">Active</option>
+                <option value="disabled">Disabled</option>
+              </select>
+            </div>
+          </div>
+
+          <div className="form-column">
+            <h3>Company Details</h3>
+            <div className="form-group">
+              <label htmlFor="brokerCompanyName">Company Name *</label>
+              <input
+                type="text"
+                id="brokerCompanyName"
+                name="brokerCompanyName"
+                value={brokerData.brokerCompanyName}
+                onChange={handleInputChange}
+                required={brokerData.status === "active"}
+              />
+            </div>
+            <div className="form-group">
+              <label htmlFor="brokerCompanyContact">
+                Company Contact Number *
+              </label>
+              <input
+                type="tel"
+                id="brokerCompanyContact"
+                name="brokerCompanyContact"
+                value={brokerData.brokerCompanyContact}
+                onChange={handleInputChange}
+                required={brokerData.status === "active"}
+              />
+            </div>
+            <div className="form-group">
+              <label htmlFor="brokerCompanyEmail">Company Email Address *</label>
+              <input
+                type="email"
+                id="brokerCompanyEmail"
+                name="brokerCompanyEmail"
+                value={brokerData.brokerCompanyEmail}
+                onChange={handleInputChange}
+                required={brokerData.status === "active"}
+              />
+            </div>
+            <div className="form-group">
+              <label htmlFor="brokerCompanyAddress">Company Address *</label>
+              <textarea
+                id="brokerCompanyAddress"
+                name="brokerCompanyAddress"
+                value={brokerData.brokerCompanyAddress}
+                onChange={handleInputChange}
+                required={brokerData.status === "active"}
+              />
+            </div>
+            <div className="form-group">
+              <label htmlFor="notes">Notes</label>
+              <textarea
+                id="notes"
+                name="notes"
+                value={brokerData.notes}
+                onChange={handleInputChange}
+              />
+            </div>
+          </div>
+
+          <div className="form-buttons">
+            <button
+              type="button"
+              className="cancel-button"
+              onClick={() => navigate("/view-brokers")}
+            >
+              Cancel
+            </button>
+            <button type="submit" className="submit-button">
+              Save Changes
+            </button>
+          </div>
+        </form>
+
+        <Snackbar
+          open={snackbar.open}
+          autoHideDuration={4000}
+          onClose={handleCloseSnackbar}
+          anchorOrigin={{ vertical: "top", horizontal: "center" }}
+        >
+          <Alert
+            onClose={handleCloseSnackbar}
+            severity={snackbar.severity}
+            sx={{ width: "100%" }}
           >
-            Cancel
-          </button>
-        </div>
-      </form>
-    </div>
+            {snackbar.message}
+          </Alert>
+        </Snackbar>
+      </div>
   );
 };
 
