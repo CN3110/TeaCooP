@@ -2,13 +2,37 @@ import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { BiSearch } from "react-icons/bi";
 import EmployeeLayout from "../../../components/EmployeeLayout/EmployeeLayout";
+import Snackbar from "@mui/material/Snackbar";
+import MuiAlert from "@mui/material/Alert";
 import "./ViewBrokers.css";
 
+const Alert = React.forwardRef(function Alert(props, ref) {
+  return <MuiAlert elevation={6} ref={ref} variant="filled" {...props} />;
+});
+
 const ViewBrokers = () => {
-  const [searchId, setSearchId] = useState("");
+  const [searchTerm, setSearchTerm] = useState("");
   const [brokers, setBrokers] = useState([]);
   const [filteredBrokers, setFilteredBrokers] = useState([]);
+  const [snackbar, setSnackbar] = useState({
+    open: false,
+    message: "",
+    severity: "success",
+  });
   const navigate = useNavigate();
+
+  const showAlert = (message, severity = "success") => {
+    setSnackbar({
+      open: true,
+      message,
+      severity,
+    });
+  };
+
+  const handleCloseSnackbar = (event, reason) => {
+    if (reason === "clickaway") return;
+    setSnackbar((prev) => ({ ...prev, open: false }));
+  };
 
   useEffect(() => {
     const fetchBrokers = async () => {
@@ -19,53 +43,80 @@ const ViewBrokers = () => {
           setBrokers(data);
           setFilteredBrokers(data);
         } else {
-          console.error("Failed to fetch brokers");
+          const errorData = await response.json();
+          showAlert(errorData.error || "Failed to fetch brokers", "error");
         }
       } catch (error) {
         console.error("Error fetching brokers:", error);
+        showAlert("An error occurred while fetching brokers", "error");
       }
     };
 
     fetchBrokers();
   }, []);
 
-  const handleSearchChange = (e) => {
-    const searchTerm = e.target.value;
-    setSearchId(searchTerm);
-    const filtered = brokers.filter((broker) =>
-      broker.brokerId.toLowerCase().includes(searchTerm.toLowerCase())
+  useEffect(() => {
+    const filtered = brokers.filter(
+      (broker) =>
+        broker.brokerId.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        broker.brokerName.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        broker.brokerCompanyName.toLowerCase().includes(searchTerm.toLowerCase())
     );
     setFilteredBrokers(filtered);
+  }, [searchTerm, brokers]);
+
+  const handleSearchChange = (e) => {
+    setSearchTerm(e.target.value);
   };
 
   const handleAddBroker = () => {
     navigate("/add-broker");
   };
 
-  const handleEdit = (broker) => {
-    navigate(`/edit-broker/${broker.brokerId}`);
+  const handleEdit = (brokerId) => {
+    navigate(`/edit-broker/${brokerId}`);
   };
 
-  const handleDelete = async (brokerId) => {
-    if (window.confirm("Are you sure you want to delete this broker?")) {
+  const handleDisabled = async (brokerId) => {
+    if (window.confirm("Are you sure you want to disable this broker?")) {
       try {
         const response = await fetch(
-          `http://localhost:3001/api/brokers/${brokerId}`,
+          `http://localhost:3001/api/brokers/${brokerId}/disable`,
           {
-            method: "DELETE",
+            method: "PUT",
+            headers: {
+              "Content-Type": "application/json",
+            }
           }
         );
-        if (response.ok) {
-          const updatedBrokers = brokers.filter(
-            (broker) => broker.brokerId !== brokerId
-          );
-          setBrokers(updatedBrokers);
-          setFilteredBrokers(updatedBrokers);
-        } else {
-          console.error("Failed to delete broker");
+
+        if (!response.ok) {
+          const errorText = await response.text();
+          throw new Error(errorText || "Failed to disable broker");
         }
+
+        const result = await response.json();
+        
+        // Update local state
+        setBrokers(prevBrokers => 
+          prevBrokers.map(broker => 
+            broker.brokerId === brokerId 
+              ? { ...broker, status: "disabled" } 
+              : broker
+          )
+        );
+        setFilteredBrokers(prev => 
+          prev.map(broker => 
+            broker.brokerId === brokerId 
+              ? { ...broker, status: "disabled" } 
+              : broker
+          )
+        );
+        
+        showAlert(result.message || "Broker disabled successfully", "success");
       } catch (error) {
-        console.error("Error deleting broker:", error);
+        console.error("Error disabling broker:", error);
+        showAlert(error.message || "An error occurred while disabling broker", "error");
       }
     }
   };
@@ -74,57 +125,95 @@ const ViewBrokers = () => {
     <EmployeeLayout>
       <div className="view-broker-container">
         <div className="content-header">
-          <h3>View Brokers</h3>
-          <div className="header-activity">
+          <h2>View Brokers</h2>
+          <div className="header-actions">
             <div className="search-box">
+              <BiSearch className="search-icon" />
               <input
                 type="text"
-                placeholder="Search by Driver ID"
-                value={searchId}
+                placeholder="Search by ID, Name or Company"
+                value={searchTerm}
                 onChange={handleSearchChange}
               />
-              <BiSearch className="icon" />
             </div>
-            <button className="add-broker-btn" onClick={handleAddBroker}>
+            <button className="add-button" onClick={handleAddBroker}>
               Add New Broker
             </button>
           </div>
         </div>
-        <table className="brokers-table">
-          <thead>
-            <tr>
-              <th>Broker ID</th>
-              <th>Broker Name</th>
-              <th>Broker Phone</th>
-              <th>Broker Email</th>
-              <th>Company Name</th>
-              <th>Company Phone</th>
-              <th>Company Email</th>
-              <th>Company Address</th>
-              <th>Actions</th>
-            </tr>
-          </thead>
-          <tbody>
-            {filteredBrokers.map((broker) => (
-              <tr key={broker.brokerId}>
-                <td>{broker.brokerId}</td>
-                <td>{broker.brokerName}</td>
-                <td>{broker.brokerContact}</td>
-                <td>{broker.brokerEmail}</td>
-                <td>{broker.brokerCompanyName}</td>
-                <td>{broker.brokerCompanyContact}</td>
-                <td>{broker.brokerCompanyEmail}</td>
-                <td>{broker.brokerCompanyAddress}</td>
-                <td>
-                  <button onClick={() => handleEdit(broker)}>Edit</button>
-                  <button onClick={() => handleDelete(broker.brokerId)}>
-                    Delete
-                  </button>
-                </td>
+
+        <div className="brokers-table-container">
+          <table className="brokers-table">
+            <thead>
+              <tr>
+                <th>Broker ID</th>
+                <th>Name</th>
+                <th>Contact Number</th>
+                <th>Email</th>
+                <th>Company</th>
+                <th>Status</th>
+                <th>Actions</th>
               </tr>
-            ))}
-          </tbody>
-        </table>
+            </thead>
+            <tbody>
+              {filteredBrokers.length > 0 ? (
+                filteredBrokers.map((broker) => (
+                  <tr key={broker.brokerId}>
+                    <td>{broker.brokerId}</td>
+                    <td>{broker.brokerName}</td>
+                    <td>{broker.brokerContactNumber}</td>
+                    <td>{broker.brokerEmail}</td>
+                    <td>{broker.brokerCompanyName}</td>
+                    <td>
+                      <span className={`status-badge ${broker.status}`}>
+                        {broker.status}
+                      </span>
+                    </td>
+                    <td>
+                      <div className="action-buttons">
+                        <button
+                          className="edit-button"
+                          onClick={() => handleEdit(broker.brokerId)}
+                        >
+                          Edit
+                        </button>
+                        {broker.status !== 'disabled' && (
+                          <button
+                            className="disable-button"
+                            onClick={() => handleDisabled(broker.brokerId)}
+                          >
+                            Disable
+                          </button>
+                        )}
+                      </div>
+                    </td>
+                  </tr>
+                ))
+              ) : (
+                <tr>
+                  <td colSpan="7" className="no-results">
+                    No brokers found
+                  </td>
+                </tr>
+              )}
+            </tbody>
+          </table>
+        </div>
+
+        <Snackbar
+          open={snackbar.open}
+          autoHideDuration={4000}
+          onClose={handleCloseSnackbar}
+          anchorOrigin={{ vertical: "top", horizontal: "center" }}
+        >
+          <Alert
+            onClose={handleCloseSnackbar}
+            severity={snackbar.severity}
+            sx={{ width: "100%" }}
+          >
+            {snackbar.message}
+          </Alert>
+        </Snackbar>
       </div>
     </EmployeeLayout>
   );

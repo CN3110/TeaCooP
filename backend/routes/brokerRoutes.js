@@ -5,6 +5,7 @@ const {
   addBroker,
   updateBroker,
   getBrokerById,
+  disableBroker,
   getBrokerConfirmedLots,
 } = require("../controllers/brokerController");
 
@@ -13,7 +14,7 @@ router.get("/", getAllBrokers);
 router.post("/", addBroker);
 router.get("/:brokerId", getBrokerById);
 router.put("/:brokerId", updateBroker);
-
+router.put("/:brokerId/disable", disableBroker);
 
 // Broker-specific routes
 router.get("/:brokerId/confirmed-lots", getBrokerConfirmedLots);

@@ -67,7 +67,7 @@ const AddBroker = () => {
         (field) => !brokerData[field]
       );
       if (missingFields.length > 0) {
-        showAlert("Please fill in all required fields.", "error");
+        showAlert("Please fill in all required fields. when you dont know all the details, then save it as pending", "error");
         return;
       }
     }
@@ -187,7 +187,7 @@ const AddBroker = () => {
                 name="brokerContact"
                 value={brokerData.brokerContact}
                 onChange={handleInputChange}
-                required
+                
               />
             </div>
             <div className="form-group">
@@ -198,7 +198,7 @@ const AddBroker = () => {
                 name="brokerEmail"
                 value={brokerData.brokerEmail}
                 onChange={handleInputChange}
-                required
+                
               />
             </div>
             <div className="form-group">
@@ -208,6 +208,7 @@ const AddBroker = () => {
                 name="status"
                 value={brokerData.status}
                 onChange={handleInputChange}
+                required
               >
                 <option value="pending">Pending</option>
                 <option value="active">Active</option>
@@ -226,7 +227,7 @@ const AddBroker = () => {
                 name="brokerCompanyName"
                 value={brokerData.brokerCompanyName}
                 onChange={handleInputChange}
-                required
+                
               />
             </div>
             <div className="form-group">
@@ -239,7 +240,7 @@ const AddBroker = () => {
                 name="brokerCompanyContact"
                 value={brokerData.brokerCompanyContact}
                 onChange={handleInputChange}
-                required
+                
               />
             </div>
             <div className="form-group">
@@ -250,7 +251,7 @@ const AddBroker = () => {
                 name="brokerCompanyEmail"
                 value={brokerData.brokerCompanyEmail}
                 onChange={handleInputChange}
-                required
+                
               />
             </div>
             <div className="form-group">
@@ -260,7 +261,7 @@ const AddBroker = () => {
                 name="brokerCompanyAddress"
                 value={brokerData.brokerCompanyAddress}
                 onChange={handleInputChange}
-                required
+                
               />
             </div>
             <div className="form-group">

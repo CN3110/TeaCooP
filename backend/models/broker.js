@@ -8,31 +8,47 @@ const generateBrokerId = async () => {
   `;
   const [results] = await db.query(query);
   const lastId = results[0].lastId || 100;
-    return `B${lastId + 1}`;
+  return `B${lastId + 1}`;
 };
 
 // Create a new broker
-const createBroker = async ({ brokerId, brokerName, brokerContact, brokerEmail, brokerCompanyName, brokerCompanyContact, brokerCompanyEmail, brokerCompanyAddress, status, notes }) => {
+const createBroker = async ({ 
+  brokerId, 
+  brokerName, 
+  brokerContact, 
+  brokerEmail, 
+  brokerCompanyName, 
+  brokerCompanyContact, 
+  brokerCompanyEmail, 
+  brokerCompanyAddress, 
+  status, 
+  notes 
+}) => {
   const query = `
     INSERT INTO broker 
-    (brokerId, brokerName, brokerContactNumber, brokerEmail, brokerCompanyName, brokerCompanyContact, brokerCompanyEmail, brokerCompanyAddress, status, notes)
+    (brokerId, brokerName, brokerContactNumber, brokerEmail, brokerCompanyName, 
+     brokerCompanyContact, brokerCompanyEmail, brokerCompanyAddress, status, notes)
     VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
   `;
-  await db.query(query, [brokerId, brokerName, brokerContact, brokerEmail, brokerCompanyName, brokerCompanyContact, brokerCompanyEmail, brokerCompanyAddress, status, notes]);
+  await db.query(query, [
+    brokerId, 
+    brokerName, 
+    brokerContact, 
+    brokerEmail, 
+    brokerCompanyName, 
+    brokerCompanyContact, 
+    brokerCompanyEmail, 
+    brokerCompanyAddress, 
+    status, 
+    notes
+  ]);
 };
 
-//get all brokers with their details
+// Get all brokers with their details
 const getAllBrokers = async () => {
   const [brokers] = await db.query("SELECT * FROM broker");
-
-  for (const broker of brokers) {
-    const [landDetails] = await db.query(
-      "SELECT * FROM land WHERE brokerId = ?",
-      [broker.brokerId]
-    );
-}
-      return brokers;
-    }; 
+  return brokers;
+}; 
 
 // Get broker and their details by brokerId
 const getBrokerById = async (brokerId) => {
@@ -46,14 +62,21 @@ const getBrokerById = async (brokerId) => {
   return {
     ...brokerRows[0],
   };
-  };
-
+};
 
 // Update broker details by brokerId
 const updateBroker = async (brokerId, brokerDetails) => {
   const query = `
     UPDATE broker 
-    SET brokerName = ?, brokerContactNumber = ?, brokerEmail = ?, brokerCompanyName = ?, brokerCompanyContact = ?, brokerCompanyEmail = ?, brokerCompanyAddress = ?, status = ?, notes = ?
+    SET brokerName = ?, 
+        brokerContactNumber = ?, 
+        brokerEmail = ?, 
+        brokerCompanyName = ?, 
+        brokerCompanyContact = ?, 
+        brokerCompanyEmail = ?, 
+        brokerCompanyAddress = ?, 
+        status = ?, 
+        notes = ?
     WHERE brokerId = ?
   `;
   await db.query(query, [
@@ -70,12 +93,10 @@ const updateBroker = async (brokerId, brokerDetails) => {
   ]);
 };
 
-
-
 module.exports = {
-    generateBrokerId,
-    createBroker,
-    getAllBrokers,
-    getBrokerById,
-    updateBroker,
+  generateBrokerId,
+  createBroker,
+  getAllBrokers,
+  getBrokerById,
+  updateBroker,
 };

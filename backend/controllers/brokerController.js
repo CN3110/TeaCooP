@@ -206,6 +206,29 @@ Morawakkorale Tea Co-op
   }
 };
 
+exports.disableBroker = async (req, res) => {
+  const { brokerId } = req.params;
+
+  try {
+    // Check if broker exists
+    const [broker] = await db.query("SELECT * FROM broker WHERE brokerId = ?", [brokerId]);
+    if (!broker.length) {
+      return res.status(404).json({ error: "Broker not found" });
+    }
+
+    // Update status to disabled
+    await db.query(
+      "UPDATE broker SET status = 'disabled' WHERE brokerId = ?",
+      [brokerId]
+    );
+
+    res.status(200).json({ message: "Broker disabled successfully" });
+  } catch (error) {
+    console.error("Error disabling broker:", error);
+    res.status(500).json({ error: "Failed to disable broker" });
+  }
+};
+
 // Get confirmed lots for a broker
 exports.getBrokerConfirmedLots = async (req, res) => {
   const { brokerId } = req.params;
