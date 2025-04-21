@@ -4,6 +4,19 @@
   padding: 20px;
 }
 
+.back-btn {
+  background-color: transparent;
+  color: #0d3411;
+  border: none;
+  font-size: 1.2rem;
+  cursor: pointer;
+  margin-bottom: 1rem;
+}
+
+.back-btn:hover {
+  text-decoration: underline;
+}
+
 .loading {
   text-align: center;
   padding: 40px;

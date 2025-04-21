@@ -155,7 +155,8 @@ const EditSupplierPage = () => {
           {alert.message}
         </Alert>
       </Snackbar>
-
+      
+      <button className="back-btn" onClick={() => navigate("/view-suppliers")}>← Back</button>
       <h2>Edit Supplier - {formData.supplierId} {formData.supplierName}</h2>
       
       <form onSubmit={handleSubmit} className="supplier-form">

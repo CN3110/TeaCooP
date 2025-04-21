@@ -128,6 +128,8 @@ const EditDriverPage = () => {
 
   return (
     <div className="edit-driver-container">
+      <button className="back-btn" onClick={() => navigate("/view-drivers")}>← Back</button>
+
       <h2>Edit Driver - {formData.driverId} {formData.driverName}</h2>
 
       <form onSubmit={handleSubmit} className="driver-form">
