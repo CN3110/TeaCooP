@@ -1,74 +1,63 @@
 .add-broker-container {
-    max-width: 500px;
-    margin: 15px auto;
-    padding: 15px;
-    background-color: #f9f9f9;
-    border-radius: 8px;
+    max-width: 1000px;
+    margin: auto;
+    padding: 20px;
+    background: #fff;
+    border-radius: 12px;
     box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
-}
-
-.add-broker-container h2 {
-    text-align: center;
-    color: #154734;
-    margin-bottom: 15px;
-}
-
-.form-group {
-    margin-bottom: 15px;
-}
-
-.form-group label {
-    display: block;
-    margin-bottom: 5px;
-    font-weight: 600;
-    color: #333;
-}
-
-.form-group input {
-    width: 100%;
-    padding: 10px;
-    border: 1px solid #ccc;
-    border-radius: 4px;
-    font-size: 16px;
-}
-
-.form-group input:focus {
-    border-color: #154734;
-    outline: none;
-    box-shadow: 0 0 5px rgba(21, 71, 52, 0.5);
-}
-
-.form-buttons {
+  }
+  
+  .two-column-form {
     display: flex;
-    justify-content: flex-end;
-    gap: 30px; /* Increased space between buttons */
-    margin-top: 15px;
-}
-
-.cancel-button,
-.submit-button {
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 20px;
+  }
+  
+  .form-column {
+    flex: 1;
+    min-width: 300px;
+  }
+  
+  .form-group {
+    margin-bottom: 15px;
+  }
+  
+  .form-group label {
+    display: block;
+    font-weight: 600;
+    margin-bottom: 5px;
+  }
+  
+  .form-group input {
+    width: 100%;
+    padding: 8px;
+    border-radius: 6px;
+    border: 1px solid #ccc;
+  }
+  
+  .form-buttons {
+  
+    
+   
+    gap: 10px;
+  }
+  
+  .cancel-button,
+  .submit-button {
     padding: 10px 20px;
     border: none;
-    border-radius: 4px;
-    font-size: 16px;
+    border-radius: 8px;
+    font-weight: bold;
     cursor: pointer;
-    transition: background-color 0.3s ease;
-}
-
-.cancel-button {
+  }
+  
+  .cancel-button {
     background-color: #ccc;
-    color: #333;
-}
-
-.cancel-button:hover {
-    background-color: #bbb;
-}
-
-.submit-button {
-    background-color: #154734;
-    color: white;
-}
-
-.submit-button:hover {
-    background-color: #0f361f;
-}
+  }
+  
+  .submit-button {
+    background-color: #28a745;
+    color: #fff;
+  }
+  

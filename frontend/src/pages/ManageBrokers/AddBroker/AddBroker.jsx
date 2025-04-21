@@ -1,76 +1,137 @@
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import EmployeeLayout from "../../../components/EmployeeLayout/EmployeeLayout";
+import Snackbar from "@mui/material/Snackbar";
+import MuiAlert from "@mui/material/Alert";
 import "./AddBroker.css";
+
+const Alert = React.forwardRef(function Alert(props, ref) {
+  return <MuiAlert elevation={6} ref={ref} variant="filled" {...props} />;
+});
 
 const AddBroker = () => {
   const [brokerData, setBrokerData] = useState({
-    brokerId: "",
+    brokerId: "Generating...",
     brokerName: "",
     brokerContact: "",
     brokerEmail: "",
+    status: "pending",
     brokerCompanyName: "",
     brokerCompanyContact: "",
     brokerCompanyEmail: "",
     brokerCompanyAddress: "",
+    notes: "",
+  });
+
+  const [snackbar, setSnackbar] = useState({
+    open: false,
+    message: "",
+    severity: "success",
   });
 
   const navigate = useNavigate();
 
-  // Handle input changes for broker details
+  const showAlert = (message, severity = "success") => {
+    setSnackbar({
+      open: true,
+      message,
+      severity,
+    });
+  };
+
+  const handleCloseSnackbar = (event, reason) => {
+    if (reason === "clickaway") return;
+    setSnackbar((prev) => ({ ...prev, open: false }));
+  };
+
   const handleInputChange = (e) => {
     const { name, value } = e.target;
     setBrokerData({ ...brokerData, [name]: value });
   };
 
-  // Handle form submission
   const handleSubmit = async (e) => {
-    e.preventDefault(); // Fixed typo
-  
-    if (
-      !brokerData.brokerId ||
-      !brokerData.brokerName ||
-      !brokerData.brokerContact ||
-      !brokerData.brokerEmail ||
-      !brokerData.brokerCompanyName ||
-      !brokerData.brokerCompanyContact ||
-      !brokerData.brokerCompanyEmail ||
-      !brokerData.brokerCompanyAddress
-    ) {
-      alert("Please fill in all required fields.");
+    e.preventDefault();
+
+    // If status is 'active', all fields should be filled
+    if (brokerData.status === "active") {
+      const requiredFields = [
+        "brokerId",
+        "brokerName",
+        "brokerContact",
+        "brokerEmail",
+        "brokerCompanyName",
+        "brokerCompanyContact",
+        "brokerCompanyEmail",
+        "brokerCompanyAddress",
+      ];
+      const missingFields = requiredFields.filter(
+        (field) => !brokerData[field]
+      );
+      if (missingFields.length > 0) {
+        showAlert("Please fill in all required fields.", "error");
+        return;
+      }
+    }
+
+    // Validations
+    const contactPattern = /^(0((7[0-8])|([1-9][0-9]))\d{7})$/;
+
+    if (!contactPattern.test(brokerData.brokerContact)) {
+      showAlert(
+        "Invalid broker's contact number. Please enter a valid contact number.",
+        "error"
+      );
       return;
     }
-  
-    const requestBody = {
-      brokerId: brokerData.brokerId,
-      brokerName: brokerData.brokerName,
-      brokerContact: brokerData.brokerContact,
-      brokerEmail: brokerData.brokerEmail,
-      brokerCompanyName: brokerData.brokerCompanyName,
-      brokerCompanyContact: brokerData.brokerCompanyContact,
-      brokerCompanyEmail: brokerData.brokerCompanyEmail,
-      brokerCompanyAddress: brokerData.brokerCompanyAddress,
-    };
-  
+
+    if (!contactPattern.test(brokerData.brokerCompanyContact)) {
+      showAlert(
+        "Invalid broker company contact number. Please enter a valid contact number.",
+        "error"
+      );
+      return;
+    }
+
+    const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
+    if (
+      !emailPattern.test(brokerData.brokerEmail) ||
+      !emailPattern.test(brokerData.brokerCompanyEmail)
+    ) {
+      showAlert("Please enter a valid email address.", "error");
+      return;
+    }
+
+    const namePattern = /^[A-Za-z\s.&'-]+$/;
+
+    if (
+      !namePattern.test(brokerData.brokerName) ||
+      !namePattern.test(brokerData.brokerCompanyName)
+    ) {
+      showAlert(
+        "Names should only contain letters and common punctuation.",
+        "error"
+      );
+      return;
+    }
+
     try {
       const response = await fetch("http://localhost:3001/api/brokers", {
         method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify(requestBody),
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(brokerData),
       });
-  
+
       if (response.ok) {
-        alert("Broker added successfully!");
-        navigate("/view-brokers");
+        showAlert("Broker added successfully!", "success");
+        setTimeout(() => navigate("/view-brokers"), 1500);
       } else {
         const errorData = await response.json();
-        alert(`Error adding broker: ${errorData.message}`);
+        showAlert(`Error adding broker: ${errorData.message}`, "error");
       }
     } catch (error) {
       console.error("Error adding broker:", error);
-      alert("An error occurred while adding the broker.");
+      showAlert("An error occurred while adding the broker.", "error");
     }
   };
 
@@ -78,86 +139,95 @@ const AddBroker = () => {
     <EmployeeLayout>
       <div className="add-broker-container">
         <h2>Add Broker</h2>
-        <form onSubmit={handleSubmit}>
-          <div className="form-group">
-            <label htmlFor="brokerId">Broker ID</label>
-            <input
-              type="text"
-              id="brokerId"
-              name="brokerId"
-              value={brokerData.brokerId}
-              onChange={handleInputChange}
-            />
+        <form onSubmit={handleSubmit} className="two-column-form">
+          <div className="form-column">
+            <h3>Broker Details</h3>
+            <div className="form-group">
+              <label htmlFor="brokerId">Broker ID</label>
+              <input
+                type="text"
+                id="brokerId"
+                name="brokerId"
+                value={brokerData.brokerId}
+                onChange={handleInputChange}
+              />
+            </div>
+            <div className="form-group">
+              <label htmlFor="brokerName">Broker Name</label>
+              <input
+                type="text"
+                id="brokerName"
+                name="brokerName"
+                value={brokerData.brokerName}
+                onChange={handleInputChange}
+              />
+            </div>
+            <div className="form-group">
+              <label htmlFor="brokerContact">Broker Contact Number</label>
+              <input
+                type="number"
+                id="brokerContact"
+                name="brokerContact"
+                value={brokerData.brokerContact}
+                onChange={handleInputChange}
+              />
+            </div>
+            <div className="form-group">
+              <label htmlFor="brokerEmail">Broker Email Address</label>
+              <input
+                type="email"
+                id="brokerEmail"
+                name="brokerEmail"
+                value={brokerData.brokerEmail}
+                onChange={handleInputChange}
+              />
+            </div>
           </div>
-          <div className="form-group">
-            <label htmlFor="brokerName">Broker Name</label>
-            <input
-              type="text"
-              id="brokerName"
-              name="brokerName"
-              value={brokerData.brokerName}
-              onChange={handleInputChange}
-            />
-          </div>
-          <div className="form-group">
-            <label htmlFor="brokerContact">Broker Contact Number</label>
-            <input
-              type="number"
-              id="brokerContact"
-              name="brokerContact"
-              value={brokerData.brokerContact}
-              onChange={handleInputChange}
-            />
-          </div>
-          <div className="form-group">
-            <label htmlFor="brokerEmail">Broker Email Address</label>
-            <input
-              type="text"
-              id="brokerEmail"
-              name="brokerEmail"
-              value={brokerData.brokerEmail}
-              onChange={handleInputChange}
-            />
-          </div>
-          <div className="form-group">
-            <label htmlFor="brokerCompanyName">Company Name</label>
-            <input
-              type="text"
-              id="brokerCompanyName"
-              name="brokerCompanyName"
-              value={brokerData.brokerCompanyName}
-              onChange={handleInputChange}
-            />
-          </div>
-          <div className="form-group">
-            <label htmlFor="brokerCompanyContact">Company Contact Number</label>
-            <input
-              type="number"
-              id="brokerCompanyContact"
-              name="brokerCompanyContact"
-              value={brokerData.brokerCompanyContact}
-              onChange={handleInputChange}
-            />
-          </div>
-          <div className="form-group">
-            <label htmlFor="brokerCompanyEmail">Company Email Address</label>
-            <input
-              type="text"
-              id="brokerCompanyEmail"
-              name="brokerCompanyEmail"
-              value={brokerData.brokerCompanyEmail}
-              onChange={handleInputChange}
-            />
-          </div>
-          <div className="form-group">
-            <label htmlFor="brokerCompanyAddress">Company Address</label>
-            <input
-              type="text"
-              id="brokerCompanyAddress"
-              name="brokerCompanyAddress"
-              value={brokerData.brokerCompanyAddress}
-              onChange={handleInputChange}
-            />
+
+          <div className="form-column">
+            <h3>Company Details</h3>
+            <div className="form-group">
+              <label htmlFor="brokerCompanyName">Company Name</label>
+              <input
+                type="text"
+                id="brokerCompanyName"
+                name="brokerCompanyName"
+                value={brokerData.brokerCompanyName}
+                onChange={handleInputChange}
+              />
+            </div>
+            <div className="form-group">
+              <label htmlFor="brokerCompanyContact">
+                Company Contact Number
+              </label>
+              <input
+                type="number"
+                id="brokerCompanyContact"
+                name="brokerCompanyContact"
+                value={brokerData.brokerCompanyContact}
+                onChange={handleInputChange}
+              />
+            </div>
+            <div className="form-group">
+              <label htmlFor="brokerCompanyEmail">Company Email Address</label>
+              <input
+                type="email"
+                id="brokerCompanyEmail"
+                name="brokerCompanyEmail"
+                value={brokerData.brokerCompanyEmail}
+                onChange={handleInputChange}
+              />
+            </div>
+            <div className="form-group">
+              <label htmlFor="brokerCompanyAddress">Company Address</label>
+              <input
+                type="text"
+                id="brokerCompanyAddress"
+                name="brokerCompanyAddress"
+                value={brokerData.brokerCompanyAddress}
+                onChange={handleInputChange}
+              />
+            </div>
           </div>
 
           <div className="form-buttons">
@@ -173,6 +243,20 @@ const AddBroker = () => {
             </button>
           </div>
         </form>
+
+        <Snackbar
+          open={snackbar.open}
+          autoHideDuration={4000}
+          onClose={handleCloseSnackbar}
+        >
+          <Alert
+            onClose={handleCloseSnackbar}
+            severity={snackbar.severity}
+            sx={{ width: "100%" }}
+          >
+            {snackbar.message}
+          </Alert>
+        </Snackbar>
       </div>
     </EmployeeLayout>
   );
