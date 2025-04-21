@@ -72,7 +72,7 @@ Your login credentials for the system are as follows:
 User ID: ${brokerId}
 Passcode: ${passcode}
 
-Please use the above passcode as your password during your first login. After logging in, you will be able to create your own password.
+Please use the above passcode as your password during your login. It does not expire. After logging in, you will be able to create your own password through the "Forgot Password" option.
 
 If you have any questions, please contact us.
 
@@ -187,7 +187,7 @@ Your login credentials for the system have been updated:
 User ID: ${brokerId}
 Passcode: ${passcode}
 
-Please use the above passcode as your password during your first login after the email change. After logging in, you will be able to create your own password.
+Please use the above passcode as your password during your login. It does not expire. After logging in, you will be able to create your own password through the "Forgot Password" option.
 
 If you have any questions, please contact us.
 
