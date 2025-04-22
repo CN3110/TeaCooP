@@ -226,3 +226,26 @@ exports.updateSupplier = async (req, res) => {
     });
   }
 };
+
+exports.disableSupplier = async (req, res) => {
+  const { supplierId } = req.params;
+
+  try {
+    // Check if Supplier exists
+    const [supplier] = await db.query("SELECT * FROM supplier WHERE supplierId = ?", [supplierId]);
+    if (!supplier.length) {
+      return res.status(404).json({ error: "Supplier not found" });
+    }
+
+    // Update status to disabled
+    await db.query(
+      "UPDATE supplier SET status = 'disabled' WHERE supplierId = ?",
+      [supplierId]
+    );
+
+    res.status(200).json({ message: "Supplier disabled successfully" });
+  } catch (error) {
+    console.error("Error disabling supplier:", error);
+    res.status(500).json({ error: "Failed to disable supplier" });
+  }
+};

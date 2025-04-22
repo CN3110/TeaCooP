@@ -2,19 +2,58 @@ import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { BiSearch } from "react-icons/bi";
 import EmployeeLayout from "../../components/EmployeeLayout/EmployeeLayout";
-import EditSupplier from "./EditSupplier";
+import Snackbar from "@mui/material/Snackbar";
+import MuiAlert from "@mui/material/Alert";
+import {
+  Dialog,
+  DialogActions,
+  DialogContent,
+  DialogContentText,
+  DialogTitle,
+  Button
+} from '@mui/material';
 import "./ViewSuppliers.css";
+
+const Alert = React.forwardRef(function Alert(props, ref) {
+  return <MuiAlert elevation={6} ref={ref} variant="filled" {...props} />;
+});
 
 const ViewSuppliers = () => {
   const [searchId, setSearchId] = useState("");
   const [statusFilter, setStatusFilter] = useState("all");
   const [suppliers, setSuppliers] = useState([]);
   const [filteredSuppliers, setFilteredSuppliers] = useState([]);
-  const [isModalOpen, setIsModalOpen] = useState(false);
-  const [selectedSupplier, setSelectedSupplier] = useState(null);
+  const [selectedSupplierId, setSelectedSupplierId] = useState(null);
+  const [snackbar, setSnackbar] = useState({
+    open: false,
+    message: "",
+    severity: "success",
+  });
+  const [openConfirm, setOpenConfirm] = useState(false);
   const navigate = useNavigate();
 
-  // Fetch all suppliers including disabled ones
+  const showAlert = (message, severity = "success") => {
+    setSnackbar({
+      open: true,
+      message,
+      severity,
+    });
+  };
+
+  const handleCloseSnackbar = (event, reason) => {
+    if (reason === "clickaway") return;
+    setSnackbar((prev) => ({ ...prev, open: false }));
+  };
+
+  const handleOpenDisableConfirm = (supplierId) => {
+    setSelectedSupplierId(supplierId);
+    setOpenConfirm(true);
+  };
+
+  const handleCloseConfirm = () => {
+    setOpenConfirm(false);
+  };
+
   useEffect(() => {
     const fetchSuppliers = async () => {
       try {
@@ -22,30 +61,28 @@ const ViewSuppliers = () => {
         if (response.ok) {
           const data = await response.json();
           setSuppliers(data);
-          setFilteredSuppliers(data); // Initialize with all suppliers
+          setFilteredSuppliers(data);
         } else {
-          console.error("Failed to fetch suppliers");
+          const errorData = await response.json();
+          showAlert(errorData.error || "Failed to fetch suppliers", "error");
         }
       } catch (error) {
         console.error("Error fetching suppliers:", error);
+        showAlert("An error occurred while fetching suppliers", "error");
       }
     };
-
     fetchSuppliers();
   }, []);
 
-  // Apply filters whenever search or status changes
   useEffect(() => {
     let filtered = [...suppliers];
 
-    // Apply search filter
     if (searchId) {
       filtered = filtered.filter((supplier) =>
         supplier.supplierId.toLowerCase().includes(searchId.toLowerCase())
       );
     }
 
-    // Apply status filter
     if (statusFilter !== "all") {
       filtered = filtered.filter((supplier) => supplier.status === statusFilter);
     }
@@ -65,9 +102,41 @@ const ViewSuppliers = () => {
     navigate(`/edit-supplier/${supplier.supplierId}`);
   };
 
-  const closeModal = () => {
-    setIsModalOpen(false);
-    setSelectedSupplier(null);
+  const handleConfirmDisable = async () => {
+    handleCloseConfirm();
+    if (!selectedSupplierId) return;
+    
+    try {
+      const response = await fetch(
+        `http://localhost:3001/api/suppliers/${selectedSupplierId}/disable`,
+        { method: "PUT" }
+      );
+
+      if (!response.ok) {
+        const errorText = await response.text();
+        throw new Error(errorText || "Failed to disable supplier");
+      }
+
+      setSuppliers(prevSuppliers => 
+        prevSuppliers.map(supplier => 
+          supplier.supplierId === selectedSupplierId 
+            ? { ...supplier, status: "disabled" } 
+            : supplier
+        )
+      );
+      setFilteredSuppliers(prev => 
+        prev.map(supplier => 
+          supplier.supplierId === selectedSupplierId 
+            ? { ...supplier, status: "disabled" } 
+            : supplier
+        )
+      );
+      
+      showAlert("Supplier disabled successfully", "success");
+    } catch (error) {
+      console.error("Error disabling supplier:", error);
+      showAlert(error.message || "An error occurred while disabling supplier", "error");
+    }
   };
 
   return (
@@ -116,7 +185,6 @@ const ViewSuppliers = () => {
               <th>Actions</th>
             </tr>
           </thead>
-
           <tbody>
             {filteredSuppliers.length > 0 ? (
               filteredSuppliers.map((supplier) => (
@@ -156,6 +224,14 @@ const ViewSuppliers = () => {
                     >
                       Edit
                     </button>
+                    {supplier.status !== 'disabled' && (
+                      <button
+                        className="disable-button"
+                        onClick={() => handleOpenDisableConfirm(supplier.supplierId)}
+                      >
+                        Disable
+                      </button>
+                    )}
                   </td>
                 </tr>
               ))
@@ -169,13 +245,67 @@ const ViewSuppliers = () => {
           </tbody>
         </table>
 
-        {isModalOpen && (
-          <div className="modal-overlay">
-            <div className="modal">
-              <EditSupplier supplier={selectedSupplier} onClose={closeModal} />
-            </div>
-          </div>
-        )}
+        {/* Confirmation Dialog */}
+        <Dialog 
+          open={openConfirm} 
+          onClose={handleCloseConfirm}
+          PaperProps={{
+            style: {
+              borderRadius: '12px',
+              padding: '20px',
+              minWidth: '400px'
+            }
+          }}
+        >
+          <DialogTitle sx={{ fontSize: '1.2rem', fontWeight: 600 }}>
+            Confirm Disable Supplier
+          </DialogTitle>
+          <DialogContent>
+            <DialogContentText sx={{ fontSize: '1rem' }}>
+              Are you sure you want to disable this supplier?
+            </DialogContentText>
+          </DialogContent>
+          <DialogActions sx={{ padding: '16px 24px' }}>
+            <Button 
+              onClick={handleCloseConfirm}
+              variant="outlined"
+              sx={{
+                textTransform: 'none',
+                padding: '6px 16px',
+                borderRadius: '8px'
+              }}
+            >
+              Cancel
+            </Button>
+            <Button 
+              onClick={handleConfirmDisable} 
+              color="error"
+              variant="contained"
+              sx={{
+                textTransform: 'none',
+                padding: '6px 16px',
+                borderRadius: '8px'
+              }}
+            >
+              Confirm Disable
+            </Button>
+          </DialogActions>
+        </Dialog>
+        
+        <Snackbar
+          open={snackbar.open}
+          autoHideDuration={4000}
+          onClose={handleCloseSnackbar}
+          anchorOrigin={{ vertical: "top", horizontal: "center" }}
+        >
+          <Alert
+            onClose={handleCloseSnackbar}
+            severity={snackbar.severity}
+            sx={{ width: "100%" }}
+          >
+            {snackbar.message}
+          </Alert>
+        </Snackbar>
       </div>
     </EmployeeLayout>
   );
