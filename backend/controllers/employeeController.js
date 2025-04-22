@@ -75,8 +75,8 @@ Morawakkorale Tea Co-op
 exports.getAllEmployees = async (req, res) => {
   try {
     const employees = await employee.getAllEmployees();
-    res.json(200).json(employees);
-  } catch (error) {
+    res.status(200).json(employees)
+    } catch (error) {
     console.error("Error fetching employees:", error);
     res.status(500).json({ error: "Failed to fetch employees" });
   }
@@ -87,8 +87,8 @@ exports.getAllEmployees = async (req, res) => {
 exports.getEmployeeById = async (req, res) => {
   const{employeeId} = req.params;
   try {
-    const employee = await employee.getEmployeeById(employeeId);
-    if (!employee) {
+    const employeeData = await employee.getEmployeeById(employeeId);
+    if (!employeeData) {
       return res.status(404).json({ error: "Employee not found" });
     }
     res.status(200).json(employee);

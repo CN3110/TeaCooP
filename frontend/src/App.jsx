@@ -27,6 +27,7 @@ import ViewTransportRequests from "./pages/ViewTransportRequests/ViewTransportRe
 import ManageDeliveryRoutes from "./pages/ManageDeliveryRoutes/ManageDeliveryRoutes.jsx";
 import ViewValuations from "./pages/SalesEM/ViewValuations/ViewValuations.jsx";
 import ManageBrokerValuations from "./pages/SalesEM/ManageBrokerValuations/ManageBrokerValuations.jsx";
+import AddEmployee from "./pages/ManageEmployees/AddEmployee/AddEmployee.jsx";
 
 
 const App = () => {
@@ -66,6 +67,10 @@ const App = () => {
             <Route path="/employee-view-transport-requests" element={<ViewTransportRequests />} />
             <Route path="/employee-view-manage-broker-valuation-price" element={<ManageBrokerValuations/>} />
             <Route path="/view-valuations/:lotNumber" element={<ViewValuations />} />
+
+
+            {/* Admin Routes */}
+            <Route path="/add-employee" element={<AddEmployee />} />
 
            
           </Routes>

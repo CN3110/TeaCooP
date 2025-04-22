@@ -11,7 +11,7 @@ const {
 
 // CRUD
 router.get('/', getAllEmployees); // Get all employees
-router.post('/add', addEmployee); // Add new employee
+router.post('/', addEmployee); // Add new employee
 router.get('/:employeeId', getEmployeeById); // Get employee by ID
 router.put('/:employeeId', updateEmployee); // Update employee by ID
 router.put('/:employeeId/disable', disableEmployee); // Disable employee
