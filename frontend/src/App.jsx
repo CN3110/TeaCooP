@@ -2,11 +2,7 @@ import React from "react";
 import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 import { AuthProvider } from './contexts/AuthContext.jsx';
 import "bootstrap/dist/css/bootstrap.min.css";
-import Home from "./pages/Home/Home";
-import AboutUs from "./pages/About Us/AboutUs.jsx";
-import Contact from "./pages/Contact/Contact";
 import Footer from "./components/Footer/Footer.jsx";
-import Login from "./pages/Login/Login.jsx";
 import EmployeeProfile from "./pages/Employee/ProfileEM/ProfileEM.jsx";
 import EmployeeDashboard from "./pages/Employee/EmployeeDashboard.jsx";
 import AddSupplier from "./pages/AddSupplier/AddSupplier.jsx";
@@ -29,7 +25,6 @@ import ViewLots from "./pages/SalesEM/ViewLots/ViewLots.jsx";
 import EditLot from "./pages/SalesEM/EditLot/EditLot.jsx";
 import ViewTransportRequests from "./pages/ViewTransportRequests/ViewTransportRequests.jsx";
 import ManageDeliveryRoutes from "./pages/ManageDeliveryRoutes/ManageDeliveryRoutes.jsx";
-import SetPassword from "./pages/SetPassword/SetPassword.jsx";
 import ViewValuations from "./pages/SalesEM/ViewValuations/ViewValuations.jsx";
 import ManageBrokerValuations from "./pages/SalesEM/ManageBrokerValuations/ManageBrokerValuations.jsx";
 
@@ -44,7 +39,7 @@ const App = () => {
           <Routes>
             {/* Public Routes */}
             
-            <Route path="/set-password" element={<SetPassword />} />
+           
             <Route path="/profile/:userId" element={<EmployeeProfile />} />
 
             {/* Employee Routes */}
