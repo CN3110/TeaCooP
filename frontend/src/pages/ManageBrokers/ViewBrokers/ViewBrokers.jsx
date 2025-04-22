@@ -4,6 +4,14 @@ import { BiSearch } from "react-icons/bi";
 import EmployeeLayout from "../../../components/EmployeeLayout/EmployeeLayout";
 import Snackbar from "@mui/material/Snackbar";
 import MuiAlert from "@mui/material/Alert";
+import {
+  Dialog,
+  DialogActions,
+  DialogContent,
+  DialogContentText,
+  DialogTitle,
+  Button
+} from '@mui/material';
 import "./ViewBrokers.css";
 
 const Alert = React.forwardRef(function Alert(props, ref) {
@@ -19,6 +27,8 @@ const ViewBrokers = () => {
     message: "",
     severity: "success",
   });
+  const [openConfirm, setOpenConfirm] = useState(false);
+  const [selectedBrokerId, setSelectedBrokerId] = useState(null);
   const navigate = useNavigate();
 
   const showAlert = (message, severity = "success") => {
@@ -32,6 +42,17 @@ const ViewBrokers = () => {
   const handleCloseSnackbar = (event, reason) => {
     if (reason === "clickaway") return;
     setSnackbar((prev) => ({ ...prev, open: false }));
+  };
+
+  // Open confirmation dialog
+  const handleOpenDisableConfirm = (brokerId) => {
+    setSelectedBrokerId(brokerId);
+    setOpenConfirm(true);
+  };
+
+  // Close dialog
+  const handleCloseConfirm = () => {
+    setOpenConfirm(false);
   };
 
   useEffect(() => {
@@ -77,47 +98,42 @@ const ViewBrokers = () => {
     navigate(`/edit-broker/${brokerId}`);
   };
 
-  const handleDisabled = async (brokerId) => {
-    if (window.confirm("Are you sure you want to disable this broker?")) {
-      try {
-        const response = await fetch(
-          `http://localhost:3001/api/brokers/${brokerId}/disable`,
-          {
-            method: "PUT",
-            headers: {
-              "Content-Type": "application/json",
-            }
-          }
-        );
+  // Handle disable confirmation
+  const handleConfirmDisable = async () => {
+    handleCloseConfirm();
+    if (!selectedBrokerId) return;
+    
+    try {
+      const response = await fetch(
+        `http://localhost:3001/api/brokers/${selectedBrokerId}/disable`,
+        { method: "PUT" }
+      );
 
-        if (!response.ok) {
-          const errorText = await response.text();
-          throw new Error(errorText || "Failed to disable broker");
-        }
-
-        const result = await response.json();
-        
-        // Update local state
-        setBrokers(prevBrokers => 
-          prevBrokers.map(broker => 
-            broker.brokerId === brokerId 
-              ? { ...broker, status: "disabled" } 
-              : broker
-          )
-        );
-        setFilteredBrokers(prev => 
-          prev.map(broker => 
-            broker.brokerId === brokerId 
-              ? { ...broker, status: "disabled" } 
-              : broker
-          )
-        );
-        
-        showAlert(result.message || "Broker disabled successfully", "success");
-      } catch (error) {
-        console.error("Error disabling broker:", error);
-        showAlert(error.message || "An error occurred while disabling broker", "error");
+      if (!response.ok) {
+        const errorText = await response.text();
+        throw new Error(errorText || "Failed to disable broker");
       }
+
+      // Update local state
+      setBrokers(prevBrokers => 
+        prevBrokers.map(broker => 
+          broker.brokerId === selectedBrokerId 
+            ? { ...broker, status: "disabled" } 
+            : broker
+        )
+      );
+      setFilteredBrokers(prev => 
+        prev.map(broker => 
+          broker.brokerId === selectedBrokerId 
+            ? { ...broker, status: "disabled" } 
+            : broker
+        )
+      );
+      
+      showAlert("Broker disabled successfully", "success");
+    } catch (error) {
+      console.error("Error disabling broker:", error);
+      showAlert(error.message || "An error occurred while disabling broker", "error");
     }
   };
 
@@ -180,7 +196,7 @@ const ViewBrokers = () => {
                         {broker.status !== 'disabled' && (
                           <button
                             className="disable-button"
-                            onClick={() => handleDisabled(broker.brokerId)}
+                            onClick={() => handleOpenDisableConfirm(broker.brokerId)}
                           >
                             Disable
                           </button>
@@ -199,6 +215,53 @@ const ViewBrokers = () => {
             </tbody>
           </table>
         </div>
+
+        {/* Confirmation Dialog */}
+        <Dialog 
+          open={openConfirm} 
+          onClose={handleCloseConfirm}
+          PaperProps={{
+            style: {
+              borderRadius: '12px',
+              padding: '20px',
+              minWidth: '400px'
+            }
+          }}
+        >
+          <DialogTitle sx={{ fontSize: '1.2rem', fontWeight: 600 }}>
+            Confirm Disable Broker
+          </DialogTitle>
+          <DialogContent>
+            <DialogContentText sx={{ fontSize: '1rem' }}>
+              Are you sure you want to disable this broker?
+            </DialogContentText>
+          </DialogContent>
+          <DialogActions sx={{ padding: '16px 24px' }}>
+            <Button 
+              onClick={handleCloseConfirm}
+              variant="outlined"
+              sx={{
+                textTransform: 'none',
+                padding: '6px 16px',
+                borderRadius: '8px'
+              }}
+            >
+              Cancel
+            </Button>
+            <Button 
+              onClick={handleConfirmDisable} 
+              color="error"
+              variant="contained"
+              sx={{
+                textTransform: 'none',
+                padding: '6px 16px',
+                borderRadius: '8px'
+              }}
+            >
+              Confirm Disable
+            </Button>
+          </DialogActions>
+        </Dialog>
 
         <Snackbar
           open={snackbar.open}
