@@ -1,21 +1,59 @@
-// add disabled button for direct disabled drivers, without going edit button
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { BiSearch } from "react-icons/bi";
 import EmployeeLayout from "../../components/EmployeeLayout/EmployeeLayout";
-import EditDriver from "./EditDriver";
+import Snackbar from "@mui/material/Snackbar";
+import MuiAlert from "@mui/material/Alert";
+import {
+  Dialog,
+  DialogActions,
+  DialogContent,
+  DialogContentText,
+  DialogTitle,
+  Button
+} from '@mui/material';
 import "./ViewDrivers.css";
+
+const Alert = React.forwardRef(function Alert(props, ref) {
+  return <MuiAlert elevation={6} ref={ref} variant="filled" {...props} />;
+});
 
 const ViewDrivers = () => {
   const [searchId, setSearchId] = useState("");
   const [statusFilter, setStatusFilter] = useState("all");
   const [drivers, setDrivers] = useState([]);
   const [filteredDrivers, setFilteredDrivers] = useState([]);
-  const [isModalOpen, setIsModalOpen] = useState(false);
-  const [selectedDriver, setSelectedDriver] = useState(null);
+  const [selectedDriverId, setSelectedDriverId] = useState(null);
+  const [snackbar, setSnackbar] = useState({
+    open: false,
+    message: "",
+    severity: "success",
+  });
+  const [openConfirm, setOpenConfirm] = useState(false);
   const navigate = useNavigate();
 
-  // Fetch all drivers
+  const showAlert = (message, severity = "success") => {
+    setSnackbar({
+      open: true,
+      message,
+      severity,
+    });
+  };
+
+  const handleCloseSnackbar = (event, reason) => {
+    if (reason === "clickaway") return;
+    setSnackbar((prev) => ({ ...prev, open: false }));
+  };
+
+  const handleOpenDisableConfirm = (driverId) => {
+    setSelectedDriverId(driverId);
+    setOpenConfirm(true);
+  };
+
+  const handleCloseConfirm = () => {
+    setOpenConfirm(false);
+  };
+
   useEffect(() => {
     const fetchDrivers = async () => {
       try {
@@ -25,16 +63,17 @@ const ViewDrivers = () => {
           setDrivers(data);
           setFilteredDrivers(data);
         } else {
-          console.error("Failed to fetch drivers");
+          const errorData = await response.json();
+          showAlert(errorData.error || "Failed to fetch drivers", "error");
         }
       } catch (error) {
         console.error("Error fetching drivers:", error);
+        showAlert("An error occurred while fetching drivers", "error");
       }
     };
     fetchDrivers();
   }, []);
 
-  // Apply filters
   useEffect(() => {
     let filtered = [...drivers];
 
@@ -63,11 +102,41 @@ const ViewDrivers = () => {
     navigate(`/edit-driver/${driver.driverId}`);
   };
 
-  
+  const handleConfirmDisable = async () => {
+    handleCloseConfirm();
+    if (!selectedDriverId) return;
+    
+    try {
+      const response = await fetch(
+        `http://localhost:3001/api/drivers/${selectedDriverId}/disable`,
+        { method: "PUT" }
+      );
 
-  const closeModal = () => {
-    setIsModalOpen(false);
-    setSelectedDriver(null);
+      if (!response.ok) {
+        const errorText = await response.text();
+        throw new Error(errorText || "Failed to disable driver");
+      }
+
+      setDrivers(prevDrivers => 
+        prevDrivers.map(driver => 
+          driver.driverId === selectedDriverId 
+            ? { ...driver, status: "disabled" } 
+            : driver
+        )
+      );
+      setFilteredDrivers(prev => 
+        prev.map(driver => 
+          driver.driverId === selectedDriverId 
+            ? { ...driver, status: "disabled" } 
+            : driver
+        )
+      );
+      
+      showAlert("Driver disabled successfully", "success");
+    } catch (error) {
+      console.error("Error disabling driver:", error);
+      showAlert(error.message || "An error occurred while disabling driver", "error");
+    }
   };
 
   return (
@@ -147,6 +216,14 @@ const ViewDrivers = () => {
                   </td>
                   <td>
                     <button className="edit-btn" onClick={() => handleEdit(driver)}>Edit</button>
+                    {driver.status !== 'disabled' && (
+                      <button
+                        className="disable-button"
+                        onClick={() => handleOpenDisableConfirm(driver.driverId)}
+                      >
+                        Disable
+                      </button>
+                    )}
                   </td>
                 </tr>
               ))
@@ -160,13 +237,67 @@ const ViewDrivers = () => {
           </tbody>
         </table>
 
-        {isModalOpen && (
-          <div className="modal-overlay">
-            <div className="modal">
-              <EditDriver driver={selectedDriver} onClose={closeModal} />
-            </div>
-          </div>
-        )}
+        {/* Confirmation Dialog */}
+        <Dialog 
+          open={openConfirm} 
+          onClose={handleCloseConfirm}
+          PaperProps={{
+            style: {
+              borderRadius: '12px',
+              padding: '20px',
+              minWidth: '400px'
+            }
+          }}
+        >
+          <DialogTitle sx={{ fontSize: '1.2rem', fontWeight: 600 }}>
+            Confirm Disable Driver
+          </DialogTitle>
+          <DialogContent>
+            <DialogContentText sx={{ fontSize: '1rem' }}>
+              Are you sure you want to disable this driver?
+            </DialogContentText>
+          </DialogContent>
+          <DialogActions sx={{ padding: '16px 24px' }}>
+            <Button 
+              onClick={handleCloseConfirm}
+              variant="outlined"
+              sx={{
+                textTransform: 'none',
+                padding: '6px 16px',
+                borderRadius: '8px'
+              }}
+            >
+              Cancel
+            </Button>
+            <Button 
+              onClick={handleConfirmDisable} 
+              color="error"
+              variant="contained"
+              sx={{
+                textTransform: 'none',
+                padding: '6px 16px',
+                borderRadius: '8px'
+              }}
+            >
+              Confirm Disable
+            </Button>
+          </DialogActions>
+        </Dialog>
+        
+        <Snackbar
+          open={snackbar.open}
+          autoHideDuration={4000}
+          onClose={handleCloseSnackbar}
+          anchorOrigin={{ vertical: "top", horizontal: "center" }}
+        >
+          <Alert
+            onClose={handleCloseSnackbar}
+            severity={snackbar.severity}
+            sx={{ width: "100%" }}
+          >
+            {snackbar.message}
+          </Alert>
+        </Snackbar>
       </div>
     </EmployeeLayout>
   );

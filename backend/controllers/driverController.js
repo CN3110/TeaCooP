@@ -177,3 +177,26 @@ exports.getActiveDrivers = async (req, res) => {
     res.status(500).json({ error: "Internal server error" });
   }
 };
+
+exports.disableDriver = async (req, res) => {
+  const { driverId } = req.params;
+
+  try {
+    // Check if driver exists
+    const [driver] = await db.query("SELECT * FROM driver WHERE driverId = ?", [driverId]);
+    if (!driver.length) {
+      return res.status(404).json({ error: "Driver not found" });
+    }
+
+    // Update status to disabled
+    await db.query(
+      "UPDATE driver SET status = 'disabled' WHERE driverId = ?",
+      [driverId]
+    );
+
+    res.status(200).json({ message: "Driver disabled successfully" });
+  } catch (error) {
+    console.error("Error disabling driver", error);
+    res.status(500).json({ error: "Failed to disable driver" });
+  }
+};

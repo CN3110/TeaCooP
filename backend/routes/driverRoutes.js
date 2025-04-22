@@ -1,5 +1,5 @@
 const express = require("express");
-const { getAllDrivers, addDriver, updateDriver, getDriverById, getActiveDrivers} = require("../controllers/driverController");
+const { getAllDrivers, addDriver, updateDriver, getDriverById, getActiveDrivers, disableDriver} = require("../controllers/driverController");
 
 const router = express.Router();
 
@@ -9,4 +9,6 @@ router.post("/add", addDriver);
 router.put("/:driverId", updateDriver);
 router.get("/:driverId", getDriverById);
 router.get("/active", getActiveDrivers); 
+router.put("/:driverId/disable", disableDriver);  // Disable driver
+
 module.exports = router;
