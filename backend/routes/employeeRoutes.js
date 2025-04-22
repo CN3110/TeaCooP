@@ -1,38 +1,19 @@
 const express = require('express');
 const router = express.Router();
-const employeeController = require('../controllers/employeeController');
-const { authenticate, authorize } = require('../middleware/authMiddleware');
+const {
+  addEmployee,
+  getAllEmployees,
+  getEmployeeById,
+  updateEmployee,
+  disableEmployee,
+ } = require('../controllers/employeeController');
 
-// Public routes (no authentication required)
-router.post('/', employeeController.createEmployee);
 
-// Admin-only routes
-router.get('/', 
-  authenticate, 
-  authorize('admin'), 
-  employeeController.getAllEmployees
-);
-
-router.delete('/:id', 
-  authenticate, 
-  authorize('admin'), 
-  employeeController.deleteEmployee
-);
-
-// Authenticated employee routes (any authenticated user)
-router.get('/:id', 
-  authenticate, 
-  employeeController.getEmployeeById
-);
-
-router.put('/:id', 
-  authenticate, 
-  employeeController.updateEmployee
-);
-
-router.put('/:id/password', 
-  authenticate, 
-  employeeController.updateEmployeePassword
-);
+// CRUD
+router.get('/', getAllEmployees); // Get all employees
+router.post('/add', addEmployee); // Add new employee
+router.get('/:employeeId', getEmployeeById); // Get employee by ID
+router.put('/:employeeId', updateEmployee); // Update employee by ID
+router.put('/:employeeId/disable', disableEmployee); // Disable employee
 
 module.exports = router;

@@ -1,87 +1,59 @@
-const pool = require('../config/database');
-const bcrypt = require('bcryptjs');
-const Employee = {
-  // Get all employees (excluding sensitive data)
-  getAll: async () => {
-    const [rows] = await pool.query(
-      'SELECT employeeId, employeeName, employeeContact_no, employeeEmail, created_at FROM employee'
-    );
-    return rows;
-  },
+const db = require('../config/database');
 
-  // Get employee by ID
-  getById: async (id) => {
-    const [rows] = await pool.query(
-      'SELECT employeeId, employeeName, employeeContact_no, employeeEmail, created_at FROM employee WHERE employeeId = ?', 
-      [id]
-    );
-    return rows[0];
-  },
 
-  // Get employee with authentication data (for login purposes)
-  getAuthData: async (id) => {
-    const [rows] = await pool.query(
-      'SELECT employeeId, passcode FROM employee WHERE employeeId = ?',
-      [id]
-    );
-    return rows[0];
-  },
-
-  // Create new employee
-  create: async (employeeData) => {
-    const { employeeId, employeeName, employeeContact_no, employeeEmail, passcode } = employeeData;
-    
-    // Hash the passcode before storing
-    const hashedPasscode = await bcrypt.hash(passcode, 10);
-    
-    const [result] = await pool.query(
-      'INSERT INTO employee (employeeId, employeeName, employeeContact_no, employeeEmail, passcode) VALUES (?, ?, ?, ?, ?)',
-      [employeeId, employeeName, employeeContact_no, employeeEmail, hashedPasscode]
-    );
-    
-    return { employeeId, employeeName, employeeContact_no, employeeEmail };
-  },
-
-  // Update employee basic info
-  update: async (id, employeeData) => {
-    const { employeeName, employeeContact_no, employeeEmail } = employeeData;
-    
-    const [result] = await pool.query(
-      'UPDATE employee SET employeeName = ?, employeeContact_no = ?, employeeEmail = ? WHERE employeeId = ?',
-      [employeeName, employeeContact_no, employeeEmail, id]
-    );
-    
-    return result.affectedRows > 0 ? { employeeId: id, ...employeeData } : null;
-  },
-
-  // Update employee password
-  updatePassword: async (id, newPassword) => {
-    const hashedPassword = await bcrypt.hash(newPassword, 10);
-    
-    const [result] = await pool.query(
-      'UPDATE employee SET passcode = ? WHERE employeeId = ?',
-      [hashedPassword, id]
-    );
-    
-    return result.affectedRows > 0;
-  },
-
-  // Delete employee
-  delete: async (id) => {
-    const [result] = await pool.query(
-      'DELETE FROM employee WHERE employeeId = ?', 
-      [id]
-    );
-    return result.affectedRows > 0;
-  },
-
-  // Verify passcode
-  verifyPasscode: async (id, passcode) => {
-    const employee = await Employee.getAuthData(id);
-    if (!employee) return false;
-    
-    return await bcrypt.compare(passcode, employee.passcode);
-  }
+//generate a new unique employeeId
+const generateEmployeeId = async () => {
+  const query = `
+    SELECT MAX(CAST(SUBSTRING(employeeId, 2) AS UNSIGNED)) AS lastId 
+    FROM employee
+  `;
+  const [results] = await db.query(query);
+  const lastId = results[0].lastId || 100;
+  return `E${lastId + 1}`;
 };
 
-module.exports = Employee;
+// Create a new employee
+const createEmployee = async ({ employeeId, employeeName, employeeContact_no, employeeEmail, status, notes }) => {
+  const query = `
+    INSERT INTO employee
+    (employeeId, employeeName, employeeContact_no, employeeEmail, status, notes)
+    VALUES (?, ?, ?, ?, ?, ?)
+  `;
+  await db.query(query, [employeeId, employeeName, employeeContact_no, employeeEmail, status, notes]);
+};
+
+//get all employees
+const getAllEmployees = async () => {
+  const [employees] = await db.query("SELECT * FROM employee");
+  return employees;
+};
+
+//get employee by id
+const getEmployeeById = async (employeeId) => {
+  const [employeeRows] = await db.query(
+    "SELECT * FROM employee WHERE employeeId = ?",
+    [employeeId]
+  );
+
+  if (employeeRows.length === 0) return null;
+
+  return employeeRows[0];
+};
+
+//update employee by id
+const updateEmployee = async ({ employeeId, employeeName, employeeContact_no, employeeEmail, status, notes }) => {
+  const query = `
+    UPDATE employee 
+    SET employeeName = ?, employeeContact_no = ?, employeeEmail = ?, status = ?, notes = ? 
+    WHERE employeeId = ?
+  `;
+  await db.query(query, [employeeName, employeeContact_no, employeeEmail, status, notes, employeeId]);
+};
+
+module.exports = {
+  generateEmployeeId,
+  createEmployee,
+  getAllEmployees,
+  getEmployeeById,
+  updateEmployee,
+};
