@@ -100,6 +100,10 @@ const SidebarEM = () => {
           )}
         </div>
 
+        <Link to="/employee-dashboard-manage-delivery-routes" className="item">
+          Manage Delivery Routes
+        </Link>
+
         {/* Manage Suppliers Dropdown */}
         <div className="dropdown">
           <button
@@ -147,10 +151,23 @@ const SidebarEM = () => {
             </div>
           )}
         </div>
+          {/* Manage Valuations Dropdown - this is only admin function*/}
+        <div className="dropdown">
+          <button
+            className="dropdown-btn"
+            onClick={() => toggleDropdown("employees")}
+          >
+            Manage Deliveries
+          </button>
+          {openDropdown === "employees" && (
+            <div className="dropdown-content">
+              <Link to="/add-employee">Add New Employee</Link>
+              <Link to="/view-employees">View Employees</Link>
+            </div>
+          )}
+        </div>
 
-        <Link to="/employee-dashboard-manage-delivery-routes" className="item">
-          Manage Delivery Routes
-        </Link>
+        
 
         <Link to="#" className="item" onClick={openProfileModal}>
           Your Profile
