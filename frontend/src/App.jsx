@@ -28,7 +28,8 @@ import ManageDeliveryRoutes from "./pages/ManageDeliveryRoutes/ManageDeliveryRou
 import ViewValuations from "./pages/SalesEM/ViewValuations/ViewValuations.jsx";
 import ManageBrokerValuations from "./pages/SalesEM/ManageBrokerValuations/ManageBrokerValuations.jsx";
 import AddEmployee from "./pages/ManageEmployees/AddEmployee/AddEmployee.jsx";
-
+import ViewEmployees from "./pages/ManageEmployees/ViewEmployees/ViewEmployees.jsx";
+import EditEmployee from "./pages/ManageEmployees/EditEmployee/EditEmployee.jsx";
 
 const App = () => {
   return (
@@ -71,6 +72,10 @@ const App = () => {
 
             {/* Admin Routes */}
             <Route path="/add-employee" element={<AddEmployee />} />
+            <Route path="/view-employees" element={<ViewEmployees />} />
+            <Route path="/edit-employee/:employeeId" element={<EditEmployee />} />
+
+            {/* Other Routes */}
 
            
           </Routes>

@@ -1,0 +1,203 @@
+.view-employee-container {
+    padding: 24px;
+    background-color: #ffffff;
+    border-radius: 8px;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+  }
+  
+  .content-header {
+    display: flex;
+    flex-direction: column;
+    margin-bottom: 24px;
+  }
+  
+  .content-header h3 {
+    font-size: 24px;
+    margin-bottom: 16px;
+    color: #333;
+  }
+  
+  .header-activity {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 16px;
+  }
+  
+  .search-box {
+    position: relative;
+    flex: 1;
+    max-width: 400px;
+  }
+  
+  .search-box input {
+    width: 100%;
+    padding: 10px 16px 10px 40px;
+    border: 1px solid #ddd;
+    border-radius: 0px;
+    font-size: 14px;
+  }
+  
+  .search-box .icon {
+    position: absolute;
+    left: 12px;
+    top: 50%;
+    transform: translateY(-50%);
+    color: #777;
+    font-size: 18px;
+  }
+  
+  .filters {
+    display: flex;
+    gap: 16px;
+    align-items: center;
+  }
+  
+  .status-filter {
+    padding: 10px 16px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    font-size: 14px;
+    min-width: 160px;
+  }
+  
+  .add-employee-btn {
+    padding: 10px 16px;
+    background-color: #0c7b08;
+    color: white;
+    border: none;
+    border-radius: 4px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: background-color 0.2s;
+  }
+  
+  .add-employee-btn:hover {
+    background-color: #0b6e08;
+  }
+  
+  .employees-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 16px;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+  }
+  
+  .employees-table th,
+  .employees-table td {
+    padding: 12px 16px;
+    text-align: left;
+    border-bottom: 1px solid #eee;
+    font-size: 14px;
+  }
+  
+  .employees-table th {
+    background-color: #f5f5f5;
+    font-weight: 600;
+    color: #555;
+  }
+  
+  .employees-table tr:hover {
+    background-color: #f9f9f9;
+  }
+  
+  .status-cell {
+    font-weight: 500;
+    padding: 6px 12px;
+    border-radius: 4px;
+    display: inline-block;
+    text-align: center;
+  }
+  
+  .status-active {
+    color: #519855;
+    background-color: #e8f5e9;
+  }
+  
+  .status-pending {
+    color: #ed6c02;
+    background-color: #fff3e0;
+  }
+  
+  .status-disabled {
+    color: #d32f2f;
+    background-color: #ffebee;
+  }
+  
+  .employee-notes {
+    max-width: 200px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+  
+  .edit-btn, 
+  .disable-button {
+    padding: 6px 12px;
+    margin-right: 8px;
+    border-radius: 4px;
+    font-size: 13px;
+    cursor: pointer;
+    transition: all 0.2s;
+    border: none;
+  }
+  
+  .edit-btn {
+    background-color: #136217cd;
+    color: white;
+  }
+  
+  .edit-btn:hover {
+    background-color: #105013cd;
+    
+  }
+  
+  .disable-button {
+    background-color: #f44336;
+    color: white;
+  }
+  
+  .disable-button:hover {
+    background-color: #d32f2f;
+  }
+  
+  .no-results {
+    text-align: center;
+    color: #777;
+    padding: 24px;
+  }
+  
+  /* Responsive adjustments */
+  @media (max-width: 1024px) {
+    .header-activity {
+      flex-direction: column;
+      align-items: flex-start;
+    }
+    
+    .search-box {
+      max-width: 100%;
+    }
+    
+    .filters {
+      width: 100%;
+      justify-content: space-between;
+    }
+    
+    .employees-table {
+      display: block;
+      overflow-x: auto;
+    }
+  }
+  
+  @media (max-width: 768px) {
+    .filters {
+      flex-direction: column;
+      align-items: flex-start;
+    }
+    
+    .status-filter, 
+    .add-employee-btn {
+      width: 100%;
+    }
+  }

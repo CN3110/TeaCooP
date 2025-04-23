@@ -91,7 +91,7 @@ exports.getEmployeeById = async (req, res) => {
     if (!employeeData) {
       return res.status(404).json({ error: "Employee not found" });
     }
-    res.status(200).json(employee);
+    res.status(200).json(employeeData); 
   } catch (error) {
     console.error("Error fetching employee:", error);
     res.status(500).json({ error: "Failed to fetch employee" });
