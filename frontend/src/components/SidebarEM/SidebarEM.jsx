@@ -31,7 +31,7 @@ const SidebarEM = () => {
   return (
     <div className="menu">
       <div className="menu-list">
-        <Link to="/employeedashboard" className="item">
+        <Link to="/employee-dashboard" className="item">
           Dashboard
         </Link>
         {/* Manage Deliveries Dropdown */}
