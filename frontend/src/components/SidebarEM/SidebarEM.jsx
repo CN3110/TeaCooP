@@ -151,13 +151,13 @@ const SidebarEM = () => {
             </div>
           )}
         </div>
-          {/* Manage Valuations Dropdown - this is only admin function*/}
+          {/* Manage Employees Dropdown - this is only admin function*/}
         <div className="dropdown">
           <button
             className="dropdown-btn"
             onClick={() => toggleDropdown("employees")}
           >
-            Manage Deliveries
+            Manage Employees
           </button>
           {openDropdown === "employees" && (
             <div className="dropdown-content">
