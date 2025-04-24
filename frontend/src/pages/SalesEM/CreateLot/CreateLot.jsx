@@ -1,15 +1,34 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import EmployeeLayout from "../../../components/EmployeeLayout/EmployeeLayout";
-import DatePicker from 'react-datepicker'; // Date picker library
-import 'react-datepicker/dist/react-datepicker.css'; // Date picker styles
-import './CreateLot.css'; 
+import DatePicker from 'react-datepicker';
+import 'react-datepicker/dist/react-datepicker.css';
+import './CreateLot.css';
+import Snackbar from '@mui/material/Snackbar';
+import MuiAlert from '@mui/material/Alert';
 
 const CreateLot = () => {
+  const [teaGradeOptions, setTeaGradeOptions] = useState([]);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [snackbar, setSnackbar] = useState({
+    open: false,
+    message: "",
+    severity: "success",
+  });
+
+  const showAlert = (message, severity = "success") => {
+    setSnackbar({ open: true, message, severity });
+  };
+
+  const handleCloseSnackbar = (event, reason) => {
+    if (reason === "clickaway") return;
+    setSnackbar(prev => ({ ...prev, open: false }));
+  };
+
   const [lotData, setLotData] = useState({
     lotNumber: '',
     invoiceNumber: '',
-    manufacturingDate: new Date(), // Initialize with current date
+    manufacturingDate: new Date(),
     teaGrade: '',
     noOfBags: '',
     netWeight: '',
@@ -17,17 +36,22 @@ const CreateLot = () => {
     valuationPrice: '',
   });
 
-  const teaGradeOptions = [
-    { value: 'BOP', label: 'BOP' },
-    { value: 'BOPF', label: 'BOPF' },
-    { value: 'OP', label: 'OP' },
-    { value: 'FBOP', label: 'FBOP' },
-    { value: 'Pekoe', label: 'Pekoe' }
-  ];
-
   const navigate = useNavigate();
 
-  // Handle input changes
+  useEffect(() => {
+    const fetchTeaGrades = async () => {
+      try {
+        const response = await fetch("http://localhost:3001/api/teaTypes");
+        const data = await response.json();
+        setTeaGradeOptions(data);
+      } catch (error) {
+        console.error("Error fetching tea grades:", error);
+        showAlert("Failed to fetch tea grades", "error");
+      }
+    };
+    fetchTeaGrades();
+  }, []);
+
   const handleInputChange = (e) => {
     const { name, value } = e.target;
     const updatedData = {
@@ -35,52 +59,43 @@ const CreateLot = () => {
       [name]: value,
     };
 
-    // Calculate totalNetWeight if noOfBags or netWeight changes
     if (name === 'noOfBags' || name === 'netWeight') {
       const noOfBags = name === 'noOfBags' ? parseFloat(value) : parseFloat(lotData.noOfBags);
       const netWeight = name === 'netWeight' ? parseFloat(value) : parseFloat(lotData.netWeight);
-      updatedData.totalNetWeight = (noOfBags * netWeight).toFixed(2); // Calculate and round to 2 decimal places
+      if (!isNaN(noOfBags) && !isNaN(netWeight)) {
+        updatedData.totalNetWeight = (noOfBags * netWeight).toFixed(2);
+      }
     }
 
     setLotData(updatedData);
   };
 
-  // Handle date changes
   const handleDateChange = (date) => {
     setLotData({ ...lotData, manufacturingDate: date });
   };
 
-  // Handle form submission
   const handleSubmit = async (e) => {
     e.preventDefault();
+    setIsSubmitting(true);
 
-    // Validate required fields
-    if (
-      !lotData.lotNumber ||
-      !lotData.invoiceNumber ||
-      !lotData.manufacturingDate ||
-      !lotData.teaGrade ||
-      !lotData.noOfBags ||
-      !lotData.netWeight ||
-      !lotData.totalNetWeight ||
-      !lotData.valuationPrice
-    ) {
-      alert("Please fill in all required fields.");
-      return;
+    const fields = ["lotNumber", "invoiceNumber", "teaGrade", "noOfBags", "netWeight", "totalNetWeight", "valuationPrice"];
+    for (let field of fields) {
+      if (!lotData[field]) {
+        alert("Please fill in all required fields.");
+        setIsSubmitting(false);
+        return;
+      }
     }
 
-    // Validate numeric fields (must be greater than zero)
-    if (
-      parseFloat(lotData.noOfBags) <= 0 ||
-      parseFloat(lotData.netWeight) <= 0 ||
-      parseFloat(lotData.totalNetWeight) <= 0 ||
-      parseFloat(lotData.valuationPrice) <= 0
-    ) {
-      alert("All numeric fields must be greater than zero.");
-      return;
+    const numbers = ["noOfBags", "netWeight", "totalNetWeight", "valuationPrice"];
+    for (let field of numbers) {
+      if (parseFloat(lotData[field]) <= 0) {
+        alert("All numeric fields must be greater than zero.");
+        setIsSubmitting(false);
+        return;
+      }
     }
 
-    // Format the date as YYYY-MM-DD
     const formattedDate = new Date(lotData.manufacturingDate).toISOString().split('T')[0];
 
     const payload = {
@@ -92,14 +107,10 @@ const CreateLot = () => {
       valuationPrice: parseFloat(lotData.valuationPrice),
     };
 
-    console.log("Payload being sent:", payload); // Log the payload
-
     try {
       const response = await fetch("http://localhost:3001/api/lots", {
         method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
+        headers: { "Content-Type": "application/json" },
         body: JSON.stringify(payload),
       });
 
@@ -108,12 +119,9 @@ const CreateLot = () => {
         throw new Error(errorData.error || "Failed to add lot");
       }
 
-      const result = await response.json();
-      console.log("Response from server:", result);
+      await response.json();
+      showAlert("Lot added successfully!");
 
-      alert("Lot added successfully!");
-
-      // Reset the form
       setLotData({
         lotNumber: "",
         invoiceNumber: "",
@@ -124,16 +132,48 @@ const CreateLot = () => {
         totalNetWeight: "",
         valuationPrice: "",
       });
-
     } catch (error) {
-      console.error("Error adding Lot:", error);
-      alert("An error occurred while adding the Lot: " + error.message);
+      console.error("Error adding lot:", error);
+      showAlert("An error occurred while adding the lot: " + error.message, "error");
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
   return (
     <EmployeeLayout>
       <div className="create-lot-container">
+        <Snackbar
+          open={snackbar.open}
+          autoHideDuration={4000}
+          onClose={handleCloseSnackbar}
+          anchorOrigin={{ vertical: "top", horizontal: "center" }}
+        >
+          <MuiAlert
+            onClose={handleCloseSnackbar}
+            severity={snackbar.severity}
+            sx={{
+              width: "100%",
+              fontWeight: "bold",
+              fontSize: "1rem",
+              backgroundColor:
+                snackbar.severity === "success"
+                  ? "rgb(14, 152, 16)"
+                  : snackbar.severity === "error"
+                  ? "rgb(211,47,47)"
+                  : snackbar.severity === "warning"
+                  ? "rgb(237, 201, 72)"
+                  : "#1976d2",
+              color: "white",
+              boxShadow: 3,
+            }}
+            elevation={6}
+            variant="filled"
+          >
+            {snackbar.message}
+          </MuiAlert>
+        </Snackbar>
+
         <h2>Create Lot</h2>
         <form className="lot-form" onSubmit={handleSubmit}>
           <div className="form-grid">
@@ -160,7 +200,7 @@ const CreateLot = () => {
             </div>
 
             <div className="lot-form-group">
-              <label>Grade:</label>
+              <label>Tea Grade:</label>
               <select
                 name="teaGrade"
                 value={lotData.teaGrade}
@@ -168,9 +208,9 @@ const CreateLot = () => {
                 required
               >
                 <option value="">Select Grade</option>
-                {teaGradeOptions.map((option) => (
-                  <option key={option.value} value={option.value}>
-                    {option.label}
+                {teaGradeOptions.map((teaType) => (
+                  <option key={teaType.teaTypeId} value={teaType.teaTypeName}>
+                    {teaType.teaTypeName}
                   </option>
                 ))}
               </select>
@@ -207,7 +247,7 @@ const CreateLot = () => {
                 type="number"
                 name="totalNetWeight"
                 value={lotData.totalNetWeight}
-                readOnly // Make it read-only since it's calculated
+                readOnly
                 required
               />
             </div>
@@ -237,14 +277,13 @@ const CreateLot = () => {
           </div>
 
           <div className="form-buttons">
-            <button type="submit" className="submit-button">
-              Add Lot
+            <button type="submit" className="submit-button" disabled={isSubmitting}>
+              {isSubmitting ? "Submitting..." : "Add Lot"}
             </button>
-
             <button
               type="button"
               className="cancel-button"
-              onClick={() => navigate("/view-lots")} // Redirect to the view lots page
+              onClick={() => navigate("/view-lots")}
             >
               Cancel
             </button>
