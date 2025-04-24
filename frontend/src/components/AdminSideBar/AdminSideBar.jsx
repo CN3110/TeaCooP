@@ -1,21 +1,9 @@
 import React, { useState } from "react";
-import { Link } from "react-router-dom"; 
-import ProfileEM from "../../pages/Employee/ProfileEM/ProfileEM"; 
-import "./SidebarEM.css";
+import { Link } from "react-router-dom"; // Import Link from React Router
+import "./AdminSideBar.css"; 
 
-const SidebarEM = () => {
-  const [isProfileModalOpen, setIsProfileModalOpen] = useState(false);
+const AdminSideBar = () => {
   const [openDropdown, setOpenDropdown] = useState(null); // Track which dropdown is open
-
-  // Open profile modal
-  const openProfileModal = () => {
-    setIsProfileModalOpen(true);
-  };
-
-  // Close profile modal
-  const closeProfileModal = () => {
-    setIsProfileModalOpen(false);
-  };
 
   // Toggle Dropdown
   const toggleDropdown = (dropdownName) => {
@@ -25,13 +13,13 @@ const SidebarEM = () => {
   // Handle logout
   const handleLogout = () => {
     alert("You have been logged out.");
-    window.location.href = "/"; // Redirect to home page
+    window.location.href = "/"; // Redirect to Login page
   };
 
   return (
     <div className="menu">
       <div className="menu-list">
-        <Link to="/employeedashboard" className="item">
+        <Link to="/admin-dashboard" className="item">
           Dashboard
         </Link>
         {/* Manage Deliveries Dropdown */}
@@ -151,13 +139,25 @@ const SidebarEM = () => {
             </div>
           )}
         </div>
-          
+        
+        <div className="dropdown">
+          <button
+            className="dropdown-btn"
+            onClick={() => toggleDropdown("employees")}
+          >
+            Manage Employees
+          </button>
+          {openDropdown === "employees" && (
+            <div className="dropdown-content">
+              <Link to="/add-employee">Add New Employee</Link>
+              <Link to="/view-employees">View Employees</Link>
+            </div>
+          )}
+        </div>
 
         
 
-        <Link to="#" className="item" onClick={openProfileModal}>
-          Your Profile
-        </Link>
+       
 
         {/* Log Out Button */}
         <button className="logout-btn" onClick={handleLogout}>
@@ -165,9 +165,8 @@ const SidebarEM = () => {
         </button>
       </div>
 
-      {isProfileModalOpen && <ProfileEM closeModal={closeProfileModal} />}
     </div>
   );
 };
 
-export default SidebarEM;
+export default AdminSideBar;

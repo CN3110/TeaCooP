@@ -31,6 +31,7 @@ import AddEmployee from "./pages/ManageEmployees/AddEmployee/AddEmployee.jsx";
 import ViewEmployees from "./pages/ManageEmployees/ViewEmployees/ViewEmployees.jsx";
 import EditEmployee from "./pages/ManageEmployees/EditEmployee/EditEmployee.jsx";
 import Login from "./pages/Login/Login.jsx";
+import AdminDashboard from "./pages/Admin/AdminDashboard/AdminDashboard.jsx";
 
 const App = () => {
   return (
@@ -72,6 +73,7 @@ const App = () => {
 
 
             {/* Admin Routes */}
+            <Route path="/admin-dashboard" element={<AdminDashboard />} />
             <Route path="/add-employee" element={<AddEmployee />} />
             <Route path="/view-employees" element={<ViewEmployees />} />
             <Route path="/edit-employee/:employeeId" element={<EditEmployee />} />
