@@ -1,61 +1,99 @@
 const db = require('../config/database');
 
+// Generate a new unique lot number
+const generateLotNumber = async () => {
+  const query = `
+    SELECT MAX(CAST(SUBSTRING(lotNumber, 2) AS UNSIGNED)) AS lastId 
+    FROM lot
+  `;
+  const [results] = await db.query(query);
+  const lastId = results[0]?.lastId || 1000;
+  const newId = lastId + 1;
+  return `L${newId}`;
+};
+
 // Get all lots
-async function getAllLots() {
-  const [rows] = await db.query('SELECT * FROM lot');
-  return rows;
-}
+const getAllLots = async () => {
+  const [lots] = await db.query('SELECT * FROM lot');
+  return lots;
+};
 
 // Get a lot by lotNumber
-async function getLotById(id) {
-  const [rows] = await db.query('SELECT * FROM lot WHERE lotNumber = ?', [id]);
-  return rows[0];
-}
+const getLotById = async (lotNumber) => {
+  const [lots] = await db.query('SELECT * FROM lot WHERE lotNumber = ?', [lotNumber]);
+  if (lots.length === 0) return null;
+  return lots[0];
+};
 
 // Create a new lot
-async function createLot(data) {
-  const {
-    lotNumber, invoiceNumber, manufacturingDate, teaGrade,
-    noOfBags, netWeight, totalNetWeight, valuationPrice
-  } = data;
-
-  await db.query(`
-    INSERT INTO lot (lotNumber, invoiceNumber, manufacturingDate, teaGrade, noOfBags, netWeight, totalNetWeight, valuationPrice)
-    VALUES (?, ?, ?, ?, ?, ?, ?, ?)`, 
-    [lotNumber, invoiceNumber, manufacturingDate, teaGrade, noOfBags, netWeight, totalNetWeight, valuationPrice]
-  );
-}
+const createLot = async ({
+  lotNumber,
+  invoiceNumber,
+  manufacturingDate,
+  teaGrade,
+  noOfBags,
+  netWeight,
+  totalNetWeight,
+  valuationPrice
+}) => {
+  const query = `
+    INSERT INTO lot (
+      lotNumber, invoiceNumber, manufacturingDate, teaGrade,
+      noOfBags, netWeight, totalNetWeight, valuationPrice, status
+    ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, 'available')
+  `;
+  await db.query(query, [
+    lotNumber,
+    invoiceNumber,
+    manufacturingDate,
+    teaGrade,
+    noOfBags,
+    netWeight,
+    totalNetWeight,
+    valuationPrice
+  ]);
+};
 
 // Update lot
-async function updateLot(id, data) {
-  const {
-    invoiceNumber, manufacturingDate, teaGrade,
-    noOfBags, netWeight, totalNetWeight, valuationPrice
-  } = data;
+const updateLot = async (lotNumber, lotDetails) => {
+  const query = `
+    UPDATE lot 
+    SET invoiceNumber=?, 
+        manufacturingDate=?, 
+        teaGrade=?, 
+        noOfBags=?, 
+        netWeight=?, 
+        totalNetWeight=?, 
+        valuationPrice=?
+    WHERE lotNumber=?
+  `;
 
-  const [result] = await db.query(`
-    UPDATE lot SET invoiceNumber=?, manufacturingDate=?, teaGrade=?, noOfBags=?, netWeight=?, totalNetWeight=?, valuationPrice=?
-    WHERE lotNumber=?`, 
-    [invoiceNumber, manufacturingDate, teaGrade, noOfBags, netWeight, totalNetWeight, valuationPrice, id]
-  );
-
-  return result.affectedRows;
-}
+  await db.query(query, [
+    lotDetails.invoiceNumber,
+    lotDetails.manufacturingDate,
+    lotDetails.teaGrade,
+    lotDetails.noOfBags,
+    lotDetails.netWeight,
+    lotDetails.totalNetWeight,
+    lotDetails.valuationPrice,
+    lotNumber
+  ]);
+};
 
 // Delete lot
-async function deleteLot(id) {
+const deleteLot = async (id) => {
   const [result] = await db.query('DELETE FROM lot WHERE lotNumber = ?', [id]);
   return result.affectedRows;
-}
+};
 
 // Get only available lots
-async function getAvailableLots() {
+const getAvailableLots = async () => {
   const [rows] = await db.query("SELECT * FROM lot WHERE status = 'available'");
   return rows;
-}
+};
 
 // Submit broker valuation
-async function submitBrokerValuation(lotNumber, brokerId, valuationPrice) {
+const submitBrokerValuation = async (lotNumber, brokerId, valuationPrice) => {
   await db.query(
     `INSERT INTO broker_valuation (lotNumber, brokerId, valuationPrice) VALUES (?, ?, ?)`,
     [lotNumber, brokerId, valuationPrice]
@@ -65,7 +103,7 @@ async function submitBrokerValuation(lotNumber, brokerId, valuationPrice) {
     `UPDATE lot SET status = 'valuation_pending' WHERE lotNumber = ?`,
     [lotNumber]
   );
-}
+};
 
 module.exports = {
   getAllLots,
@@ -75,4 +113,5 @@ module.exports = {
   deleteLot,
   getAvailableLots,
   submitBrokerValuation,
+  generateLotNumber,
 };

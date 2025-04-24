@@ -184,6 +184,7 @@ const CreateLot = () => {
                 name="lotNumber"
                 value={lotData.lotNumber}
                 onChange={handleInputChange}
+                autoComplete="off"
                 required
               />
             </div>
