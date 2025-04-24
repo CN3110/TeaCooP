@@ -43,6 +43,7 @@ const App = () => {
           <Routes>
             {/* Public Routes */}
             <Route path="/" element={<Login />} />
+            
            
             <Route path="/profile/:userId" element={<EmployeeProfile />} />
 

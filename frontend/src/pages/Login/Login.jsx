@@ -1,7 +1,9 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
-//import './Login.css';
+import './Login.css';
+
+const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:3001/api';
 
 const Login = () => {
   const [userId, setUserId] = useState('');
@@ -33,35 +35,35 @@ const Login = () => {
     e.preventDefault();
     setError('');
     setLoading(true);
-
+  
     try {
-      const response = await axios.post("http://localhost:3001/api/auth/login", { userId, password });
+      const response = await axios.post(`${API_BASE_URL}/auth/login`, { userId, password });
       
       // Store token and user info in localStorage
       localStorage.setItem('token', response.data.token);
       localStorage.setItem('userRole', response.data.role);
-      localStorage.setItem('userId', response.data.employeeId || response.data.userId);
-      
+      localStorage.setItem('userId', response.data.userId || response.data.employeeId);      
       if (response.data.employeeName) {
         localStorage.setItem('userName', response.data.employeeName);
       }
       
-      // Configure axios default headers for future requests
-      axios.defaults.headers.common['Authorization'] = `Bearer ${response.data.token}`;
       
-      // Redirect based on role
-      if (response.data.role === 'admin') {
-        navigate('/admin/dashboard');
-      } else {
-        navigate('/employee/dashboard');
-      }
-    } catch (err) {
-      console.error('Login error:', err);
-      setError(err.response?.data?.error || 'Login failed. Please try again.');
-    } finally {
-      setLoading(false);
+     // Configure axios default headers for future requests
+    axios.defaults.headers.common['Authorization'] = `Bearer ${response.data.token}`;
+    
+    // Redirect based on role
+    if (response.data.role === 'admin') {
+      navigate('/admin-dashboard');
+    } else {
+      navigate('/employee-dashboard');
     }
-  };
+  } catch (err) {
+    console.error('Login error:', err);
+    setError(err.response?.data?.error || 'Login failed. Please try again.');
+  } finally {
+    setLoading(false);
+  }
+};
 
   // Handle forgot password
   const handleForgotPassword = async (e) => {
@@ -69,9 +71,9 @@ const Login = () => {
     setMessage('');
     setError('');
     setLoading(true);
-
+  
     try {
-      const response = await axios.post('/api/auth/forgot-password', { employeeEmail: email });
+      const response = await axios.post(`${API_BASE_URL}/auth/forgot-password`, { employeeEmail: email });
       setMessage(response.data.message);
       // Clear email field on success
       setEmail('');
@@ -86,13 +88,9 @@ const Login = () => {
     <div className="login-container">
       <div className="login-card">
         <div className="login-header">
-          <img 
-            src="/logo.png" 
-            alt="Morawakkorale Tea CooP Logo" 
-            className="login-logo" 
-          />
+          
           <h2>Morawakkorale Tea CooP</h2>
-          <p>Employee Management System</p>
+          
         </div>
 
         {!showForgotPassword ? (
