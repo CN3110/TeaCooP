@@ -30,6 +30,7 @@ import ManageBrokerValuations from "./pages/SalesEM/ManageBrokerValuations/Manag
 import AddEmployee from "./pages/ManageEmployees/AddEmployee/AddEmployee.jsx";
 import ViewEmployees from "./pages/ManageEmployees/ViewEmployees/ViewEmployees.jsx";
 import EditEmployee from "./pages/ManageEmployees/EditEmployee/EditEmployee.jsx";
+import Login from "./pages/Login/Login.jsx";
 
 const App = () => {
   return (
@@ -40,7 +41,7 @@ const App = () => {
 
           <Routes>
             {/* Public Routes */}
-            
+            <Route path="/" element={<Login />} />
            
             <Route path="/profile/:userId" element={<EmployeeProfile />} />
 

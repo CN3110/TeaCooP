@@ -1,7 +1,7 @@
 const db = require('../config/database');
+const bcrypt = require('bcrypt');
 
-
-//generate a new unique employeeId
+// Generate a new unique employeeId
 const generateEmployeeId = async () => {
   const query = `
     SELECT MAX(CAST(SUBSTRING(employeeId, 2) AS UNSIGNED)) AS lastId 
@@ -12,23 +12,33 @@ const generateEmployeeId = async () => {
   return `E${lastId + 1}`;
 };
 
-// Create a new employee
-const createEmployee = async ({ employeeId, employeeName, employeeContact_no, employeeEmail, status, notes }) => {
-  const query = `
-    INSERT INTO employee
-    (employeeId, employeeName, employeeContact_no, employeeEmail, status, notes)
-    VALUES (?, ?, ?, ?, ?, ?)
-  `;
-  await db.query(query, [employeeId, employeeName, employeeContact_no, employeeEmail, status, notes]);
+// Hash a password/passcode
+const hashPassword = async (password) => {
+  const saltRounds = 10;
+  return await bcrypt.hash(password, saltRounds);
 };
 
-//get all employees
+// Create a new employee
+const createEmployee = async ({ employeeId, employeeName, employeeContact_no, employeeEmail, status, notes, passcode }) => {
+  // If we're storing plaintext passcodes (for email delivery)
+  // We'll hash them before storing in the database
+  const hashedPasscode = await hashPassword(passcode);
+  
+  const query = `
+    INSERT INTO employee
+    (employeeId, employeeName, employeeContact_no, employeeEmail, status, notes, passcode)
+    VALUES (?, ?, ?, ?, ?, ?, ?)
+  `;
+  await db.query(query, [employeeId, employeeName, employeeContact_no, employeeEmail, status, notes, hashedPasscode]);
+};
+
+// Get all employees
 const getAllEmployees = async () => {
   const [employees] = await db.query("SELECT * FROM employee");
   return employees;
 };
 
-//get employee by id
+// Get employee by id
 const getEmployeeById = async (employeeId) => {
   const [employeeRows] = await db.query(
     "SELECT * FROM employee WHERE employeeId = ?",
@@ -40,7 +50,7 @@ const getEmployeeById = async (employeeId) => {
   return employeeRows[0];
 };
 
-//update employee by id
+// Update employee by id
 const updateEmployee = async ({ employeeId, employeeName, employeeContact_no, employeeEmail, status, notes }) => {
   const query = `
     UPDATE employee 
@@ -50,10 +60,42 @@ const updateEmployee = async ({ employeeId, employeeName, employeeContact_no, em
   await db.query(query, [employeeName, employeeContact_no, employeeEmail, status, notes, employeeId]);
 };
 
+// Update employee password directly
+const updateEmployeePassword = async (employeeId, newPassword) => {
+  const hashedPassword = await hashPassword(newPassword);
+  
+  const query = `
+    UPDATE employee 
+    SET passcode = ? 
+    WHERE employeeId = ?
+  `;
+  await db.query(query, [hashedPassword, employeeId]);
+};
+
+// Verify employee credentials
+const verifyEmployeeCredentials = async (employeeId, passcode) => {
+  const [employees] = await db.query(
+    "SELECT * FROM employee WHERE employeeId = ? AND status = 'active'", 
+    [employeeId]
+  );
+  
+  if (employees.length === 0) return null;
+  
+  const employee = employees[0];
+  const isPasswordValid = await bcrypt.compare(passcode, employee.passcode);
+  
+  if (!isPasswordValid) return null;
+  
+  return employee;
+};
+
 module.exports = {
   generateEmployeeId,
   createEmployee,
   getAllEmployees,
   getEmployeeById,
   updateEmployee,
+  updateEmployeePassword,
+  verifyEmployeeCredentials,
+  hashPassword
 };

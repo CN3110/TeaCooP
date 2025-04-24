@@ -1,73 +1,172 @@
-import React, { useState } from "react";
-import { useAuth } from "../../contexts/AuthContext";
-import { useNavigate } from "react-router-dom";
+import React, { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
+import axios from 'axios';
+//import './Login.css';
 
 const Login = () => {
-  const [userId, setUserId] = useState("");
-  const [password, setPassword] = useState("");
-  const [error, setError] = useState("");
-  const { login } = useAuth();
+  const [userId, setUserId] = useState('');
+  const [password, setPassword] = useState('');
+  const [error, setError] = useState('');
+  const [loading, setLoading] = useState(false);
+  const [showForgotPassword, setShowForgotPassword] = useState(false);
+  const [email, setEmail] = useState('');
+  const [message, setMessage] = useState('');
+  
   const navigate = useNavigate();
 
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-    setError("");
-    try {
-      const user = await login(userId, password);
-      if (user.isFirstLogin) {
-        navigate("/set-password");
+  // Check if user is already logged in
+  useEffect(() => {
+    const token = localStorage.getItem('token');
+    const userRole = localStorage.getItem('userRole');
+    
+    if (token && userRole) {
+      if (userRole === 'admin') {
+        navigate('/admin/dashboard');
       } else {
-        navigate(`/${user.userType}-dashboard`);
+        navigate('/employee/dashboard');
+      }
+    }
+  }, [navigate]);
+
+  // Handle login
+  const handleLogin = async (e) => {
+    e.preventDefault();
+    setError('');
+    setLoading(true);
+
+    try {
+      const response = await axios.post("http://localhost:3001/api/auth/login", { userId, password });
+      
+      // Store token and user info in localStorage
+      localStorage.setItem('token', response.data.token);
+      localStorage.setItem('userRole', response.data.role);
+      localStorage.setItem('userId', response.data.employeeId || response.data.userId);
+      
+      if (response.data.employeeName) {
+        localStorage.setItem('userName', response.data.employeeName);
+      }
+      
+      // Configure axios default headers for future requests
+      axios.defaults.headers.common['Authorization'] = `Bearer ${response.data.token}`;
+      
+      // Redirect based on role
+      if (response.data.role === 'admin') {
+        navigate('/admin/dashboard');
+      } else {
+        navigate('/employee/dashboard');
       }
     } catch (err) {
-      setError(
-        err.response?.data?.error ||
-          err.message ||
-          "Login failed. Please try again."
-      );
+      console.error('Login error:', err);
+      setError(err.response?.data?.error || 'Login failed. Please try again.');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // Handle forgot password
+  const handleForgotPassword = async (e) => {
+    e.preventDefault();
+    setMessage('');
+    setError('');
+    setLoading(true);
+
+    try {
+      const response = await axios.post('/api/auth/forgot-password', { employeeEmail: email });
+      setMessage(response.data.message);
+      // Clear email field on success
+      setEmail('');
+    } catch (err) {
+      setError(err.response?.data?.error || 'Password reset failed. Please try again.');
+    } finally {
+      setLoading(false);
     }
   };
 
   return (
     <div className="login-container">
-      <h2>Tea Factory Management System</h2>
-      <form onSubmit={handleSubmit}>
-        {error && (
-          <div className="alert alert-danger" role="alert">
-            {error}
-          </div>
+      <div className="login-card">
+        <div className="login-header">
+          <img 
+            src="/logo.png" 
+            alt="Morawakkorale Tea CooP Logo" 
+            className="login-logo" 
+          />
+          <h2>Morawakkorale Tea CooP</h2>
+          <p>Employee Management System</p>
+        </div>
+
+        {!showForgotPassword ? (
+          // Login Form
+          <>
+            <form onSubmit={handleLogin} className="login-form">
+              <div className="form-group">
+                <label htmlFor="userId">User ID</label>
+                <input
+                  type="text"
+                  id="userId"
+                  value={userId}
+                  onChange={(e) => setUserId(e.target.value)}
+                  required
+                  placeholder="Enter your User ID"
+                />
+              </div>
+              <div className="form-group">
+                <label htmlFor="password">Password</label>
+                <input
+                  type="password"
+                  id="password"
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  required
+                  placeholder="Enter your password"
+                />
+              </div>
+              {error && <div className="error-message">{error}</div>}
+              <button type="submit" className="login-button" disabled={loading}>
+                {loading ? 'Logging in...' : 'Login'}
+              </button>
+            </form>
+            <div className="login-footer">
+              <button 
+                className="forgot-password-link" 
+                onClick={() => setShowForgotPassword(true)}
+              >
+                Forgot Password?
+              </button>
+            </div>
+          </>
+        ) : (
+          // Forgot Password Form
+          <>
+            <form onSubmit={handleForgotPassword} className="forgot-password-form">
+              <div className="form-group">
+                <label htmlFor="email">Email Address</label>
+                <input
+                  type="email"
+                  id="email"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  required
+                  placeholder="Enter your registered email"
+                />
+              </div>
+              {error && <div className="error-message">{error}</div>}
+              {message && <div className="success-message">{message}</div>}
+              <button type="submit" className="login-button" disabled={loading}>
+                {loading ? 'Processing...' : 'Reset Password'}
+              </button>
+            </form>
+            <div className="login-footer">
+              <button 
+                className="back-to-login-link" 
+                onClick={() => setShowForgotPassword(false)}
+              >
+                Back to Login
+              </button>
+            </div>
+          </>
         )}
-        <div className="mb-3">
-          <label htmlFor="userId" className="form-label">
-            User ID:
-          </label>
-          <input
-            id="userId"
-            type="text"
-            className="form-control"
-            value={userId}
-            onChange={(e) => setUserId(e.target.value)}
-            required
-          />
-        </div>
-        <div className="mb-3">
-          <label htmlFor="password" className="form-label">
-            Password:
-          </label>
-          <input
-            id="password"
-            type="password"
-            className="form-control"
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
-            required
-            autoComplete="current-password" 
-          />
-        </div>
-        <button type="submit" className="btn btn-primary">
-          Login
-        </button>
-      </form>
+      </div>
     </div>
   );
 };

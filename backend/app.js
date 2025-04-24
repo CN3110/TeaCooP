@@ -18,13 +18,15 @@ app.use(cors({
   credentials: true
 }));
 
+
+
 app.use(express.json());
 app.use(cookieParser());
 
 
 
 // Routes
-app.use('/api/auth', require('./routes/authRoutes'));
+app.use("/api/auth", require("./routes/authRoutes"));
 app.use('/api/dashboard', require("./routes/dashboardRoutes"));
 app.use("/api/deliveries", require("./routes/deliveryRoutes"));
 app.use("/api/suppliers", require("./routes/supplierRoutes"));

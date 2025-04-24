@@ -1,169 +1,166 @@
 const jwt = require('jsonwebtoken');
-const bcrypt = require('bcryptjs');
-const pool = require('../config/database');
+const employee = require('../models/employee');
+const nodemailer = require('nodemailer');
+require('dotenv').config();
 
-// Validate critical environment variables
-const JWT_SECRET = process.env.JWT_SECRET;
-if (!JWT_SECRET && process.env.NODE_ENV === 'production') {
-  throw new Error('Missing JWT_SECRET environment variable');
-}
-
-const BCRYPT_SALT_ROUNDS = parseInt(process.env.BCRYPT_SALT_ROUNDS) || 10;
-const JWT_EXPIRES_IN = process.env.JWT_EXPIRES_IN || '8h';
-const JWT_FIRST_LOGIN_EXPIRES_IN = process.env.JWT_FIRST_LOGIN_EXPIRES_IN || '1h';
-
-// Helper function to determine user type (consistent table names)
-function getUserType(userId) {
-  const prefix = userId.charAt(0).toUpperCase();
-  switch(prefix) {
-    case 'E': return { userType: 'employee', tableName: 'employee', idField: 'employeeId' };
-    case 'S': return { userType: 'supplier', tableName: 'supplier', idField: 'supplierId' };
-    case 'D': return { userType: 'driver', tableName: 'driver', idField: 'driverId' };
-    case 'B': return { userType: 'broker', tableName: 'broker', idField: 'brokerId' };
-    default: throw new Error('Invalid user ID format');
+// Set up nodemailer
+const transporter = nodemailer.createTransport({
+  service: 'gmail',
+  auth: {
+    user: process.env.EMAIL_USER,
+    pass: process.env.EMAIL_PASS
   }
-}
+});
 
-// Enhanced password validation
-function validatePassword(password) {
-  if (password.length < 8) {
-    return { valid: false, message: 'Password must be at least 8 characters' };
-  }
-  // Add more rules as needed
-  return { valid: true };
-}
+// Generate random passcode - 6 digits
+const generatePasscode = () => {
+  return Math.floor(100000 + Math.random() * 900000).toString();
+};
 
+// Generate JWT token
+const generateToken = (userId, role) => {
+  return jwt.sign(
+    { userId, role },
+    process.env.JWT_SECRET,
+    { expiresIn: '8h' }
+  );
+};
+
+// Handle login for both admin and employees
 exports.login = async (req, res) => {
-  const { userId, passcode } = req.body;
+  const { userId, password } = req.body;
+
+  if (!userId || !password) {
+    return res.status(400).json({ error: 'User ID and password are required' });
+  }
 
   try {
-    const { userType, tableName, idField } = getUserType(userId);
-    const [rows] = await pool.query(
-      `SELECT * FROM ${tableName} WHERE ${idField} = ?`, 
-      [userId]
-    );
-
-    if (rows.length === 0) {
-      return res.status(404).json({ message: 'User not found' });
-    }
-
-    const user = rows[0];
-
-    // First login flow
-    if (!user.password) {
-      if (user.passcode !== passcode) {
-        return res.status(401).json({ message: 'Invalid passcode' });
-      }
-
-      const token = jwt.sign(
-        { userId: user[idField], userType, needsPassword: true },
-        JWT_SECRET,
-        { expiresIn: JWT_FIRST_LOGIN_EXPIRES_IN }
-      );
-
-      return res.json({ 
+    // Check for admin login
+    if (
+      userId === process.env.ADMIN_USERNAME &&
+      password === process.env.ADMIN_PASSWORD
+    ) {
+      const token = generateToken(userId, 'admin');
+      return res.status(200).json({
+        role: 'admin',
         token,
-        userType,
-        needsPassword: true,
-        message: 'Please set your password'
+        userId,
+        message: 'Admin login successful'
       });
     }
 
-    // Regular login
-    const isMatch = await bcrypt.compare(passcode, user.password);
-    if (!isMatch) {
-      return res.status(401).json({ message: 'Invalid credentials' });
+    // Employee login
+    const employeeData = await employee.verifyEmployeeCredentials(userId, password);
+    
+    if (!employeeData) {
+      return res.status(401).json({ error: 'Invalid credentials or inactive account' });
     }
 
-    const token = jwt.sign(
-      { userId: user[idField], userType },
-      JWT_SECRET,
-      { expiresIn: JWT_EXPIRES_IN }
-    );
+    const token = generateToken(employeeData.employeeId, 'employee');
 
-    res.json({ token, userType, message: 'Login successful' });
-    
+    res.status(200).json({
+      role: 'employee',
+      token,
+      employeeId: employeeData.employeeId,
+      employeeName: employeeData.employeeName,
+      message: 'Login successful'
+    });
   } catch (error) {
     console.error('Login error:', error);
-    if (error.message === 'Invalid user ID format') {
-      return res.status(400).json({ message: error.message });
-    }
-    res.status(500).json({ 
-      message: 'Authentication failed',
-      ...(process.env.NODE_ENV === 'development' && { error: error.message })
-    });
+    res.status(500).json({ error: 'Server error during login' });
   }
 };
 
-exports.setPassword = async (req, res) => {
-  const { newPassword, confirmPassword } = req.body;
-  const { userId, userType } = req.user;
-  
+// Verify token (for protected routes)
+exports.verifyToken = async (req, res) => {
+  res.status(200).json({
+    authenticated: true,
+    user: {
+      userId: req.user.userId,
+      userType: req.user.userType,
+      name: req.user.name || null,
+      email: req.user.email || null
+    }
+  });
+};
+
+// Reset password (for employees who know their current password)
+exports.resetPassword = async (req, res) => {
+  const { employeeId, oldPassword, newPassword } = req.body;
+
+  if (!employeeId || !oldPassword || !newPassword) {
+    return res.status(400).json({ error: 'All fields are required' });
+  }
+
   try {
-    // Validate passwords
-    if (newPassword !== confirmPassword) {
-      return res.status(400).json({ message: 'Passwords do not match' });
+    // Verify current credentials
+    const employeeData = await employee.verifyEmployeeCredentials(employeeId, oldPassword);
+
+    if (!employeeData) {
+      return res.status(401).json({ error: 'Invalid credentials' });
     }
-    
-    const { valid, message } = validatePassword(newPassword);
-    if (!valid) {
-      return res.status(400).json({ message });
-    }
-    
-    // Hash password
-    const hashedPassword = await bcrypt.hash(newPassword, BCRYPT_SALT_ROUNDS);
-    const { tableName, idField } = getUserType(userId);
-    
-    // Update database
-    await pool.query(
-      `UPDATE ${tableName} SET password = ? WHERE ${idField} = ?`,
-      [hashedPassword, userId]
-    );
-    
-    // Generate new token without needsPassword flag
-    const token = jwt.sign(
-      { userId, userType },
-      JWT_SECRET,
-      { expiresIn: JWT_EXPIRES_IN }
-    );
-    
-    res.json({ 
-      token,
-      userType,
-      message: 'Password set successfully'
-    });
-    
+
+    // Update password
+    await employee.updateEmployeePassword(employeeId, newPassword);
+
+    res.status(200).json({ message: 'Password updated successfully' });
   } catch (error) {
-    console.error('Set password error:', error);
-    res.status(500).json({ 
-      message: 'Password update failed',
-      ...(process.env.NODE_ENV === 'development' && { error: error.message })
-    });
+    console.error('Password reset error:', error);
+    res.status(500).json({ error: 'Server error during password reset' });
   }
 };
 
-exports.getProfile = async (req, res) => {
-  const { userId, userType } = req.user;
-  
+// Forgot password functionality
+exports.forgotPassword = async (req, res) => {
+  const { employeeEmail } = req.body;
+
+  if (!employeeEmail) {
+    return res.status(400).json({ error: 'Email is required' });
+  }
+
   try {
-    const { tableName, idField } = getUserType(userId);
-    
-    const [rows] = await pool.query(
-      `SELECT * FROM ${tableName} WHERE ${idField} = ?`,
-      [userId]
+    // Check if employee exists with this email
+    const [employees] = await require('../config/database').query(
+      'SELECT * FROM employee WHERE employeeEmail = ? AND status = "active"',
+      [employeeEmail]
     );
-    
-    if (rows.length === 0) {
-      return res.status(404).json({ message: 'User not found' });
+
+    if (employees.length === 0) {
+      // For security, don't reveal if email exists or not
+      return res.status(200).json({ message: 'If your email is registered, you will receive a reset link' });
     }
-    
-    const user = rows[0];
-    const { password, passcode, ...profileData } = user;
-    
-    res.json(profileData);
-    
+
+    const employeeData = employees[0];
+    const newPasscode = generatePasscode();
+
+    // Update employee with new passcode
+    await employee.updateEmployeePassword(employeeData.employeeId, newPasscode);
+
+    // Send email with new passcode
+    const mailOptions = {
+      from: process.env.EMAIL_USER,
+      to: employeeEmail,
+      subject: 'Morawakkorale Tea CooP - Password Reset',
+      text: `Dear ${employeeData.employeeName},
+
+Your password has been reset. Please use the following credentials to log in:
+User ID: ${employeeData.employeeId}
+New Passcode: ${newPasscode}
+
+After logging in, you can change your password using the change password option.
+
+If you did not request this password reset, please contact us immediately.
+
+Best regards,
+Morawakkorale Tea Co-op
+041-2271400`
+    };
+
+    await transporter.sendMail(mailOptions);
+
+    res.status(200).json({ message: 'If your email is registered, you will receive a reset link' });
   } catch (error) {
-    console.error(error);
-    res.status(500).json({ message: 'Server error' });
+    console.error('Forgot password error:', error);
+    res.status(500).json({ error: 'Server error during password recovery' });
   }
 };
