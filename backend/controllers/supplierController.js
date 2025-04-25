@@ -51,21 +51,37 @@ exports.getAllSuppliers = async (req, res) => {
 };
 
 // Add supplier
+// Add supplier (updated to include employeeId)
 exports.addSupplier = async (req, res) => {
   const { name, contact, email, landDetails, status, notes } = req.body;
+  const addedByEmployeeId = req.body.addedByEmployeeId; // Get from request body
 
-  if (!name || !contact || !email) {
+  if (!name || !contact || !email || !addedByEmployeeId) {
     return res.status(400).json({ error: "Missing required fields" });
+  }
+
+  // Verify employee exists and is active
+  try {
+    const [employee] = await db.query(
+      "SELECT * FROM employee WHERE employeeId = ? AND status = 'active'",
+      [addedByEmployeeId]
+    );
+
+    if (!employee.length) {
+      return res.status(400).json({ error: "Invalid employee ID or employee not active" });
+    }
+  } catch (err) {
+    return res.status(500).json({ error: "Error verifying employee" });
   }
 
   const supplierId = await generateSupplierId();
   const passcode = generatePasscode();
 
   try {
-    // Insert supplier into the supplier table
+    // Insert supplier with employeeId
     await db.query(
-      "INSERT INTO supplier (supplierId, supplierName, supplierContactNumber, supplierEmail, status, notes) VALUES (?, ?, ?, ?, ?, ?)",
-      [supplierId, name, contact, email, status, notes]
+      "INSERT INTO supplier (supplierId, supplierName, supplierContactNumber, supplierEmail, status, notes, addedByEmployeeId) VALUES (?, ?, ?, ?, ?, ?, ?)",
+      [supplierId, name, contact, email, status, notes, addedByEmployeeId]
     );
 
     // Insert land details if provided
@@ -81,39 +97,29 @@ exports.addSupplier = async (req, res) => {
     // Send email only if supplier status is "active"
     if (status === "active") {
       const mailOptions = {
-        from: "mkteacoop@gmail.com",
+        from: process.env.EMAIL_USER,
         to: email,
         subject: "Morawakkorale Tea CooP - Your Login Credentials",
-        text: `Dear ${name},
-
-        Your login credentials for the system are as follows:
-        User ID: ${supplierId}
-        Passcode: ${passcode}
-
-        Please use the above passcode as your password during your login. It does not expire. After logging in, you will be able to create your own password through the "Forgot Password" option.
-
-        If you have any questions, please contact us.
-
-        Best regards,
-        Morawakkorale Tea Co-op
-        041-2271400`,
+        text: `Dear ${name},\n\nYour login credentials...` // Keep your existing email text
       };
 
-      transporter.sendMail(mailOptions, (error, info) => {
-        if (error) {
-          console.error("Error sending email:", error);
-          return res.status(500).json({ error: "Failed to send email" });
-        }
-        res.status(201).json({ message: "Supplier added successfully!" });
-      });
-    } else {
-      res.status(201).json({ message: "Supplier added successfully!" });
+      await transporter.sendMail(mailOptions);
     }
+
+    res.status(201).json({ 
+      success: true,
+      supplierId,
+      message: "Supplier added successfully!" 
+    });
   } catch (error) {
     console.error("Error adding supplier:", error);
-    res.status(500).json({ error: "Failed to add supplier" });
+    res.status(500).json({ 
+      success: false,
+      error: "Failed to add supplier" 
+    });
   }
 };
+
 
 // Fetch a single supplier by ID
 exports.getSupplierById = async (req, res) => {

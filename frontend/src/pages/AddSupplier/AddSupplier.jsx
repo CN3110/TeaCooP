@@ -17,7 +17,7 @@ const AddSupplier = () => {
   const [snackbar, setSnackbar] = useState({
     open: false,
     message: "",
-    severity: "success", // success | error | warning | info
+    severity: "success",
   });
 
   const showAlert = (message, severity = "success") => {
@@ -108,7 +108,6 @@ const AddSupplier = () => {
       showAlert("Invalid contact number. Please enter a valid contact number.", "error");
       return;
     }
-    
 
     const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     if (!emailPattern.test(supplierData.email)) {
@@ -140,10 +139,24 @@ const AddSupplier = () => {
     // Submit if valid
     try {
       setIsSubmitting(true);
+      
+      // Get employee ID from localStorage
+      const employeeId = localStorage.getItem('userId');
+      
+      if (!employeeId) {
+        showAlert("Employee authentication required", "error");
+        return;
+      }
+
       const response = await fetch("http://localhost:3001/api/suppliers/add", {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(supplierData),
+        headers: { 
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          ...supplierData,
+          addedByEmployeeId: employeeId
+        }),
       });
 
       if (response.ok) {
@@ -163,7 +176,8 @@ const AddSupplier = () => {
 
   const handleCancel = () => navigate("/view-suppliers");
 
-  return (
+  
+return (
     <EmployeeLayout>
       <div className="add-supplier-container">
         <h3>Add New Supplier</h3>
