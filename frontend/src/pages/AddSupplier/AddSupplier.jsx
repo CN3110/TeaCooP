@@ -103,7 +103,7 @@ const AddSupplier = () => {
     e.preventDefault();
 
     // Validations
-    const contactPattern = /^(0([0-8]|([1-9][0-9]))\d{7})$/;
+    const contactPattern = /^(0((7[0-8])|([1-9][0-9]))\d{7})$/;
     if (!contactPattern.test(supplierData.contact)) {
       showAlert("Invalid contact number. Please enter a valid contact number.", "error");
       return;
