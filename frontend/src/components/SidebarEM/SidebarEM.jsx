@@ -56,13 +56,13 @@ const SidebarEM = () => {
             className="dropdown-btn"
             onClick={() => toggleDropdown("sales")}
           >
-            Manage Sales Records
+            Manage Lots
           </button>
           {openDropdown === "sales" && (
             <div className="dropdown-content">
-              <Link to="/employee-dashboard-create-lot">Add New Sale</Link>
-              <Link to="/view-lots">View Sales Records</Link>
-              <Link to="#">Confirm Sale Orders</Link>
+              <Link to="/employee-dashboard-create-lot">Add New Lot</Link>
+              <Link to="/view-lots">View Lot Records</Link>
+              <Link to="#">Confirm Lot Orders</Link>
             </div>
           )}
         </div>
