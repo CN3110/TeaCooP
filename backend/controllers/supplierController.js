@@ -28,10 +28,16 @@ const generateSupplierId = async () => {
   }
 };
 
-// Fetch all suppliers
 exports.getAllSuppliers = async (req, res) => {
   try {
-    const [suppliers] = await db.query("SELECT * FROM supplier");
+    // Join supplier with employee to get employee name and ID
+    const [suppliers] = await db.query(`
+      SELECT s.*, e.employeeName
+      FROM supplier s
+      JOIN employee e ON s.addedByEmployeeId = e.employeeId
+    `);
+
+    // Fetch land details for each supplier
     for (let supplier of suppliers) {
       const [landDetails] = await db.query(
         "SELECT * FROM land WHERE supplierId = ?",
@@ -39,12 +45,14 @@ exports.getAllSuppliers = async (req, res) => {
       );
       supplier.landDetails = landDetails;
     }
+
     res.status(200).json(suppliers);
   } catch (error) {
     console.error("Error fetching suppliers:", error);
     res.status(500).json({ error: "Failed to fetch suppliers" });
   }
 };
+
 
 // Add supplier
 exports.addSupplier = async (req, res) => {

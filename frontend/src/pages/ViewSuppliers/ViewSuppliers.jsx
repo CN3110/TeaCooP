@@ -183,6 +183,7 @@ const ViewSuppliers = () => {
               <th>Land Details</th>
               <th>Notes</th>
               <th>Actions</th>
+              <th>Added by:</th>
             </tr>
           </thead>
           <tbody>
@@ -213,7 +214,7 @@ const ViewSuppliers = () => {
                         <li>No land details available</li>
                       )}
                     </ul>
-                  </td>
+                  </td> 
                   <td className="supplier-notes">
                     {supplier.notes || "No notes available"}
                   </td>
@@ -233,13 +234,24 @@ const ViewSuppliers = () => {
                       </button>
                     )}
                   </td>
-                </tr>
+                  
+                  <td>
+          {supplier.addedByEmployeeId} <br />
+          {supplier.employeeName && (
+            <span style={{ marginLeft: 4, color: "#555" }}>
+              ({supplier.employeeName})
+            </span>
+          )}
+        </td>
+        </tr>
+                
               ))
             ) : (
               <tr>
                 <td colSpan="8" className="no-results">
                   No suppliers found matching your criteria
                 </td>
+                
               </tr>
             )}
           </tbody>
