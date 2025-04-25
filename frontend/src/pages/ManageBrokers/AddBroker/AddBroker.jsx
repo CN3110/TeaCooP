@@ -29,6 +29,8 @@ const AddBroker = () => {
     severity: "success",
   });
 
+  const [isSubmitting, setIsSubmitting] = useState(false);
+
   const navigate = useNavigate();
 
   const showAlert = (message, severity = "success") => {
@@ -67,7 +69,10 @@ const AddBroker = () => {
         (field) => !brokerData[field]
       );
       if (missingFields.length > 0) {
-        showAlert("Please fill in all required fields. when you dont know all the details, then save it as pending", "error");
+        showAlert(
+          "Please fill in all required fields. When you don't know all the details, then save it as pending.",
+          "error"
+        );
         return;
       }
     }
@@ -75,7 +80,10 @@ const AddBroker = () => {
     // Validations
     const contactPattern = /^(0((7[0-8])|([1-9][0-9]))\d{7})$/;
 
-    if (brokerData.brokerContact && !contactPattern.test(brokerData.brokerContact)) {
+    if (
+      brokerData.brokerContact &&
+      !contactPattern.test(brokerData.brokerContact)
+    ) {
       showAlert(
         "Invalid broker's contact number. Please enter a valid contact number.",
         "error"
@@ -83,7 +91,10 @@ const AddBroker = () => {
       return;
     }
 
-    if (brokerData.brokerCompanyContact && !contactPattern.test(brokerData.brokerCompanyContact)) {
+    if (
+      brokerData.brokerCompanyContact &&
+      !contactPattern.test(brokerData.brokerCompanyContact)
+    ) {
       showAlert(
         "Invalid broker company contact number. Please enter a valid contact number.",
         "error"
@@ -94,14 +105,16 @@ const AddBroker = () => {
     const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
     if (
-      brokerData.brokerEmail && !emailPattern.test(brokerData.brokerEmail)
+      brokerData.brokerEmail &&
+      !emailPattern.test(brokerData.brokerEmail)
     ) {
       showAlert("Please enter a valid broker email address.", "error");
       return;
     }
 
     if (
-      brokerData.brokerCompanyEmail && !emailPattern.test(brokerData.brokerCompanyEmail)
+      brokerData.brokerCompanyEmail &&
+      !emailPattern.test(brokerData.brokerCompanyEmail)
     ) {
       showAlert("Please enter a valid company email address.", "error");
       return;
@@ -110,7 +123,8 @@ const AddBroker = () => {
     const namePattern = /^[A-Za-z\s.&'-]+$/;
 
     if (
-      brokerData.brokerName && !namePattern.test(brokerData.brokerName)
+      brokerData.brokerName &&
+      !namePattern.test(brokerData.brokerName)
     ) {
       showAlert(
         "Broker name should only contain letters and common punctuation.",
@@ -120,7 +134,8 @@ const AddBroker = () => {
     }
 
     if (
-      brokerData.brokerCompanyName && !namePattern.test(brokerData.brokerCompanyName)
+      brokerData.brokerCompanyName &&
+      !namePattern.test(brokerData.brokerCompanyName)
     ) {
       showAlert(
         "Company name should only contain letters and common punctuation.",
@@ -130,23 +145,42 @@ const AddBroker = () => {
     }
 
     try {
-      const response = await fetch("http://localhost:3001/api/brokers", {
+      setIsSubmitting(true);
+
+      // Get employee ID from localStorage
+      const employeeId = localStorage.getItem("userId");
+
+      if (!employeeId) {
+        showAlert("Employee authentication required", "error");
+        setIsSubmitting(false);
+        return;
+      }
+
+      const response = await fetch("http://localhost:3001/api/brokers/add", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(brokerData),
+        body: JSON.stringify({
+          ...brokerData,
+          addedByEmployeeId: employeeId,
+        }),
       });
 
-      const data = await response.json();
-      
       if (response.ok) {
-        showAlert("Broker added successfully!", "success");
-        setTimeout(() => navigate("/view-brokers"), 1500);
+        const result = await response.json();
+        showAlert(
+          `${result.brokerId} - ${result.brokerName} Broker added successfully! `,
+          "success"
+        );
+        setTimeout(() => navigate("/view-brokers"), 3000);
       } else {
+        const data = await response.json();
         showAlert(data.error || "Failed to add broker", "error");
       }
     } catch (error) {
       console.error("Error adding broker:", error);
       showAlert("An error occurred while adding the broker.", "error");
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
@@ -176,7 +210,7 @@ const AddBroker = () => {
                 name="brokerName"
                 value={brokerData.brokerName}
                 onChange={handleInputChange}
-                required
+                required={brokerData.status === "active"}
               />
             </div>
             <div className="form-group">
@@ -187,7 +221,7 @@ const AddBroker = () => {
                 name="brokerContact"
                 value={brokerData.brokerContact}
                 onChange={handleInputChange}
-                
+                required={brokerData.status === "active"}
               />
             </div>
             <div className="form-group">
@@ -198,7 +232,7 @@ const AddBroker = () => {
                 name="brokerEmail"
                 value={brokerData.brokerEmail}
                 onChange={handleInputChange}
-                
+                required={brokerData.status === "active"}
               />
             </div>
             <div className="form-group">
@@ -227,7 +261,7 @@ const AddBroker = () => {
                 name="brokerCompanyName"
                 value={brokerData.brokerCompanyName}
                 onChange={handleInputChange}
-                
+                required={brokerData.status === "active"}
               />
             </div>
             <div className="form-group">
@@ -240,7 +274,7 @@ const AddBroker = () => {
                 name="brokerCompanyContact"
                 value={brokerData.brokerCompanyContact}
                 onChange={handleInputChange}
-                
+                required={brokerData.status === "active"}
               />
             </div>
             <div className="form-group">
@@ -251,7 +285,7 @@ const AddBroker = () => {
                 name="brokerCompanyEmail"
                 value={brokerData.brokerCompanyEmail}
                 onChange={handleInputChange}
-                
+                required={brokerData.status === "active"}
               />
             </div>
             <div className="form-group">
@@ -261,7 +295,7 @@ const AddBroker = () => {
                 name="brokerCompanyAddress"
                 value={brokerData.brokerCompanyAddress}
                 onChange={handleInputChange}
-                
+                required={brokerData.status === "active"}
               />
             </div>
             <div className="form-group">
@@ -280,11 +314,12 @@ const AddBroker = () => {
               type="button"
               className="cancel-button"
               onClick={() => navigate("/view-brokers")}
+              disabled={isSubmitting}
             >
               Cancel
             </button>
-            <button type="submit" className="submit-button">
-              Save
+            <button type="submit" className="submit-button" disabled={isSubmitting}>
+              {isSubmitting ? "Saving..." : "Save"}
             </button>
           </div>
         </form>

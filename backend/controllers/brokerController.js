@@ -28,6 +28,7 @@ exports.addBroker = async (req, res) => {
     brokerCompanyAddress,
     status = "pending",
     notes = null,
+    addedByEmployeeId,
   } = req.body;
 
   if (
@@ -38,7 +39,8 @@ exports.addBroker = async (req, res) => {
       !brokerCompanyName ||
       !brokerCompanyContact ||
       !brokerCompanyEmail ||
-      !brokerCompanyAddress)
+      !brokerCompanyAddress ||
+      !addedByEmployeeId)
   ) {
     return res.status(400).json({ error: "Missing required fields" });
   }
@@ -58,6 +60,7 @@ exports.addBroker = async (req, res) => {
       brokerCompanyAddress,
       status,
       notes,
+      addedByEmployeeId,
     });
 
     if (status === "active") {
@@ -84,7 +87,12 @@ Morawakkorale Tea Co-op
       await transporter.sendMail(mailOptions);
     }
 
-    res.status(201).json({ message: "Broker added successfully" });
+    // Return brokerId in the response so the frontend can display it
+    res.status(201).json({ 
+      message: "Broker added successfully", 
+      brokerId: brokerId, 
+      brokerName: brokerName 
+    });
   } catch (error) {
     console.error("Error adding broker:", error);
     res.status(500).json({ error: "Failed to add broker" });
@@ -94,7 +102,11 @@ Morawakkorale Tea Co-op
 // Fetch all brokers
 exports.getAllBrokers = async (req, res) => {
   try {
-    const brokers = await broker.getAllBrokers();
+    const [brokers] = await db.query(`
+      SELECT b.*, e.employeeName 
+      FROM broker b
+      JOIN employee e ON b.addedByEmployeeId = e.employeeId
+      `);
     res.status(200).json(brokers);
   } catch (error) {
     console.error("Error fetching brokers:", error);
@@ -156,21 +168,18 @@ exports.updateBroker = async (req, res) => {
     const currentBroker = result[0];
     const oldEmail = currentBroker.brokerEmail;
 
-    await db.query(
-      "UPDATE broker SET brokerName = ?, brokerContactNumber = ?, brokerEmail = ?, brokerCompanyName = ?, brokerCompanyContact = ?, brokerCompanyEmail = ?, brokerCompanyAddress = ?, status = ?, notes = ? WHERE brokerId = ?",
-      [
-        brokerName,
-        brokerContact,
-        brokerEmail,
-        brokerCompanyName,
-        brokerCompanyContact,
-        brokerCompanyEmail,
-        brokerCompanyAddress,
-        status,
-        notes,
-        brokerId,
-      ]
-    );
+    // Use the broker model function instead of direct db query
+    await broker.updateBroker(brokerId, {
+      brokerName,
+      brokerContact,
+      brokerEmail,
+      brokerCompanyName,
+      brokerCompanyContact,
+      brokerCompanyEmail,
+      brokerCompanyAddress,
+      status,
+      notes,
+    });
 
     // Send passcode if email was changed
     if (oldEmail !== brokerEmail) {

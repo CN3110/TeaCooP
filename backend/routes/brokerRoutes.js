@@ -11,7 +11,7 @@ const {
 
 // CRUD routes
 router.get("/", getAllBrokers);
-router.post("/", addBroker);
+router.post("/add", addBroker);
 router.get("/:brokerId", getBrokerById);
 router.put("/:brokerId", updateBroker);
 router.put("/:brokerId/disable", disableBroker);

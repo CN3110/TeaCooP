@@ -22,13 +22,14 @@ const createBroker = async ({
   brokerCompanyEmail, 
   brokerCompanyAddress, 
   status, 
-  notes 
+  notes,
+  addedByEmployeeId  // Added missing parameter
 }) => {
   const query = `
     INSERT INTO broker 
     (brokerId, brokerName, brokerContactNumber, brokerEmail, brokerCompanyName, 
-     brokerCompanyContact, brokerCompanyEmail, brokerCompanyAddress, status, notes)
-    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+     brokerCompanyContact, brokerCompanyEmail, brokerCompanyAddress, status, notes, addedByEmployeeId)
+    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
   `;
   await db.query(query, [
     brokerId, 
@@ -40,7 +41,8 @@ const createBroker = async ({
     brokerCompanyEmail, 
     brokerCompanyAddress, 
     status, 
-    notes
+    notes,
+    addedByEmployeeId
   ]);
 };
 
