@@ -1,11 +1,12 @@
 import React, { useState } from "react";
-import { Link, Navigate } from "react-router-dom"; 
+import { Link, useNavigate } from "react-router-dom";
 import ProfileEM from "../../pages/Employee/ProfileEM/ProfileEM"; 
 import "./SidebarEM.css";
 
 const SidebarEM = () => {
   const [isProfileModalOpen, setIsProfileModalOpen] = useState(false);
   const [openDropdown, setOpenDropdown] = useState(null); // Track which dropdown is open
+  const navigate = useNavigate();
 
   // Open profile modal
   const openProfileModal = () => {
@@ -26,7 +27,7 @@ const SidebarEM = () => {
   const handleLogout = () => {
     localStorage.clear(); // Clear local storage
     alert("You have been logged out.");
-    Navigate("/"); // Redirect to home page
+    navigate("/"); // Redirect to home page
   };
 
   return (

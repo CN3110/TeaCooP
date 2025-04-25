@@ -23,9 +23,9 @@ const Login = () => {
     
     if (token && userRole) {
       if (userRole === 'admin') {
-        navigate('/admin/dashboard');
+        navigate('/admin-dashboard');
       } else {
-        navigate('/employee/dashboard');
+        navigate('/employee-dashboard');
       }
     }
   }, [navigate]);
