@@ -1,5 +1,3 @@
-//<option value="disabled">Disabled</option> diabled aywa save krnne ai
-//diabled or pending nam okkoma details on naaaa - meka hdannaa
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom"; 
 import { v4 as uuidv4 } from "uuid";
@@ -101,38 +99,46 @@ const AddSupplier = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-
-    // Validations
-    const contactPattern = /^(0((7[0-8])|([1-9][0-9]))\d{7})$/;
-    if (!contactPattern.test(supplierData.contact)) {
-      showAlert("Invalid contact number. Please enter a valid contact number.", "error");
-      return;
-    }
-
-    const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    if (!emailPattern.test(supplierData.email)) {
-      showAlert("Please enter a valid email address.", "error");
-      return;
-    }
-
-    if (!supplierData.name.trim() || !/^[A-Za-z\s.&'-]+$/.test(supplierData.name)) {
+  
+    const { status, name, contact, email, landDetails } = supplierData;
+  
+    // Always validate status and name
+    if (!name.trim() || !/^[A-Za-z\s.&'-]+$/.test(name)) {
       showAlert("Supplier name should only contain letters and common punctuation.", "error");
       return;
     }
-
-    for (let i = 0; i < supplierData.landDetails.length; i++) {
-      const land = supplierData.landDetails[i];
-      if (!land.landSize || parseFloat(land.landSize) <= 0) {
-        showAlert(`Enter a valid land size for Land No.${i + 1}.`, "error");
+  
+    // Only require all fields if status is "active"
+    if (status === "active") {
+      // Validate contact
+      const contactPattern = /^(0((7[0-8])|([1-9][0-9]))\d{7})$/;
+      if (!contactPattern.test(contact)) {
+        showAlert("Invalid contact number. Please enter a valid contact number.", "error");
         return;
       }
-      if (!land.landAddress.trim()) {
-        showAlert(`Please provide an address for Land No.${i + 1}.`, "error");
+  
+      // Validate email
+      const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+      if (!emailPattern.test(email)) {
+        showAlert("Please enter a valid email address.", "error");
         return;
       }
-      if (!land.route) {
-        showAlert(`Select a route for Land No.${i + 1}.`, "error");
-        return;
+  
+      // Validate all land details
+      for (let i = 0; i < landDetails.length; i++) {
+        const land = landDetails[i];
+        if (!land.landSize || parseFloat(land.landSize) <= 0) {
+          showAlert(`Enter a valid land size for Land No.${i + 1}.`, "error");
+          return;
+        }
+        if (!land.landAddress.trim()) {
+          showAlert(`Please provide an address for Land No.${i + 1}.`, "error");
+          return;
+        }
+        if (!land.route) {
+          showAlert(`Select a route for Land No.${i + 1}.`, "error");
+          return;
+        }
       }
     }
 
@@ -193,22 +199,22 @@ return (
             </div>
 
             <div className="form-group">
-              <label>Supplier Name *</label>
+              <label>Supplier Name </label>
               <input type="text" name="name" value={supplierData.name} onChange={handleInputChange} required />
             </div>
 
             <div className="form-group">
-              <label>Contact Number *</label>
-              <input type="text" name="contact" value={supplierData.contact} onChange={handleInputChange} />
+              <label>Contact Number </label>
+              <input type="text" name="contact" value={supplierData.contact} onChange={handleInputChange} required={supplierData.status === "active"}/>
             </div>
 
             <div className="form-group">
-              <label>Email Address *</label>
-              <input type="email" name="email" value={supplierData.email} onChange={handleInputChange} />
+              <label>Email Address </label>
+              <input type="email" name="email" value={supplierData.email} onChange={handleInputChange} required={supplierData.status === "active"}/>
             </div>
 
             <div className="form-group">
-              <label>Status *</label>
+              <label>Status </label>
               <select name="status" value={supplierData.status} onChange={handleInputChange} required>
                 <option value="pending">Pending</option>
                 <option value="active">Active</option>
@@ -243,36 +249,35 @@ return (
                 </div>
 
                 <div className="form-group">
-                  <label>Size of Land (Acres) *</label>
+                  <label>Size of Land (Acres)</label>
                   <input
                     type="number"
                     name="landSize"
                     value={land.landSize}
                     onChange={(e) => handleLandDetailsChange(index, e)}
-                    required
-                    step="0.01"
+                    required={supplierData.status === "active"}                    step="0.01"
                     min="0"
                   />
                 </div>
 
                 <div className="form-group">
-                  <label>Address of Land *</label>
+                  <label>Address of Land</label>
                   <textarea
                     name="landAddress"
                     value={land.landAddress}
                     onChange={(e) => handleLandDetailsChange(index, e)}
-                    required
+                    required={supplierData.status === "active"}
                     rows="2"
                   />
                 </div>
 
                 <div className="form-group">
-                  <label>Route *</label>
+                  <label>Route</label>
                   <select
                     name="route"
                     value={land.route}
                     onChange={(e) => handleLandDetailsChange(index, e)}
-                    required
+                    required={supplierData.status === "active"}
                   >
                     <option value="">Select Route</option>
                     {routes.map((route) => (
