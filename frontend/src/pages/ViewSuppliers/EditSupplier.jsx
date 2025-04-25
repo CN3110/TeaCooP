@@ -37,7 +37,7 @@ const EditSupplierPage = () => {
 
   const validateEmail = (email) => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
   const validateSLContact = (contact) =>
-    /^(?:\+94|0)?(?:7[01245678])[0-9]{7}$/.test(contact);
+   /^(0([0-8]|([1-9][0-9]))\d{7})$/.test(contact);
 
   useEffect(() => {
     const fetchData = async () => {
