@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { Link } from "react-router-dom"; 
+import { Link, Navigate } from "react-router-dom"; 
 import ProfileEM from "../../pages/Employee/ProfileEM/ProfileEM"; 
 import "./SidebarEM.css";
 
@@ -24,8 +24,9 @@ const SidebarEM = () => {
 
   // Handle logout
   const handleLogout = () => {
+    localStorage.clear(); // Clear local storage
     alert("You have been logged out.");
-    window.location.href = "/"; // Redirect to home page
+    Navigate("/"); // Redirect to home page
   };
 
   return (

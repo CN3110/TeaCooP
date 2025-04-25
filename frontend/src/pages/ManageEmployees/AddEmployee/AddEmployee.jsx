@@ -97,11 +97,14 @@ const AddEmployee = () => {
     }
 
     try {
-      const response = await fetch("http://localhost:3001/api/employees", {
+      const response = await fetch("http://localhost:3001/api/employees/add", {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers: {
+          "Content-Type": "application/json",
+        },
         body: JSON.stringify(employeeData),
       });
+      
 
       const data = await response.json();
       

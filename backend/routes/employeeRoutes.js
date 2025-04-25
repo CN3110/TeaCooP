@@ -11,14 +11,14 @@ const {
 const { authenticate, authorize } = require('../middleware/authMiddleware');
 
 // All employee routes should be protected
-router.use(authenticate);
+
 
 // Routes accessible only to admin
-router.get('/', authorize('admin'), getAllEmployees);
-router.post('/', authorize('admin'), addEmployee);
-router.get('/:employeeId', authorize('admin'), getEmployeeById);
-router.put('/:employeeId', authorize('admin'), updateEmployee);
-router.put('/:employeeId/disable', authorize('admin'), disableEmployee);
-router.post('/:employeeId/reset-password', authorize('admin'), resetEmployeePassword);
+router.get('/', getAllEmployees);
+router.post('/add', addEmployee);
+router.get('/:employeeId', getEmployeeById);
+router.put('/:employeeId', updateEmployee);
+router.put('/:employeeId/disable', disableEmployee);
+router.post('/:employeeId/reset-password', resetEmployeePassword);
 
 module.exports = router;

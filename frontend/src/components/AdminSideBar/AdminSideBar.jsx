@@ -1,10 +1,10 @@
 import React, { useState } from "react";
-import { Link } from "react-router-dom"; // Import Link from React Router
+import { Link,useNavigate } from "react-router-dom"; // Import Link from React Router
 import "./AdminSideBar.css"; 
 
 const AdminSideBar = () => {
   const [openDropdown, setOpenDropdown] = useState(null); // Track which dropdown is open
-
+  const navigate = useNavigate();
   // Toggle Dropdown
   const toggleDropdown = (dropdownName) => {
     setOpenDropdown(openDropdown === dropdownName ? null : dropdownName);
@@ -12,8 +12,9 @@ const AdminSideBar = () => {
 
   // Handle logout
   const handleLogout = () => {
+    localStorage.clear(); // Clear local storage
     alert("You have been logged out.");
-    window.location.href = "/"; // Redirect to Login page
+    navigate("/"); // Redirect to Login page
   };
 
   return (
