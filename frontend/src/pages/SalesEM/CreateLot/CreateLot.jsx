@@ -5,7 +5,7 @@ import DatePicker from 'react-datepicker';
 import 'react-datepicker/dist/react-datepicker.css';
 import './CreateLot.css';
 import Snackbar from '@mui/material/Snackbar';
-import MuiAlert from '@mui/material/Alert';
+import MuiAlert from '@mui/material/Alert'; 
 
 const CreateLot = () => {
   const [teaGradeOptions, setTeaGradeOptions] = useState([]);
@@ -14,6 +14,16 @@ const CreateLot = () => {
     open: false,
     message: "",
     severity: "success",
+  });
+
+  // Add validation state
+  const [errors, setErrors] = useState({
+    invoiceNumber: "",
+    teaGrade: "",
+    noOfBags: "",
+    netWeight: "",
+    valuationPrice: "",
+    manufacturingDate: ""
   });
 
   const showAlert = (message, severity = "success") => {
@@ -26,7 +36,7 @@ const CreateLot = () => {
   };
 
   const [lotData, setLotData] = useState({
-    lotNumber: '',
+    lotNumber: "Generating...",
     invoiceNumber: '',
     manufacturingDate: new Date(),
     teaGrade: '',
@@ -52,8 +62,67 @@ const CreateLot = () => {
     fetchTeaGrades();
   }, []);
 
+  // Validation function
+  const validateField = (name, value) => {
+    let errorMessage = "";
+    
+    switch (name) {
+      case "invoiceNumber":
+        if (!value.trim()) {
+          errorMessage = "Invoice number is required";
+        } else if (!/^\d+$/.test(value)) {
+          errorMessage = "Invoice number must be a positive number";
+        }
+        break;
+      case "teaGrade":
+        if (!value) {
+          errorMessage = "Tea grade is required";
+        }
+        break;
+      case "noOfBags":
+        if (!value) {
+          errorMessage = "Number of bags is required";
+        } else if (parseFloat(value) <= 0) {
+          errorMessage = "Number of bags must be greater than zero";
+        } else if (!Number.isInteger(parseFloat(value))) {
+          errorMessage = "Number of bags must be a whole number";
+        }
+        break;
+      case "netWeight":
+        if (!value) {
+          errorMessage = "Net weight is required";
+        } else if (parseFloat(value) <= 0) {
+          errorMessage = "Net weight must be greater than zero";
+        }
+        break;
+      case "valuationPrice":
+        if (!value) {
+          errorMessage = "Valuation price is required";
+        } else if (parseFloat(value) <= 0) {
+          errorMessage = "Valuation price must be greater than zero";
+        }
+        break;
+      case "manufacturingDate":
+        if (!value) {
+          errorMessage = "Manufacturing date is required";
+        } else if (new Date(value) > new Date()) {
+          errorMessage = "Manufacturing date cannot be in the future";
+        }
+        break;
+      default:
+        break;
+    }
+    
+    return errorMessage;
+  };
+
   const handleInputChange = (e) => {
     const { name, value } = e.target;
+    
+    // Validate the field
+    const errorMessage = validateField(name, value);
+    setErrors(prev => ({ ...prev, [name]: errorMessage }));
+    
     const updatedData = {
       ...lotData,
       [name]: value,
@@ -62,8 +131,11 @@ const CreateLot = () => {
     if (name === 'noOfBags' || name === 'netWeight') {
       const noOfBags = name === 'noOfBags' ? parseFloat(value) : parseFloat(lotData.noOfBags);
       const netWeight = name === 'netWeight' ? parseFloat(value) : parseFloat(lotData.netWeight);
+      
       if (!isNaN(noOfBags) && !isNaN(netWeight)) {
         updatedData.totalNetWeight = (noOfBags * netWeight).toFixed(2);
+      } else {
+        updatedData.totalNetWeight = '';
       }
     }
 
@@ -72,29 +144,40 @@ const CreateLot = () => {
 
   const handleDateChange = (date) => {
     setLotData({ ...lotData, manufacturingDate: date });
+    
+    // Validate the date
+    const errorMessage = validateField("manufacturingDate", date);
+    setErrors(prev => ({ ...prev, manufacturingDate: errorMessage }));
+  };
+
+  const validateForm = () => {
+    const formErrors = {};
+    let isValid = true;
+    
+    // Validate all fields
+    Object.keys(lotData).forEach(key => {
+      if (key !== "lotNumber" && key !== "totalNetWeight") { // Skip auto-generated fields
+        const error = validateField(key, lotData[key]);
+        if (error) {
+          formErrors[key] = error;
+          isValid = false;
+        }
+      }
+    });
+    
+    setErrors(formErrors);
+    return isValid;
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    
+    if (!validateForm()) {
+      showAlert("Please correct the errors in the form", "error");
+      return;
+    }
+    
     setIsSubmitting(true);
-
-    const fields = ["lotNumber", "invoiceNumber", "teaGrade", "noOfBags", "netWeight", "totalNetWeight", "valuationPrice"];
-    for (let field of fields) {
-      if (!lotData[field]) {
-        alert("Please fill in all required fields.");
-        setIsSubmitting(false);
-        return;
-      }
-    }
-
-    const numbers = ["noOfBags", "netWeight", "totalNetWeight", "valuationPrice"];
-    for (let field of numbers) {
-      if (parseFloat(lotData[field]) <= 0) {
-        alert("All numeric fields must be greater than zero.");
-        setIsSubmitting(false);
-        return;
-      }
-    }
 
     const formattedDate = new Date(lotData.manufacturingDate).toISOString().split('T')[0];
 
@@ -123,7 +206,7 @@ const CreateLot = () => {
       showAlert("Lot added successfully!");
 
       setLotData({
-        lotNumber: "",
+        lotNumber: "Generating...",
         invoiceNumber: "",
         manufacturingDate: new Date(),
         teaGrade: "",
@@ -131,6 +214,16 @@ const CreateLot = () => {
         netWeight: "",
         totalNetWeight: "",
         valuationPrice: "",
+      });
+      
+      // Clear errors
+      setErrors({
+        invoiceNumber: "",
+        teaGrade: "",
+        noOfBags: "",
+        netWeight: "",
+        valuationPrice: "",
+        manufacturingDate: ""
       });
     } catch (error) {
       console.error("Error adding lot:", error);
@@ -184,8 +277,8 @@ const CreateLot = () => {
                 name="lotNumber"
                 value={lotData.lotNumber}
                 onChange={handleInputChange}
-                autoComplete="off"
-                required
+                readOnly 
+                className="read-only-input"
               />
             </div>
 
@@ -197,7 +290,9 @@ const CreateLot = () => {
                 value={lotData.invoiceNumber}
                 onChange={handleInputChange}
                 required
+                className={errors.invoiceNumber ? "error" : ""}
               />
+              {errors.invoiceNumber && <div className="error-message">{errors.invoiceNumber}</div>}
             </div>
 
             <div className="lot-form-group">
@@ -207,6 +302,7 @@ const CreateLot = () => {
                 value={lotData.teaGrade}
                 onChange={handleInputChange}
                 required
+                className={errors.teaGrade ? "error" : ""}
               >
                 <option value="">Select Grade</option>
                 {teaGradeOptions.map((teaType) => (
@@ -215,6 +311,7 @@ const CreateLot = () => {
                   </option>
                 ))}
               </select>
+              {errors.teaGrade && <div className="error-message">{errors.teaGrade}</div>}
             </div>
 
             <div className="lot-form-group">
@@ -225,8 +322,11 @@ const CreateLot = () => {
                 value={lotData.noOfBags}
                 onChange={handleInputChange}
                 min="1"
+                step="1"
                 required
+                className={errors.noOfBags ? "error" : ""}
               />
+              {errors.noOfBags && <div className="error-message">{errors.noOfBags}</div>}
             </div>
 
             <div className="lot-form-group">
@@ -239,7 +339,9 @@ const CreateLot = () => {
                 min="0.01"
                 step="0.01"
                 required
+                className={errors.netWeight ? "error" : ""}
               />
+              {errors.netWeight && <div className="error-message">{errors.netWeight}</div>}
             </div>
 
             <div className="lot-form-group">
@@ -250,6 +352,7 @@ const CreateLot = () => {
                 value={lotData.totalNetWeight}
                 readOnly
                 required
+                className="read-only-input"
               />
             </div>
 
@@ -263,7 +366,9 @@ const CreateLot = () => {
                 min="0.01"
                 step="0.01"
                 required
+                className={errors.valuationPrice ? "error" : ""}
               />
+              {errors.valuationPrice && <div className="error-message">{errors.valuationPrice}</div>}
             </div>
 
             <div className="lot-form-group">
@@ -273,7 +378,9 @@ const CreateLot = () => {
                 onChange={handleDateChange}
                 dateFormat="yyyy-MM-dd"
                 required
+                className={errors.manufacturingDate ? "error" : ""}
               />
+              {errors.manufacturingDate && <div className="error-message">{errors.manufacturingDate}</div>}
             </div>
           </div>
 

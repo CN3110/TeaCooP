@@ -185,12 +185,12 @@ const AddSupplier = () => {
 
             <div className="form-group">
               <label>Contact Number *</label>
-              <input type="text" name="contact" value={supplierData.contact} onChange={handleInputChange} required />
+              <input type="text" name="contact" value={supplierData.contact} onChange={handleInputChange} />
             </div>
 
             <div className="form-group">
               <label>Email Address *</label>
-              <input type="email" name="email" value={supplierData.email} onChange={handleInputChange} required />
+              <input type="email" name="email" value={supplierData.email} onChange={handleInputChange} />
             </div>
 
             <div className="form-group">
@@ -198,7 +198,7 @@ const AddSupplier = () => {
               <select name="status" value={supplierData.status} onChange={handleInputChange} required>
                 <option value="pending">Pending</option>
                 <option value="active">Active</option>
-                {/*<option value="disabled">Disabled</option> diabled aywa save krnne ai */}
+                {/*<option value="disabled">Disabled</option> disabled aywa save krnne ai */}
               </select>
             </div>
 
