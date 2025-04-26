@@ -32,6 +32,7 @@ import ViewEmployees from "./pages/ManageEmployees/ViewEmployees/ViewEmployees.j
 import EditEmployee from "./pages/ManageEmployees/EditEmployee/EditEmployee.jsx";
 import Login from "./pages/Login/Login.jsx";
 import AdminDashboard from "./pages/Admin/AdminDashboard/AdminDashboard.jsx";
+import TeaProductionPage from "./pages/TeaProduction/TeaProduction.jsx";
 
 const App = () => {
   return (
@@ -71,6 +72,7 @@ const App = () => {
             <Route path="/employee-view-transport-requests" element={<ViewTransportRequests />} />
             <Route path="/employee-view-manage-broker-valuation-price" element={<ManageBrokerValuations/>} />
             <Route path="/view-valuations/:lotNumber" element={<ViewValuations />} />
+            <Route path="/tea-production" element={<TeaProductionPage />} />
 
 
             {/* Admin Routes */}
