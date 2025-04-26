@@ -10,6 +10,7 @@ const Alert = React.forwardRef(function Alert(props, ref) {
 });
 
 const AddDriver = () => {
+  const [isSubmitting, setIsSubmitting] = useState(false);
   const [driverData, setDriverData] = useState({
     driverId: "Generating...",
     driverName: "",
@@ -65,50 +66,82 @@ const AddDriver = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    
+    const { driverName, driverContactNumber, driverEmail, status } = driverData;
 
-    const { driverName, driverContactNumber, driverEmail } = driverData;
-
-    if (!driverName.trim()) return showAlert("Driver name is required.");
-
-    if (!validateSLContact(driverContactNumber)) return showAlert("Invalid contact number.");
-
-    if (!validateEmail(driverEmail)) return showAlert("Invalid email address.");
-    if (
-      driverData.vehicleDetails.some(
-        (v) => !v.vehicleNumber.trim() || !v.vehicleType.trim()
-      )
-    ) {
-      return showAlert("All vehicle fields must be filled.");
+    // Always validate name
+    if (!driverName.trim() || !/^[A-Za-z\s.&'-]+$/.test(driverName)) {
+      showAlert("Driver name should only contain letters and common punctuation.", "error");
+      return;
     }
 
-    const requestBody = {
-      driverName,
-      driverContactNumber,
-      driverEmail,
-      status: driverData.status,
-      notes: driverData.notes,
-      vehicleDetails: driverData.vehicleDetails,
-    };
+    // Only require all fields if status is "active"
+    if (status === "active") {
+      // Validate contact
+      if (!validateSLContact(driverContactNumber)) {
+        showAlert("Invalid contact number. Please enter a valid Sri Lankan mobile number.", "error");
+        return;
+      }
 
+      // Validate email
+      if (!validateEmail(driverEmail)) {
+        showAlert("Please enter a valid email address.", "error");
+        return;
+      }
+
+      // Validate all vehicle details
+      for (let i = 0; i < driverData.vehicleDetails.length; i++) {
+        const vehicle = driverData.vehicleDetails[i];
+        if (!vehicle.vehicleNumber.trim()) {
+          showAlert(`Enter a valid vehicle number for Vehicle No.${i + 1}.`, "error");
+          return;
+        }
+        if (!vehicle.vehicleType.trim()) {
+          showAlert(`Please provide vehicle type for Vehicle No.${i + 1}.`, "error");
+          return;
+        }
+      }
+    }
+
+    // Submit if valid
     try {
+      setIsSubmitting(true);
+      
+      // Get employee ID from localStorage
+      const employeeId = localStorage.getItem('userId');
+      
+      if (!employeeId) {
+        showAlert("Employee authentication required", "error");
+        return;
+      }
+      
+
+
       const response = await fetch("http://localhost:3001/api/drivers/add", {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(requestBody),
+        headers: { 
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          ...driverData,
+          addedByEmployeeId: employeeId
+        }),
       });
 
       if (response.ok) {
-        showAlert("Driver added successfully!", "success");
-        setTimeout(() => navigate("/view-drivers"), 1500);
+        const result = await response.json();
+        showAlert(`Driver added successfully!`, "success");
+        setTimeout(() => navigate("/view-drivers"), 3000);
       } else {
         const errorData = await response.json();
-        showAlert(`Error: ${errorData.message}`);
+        showAlert(`Failed to add driver: ${errorData.error || "Unknown error"}`, "error");
       }
-    } catch (err) {
-      showAlert("Something went wrong while adding the driver.");
+    } catch (error) {
+      showAlert("An error occurred while submitting the form.", "error");
+    } finally {
+      setIsSubmitting(false);
     }
   };
-
 
   return (
     <EmployeeLayout>

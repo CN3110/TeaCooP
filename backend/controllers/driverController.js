@@ -25,6 +25,7 @@ exports.addDriver = async (req, res) => {
     vehicleDetails,
     status = "pending",
     notes = null,
+    addedByEmployeeId,
   } = req.body;
 
   if (!driverName || !driverContactNumber || !driverEmail) {
@@ -42,6 +43,7 @@ exports.addDriver = async (req, res) => {
       driverEmail,
       status,
       notes,
+      addedByEmployeeId,
     });
 
     await driver.addVehicles(driverId, vehicleDetails);

@@ -184,6 +184,7 @@ const ViewDrivers = () => {
               <th>Vehicle Details</th>
               <th>Notes</th>
               <th>Actions</th>
+              <th>Added by:</th>
             </tr>
           </thead>
           <tbody>
@@ -225,6 +226,14 @@ const ViewDrivers = () => {
                       </button>
                     )}
                   </td>
+                  <td>
+          {driver.addedByEmployeeId} <br />
+          {driver.employeeName && (
+            <span style={{ marginLeft: 4, color: "#555" }}>
+              ({driver.employeeName})
+            </span>
+          )}
+        </td>
                 </tr>
               ))
             ) : (

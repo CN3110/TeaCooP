@@ -12,13 +12,13 @@ const generateDriverId = async () => {
 };
 
 // Create a new driver
-const createDriver = async ({ driverId, driverName, driverContactNumber, driverEmail, status, notes }) => {
+const createDriver = async ({ driverId, driverName, driverContactNumber, driverEmail, status, notes, addedByEmployeeId }) => {
   const query = `
     INSERT INTO driver 
-    (driverId, driverName, driverContactNumber, driverEmail, status, notes)
-    VALUES (?, ?, ?, ?, ?, ?)
+    (driverId, driverName, driverContactNumber, driverEmail, status, notes, addedByEmployeeId)
+    VALUES (?, ?, ?, ?, ?, ?, ?)
   `;
-  await db.query(query, [driverId, driverName, driverContactNumber, driverEmail, status, notes]);
+  await db.query(query, [driverId, driverName, driverContactNumber, driverEmail, status, notes, addedByEmployeeId]);
 };
 
 // Add multiple vehicles for a driver

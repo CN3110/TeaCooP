@@ -23,7 +23,7 @@ const createBroker = async ({
   brokerCompanyAddress, 
   status, 
   notes,
-  addedByEmployeeId  // Added missing parameter
+  addedByEmployeeId  
 }) => {
   const query = `
     INSERT INTO broker 
