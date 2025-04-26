@@ -21,6 +21,7 @@ const Alert = React.forwardRef(function Alert(props, ref) {
 
 const ViewBrokers = () => {
   const [searchTerm, setSearchTerm] = useState("");
+  const [statusFilter, setStatusFilter] = useState("all");
   const [brokers, setBrokers] = useState([]);
   const [filteredBrokers, setFilteredBrokers] = useState([]);
   const [snackbar, setSnackbar] = useState({
@@ -44,6 +45,11 @@ const ViewBrokers = () => {
     if (reason === "clickaway") return;
     setSnackbar((prev) => ({ ...prev, open: false }));
   };
+
+  const handleSearchChange = (e) => {
+    setSearchTerm(e.target.value);
+  };
+  
 
   // Open confirmation dialog
   const handleOpenDisableConfirm = (brokerId) => {
@@ -78,19 +84,23 @@ const ViewBrokers = () => {
   }, []);
 
   useEffect(() => {
-    const filtered = brokers.filter(
-      (broker) =>
+    const filtered = brokers.filter((broker) => {
+      // Filter by search term
+      const matchesSearch =
         broker.brokerId.toLowerCase().includes(searchTerm.toLowerCase()) ||
         broker.brokerName.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        broker.brokerCompanyName.toLowerCase().includes(searchTerm.toLowerCase())
-    );
+        broker.brokerCompanyName.toLowerCase().includes(searchTerm.toLowerCase());
+  
+      // Filter by status
+      const matchesStatus =
+        statusFilter === "all" || broker.status === statusFilter;
+  
+      return matchesSearch && matchesStatus;
+    });
+  
     setFilteredBrokers(filtered);
-  }, [searchTerm, brokers]);
-
-  const handleSearchChange = (e) => {
-    setSearchTerm(e.target.value);
-  };
-
+  }, [searchTerm, statusFilter, brokers]);
+  
   const handleAddBroker = () => {
     navigate("/add-broker");
   };
@@ -153,6 +163,19 @@ const ViewBrokers = () => {
                 onChange={handleSearchChange}
               />
             </div>
+            <div className="filters">
+  <select
+    value={statusFilter}
+    onChange={(e) => setStatusFilter(e.target.value)}
+    className="status-filter"
+  >
+    <option value="all">All Statuses</option>
+    <option value="pending">Pending</option>
+    <option value="active">Active</option>
+    <option value="disabled">Disabled</option>
+  </select>
+</div>
+
             <button className="add-button" onClick={handleAddBroker}>
               Add New Broker
             </button>
@@ -170,6 +193,7 @@ const ViewBrokers = () => {
                 <th>Company</th>
                 <th>Status</th>
                 <th>Actions</th>
+                <th>Added by:</th>
               </tr>
             </thead>
             <tbody>
@@ -204,6 +228,14 @@ const ViewBrokers = () => {
                         )}
                       </div>
                     </td>
+                    <td>
+          {broker.addedByEmployeeId} <br />
+          {broker.employeeName && (
+            <span style={{ marginLeft: 4, color: "#555" }}>
+              ({broker.employeeName})
+            </span>
+          )}
+        </td>
                   </tr>
                 ))
               ) : (
