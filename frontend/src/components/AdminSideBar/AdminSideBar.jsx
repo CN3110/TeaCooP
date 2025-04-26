@@ -88,6 +88,10 @@ const AdminSideBar = () => {
             </div>
           )}
         </div>
+        
+        <Link to="/tea-production" className="item">
+        Tea Production Management
+                </Link>
 
         <Link to="/employee-dashboard-manage-delivery-routes" className="item">
           Manage Delivery Routes
