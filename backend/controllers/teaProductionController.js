@@ -4,20 +4,23 @@ const db = require("../config/database");
 exports.getAllTeaProductions = async (req, res) => {
   try {
     const page = parseInt(req.query.page) || 1;
-    const limit = parseInt(req.query.limit) || 10;
-    const offset = (page - 1) * limit;
-    
-    // Join with teatype and employee tables to get names
-    const [productions] = await db.query(
-      `SELECT p.*, t.teaTypeName, e.employeeName as employeeName
-       FROM tea_production p
-       JOIN teatype t ON p.teaTypeId = t.teaTypeId
-       JOIN employee e ON p.createdBy = e.employeeId
-       ORDER BY p.productionDate DESC, p.created_at DESC
-       LIMIT ? OFFSET ?`,
-      [limit, offset]
-    );
-    
+    let limit = req.query.limit === 'all' ? null : (parseInt(req.query.limit) || 10);
+    const offset = (page - 1) * (limit || 0);
+
+    let query = `
+      SELECT p.*, t.teaTypeName, e.employeeName as employeeName
+      FROM tea_production p
+      JOIN teatype t ON p.teaTypeId = t.teaTypeId
+      JOIN employee e ON p.createdBy = e.employeeId
+      ORDER BY p.productionDate DESC, p.created_at DESC
+    `;
+
+    if (limit !== null) {
+      query += ` LIMIT ${limit} OFFSET ${offset}`;
+    }
+
+    const [productions] = await db.query(query);
+
     // Calculate packet count for dust tea
     productions.forEach(record => {
       if (record.teaTypeName.toLowerCase() === 'dust tea') {
@@ -26,17 +29,16 @@ exports.getAllTeaProductions = async (req, res) => {
         record.packetCount = null;
       }
     });
-    
-    // Get total count for pagination
+
     const [countResult] = await db.query('SELECT COUNT(*) as total FROM tea_production');
-    
+
     res.status(200).json({
       productions,
       pagination: {
         total: countResult[0].total,
         page,
-        limit,
-        pages: Math.ceil(countResult[0].total / limit)
+        limit: limit || countResult[0].total,
+        pages: limit ? Math.ceil(countResult[0].total / limit) : 1
       }
     });
   } catch (error) {
@@ -44,6 +46,7 @@ exports.getAllTeaProductions = async (req, res) => {
     res.status(500).json({ error: "Failed to fetch tea production records" });
   }
 };
+
 
 // Add a new tea production record
 exports.addTeaProduction = async (req, res) => {
