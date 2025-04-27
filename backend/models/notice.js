@@ -1,10 +1,10 @@
 // models/noticeModel.js
 const db = require('../config/database');
 
-const Notice = {};
+
 
 // Create a new notice
-Notice.createNotice = async (title, content, recipients, priority, expiryDate) => {
+const createNotice = async (title, content, recipients, priority, expiryDate) => {
   try {
     // Insert into notice table
     const [result] = await db.query(
@@ -28,10 +28,10 @@ Notice.createNotice = async (title, content, recipients, priority, expiryDate) =
 };
 
 // Get all notice with filtering options
-Notice.getNotice = async (recipientType, status, sortBy) => {
+const getNotices = async (recipientType, status, sortBy) => {
   try {
     let query = `
-      SELECT n.*, GROUP_CONCAT(nr.recipient_type) as recipients
+      SELECT n.*, GROUP_CONCAT(nr.recipient_type) as recipient
       FROM notice n
       LEFT JOIN notice_recipient nr ON n.id = nr.notice_id
     `;
@@ -63,7 +63,7 @@ Notice.getNotice = async (recipientType, status, sortBy) => {
 };
 
 // Get a single notice
-Notice.getNotice = async (id) => {
+const getNoticeById = async (id) => {
   try {
     const [notice] = await db.query(
       `SELECT n.*, GROUP_CONCAT(nr.recipient_type) as recipients
@@ -81,7 +81,7 @@ Notice.getNotice = async (id) => {
 };
 
 // Update a notice
-Notice.updateNotice = async (noticeId, title, content, recipients, priority, expiryDate) => {
+const updateNotice = async (noticeId, title, content, recipients, priority, expiryDate) => {
   try {
     // Update notice
     await db.query(
@@ -104,7 +104,7 @@ Notice.updateNotice = async (noticeId, title, content, recipients, priority, exp
 };
 
 // Delete a notice
-Notice.deleteNotice = async (id) => {
+const deleteNotice = async (id) => {
   try {
     await db.query('DELETE FROM notice WHERE id = ?', [id]);
   } catch (error) {
@@ -112,4 +112,10 @@ Notice.deleteNotice = async (id) => {
   }
 };
 
-module.exports = Notice;
+module.exports = {
+  createNotice,
+  getNoticeById,
+  updateNotice,
+  deleteNotice,
+  getNotices,
+};

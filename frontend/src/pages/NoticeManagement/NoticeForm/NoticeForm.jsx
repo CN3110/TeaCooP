@@ -1,29 +1,34 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import Snackbar from '@mui/material/Snackbar';
-import MuiAlert from '@mui/material/Alert';
-
-const Alert = React.forwardRef(function Alert(props, ref) {
-  return <MuiAlert elevation={6} ref={ref} variant="filled" {...props} />;
-});
+import './NoticeForm.css'
 
 const NoticeForm = ({ editMode = false, notice = null }) => {
   const navigate = useNavigate();
   const [formData, setFormData] = useState({
-    title: notice?.title || '',
-    content: notice?.content || '',
-    recipients: notice?.recipients ? notice.recipients.split(',') : [],
-    priority: notice?.priority || 'medium',
-    expiryDate: notice?.expiry_date ? new Date(notice.expiry_date).toISOString().split('T')[0] : ''
+    title: '',
+    content: '',
+    recipients: [],
+    priority: 'medium',
+    expiryDate: '',
   });
   const [errors, setErrors] = useState({});
   const [isSubmitting, setIsSubmitting] = useState(false);
-  
-  const [snackbar, setSnackbar] = useState({
-    open: false,
-    message: "",
-    severity: "success",
-  });
+
+  // This useEffect will update the form data whenever the notice prop changes
+  useEffect(() => {
+    if (notice) {
+      console.log('Notice data received:', notice);
+      setFormData({
+        title: notice.title || '',
+        content: notice.content || '',
+        recipients: Array.isArray(notice.recipients) 
+          ? notice.recipients 
+          : (notice.recipients ? notice.recipients.split(',') : []),
+        priority: notice.priority || 'medium',
+        expiryDate: notice.expiry_date ? new Date(notice.expiry_date).toISOString().split('T')[0] : '',
+      });
+    }
+  }, [notice]);
 
   const recipientOptions = [
     { value: 'employees', label: 'Employees' },
@@ -40,13 +45,13 @@ const NoticeForm = ({ editMode = false, notice = null }) => {
   const handleRecipientChange = (e) => {
     const { value, checked } = e.target;
     let updatedRecipients = [...formData.recipients];
-    
+
     if (checked) {
       updatedRecipients.push(value);
     } else {
       updatedRecipients = updatedRecipients.filter(type => type !== value);
     }
-    
+
     setFormData({ ...formData, recipients: updatedRecipients });
   };
 
@@ -55,72 +60,57 @@ const NoticeForm = ({ editMode = false, notice = null }) => {
     if (!formData.title.trim()) newErrors.title = 'Title is required';
     if (!formData.content.trim()) newErrors.content = 'Content is required';
     if (formData.recipients.length === 0) newErrors.recipients = 'Select at least one recipient group';
-    
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
   };
 
-  const showAlert = (message, severity = "success") => {
-    setSnackbar({
-      open: true,
-      message,
-      severity,
-    });
-  };
-
-  const handleCloseSnackbar = (event, reason) => {
-    if (reason === "clickaway") return;
-    setSnackbar((prev) => ({ ...prev, open: false }));
-  };
-
   const handleSubmit = async (e) => {
     e.preventDefault();
-    
     if (!validateForm()) return;
-    
+  
     setIsSubmitting(true);
-    
     try {
       const url = editMode && notice?.id 
-        ? `http://localhost:3001/api/notices/${notice.id}`
-        : `http://localhost:3001/api/notices`;
-
+        ? `http://localhost:3001/api/notices/${notice.id}` // Fixed URL
+        : 'http://localhost:3001/api/notices';
+  
       const method = editMode && notice?.id ? 'PUT' : 'POST';
-
+  
+      // Prepare data for API
+      const payload = {
+        ...formData,
+        recipients: Array.isArray(formData.recipients)
+          ? formData.recipients.join(',')
+          : formData.recipients,
+        expiry_date: formData.expiryDate, // Use backend field name
+      };
+      delete payload.expiryDate; // Remove frontend-only field
+  
       const response = await fetch(url, {
-        method: method,
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(formData),
+        method,
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload),
       });
-
-      if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(errorData.message || 'Failed to save notice');
-      }
-
-      showAlert(editMode ? "Notice updated successfully!" : "Notice created successfully!", "success");
-
-      setTimeout(() => {
-        navigate('/notices');
-      }, 1000);
-
+  
+      if (!response.ok) throw new Error('Failed to save notice');
+      navigate('/notice-list'); 
     } catch (error) {
       console.error('Error saving notice:', error);
-      showAlert(error.message || "Failed to save notice", "error");
+      setErrors({ form: 'Failed to save notice. Please try again.' });
     } finally {
       setIsSubmitting(false);
     }
   };
+  
 
   return (
-    <div>
+    <div className="notice-form-container">
       <h2>{editMode ? 'Edit Notice' : 'Create New Notice'}</h2>
+      {errors.form && <div className="form-error">{errors.form}</div>}
 
-      <form onSubmit={handleSubmit}>
+      <form onSubmit={handleSubmit} className="notice-form">
         
-        <div>
+        <div className="form-group">
           <label htmlFor="title">Notice Title</label>
           <input
             id="title"
@@ -130,14 +120,14 @@ const NoticeForm = ({ editMode = false, notice = null }) => {
             onChange={handleChange}
             placeholder="Enter notice title"
           />
-          {errors.title && <p>{errors.title}</p>}
+          {errors.title && <p className="error-message">{errors.title}</p>}
         </div>
-        
-        <div>
+
+        <div className="form-group">
           <label>Recipients</label>
-          <div>
+          <div className="recipients-container">
             {recipientOptions.map(option => (
-              <div key={option.value}>
+              <div key={option.value} className="recipient-checkbox">
                 <input
                   type="checkbox"
                   id={`recipient-${option.value}`}
@@ -150,10 +140,10 @@ const NoticeForm = ({ editMode = false, notice = null }) => {
               </div>
             ))}
           </div>
-          {errors.recipients && <p>{errors.recipients}</p>}
+          {errors.recipients && <p className="error-message">{errors.recipients}</p>}
         </div>
-        
-        <div>
+
+        <div className="form-group">
           <label htmlFor="priority">Priority</label>
           <select
             id="priority"
@@ -166,8 +156,8 @@ const NoticeForm = ({ editMode = false, notice = null }) => {
             <option value="high">High</option>
           </select>
         </div>
-        
-        <div>
+
+        <div className="form-group">
           <label htmlFor="expiryDate">Expiration Date</label>
           <input
             id="expiryDate"
@@ -175,11 +165,11 @@ const NoticeForm = ({ editMode = false, notice = null }) => {
             name="expiryDate"
             value={formData.expiryDate}
             onChange={handleChange}
-            min={new Date().toISOString().split('T')[0]}
+            min={new Date().toISOString().split('T')[0]} // Prevent past dates
           />
         </div>
-        
-        <div>
+
+        <div className="form-group">
           <label htmlFor="content">Notice Content</label>
           <textarea
             id="content"
@@ -189,40 +179,27 @@ const NoticeForm = ({ editMode = false, notice = null }) => {
             rows="6"
             placeholder="Type your notice here..."
           ></textarea>
-          {errors.content && <p>{errors.content}</p>}
+          {errors.content && <p className="error-message">{errors.content}</p>}
         </div>
-        
-        <div>
+
+        <div className="form-buttons">
           <button
             type="button"
-            onClick={() => navigate('/notices')}
+            onClick={() => navigate('/notice-list')}
+            className="btn cancel-btn"
           >
             Cancel
           </button>
           <button
             type="submit"
             disabled={isSubmitting}
+            className="btn submit-btn"
           >
             {isSubmitting ? 'Saving...' : editMode ? 'Update Notice' : 'Create Notice'}
           </button>
         </div>
-      </form>
 
-      {/* Snackbar for alerts */}
-      <Snackbar
-        open={snackbar.open}
-        autoHideDuration={4000}
-        onClose={handleCloseSnackbar}
-        anchorOrigin={{ vertical: "top", horizontal: "center" }}
-      >
-        <Alert
-          onClose={handleCloseSnackbar}
-          severity={snackbar.severity}
-          sx={{ width: "100%" }}
-        >
-          {snackbar.message}
-        </Alert>
-      </Snackbar>
+      </form>
     </div>
   );
 };

@@ -27,9 +27,9 @@ exports.getNotices = async (req, res) => {
 };
 
 // Get a single notice
-exports.getNotice = async (req, res) => {
+exports.getNoticeById = async (req, res) => {
   try {
-    const notice = await Notice.getNotice(req.params.id);
+    const notice = await getNoticeById(req.params.id);
     
     if (!notice) {
       return res.status(404).json({ message: 'Notice not found' });

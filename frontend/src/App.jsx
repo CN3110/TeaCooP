@@ -33,6 +33,9 @@ import EditEmployee from "./pages/ManageEmployees/EditEmployee/EditEmployee.jsx"
 import Login from "./pages/Login/Login.jsx";
 import AdminDashboard from "./pages/Admin/AdminDashboard/AdminDashboard.jsx";
 import TeaProductionPage from "./pages/TeaProduction/TeaProduction.jsx";
+import NoticeForm from "./pages/NoticeManagement/NoticeForm/NoticeForm.jsx";
+import NoticeList from "./pages/NoticeManagement/NoticeList/NoticeList.jsx";
+import EditNotice from "./pages/NoticeManagement/EditNotice/EditNotice.jsx";
 
 const App = () => {
   return (
@@ -80,6 +83,10 @@ const App = () => {
             <Route path="/add-employee" element={<AddEmployee />} />
             <Route path="/view-employees" element={<ViewEmployees />} />
             <Route path="/edit-employee/:employeeId" element={<EditEmployee />} />
+            <Route path="/notice-list" element={<NoticeList />} />
+            <Route path="/notice-form" element={<NoticeForm />} />
+            <Route path="/notices/edit/:id" element={<NoticeForm />} />
+            <Route path="/edit-notice/:id" element={<EditNotice />} />
 
             {/* Other Routes */}
 
