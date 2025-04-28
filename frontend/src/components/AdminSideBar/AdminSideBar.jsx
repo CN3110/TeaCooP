@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import { Link, useNavigate } from "react-router-dom"; // Import Link from React Router
-import "./AdminSideBar.css"; 
+import "./AdminSideBar.css";
 
 const AdminSideBar = () => {
   const [openDropdown, setOpenDropdown] = useState(null); // Track which dropdown is open
@@ -88,10 +88,14 @@ const AdminSideBar = () => {
             </div>
           )}
         </div>
-        
+
         <Link to="/tea-production" className="item">
-        Tea Production Management
-                </Link>
+          Tea Production Management
+        </Link>
+
+        <Link to="/notice-list" className="item">
+          Notice Management
+        </Link>
 
         <Link to="/employee-dashboard-manage-delivery-routes" className="item">
           Manage Delivery Routes
@@ -144,7 +148,7 @@ const AdminSideBar = () => {
             </div>
           )}
         </div>
-        
+
         <div className="dropdown">
           <button
             className="dropdown-btn"
@@ -160,16 +164,11 @@ const AdminSideBar = () => {
           )}
         </div>
 
-        
-
-       
-
         {/* Log Out Button */}
         <button className="logout-btn" onClick={handleLogout}>
           Log Out
         </button>
       </div>
-
     </div>
   );
 };
