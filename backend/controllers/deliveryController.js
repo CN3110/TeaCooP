@@ -240,3 +240,29 @@ exports.deleteDeliveryRecord = async (req, res) => {
     res.status(500).json({ error: "Failed to delete delivery record" });
   }
 };
+
+// Controller to fetch raw tea records with optional date filtering
+exports.getRawTeaRecords = (req, res) => {
+  const { startDate, endDate } = req.query;
+
+  Delivery.getRawTeaRecords(startDate, endDate, (err, results) => {
+    if (err) {
+      console.error('Error fetching raw tea records:', err);
+      return res.status(500).json({ error: 'Server error' });
+    }
+
+    res.json(results);
+  });
+};
+
+// Controller to fetch total raw tea weight
+exports.getTotalRawTeaWeight = (req, res) => {
+  Delivery.getTotalRawTeaWeight((err, result) => {
+    if (err) {
+      console.error('Error fetching total raw tea weight:', err);
+      return res.status(500).json({ error: 'Server error' });
+    }
+
+    res.json(result);
+  });
+};

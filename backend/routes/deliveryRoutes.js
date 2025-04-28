@@ -16,4 +16,10 @@ router.get("/:deliveryId", getDeliveryRecordById); // Get a single delivery reco
 router.put("/:deliveryId", updateDeliveryRecord); // Update a delivery record
 router.delete("/:deliveryId", deleteDeliveryRecord); // Delete a delivery record
 
+// Route to fetch raw tea records
+router.get('/raw-tea-records', deliveryController.getRawTeaRecords);
+
+// Route to fetch total raw tea weight
+router.get('/total-raw-tea-weight', deliveryController.getTotalRawTeaWeight);
+
 module.exports = router;
