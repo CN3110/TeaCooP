@@ -36,7 +36,7 @@ import TeaProductionPage from "./pages/TeaProduction/TeaProduction.jsx";
 import NoticeForm from "./pages/NoticeManagement/NoticeForm/NoticeForm.jsx";
 import NoticeList from "./pages/NoticeManagement/NoticeList/NoticeList.jsx";
 import EditNotice from "./pages/NoticeManagement/EditNotice/EditNotice.jsx";
-
+import RawTeaRecords from "./pages/RawTeaRecords/RawTeaRecords.jsx";
 const App = () => {
   return (
     <AuthProvider>
@@ -76,7 +76,7 @@ const App = () => {
             <Route path="/employee-view-manage-broker-valuation-price" element={<ManageBrokerValuations/>} />
             <Route path="/view-valuations/:lotNumber" element={<ViewValuations />} />
             <Route path="/tea-production" element={<TeaProductionPage />} />
-
+            <Route path="/raw-tea-records" element={<RawTeaRecords />} />
 
             {/* Admin Routes */}
             <Route path="/admin-dashboard" element={<AdminDashboard />} />
