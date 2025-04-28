@@ -18,11 +18,11 @@ import ViewNewLots from './pages/Broker/ViewNewLots/ViewNewLots';
 import ViewTeaTypes from './pages/View Tea Types/ViewTeaTypes';
 
 const App = () => {
-  const [showLogin, setShowLogin] = useState(false); // Move login state here
+  //const [showLogin, setShowLogin] = useState(false); // Move login state here
   return (
-    <BrowserRouter>
-      <div className='app'>
-        <Navbar setShowLogin={setShowLogin}/>
+    
+    <div className="app">
+      
         <Routes>
           {/* Common Routes */}
           <Route path="/" element={<HomePage showLogin={showLogin} setShowLogin={setShowLogin} />} />
@@ -45,9 +45,12 @@ const App = () => {
           <Route path="/broker-profile" element={<BProfile/>} />
           <Route path="/broker-view-new-lots" element={<ViewNewLots/>} />
         </Routes>
+        
         <Footer />
-      </div>
-    </BrowserRouter>
+    
+    
+    </div>
+ 
   );
 }
 

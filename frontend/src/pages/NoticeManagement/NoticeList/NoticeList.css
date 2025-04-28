@@ -17,6 +17,25 @@
     font-size: 28px;
     margin: 0;
   }
+  .notice-header-buttons {
+    display: flex;
+    gap: 10px;
+  }
+  
+  .btn-back {
+    background-color: #ccc;
+    color: #333;
+    padding: 8px 16px;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    font-weight: bold;
+  }
+  
+  .btn-back:hover {
+    background-color: #bbb;
+  }
+  
   
   .notice-loading,
   .notice-empty,

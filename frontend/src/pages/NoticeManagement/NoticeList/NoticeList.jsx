@@ -108,11 +108,17 @@ const NoticeList = () => {
   return (
     <div className="notice-container">
       <div className="notice-header">
-        <h1>Manage Notices</h1>
-        <button onClick={() => navigate('/notice-form')} className="btn-create">
-          Create New Notice
-        </button>
-      </div>
+  
+  
+    <button onClick={() => navigate('/admin-dashboard')} className="btn-back">
+      Back
+    </button>
+    <h1>Manage Notices</h1>
+    <button onClick={() => navigate('/notice-form')} className="btn-create">
+      Create New Notice
+    </button>
+  
+</div>
 
       {/* Error message */}
       {error && <div className="notice-error">{error}</div>}

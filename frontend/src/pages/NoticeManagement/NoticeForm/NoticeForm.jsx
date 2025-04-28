@@ -71,20 +71,19 @@ const NoticeForm = ({ editMode = false, notice = null }) => {
     setIsSubmitting(true);
     try {
       const url = editMode && notice?.id 
-        ? `http://localhost:3001/api/notices/${notice.id}` // Fixed URL
+        ? `http://localhost:3001/api/notices/${notice.id}`
         : 'http://localhost:3001/api/notices';
   
       const method = editMode && notice?.id ? 'PUT' : 'POST';
   
-      // Prepare data for API
+      // 👉 Fully fixed payload
       const payload = {
-        ...formData,
-        recipients: Array.isArray(formData.recipients)
-          ? formData.recipients.join(',')
-          : formData.recipients,
-        expiry_date: formData.expiryDate, // Use backend field name
+        title: formData.title,
+        content: formData.content,
+        recipients: formData.recipients,  // ✅ Send as array, not string
+        priority: formData.priority,
+        expiry_date: formData.expiryDate || null, // 🛡 if no expiry selected
       };
-      delete payload.expiryDate; // Remove frontend-only field
   
       const response = await fetch(url, {
         method,
@@ -93,7 +92,7 @@ const NoticeForm = ({ editMode = false, notice = null }) => {
       });
   
       if (!response.ok) throw new Error('Failed to save notice');
-      navigate('/notice-list'); 
+      navigate('/notice-list');
     } catch (error) {
       console.error('Error saving notice:', error);
       setErrors({ form: 'Failed to save notice. Please try again.' });
@@ -101,6 +100,7 @@ const NoticeForm = ({ editMode = false, notice = null }) => {
       setIsSubmitting(false);
     }
   };
+  
   
 
   return (
