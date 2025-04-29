@@ -1,4 +1,5 @@
 const db = require("../config/database");
+const Delivery = require("../models/DeliveryRecord");
 
 // Fetch all delivery records
 exports.getAllDeliveryRecords = async (req, res) => {
@@ -100,7 +101,30 @@ exports.addDeliveryRecord = async (req, res) => {
         randaluNum,
       ]
     );
-    res.status(201).json({ message: "Delivery record added successfully" });
+    
+    // Get the newly inserted record's ID
+    const deliveryId = deliveryResult.insertId;
+    
+    // Fetch raw tea details for the newly inserted record
+    const [rawTeaDetails] = await db.query(
+      `SELECT 
+        deliveryId, 
+        date, 
+        DATE_FORMAT(date, '%Y-%m-%d') as deliveryDate,
+        TIME(date) as deliveryTime,
+        (greenTeaLeaves + randalu) AS rawTeaWeight,
+        greenTeaLeaves,
+        randalu
+      FROM delivery
+      WHERE deliveryId = ?`,
+      [deliveryId]
+    );
+    
+    res.status(201).json({ 
+      message: "Delivery record added successfully",
+      deliveryId: deliveryId,
+      rawTeaDetails: rawTeaDetails[0] || null
+    });
   } catch (error) {
     console.error("Error adding delivery record:", error);
     res.status(500).json({ error: "Failed to add delivery record" });
@@ -216,7 +240,26 @@ exports.updateDeliveryRecord = async (req, res) => {
         deliveryId,
       ]
     );
-    res.status(200).json({ message: "Delivery record updated successfully" });
+    
+    // Get the updated raw tea details
+    const [rawTeaDetails] = await db.query(
+      `SELECT 
+        deliveryId, 
+        date, 
+        DATE_FORMAT(date, '%Y-%m-%d') as deliveryDate,
+        TIME(date) as deliveryTime,
+        (greenTeaLeaves + randalu) AS rawTeaWeight,
+        greenTeaLeaves,
+        randalu
+      FROM delivery
+      WHERE deliveryId = ?`,
+      [deliveryId]
+    );
+    
+    res.status(200).json({ 
+      message: "Delivery record updated successfully",
+      rawTeaDetails: rawTeaDetails[0] || null
+    });
   } catch (error) {
     console.error("Error updating delivery record:", error);
     res.status(500).json({ error: "Failed to update delivery record" });
@@ -263,6 +306,44 @@ exports.getTotalRawTeaWeight = (req, res) => {
       return res.status(500).json({ error: 'Server error' });
     }
 
+    res.json(result);
+  });
+};
+
+// NEW CONTROLLER: Get raw tea details by delivery ID
+exports.getRawTeaDetailsByDeliveryId = (req, res) => {
+  const { deliveryId } = req.params;
+  
+  if (!deliveryId) {
+    return res.status(400).json({ error: 'Delivery ID is required' });
+  }
+  
+  Delivery.getRawTeaDetailsByDeliveryId(deliveryId, (err, result) => {
+    if (err) {
+      console.error('Error fetching raw tea details:', err);
+      return res.status(500).json({ error: 'Server error' });
+    }
+    
+    if (!result) {
+      return res.status(404).json({ error: 'Delivery record not found' });
+    }
+    
+    res.json(result);
+  });
+};
+
+// NEW CONTROLLER: Get latest delivery raw tea details
+exports.getLatestDeliveryRawTeaDetails = (req, res) => {
+  Delivery.getLatestDeliveryRawTeaDetails((err, result) => {
+    if (err) {
+      console.error('Error fetching latest delivery details:', err);
+      return res.status(500).json({ error: 'Server error' });
+    }
+    
+    if (!result) {
+      return res.status(404).json({ error: 'No delivery records found' });
+    }
+    
     res.json(result);
   });
 };

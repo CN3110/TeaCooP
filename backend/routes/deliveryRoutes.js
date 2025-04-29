@@ -5,6 +5,11 @@ const {
   getDeliveryRecordById,
   updateDeliveryRecord,
   deleteDeliveryRecord,
+  getRawTeaRecords,
+  getTotalRawTeaWeight,
+  getRawTeaDetailsByDeliveryId,
+  getLatestDeliveryRawTeaDetails,
+
 } = require("../controllers/deliveryController");
 
 const router = express.Router();
@@ -16,10 +21,11 @@ router.get("/:deliveryId", getDeliveryRecordById); // Get a single delivery reco
 router.put("/:deliveryId", updateDeliveryRecord); // Update a delivery record
 router.delete("/:deliveryId", deleteDeliveryRecord); // Delete a delivery record
 
-// Route to fetch raw tea records
-router.get('/raw-tea-records', deliveryController.getRawTeaRecords);
-
-// Route to fetch total raw tea weight
-router.get('/total-raw-tea-weight', deliveryController.getTotalRawTeaWeight);
+// Raw tea related routes
+router.get("/raw-tea/records", getRawTeaRecords); // Get raw tea records with optional date filtering
+router.get("/raw-tea/total", getTotalRawTeaWeight); // Get total raw tea weight
+router.get("/raw-tea/latest", getLatestDeliveryRawTeaDetails); // Get latest delivery raw tea details
+//router.get("/raw-tea/daily", getDailyRawTeaAggregates); // Get daily aggregated raw tea data
+router.get("/raw-tea/:deliveryId", getRawTeaDetailsByDeliveryId); // Get raw tea details by delivery ID
 
 module.exports = router;
