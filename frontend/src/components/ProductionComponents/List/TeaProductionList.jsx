@@ -228,9 +228,7 @@ const TeaProductionList = () => {
               <th>Tea Type</th>
               <th>Weight (kg)</th>
               <th>Recorded By</th>
-              {productions.some(p => p?.teaTypeName?.toLowerCase().includes('dust')) && (
-                <th>400g Packets</th>
-              )}
+              
               <th>Actions</th>
             </tr>
           </thead>
@@ -249,13 +247,8 @@ const TeaProductionList = () => {
                     <td>{production.teaTypeName || 'Unknown'}</td>
                     <td>{weight}</td>
                     <td>{production.employeeName || production.createdBy}</td>
-                    {productions.some(p => p?.teaTypeName?.toLowerCase().includes('dust')) && (
-                      <td>
-                        {production?.teaTypeName?.toLowerCase().includes('dust') 
-                          ? Math.floor((production.weightInKg * 1000) / 400)
-                          : '-'}
-                      </td>
-                    )}
+                    
+                    
                     <td>
                       <button 
                         onClick={() => handleDeleteClick(production.productionId)}

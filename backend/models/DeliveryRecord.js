@@ -20,63 +20,8 @@ class Delivery {
       return callback(null, { delivery: result });
     });
   }
-
-  // Method to fetch raw tea records, optionally filtered by date
-  static getRawTeaRecords(startDate, endDate, callback) {
-    let sql = `
-      SELECT 
-        deliveryId, 
-        date, 
-        DATE_FORMAT(date, '%Y-%m-%d') as deliveryDate,
-        TIME(date) as deliveryTime,
-        (greenTeaLeaves + randalu) AS rawTeaWeight 
-      FROM delivery`;
-    const params = [];
-
-    if (startDate && endDate) {
-      sql += ` WHERE date BETWEEN ? AND ?`;
-      params.push(startDate, endDate);
-    }
-
-    sql += ` ORDER BY date DESC`;
-
-    db.query(sql, params, (err, results) => {
-      if (err) {
-        return callback(err, null);
-      }
-
-      return callback(null, results);
-    });
-  }
   
-  // Method to get raw tea records aggregated by day
-  static getDailyRawTeaAggregates(startDate, endDate, callback) {
-    let sql = `
-      SELECT 
-        DATE_FORMAT(date, '%Y-%m-%d') as deliveryDate,
-        COUNT(*) as deliveryCount,
-        SUM(greenTeaLeaves + randalu) AS totalRawTeaWeight,
-        SUM(greenTeaLeaves) as totalGreenTeaLeaves,
-        SUM(randalu) as totalRandalu
-      FROM delivery`;
-    const params = [];
-
-    if (startDate && endDate) {
-      sql += ` WHERE date BETWEEN ? AND ?`;
-      params.push(startDate, endDate);
-    }
-
-    sql += ` GROUP BY DATE_FORMAT(date, '%Y-%m-%d')
-             ORDER BY deliveryDate DESC`;
-
-    db.query(sql, params, (err, results) => {
-      if (err) {
-        return callback(err, null);
-      }
-
-      return callback(null, results);
-    });
-  }
+  
 
   // Method to fetch total raw tea weight (sum of all raw tea weights)
   static getTotalRawTeaWeight(callback) {
