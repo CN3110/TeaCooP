@@ -8,9 +8,8 @@ exports.getAllTeaProductions = async (req, res) => {
     const offset = (page - 1) * (limit || 0);
 
     let query = `
-      SELECT p.*, t.teaTypeName, e.employeeName as employeeName
+      SELECT p.*, e.employeeName as employeeName
       FROM tea_production p
-      JOIN teatype t ON p.teaTypeId = t.teaTypeId
       JOIN employee e ON p.createdBy = e.employeeId
       ORDER BY p.productionDate DESC, p.created_at DESC
     `;
@@ -20,15 +19,6 @@ exports.getAllTeaProductions = async (req, res) => {
     }
 
     const [productions] = await db.query(query);
-
-    // Calculate packet count for dust tea
-    productions.forEach(record => {
-      if (record.teaTypeName.toLowerCase() === 'dust tea') {
-        record.packetCount = Math.floor(record.weightInKg * 1000 / 400);
-      } else {
-        record.packetCount = null;
-      }
-    });
 
     const [countResult] = await db.query('SELECT COUNT(*) as total FROM tea_production');
 
@@ -50,33 +40,26 @@ exports.getAllTeaProductions = async (req, res) => {
 
 // Add a new tea production record
 exports.addTeaProduction = async (req, res) => {
-  const { teaTypeId, productionDate, weightInKg, createdBy } = req.body;
+  const {productionDate, weightInKg, createdBy } = req.body;
 
   // Validate required fields
-  if (!teaTypeId || !productionDate || !weightInKg || !createdBy) {
+  if ( !productionDate || !weightInKg || !createdBy) {
     return res.status(400).json({ error: "Missing required fields" });
   }
 
   try {
     // Insert production record
     const [result] = await db.query(
-      "INSERT INTO tea_production (teaTypeId, productionDate, weightInKg, createdBy) VALUES (?, ?, ?, ?)",
-      [teaTypeId, productionDate, weightInKg, createdBy]
+      "INSERT INTO tea_production (productionDate, weightInKg, createdBy) VALUES (?, ?, ?)",
+      [ productionDate, weightInKg, createdBy]
     );
     
-    // Get the tea type name to determine if it's dust tea
-    const [teaType] = await db.query("SELECT teaTypeName FROM teatype WHERE teaTypeId = ?", [teaTypeId]);
-    
-    // Calculate packet count for dust tea
-    let packetCount = null;
-    if (teaType.length > 0 && teaType[0].teaTypeName.toLowerCase() === 'dust tea') {
-      packetCount = Math.floor(weightInKg * 1000 / 400); // Convert kg to g and divide by 400g
-    }
+  
     
     res.status(201).json({ 
       message: "Production record added successfully",
       productionId: result.insertId,
-      packetCount
+      
     });
   } catch (error) {
     console.error("Error adding tea production:", error);
@@ -90,9 +73,8 @@ exports.getTeaProductionById = async (req, res) => {
 
   try {
     const [production] = await db.query(
-      `SELECT p.*, t.teaTypeName, e.employeeName as employeeName
+      `SELECT p.*, e.employeeName as employeeName
        FROM tea_production p
-       JOIN teatype t ON p.teaTypeId = t.teaTypeId
        JOIN employee e ON p.createdBy = e.employeeId
        WHERE p.productionId = ?`,
       [productionId]
@@ -102,13 +84,7 @@ exports.getTeaProductionById = async (req, res) => {
       return res.status(404).json({ error: "Production record not found" });
     }
 
-    // Calculate packet count for dust tea
-    if (production[0].teaTypeName.toLowerCase() === 'dust tea') {
-      production[0].packetCount = Math.floor(production[0].weightInKg * 1000 / 400);
-    } else {
-      production[0].packetCount = null;
-    }
-
+    
     res.status(200).json(production[0]);
   } catch (error) {
     console.error("Error fetching tea production:", error);
@@ -122,25 +98,15 @@ exports.getTeaProductionByDate = async (req, res) => {
 
   try {
     const [productions] = await db.query(
-      `SELECT p.*, t.teaTypeName, e.employeeName as employeeName
+      `SELECT p.*, e.employeeName as employeeName
        FROM tea_production p
-       JOIN teatype t ON p.teaTypeId = t.teaTypeId
        JOIN employee e ON p.createdBy = e.employeeId
        WHERE p.productionDate = ?
        ORDER BY p.created_at DESC`,
       [date]
     );
 
-    // Calculate packet count for dust tea
-    productions.forEach(record => {
-      if (record.teaTypeName.toLowerCase() === 'dust tea') {
-        record.packetCount = Math.floor(record.weightInKg * 1000 / 400);
-      } else {
-        record.packetCount = null;
-      }
-    });
-
-    res.status(200).json(productions);
+   res.status(200).json(productions);
   } catch (error) {
     console.error("Error fetching tea productions by date:", error);
     res.status(500).json({ error: "Failed to fetch tea production records by date" });
@@ -150,30 +116,21 @@ exports.getTeaProductionByDate = async (req, res) => {
 // Update a tea production record
 exports.updateTeaProduction = async (req, res) => {
   const { productionId } = req.params;
-  const { teaTypeId, productionDate, weightInKg } = req.body;
+  const { productionDate, weightInKg } = req.body;
 
   // Validate required fields
-  if (!teaTypeId || !productionDate || !weightInKg) {
+  if (!productionDate || !weightInKg) {
     return res.status(400).json({ error: "Missing required fields" });
   }
 
   try {
     const [result] = await db.query(
-      "UPDATE tea_production SET teaTypeId = ?, productionDate = ?, weightInKg = ? WHERE productionId = ?",
-      [teaTypeId, productionDate, weightInKg, productionId]
+      "UPDATE tea_production SET productionDate = ?, weightInKg = ? WHERE productionId = ?",
+      [productionDate, weightInKg, productionId]
     );
 
     if (result.affectedRows === 0) {
       return res.status(404).json({ error: "Production record not found" });
-    }
-
-    // Get the tea type name to determine if it's dust tea
-    const [teaType] = await db.query("SELECT teaTypeName FROM teatype WHERE teaTypeId = ?", [teaTypeId]);
-    
-    // Calculate packet count for dust tea
-    let packetCount = null;
-    if (teaType.length > 0 && teaType[0].teaTypeName.toLowerCase() === 'dust tea') {
-      packetCount = Math.floor(weightInKg * 1000 / 400);
     }
 
     res.status(200).json({ 

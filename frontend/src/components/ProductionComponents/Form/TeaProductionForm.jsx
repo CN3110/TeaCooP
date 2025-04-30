@@ -6,15 +6,14 @@ import MuiAlert from "@mui/material/Alert";
 import './TeaProductionForm.css';
 
 const TeaProductionForm = () => {
-  const [teaTypes, setTeaTypes] = useState([]);
+  
   const [loading, setLoading] = useState(false);
   const [formData, setFormData] = useState({
-    teaTypeId: '',
+    
     productionDate: format(new Date(), 'yyyy-MM-dd'),
     weightInKg: '',
   });
-  const [packetCount, setPacketCount] = useState(null);
-  const [loadingTeaTypes, setLoadingTeaTypes] = useState(true);
+  
   const [formErrors, setFormErrors] = useState({});
   
   // Snackbar state
@@ -24,33 +23,7 @@ const TeaProductionForm = () => {
     severity: 'success' // 'success', 'error', 'warning', 'info'
   });
 
-  useEffect(() => {
-    const fetchTeaTypes = async () => {
-      try {
-        setLoadingTeaTypes(true);
-        const response = await axios.get('http://localhost:3001/api/teaTypes');
-        
-        if (Array.isArray(response.data)) {
-          setTeaTypes(response.data);
-          
-        } else {
-          console.error('Tea types response is not an array:', response.data);
-          setTeaTypes([]);
-          showSnackbar('Failed to load tea types. Please refresh the page.', 'error');
-        }
-      } catch (error) {
-        console.error('Error fetching tea types:', error);
-        setTeaTypes([]);
-        showSnackbar('Failed to load tea types. Please refresh the page.', 'error');
-      } finally {
-        setLoadingTeaTypes(false);
-      }
-    };
-
-    fetchTeaTypes();
-  }, []);
-
-  const showSnackbar = (message, severity = 'success') => {
+    const showSnackbar = (message, severity = 'success') => {
     setSnackbar({
       open: true,
       message,
@@ -71,21 +44,7 @@ const TeaProductionForm = () => {
       });
     }
     
-    // Calculate packets if it's dust tea and weight changes
-    if (name === 'weightInKg' || name === 'teaTypeId') {
-      const selectedTeaType = teaTypes.find(type => type.teaTypeId === parseInt(formData.teaTypeId));
-      if (selectedTeaType && selectedTeaType.teaTypeName.toLowerCase() === 'dust tea' && formData.weightInKg) {
-        const weight = name === 'weightInKg' ? parseFloat(value) : parseFloat(formData.weightInKg);
-        if (!isNaN(weight) && weight > 0) {
-          setPacketCount(Math.floor(weight * 1000 / 400));
-        } else {
-          setPacketCount(null);
-        }
-      } else {
-        setPacketCount(null);
-      }
-    }
-  };
+   };
 
   const validateForm = () => {
     const errors = {};
@@ -130,11 +89,11 @@ const TeaProductionForm = () => {
       
       // Reset form
       setFormData({
-        teaTypeId: teaTypes.length > 0 ? teaTypes[0].teaTypeId : '',
+       
         productionDate: format(new Date(), 'yyyy-MM-dd'),
         weightInKg: '',
       });
-      setPacketCount(null);
+   
     } catch (error) {
       console.error('Error:', error);
       showSnackbar(
@@ -174,27 +133,7 @@ const TeaProductionForm = () => {
           )}
         </div>
         
-        <div className="form-group">
-          <label htmlFor="teaTypeId">Tea Type:</label>
-          {loadingTeaTypes ? (
-            <p>Loading tea types...</p>
-          ) : (
-            <select
-  id="teaTypeId"
-  name="teaTypeId"
-  value={formData.teaTypeId}
-  onChange={handleChange}
-  required
->
-  <option value="">Select Tea Type</option> {/* This will show first */}
-  {teaTypes.map(type => (
-    <option key={type.teaTypeId} value={type.teaTypeId}>
-      {type.teaTypeName}
-    </option>
-  ))}
-</select>
-          )}
-        </div>
+        
         
         <div className={`form-group ${formErrors.weightInKg ? 'error' : ''}`}>
           <label htmlFor="weightInKg">Weight (kg):</label>
@@ -212,16 +151,11 @@ const TeaProductionForm = () => {
             <div className="error-text">{formErrors.weightInKg}</div>
           )}
         </div>
-        
-        {packetCount !== null && (
-          <div className="packet-info">
-            <p>This will produce approximately <strong>{packetCount}</strong> packets of 400g Dust Tea</p>
-          </div>
-        )}
+       
         
         <button 
           type="submit" 
-          disabled={loading || loadingTeaTypes || teaTypes.length === 0}
+          
           className={loading ? 'loading-button' : ''}
         >
           {loading ? (

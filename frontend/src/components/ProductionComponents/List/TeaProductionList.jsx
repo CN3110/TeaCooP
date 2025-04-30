@@ -25,11 +25,10 @@ const TeaProductionList = () => {
     pages: 1
   });
   const [filters, setFilters] = useState({
-    teaTypeId: '',
     startDate: '',
     endDate: ''
   });
-  const [teaTypes, setTeaTypes] = useState([]);
+  
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const [selectedProductionId, setSelectedProductionId] = useState(null);
   const [snackbar, setSnackbar] = useState({
@@ -42,8 +41,7 @@ const TeaProductionList = () => {
     const fetchData = async () => {
       try {
         setLoading(true);
-        const typesResponse = await axios.get('http://localhost:3001/api/teaTypes');
-        setTeaTypes(typesResponse.data || []);
+        
         const productionsResponse = await axios.get('http://localhost:3001/api/teaProductions?limit=1000&page=1');
         setAllProductions(productionsResponse.data.productions || []);
         setProductions(productionsResponse.data.productions || []);
@@ -72,9 +70,7 @@ const TeaProductionList = () => {
     if (allProductions.length === 0) return;
     let filtered = [...allProductions];
 
-    if (filters.teaTypeId) {
-      filtered = filtered.filter(p => p.teaTypeId == filters.teaTypeId);
-    }
+    
     if (filters.startDate) {
       const start = new Date(filters.startDate);
       filtered = filtered.filter(p => new Date(p.productionDate) >= start);
@@ -135,7 +131,7 @@ const TeaProductionList = () => {
 
   const resetFilters = () => {
     setFilters({
-      teaTypeId: '',
+     
       startDate: '',
       endDate: ''
     });
@@ -176,22 +172,6 @@ const TeaProductionList = () => {
       {/* Filters */}
       <div className="filters">
         <div className="filter-group">
-          <label>Tea Type:</label>
-          <select
-            name="teaTypeId"
-            value={filters.teaTypeId}
-            onChange={handleFilterChange}
-          >
-            <option value="">All Tea Types</option>
-            {teaTypes.map(type => (
-              <option key={type.teaTypeId} value={type.teaTypeId}>
-                {type.teaTypeName}
-              </option>
-            ))}
-          </select>
-        </div>
-
-        <div className="filter-group">
           <label>From Date:</label>
           <input
             type="date"
@@ -225,7 +205,7 @@ const TeaProductionList = () => {
           <thead>
             <tr>
               <th>Date</th>
-              <th>Tea Type</th>
+              
               <th>Weight (kg)</th>
               <th>Recorded By</th>
               
@@ -244,7 +224,7 @@ const TeaProductionList = () => {
                 return (
                   <tr key={production.productionId}>
                     <td>{productionDate}</td>
-                    <td>{production.teaTypeName || 'Unknown'}</td>
+                    
                     <td>{weight}</td>
                     <td>{production.employeeName || production.createdBy}</td>
                     
@@ -262,7 +242,7 @@ const TeaProductionList = () => {
               })
             ) : (
               <tr className="no-records">
-                <td colSpan={productions.some(p => p?.teaTypeName?.toLowerCase().includes('dust')) ? 6 : 5}>
+                <td colSpan="5" className="no-records-text">
                   No production records found
                 </td>
               </tr>
