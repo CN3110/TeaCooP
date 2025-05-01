@@ -1,64 +1,31 @@
-import React, { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
-import Snackbar from '@mui/material/Snackbar';
-import MuiAlert from '@mui/material/Alert';
+import React, { useState } from "react";
+import { useNavigate } from "react-router-dom";
+import EmployeeLayout from "../../../components/EmployeeLayout/EmployeeLayout";
+import Snackbar from "@mui/material/Snackbar";
+import MuiAlert from "@mui/material/Alert";
+import "./AddEmployee.css";
 
 const Alert = React.forwardRef(function Alert(props, ref) {
   return <MuiAlert elevation={6} ref={ref} variant="filled" {...props} />;
 });
 
-const NoticeForm = ({ editMode = false, notice = null }) => {
-  const navigate = useNavigate();
-  const [formData, setFormData] = useState({
-    title: notice?.title || '',
-    content: notice?.content || '',
-    recipients: notice?.recipients ? notice.recipients.split(',') : [],
-    priority: notice?.priority || 'medium',
-    expiryDate: notice?.expiry_date ? new Date(notice.expiry_date).toISOString().split('T')[0] : ''
+const AddEmployee = () => {
+  const [employeeData, setEmployeeData] = useState({
+    employeeId: "Generating...",
+    employeeName: "",
+    employeeContact_no: "",
+    employeeEmail: "",
+    status: "pending",
+    notes: "",
   });
-  const [errors, setErrors] = useState({});
-  const [isSubmitting, setIsSubmitting] = useState(false);
-  
+
   const [snackbar, setSnackbar] = useState({
     open: false,
     message: "",
     severity: "success",
   });
 
-  const recipientOptions = [
-    { value: 'employees', label: 'Employees' },
-    { value: 'drivers', label: 'Drivers' },
-    { value: 'brokers', label: 'Brokers' },
-    { value: 'suppliers', label: 'Suppliers' },
-  ];
-
-  const handleChange = (e) => {
-    const { name, value } = e.target;
-    setFormData({ ...formData, [name]: value });
-  };
-
-  const handleRecipientChange = (e) => {
-    const { value, checked } = e.target;
-    let updatedRecipients = [...formData.recipients];
-    
-    if (checked) {
-      updatedRecipients.push(value);
-    } else {
-      updatedRecipients = updatedRecipients.filter(type => type !== value);
-    }
-    
-    setFormData({ ...formData, recipients: updatedRecipients });
-  };
-
-  const validateForm = () => {
-    const newErrors = {};
-    if (!formData.title.trim()) newErrors.title = 'Title is required';
-    if (!formData.content.trim()) newErrors.content = 'Content is required';
-    if (formData.recipients.length === 0) newErrors.recipients = 'Select at least one recipient group';
-    
-    setErrors(newErrors);
-    return Object.keys(newErrors).length === 0;
-  };
+  const navigate = useNavigate();
 
   const showAlert = (message, severity = "success") => {
     setSnackbar({
@@ -73,158 +40,193 @@ const NoticeForm = ({ editMode = false, notice = null }) => {
     setSnackbar((prev) => ({ ...prev, open: false }));
   };
 
+  const handleInputChange = (e) => {
+    const { name, value } = e.target;
+    setEmployeeData({ ...employeeData, [name]: value });
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
-    
-    if (!validateForm()) return;
-    
-    setIsSubmitting(true);
-    
-    try {
-      const url = editMode && notice?.id 
-        ? `http://localhost:3001/api/notices/${notice.id}`
-        : `http://localhost:3001/api/notices`;
 
-      const method = editMode && notice?.id ? 'PUT' : 'POST';
-
-      const response = await fetch(url, {
-        method: method,
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(formData),
-      });
-
-      if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(errorData.message || 'Failed to save notice');
+    // If status is 'active', all fields should be filled
+    if (employeeData.status === "active") {
+      const requiredFields = [
+        "employeeName",
+        "employeeContact_no",
+        "employeeEmail",
+      ];
+      const missingFields = requiredFields.filter(
+        (field) => !employeeData[field]
+      );
+      if (missingFields.length > 0) {
+        showAlert("Please fill in all required fields. When you don't know all the details, save it as pending", "error");
+        return;
       }
+    }
 
-      showAlert(editMode ? "Notice updated successfully!" : "Notice created successfully!", "success");
+    // Validations
+    const contactPattern = /^(0((7[0-8])|([1-9][0-9]))\d{7})$/;
 
-      setTimeout(() => {
-        navigate('/notices');
-      }, 1000);
+    if (employeeData.employeeContact_no && !contactPattern.test(employeeData.employeeContact_no)) {
+      showAlert(
+        "Invalid employee contact number. Please enter a valid contact number.",
+        "error"
+      );
+      return;
+    }
 
+    const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
+    if (
+      employeeData.employeeEmail && !emailPattern.test(employeeData.employeeEmail)
+    ) {
+      showAlert("Please enter a valid employee email address.", "error");
+      return;
+    }
+
+    const namePattern = /^[A-Za-z\s.&'-]+$/;
+
+    if (
+      employeeData.employeeName && !namePattern.test(employeeData.employeeName)
+    ) {
+      showAlert(
+        "Employee name should only contain letters and common punctuation.",
+        "error"
+      );
+      return;
+    }
+
+    try {
+      const response = await fetch("http://localhost:3001/api/employees/add", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(employeeData),
+      });
+      
+
+      const data = await response.json();
+      
+      if (response.ok) {
+        showAlert("Employee added successfully!", "success");
+        setTimeout(() => navigate("/view-employees"), 1500);
+      } else {
+        showAlert(data.error || "Failed to add employee", "error");
+      }
     } catch (error) {
-      console.error('Error saving notice:', error);
-      showAlert(error.message || "Failed to save notice", "error");
-    } finally {
-      setIsSubmitting(false);
+      console.error("Error adding employee:", error);
+      showAlert("An error occurred while adding the employee.", "error");
     }
   };
 
   return (
-    <div>
-      <h2>{editMode ? 'Edit Notice' : 'Create New Notice'}</h2>
-
-      <form onSubmit={handleSubmit}>
-        
-        <div>
-          <label htmlFor="title">Notice Title</label>
-          <input
-            id="title"
-            type="text"
-            name="title"
-            value={formData.title}
-            onChange={handleChange}
-            placeholder="Enter notice title"
-          />
-          {errors.title && <p>{errors.title}</p>}
-        </div>
-        
-        <div>
-          <label>Recipients</label>
-          <div>
-            {recipientOptions.map(option => (
-              <div key={option.value}>
-                <input
-                  type="checkbox"
-                  id={`recipient-${option.value}`}
-                  name="recipients"
-                  value={option.value}
-                  checked={formData.recipients.includes(option.value)}
-                  onChange={handleRecipientChange}
-                />
-                <label htmlFor={`recipient-${option.value}`}>{option.label}</label>
-              </div>
-            ))}
+    <EmployeeLayout>
+      <div className="add-employee-container">
+        <h2>Add Employee</h2>
+        <form onSubmit={handleSubmit} className="employee-form">
+          <div className="form-group">
+            <label htmlFor="employeeId">Employee ID</label>
+            <input
+              type="text"
+              id="employeeId"
+              name="employeeId"
+              value={employeeData.employeeId}
+              readOnly={true}
+              className="read-only-input"
+            />
           </div>
-          {errors.recipients && <p>{errors.recipients}</p>}
-        </div>
-        
-        <div>
-          <label htmlFor="priority">Priority</label>
-          <select
-            id="priority"
-            name="priority"
-            value={formData.priority}
-            onChange={handleChange}
-          >
-            <option value="low">Low</option>
-            <option value="medium">Medium</option>
-            <option value="high">High</option>
-          </select>
-        </div>
-        
-        <div>
-          <label htmlFor="expiryDate">Expiration Date</label>
-          <input
-            id="expiryDate"
-            type="date"
-            name="expiryDate"
-            value={formData.expiryDate}
-            onChange={handleChange}
-            min={new Date().toISOString().split('T')[0]}
-          />
-        </div>
-        
-        <div>
-          <label htmlFor="content">Notice Content</label>
-          <textarea
-            id="content"
-            name="content"
-            value={formData.content}
-            onChange={handleChange}
-            rows="6"
-            placeholder="Type your notice here..."
-          ></textarea>
-          {errors.content && <p>{errors.content}</p>}
-        </div>
-        
-        <div>
-          <button
-            type="button"
-            onClick={() => navigate('/notices')}
-          >
-            Cancel
-          </button>
-          <button
-            type="submit"
-            disabled={isSubmitting}
-          >
-            {isSubmitting ? 'Saving...' : editMode ? 'Update Notice' : 'Create Notice'}
-          </button>
-        </div>
-      </form>
+          
+          <div className="form-group">
+            <label htmlFor="employeeName">Employee Name *</label>
+            <input
+              type="text"
+              id="employeeName"
+              name="employeeName"
+              value={employeeData.employeeName}
+              onChange={handleInputChange}
+              required
+            />
+          </div>
+          
+          <div className="form-group">
+            <label htmlFor="employeeContact_no">Contact Number *</label>
+            <input
+              type="tel"
+              id="employeeContact_no"
+              name="employeeContact_no"
+              value={employeeData.employeeContact_no}
+              onChange={handleInputChange}
+            />
+          </div>
+          
+          <div className="form-group">
+            <label htmlFor="employeeEmail">Email Address *</label>
+            <input
+              type="email"
+              id="employeeEmail"
+              name="employeeEmail"
+              value={employeeData.employeeEmail}
+              onChange={handleInputChange}
+            />
+          </div>
+          
+          <div className="form-group">
+            <label htmlFor="status">Status</label>
+            <select
+              id="status"
+              name="status"
+              value={employeeData.status}
+              onChange={handleInputChange}
+              required
+            >
+              <option value="pending">Pending</option>
+              <option value="active">Active</option>
+              <option value="disabled">Disabled</option>
+            </select>
+          </div>
+          
+          <div className="form-group">
+            <label htmlFor="notes">Notes</label>
+            <textarea
+              id="notes"
+              name="notes"
+              value={employeeData.notes}
+              onChange={handleInputChange}
+            />
+          </div>
 
-      {/* Snackbar for alerts */}
-      <Snackbar
-        open={snackbar.open}
-        autoHideDuration={4000}
-        onClose={handleCloseSnackbar}
-        anchorOrigin={{ vertical: "top", horizontal: "center" }}
-      >
-        <Alert
+          <div className="form-buttons">
+            <button
+              type="button"
+              className="cancel-button"
+              onClick={() => navigate("/view-employees")}
+            >
+              Cancel
+            </button>
+            <button type="submit" className="submit-button">
+              Save
+            </button>
+          </div>
+        </form>
+
+        <Snackbar
+          open={snackbar.open}
+          autoHideDuration={4000}
           onClose={handleCloseSnackbar}
-          severity={snackbar.severity}
-          sx={{ width: "100%" }}
+          anchorOrigin={{ vertical: "top", horizontal: "center" }}
         >
-          {snackbar.message}
-        </Alert>
-      </Snackbar>
-    </div>
+          <Alert
+            onClose={handleCloseSnackbar}
+            severity={snackbar.severity}
+            sx={{ width: "100%" }}
+          >
+            {snackbar.message}
+          </Alert>
+        </Snackbar>
+      </div>
+    </EmployeeLayout>
   );
 };
 
-export default NoticeForm;
+export default AddEmployee;

@@ -6,15 +6,13 @@ require('dotenv').config();
 const authenticate = async (req, res, next) => {
   try {
     const token = req.header('Authorization')?.replace('Bearer ', '');
-    
     if (!token) {
       return res.status(401).send({ error: 'Authentication required' });
     }
 
-    // Verify the token
     const decoded = jwt.verify(token, process.env.JWT_SECRET);
-    
-    // For admin users
+
+    // Admin
     if (decoded.role === 'admin' && decoded.userId === process.env.ADMIN_USERNAME) {
       req.user = {
         userId: decoded.userId,
@@ -22,8 +20,8 @@ const authenticate = async (req, res, next) => {
       };
       return next();
     }
-    
-    // For employee users
+
+    // Employee
     if (decoded.role === 'employee') {
       const [employees] = await db.query(
         'SELECT * FROM employee WHERE employeeId = ? AND status = "active"', 
@@ -44,18 +42,82 @@ const authenticate = async (req, res, next) => {
       return next();
     }
 
-    // If we get here, the token is valid but the user type is not recognized
+    // Supplier
+    if (decoded.role === 'supplier') {
+      const [suppliers] = await db.query(
+        'SELECT * FROM supplier WHERE supplierId = ? AND status = "active"',
+        [decoded.userId]
+      );
+
+      if (!suppliers.length) {
+        return res.status(401).send({ error: 'Supplier not found or inactive' });
+      }
+
+      const supplier = suppliers[0];
+      req.user = {
+        userId: supplier.supplierId,
+        userType: 'supplier',
+        email: supplier.supplierEmail,
+        name: supplier.supplierName
+      };
+      return next();
+    }
+
+    // Driver
+    if (decoded.role === 'driver') {
+      const [drivers] = await db.query(
+        'SELECT * FROM driver WHERE driverId = ? AND status = "active"',
+        [decoded.userId]
+      );
+
+      if (!drivers.length) {
+        return res.status(401).send({ error: 'Driver not found or inactive' });
+      }
+
+      const driver = drivers[0];
+      req.user = {
+        userId: driver.driverId,
+        userType: 'driver',
+        email: driver.driverEmail,
+        name: driver.driverName
+      };
+      return next();
+    }
+
+    // Broker
+    if (decoded.role === 'broker') {
+      const [brokers] = await db.query(
+        'SELECT * FROM broker WHERE brokerId = ? AND status = "active"',
+        [decoded.userId]
+      );
+
+      if (!brokers.length) {
+        return res.status(401).send({ error: 'Broker not found or inactive' });
+      }
+
+      const broker = brokers[0];
+      req.user = {
+        userId: broker.brokerId,
+        userType: 'broker',
+        email: broker.brokerEmail,
+        name: broker.brokerName
+      };
+      return next();
+    }
+
+    // Unrecognized role
     return res.status(401).send({ error: 'Invalid user type' });
+
   } catch (error) {
     console.error('Authentication error:', error);
-    res.status(401).send({ error: 'Please authenticate' });
+    return res.status(401).send({ error: 'Please authenticate' });
   }
 };
 
-// Middleware to authorize based on role
+// Middleware to authorize specific roles
 const authorize = (...roles) => {
   return (req, res, next) => {
-    if (!roles.includes(req.user.userType)) {
+    if (!req.user || !roles.includes(req.user.userType)) {
       return res.status(403).send({ error: 'Access forbidden' });
     }
     next();

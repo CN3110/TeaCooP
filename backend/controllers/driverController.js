@@ -1,6 +1,8 @@
 const db = require("../config/database");
 const driver = require("../models/driver"); 
 const nodemailer = require("nodemailer");
+const bcrypt = require("bcrypt");
+
 
 // Generate random passcode
 const generatePasscode = () => {
@@ -35,6 +37,7 @@ exports.addDriver = async (req, res) => {
   try {
     const driverId = await driver.generateDriverId();
     const passcode = generatePasscode();
+    const hashedPasscode = await bcrypt.hash(passcode, 10);
 
     await driver.createDriver({
       driverId,
@@ -44,6 +47,7 @@ exports.addDriver = async (req, res) => {
       status,
       notes,
       addedByEmployeeId,
+      passcode,
     });
 
     await driver.addVehicles(driverId, vehicleDetails);

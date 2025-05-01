@@ -1,32 +1,30 @@
 const jwt = require('jsonwebtoken');
-const employee = require('../models/employee');
 const nodemailer = require('nodemailer');
+const employee = require('../models/employee');
+const supplier = require('../models/supplier');
+const driver = require('../models/driver');
+const broker = require('../models/broker');
+const db = require('../config/database');
 require('dotenv').config();
 
-// Set up nodemailer
+// JWT generation
+const generateToken = (userId, role) => {
+  return jwt.sign({ userId, role }, process.env.JWT_SECRET, { expiresIn: '8h' });
+};
+
+// Nodemailer setup
 const transporter = nodemailer.createTransport({
   service: 'gmail',
   auth: {
     user: process.env.EMAIL_USER,
-    pass: process.env.EMAIL_PASS
-  }
+    pass: process.env.EMAIL_PASS,
+  },
 });
 
-// Generate random passcode - 6 digits
-const generatePasscode = () => {
-  return Math.floor(100000 + Math.random() * 900000).toString();
-};
+// Generate 6-digit numeric passcode
+const generatePasscode = () => Math.floor(100000 + Math.random() * 900000).toString();
 
-// Generate JWT token
-const generateToken = (userId, role) => {
-  return jwt.sign(
-    { userId, role },
-    process.env.JWT_SECRET,
-    { expiresIn: '8h' }
-  );
-};
-
-// Handle login for both admin and employees
+// Login handler
 exports.login = async (req, res) => {
   const { userId, password } = req.body;
 
@@ -35,56 +33,108 @@ exports.login = async (req, res) => {
   }
 
   try {
-    // Check for admin login
-    if (
-      userId === process.env.ADMIN_USERNAME &&
-      password === process.env.ADMIN_PASSWORD
-    ) {
+    // Admin login
+    if (userId === process.env.ADMIN_USERNAME && password === process.env.ADMIN_PASSWORD) {
       const token = generateToken(userId, 'admin');
       return res.status(200).json({
         role: 'admin',
         token,
         userId,
-        message: 'Admin login successful'
+        message: 'Admin login successful',
       });
     }
 
     // Employee login
-    const employeeData = await employee.verifyEmployeeCredentials(userId, password);
-    
-    if (!employeeData) {
-      return res.status(401).json({ error: 'Invalid credentials or inactive account' });
+    if (userId.startsWith('E')) {
+      const data = await employee.verifyEmployeeCredentials(userId, password);
+      if (!data || data.status !== 'active') {
+        return res.status(401).json({ error: 'Invalid credentials or inactive account' });
+      }
+      const token = generateToken(data.employeeId, 'employee');
+      return res.status(200).json({
+        role: 'employee',
+        token,
+        userId: data.employeeId,
+        name: data.employeeName,
+        email: data.employeeEmail,
+        message: 'Login successful',
+      });
     }
 
-    const token = generateToken(employeeData.employeeId, 'employee');
+    // Supplier login
+    if (userId.startsWith('S')) {
+      const data = await supplier.verifySupplierCredentials(userId, password);
+      if (!data || data.status !== 'active') {
+        return res.status(401).json({ error: 'Invalid credentials or inactive account' });
+      }
+      const token = generateToken(data.supplierId, 'supplier');
+      return res.status(200).json({
+        role: 'supplier',
+        token,
+        userId: data.supplierId,
+        name: data.supplierName,
+        email: data.supplierEmail,
+        message: 'Login successful',
+      });
+    }
 
-    res.status(200).json({
-      role: 'employee',
-      token,
-      employeeId: employeeData.employeeId,
-      employeeName: employeeData.employeeName,
-      message: 'Login successful'
-    });
+    // Driver login
+    if (userId.startsWith('D')) {
+      const data = await driver.verifyDriverCredentials(userId, password);
+      if (!data || data.status !== 'active') {
+        return res.status(401).json({ error: 'Invalid credentials or inactive account' });
+      }
+      const token = generateToken(data.driverId, 'driver');
+      return res.status(200).json({
+        role: 'driver',
+        token,
+        userId: data.driverId,
+        name: data.driverName,
+        email: data.driverEmail,
+        message: 'Login successful',
+      });
+    }
+
+    // Broker login
+    if (userId.startsWith('B')) {
+      const data = await broker.verifyBrokerCredentials(userId, password);
+      if (!data || data.status !== 'active') {
+        return res.status(401).json({ error: 'Invalid credentials or inactive account' });
+      }
+      const token = generateToken(data.brokerId, 'broker');
+      return res.status(200).json({
+        role: 'broker',
+        token,
+        userId: data.brokerId,
+        name: data.brokerName,
+        email: data.brokerEmail,
+        message: 'Login successful',
+      });
+    }
+
+    // Unrecognized user ID format
+    return res.status(400).json({ error: 'Invalid user ID format' });
+
   } catch (error) {
     console.error('Login error:', error);
-    res.status(500).json({ error: 'Server error during login' });
+    return res.status(500).json({ error: 'Server error during login' });
   }
 };
 
-// Verify token (for protected routes)
-exports.verifyToken = async (req, res) => {
+// Token verification
+exports.verifyToken = (req, res) => {
   res.status(200).json({
     authenticated: true,
     user: {
       userId: req.user.userId,
-      userType: req.user.userType,
+      userType: req.user.role,
       name: req.user.name || null,
-      email: req.user.email || null
-    }
+      email: req.user.email || null,
+    },
   });
 };
 
-// Reset password (for employees who know their current password)
+// Password reset (employee who knows current password)
 exports.resetPassword = async (req, res) => {
   const { employeeId, oldPassword, newPassword } = req.body;
 
@@ -93,16 +143,12 @@ exports.resetPassword = async (req, res) => {
   }
 
   try {
-    // Verify current credentials
-    const employeeData = await employee.verifyEmployeeCredentials(employeeId, oldPassword);
-
-    if (!employeeData) {
+    const data = await employee.verifyEmployeeCredentials(employeeId, oldPassword);
+    if (!data) {
       return res.status(401).json({ error: 'Invalid credentials' });
     }
 
-    // Update password
     await employee.updateEmployeePassword(employeeId, newPassword);
-
     res.status(200).json({ message: 'Password updated successfully' });
   } catch (error) {
     console.error('Password reset error:', error);
@@ -110,7 +156,7 @@ exports.resetPassword = async (req, res) => {
   }
 };
 
-// Forgot password functionality
+// Forgot password handler
 exports.forgotPassword = async (req, res) => {
   const { employeeEmail } = req.body;
 
@@ -119,24 +165,20 @@ exports.forgotPassword = async (req, res) => {
   }
 
   try {
-    // Check if employee exists with this email
-    const [employees] = await require('../config/database').query(
+    const [rows] = await db.query(
       'SELECT * FROM employee WHERE employeeEmail = ? AND status = "active"',
       [employeeEmail]
     );
 
-    if (employees.length === 0) {
-      // For security, don't reveal if email exists or not
+    if (rows.length === 0) {
       return res.status(200).json({ message: 'If your email is registered, you will receive a reset link' });
     }
 
-    const employeeData = employees[0];
+    const employeeData = rows[0];
     const newPasscode = generatePasscode();
 
-    // Update employee with new passcode
     await employee.updateEmployeePassword(employeeData.employeeId, newPasscode);
 
-    // Send email with new passcode
     const mailOptions = {
       from: process.env.EMAIL_USER,
       to: employeeEmail,

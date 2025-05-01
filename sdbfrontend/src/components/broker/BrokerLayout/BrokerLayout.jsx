@@ -1,9 +1,11 @@
 import React from "react";
 import SidebarBroker from "../SidebarBroker/SidebarBroker";
 
+
 const BrokerLayout = ({ children }) => {
   return (
     <div className="d-flex">
+      
       {/* Sidebar stays fixed */}
       <SidebarBroker />
 

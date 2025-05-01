@@ -61,6 +61,7 @@ exports.addBroker = async (req, res) => {
       status,
       notes,
       addedByEmployeeId,
+      passcode, // ✅ FIXED: Pass passcode here
     });
 
     if (status === "active") {
@@ -87,11 +88,10 @@ Morawakkorale Tea Co-op
       await transporter.sendMail(mailOptions);
     }
 
-    // Return brokerId in the response so the frontend can display it
-    res.status(201).json({ 
-      message: "Broker added successfully", 
-      brokerId: brokerId, 
-      brokerName: brokerName 
+    res.status(201).json({
+      message: "Broker added successfully",
+      brokerId: brokerId,
+      brokerName: brokerName,
     });
   } catch (error) {
     console.error("Error adding broker:", error);
@@ -106,7 +106,7 @@ exports.getAllBrokers = async (req, res) => {
       SELECT b.*, e.employeeName 
       FROM broker b
       JOIN employee e ON b.addedByEmployeeId = e.employeeId
-      `);
+    `);
     res.status(200).json(brokers);
   } catch (error) {
     console.error("Error fetching brokers:", error);
@@ -168,7 +168,6 @@ exports.updateBroker = async (req, res) => {
     const currentBroker = result[0];
     const oldEmail = currentBroker.brokerEmail;
 
-    // Use the broker model function instead of direct db query
     await broker.updateBroker(brokerId, {
       brokerName,
       brokerContact,
@@ -181,7 +180,6 @@ exports.updateBroker = async (req, res) => {
       notes,
     });
 
-    // Send passcode if email was changed
     if (oldEmail !== brokerEmail) {
       const passcode = generatePasscode();
 
@@ -219,17 +217,12 @@ exports.disableBroker = async (req, res) => {
   const { brokerId } = req.params;
 
   try {
-    // Check if broker exists
-    const [broker] = await db.query("SELECT * FROM broker WHERE brokerId = ?", [brokerId]);
-    if (!broker.length) {
+    const [brokerData] = await db.query("SELECT * FROM broker WHERE brokerId = ?", [brokerId]);
+    if (!brokerData.length) {
       return res.status(404).json({ error: "Broker not found" });
     }
 
-    // Update status to disabled
-    await db.query(
-      "UPDATE broker SET status = 'disabled' WHERE brokerId = ?",
-      [brokerId]
-    );
+    await db.query("UPDATE broker SET status = 'disabled' WHERE brokerId = ?", [brokerId]);
 
     res.status(200).json({ message: "Broker disabled successfully" });
   } catch (error) {
@@ -241,7 +234,7 @@ exports.disableBroker = async (req, res) => {
 // Get confirmed lots for a broker
 exports.getBrokerConfirmedLots = async (req, res) => {
   const { brokerId } = req.params;
-  
+
   try {
     const [lots] = await db.query(`
       SELECT 
@@ -254,7 +247,7 @@ exports.getBrokerConfirmedLots = async (req, res) => {
       WHERE cl.brokerId = ?
       ORDER BY cl.confirmedAt DESC
     `, [brokerId]);
-    
+
     res.status(200).json(lots);
   } catch (error) {
     console.error("Error fetching broker confirmed lots:", error);

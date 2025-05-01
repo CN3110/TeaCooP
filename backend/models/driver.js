@@ -1,4 +1,5 @@
 const db = require("../config/database");
+const bcrypt = require("bcrypt");
 
 // Generate a new unique driver ID
 const generateDriverId = async () => {
@@ -12,13 +13,35 @@ const generateDriverId = async () => {
 };
 
 // Create a new driver
-const createDriver = async ({ driverId, driverName, driverContactNumber, driverEmail, status, notes, addedByEmployeeId }) => {
+const createDriver = async ({ driverId, driverName, driverContactNumber, driverEmail, status, notes, addedByEmployeeId, passcode }) => {
+  const hashedPassword = await bcrypt.hash(passcode, 10);
   const query = `
     INSERT INTO driver 
-    (driverId, driverName, driverContactNumber, driverEmail, status, notes, addedByEmployeeId)
-    VALUES (?, ?, ?, ?, ?, ?, ?)
+    (driverId, driverName, driverContactNumber, driverEmail, status, notes, addedByEmployeeId, passcode)
+    VALUES (?, ?, ?, ?, ?, ?, ?, ?)
   `;
-  await db.query(query, [driverId, driverName, driverContactNumber, driverEmail, status, notes, addedByEmployeeId]);
+  await db.query(query, [driverId, driverName, driverContactNumber, driverEmail, status, notes, addedByEmployeeId, hashedPassword]);
+};
+
+// Verify driver credentials (for login)
+const verifyDriverCredentials = async (driverId, password) => {
+  const [drivers] = await db.query(
+    "SELECT * FROM driver WHERE driverId = ? AND status = 'active'",
+    [driverId]
+  );
+  if (drivers.length === 0) return null;
+
+  const driver = drivers[0];
+  const isPasswordValid = await bcrypt.compare(password, driver.passcode);
+  if (!isPasswordValid) return null;
+
+  return driver;
+};
+
+// Update driver password
+const updateDriverPassword = async (driverId, newPassword) => {
+  const hashedPassword = await bcrypt.hash(newPassword, 10);
+  await db.query("UPDATE driver SET passcode = ? WHERE driverId = ?", [hashedPassword, driverId]);
 };
 
 // Add multiple vehicles for a driver
@@ -49,19 +72,13 @@ const getAllDrivers = async () => {
   return drivers;
 };
 
-// Get driver and their vehicles by driverId
+// Get driver and their vehicles by ID
 const getDriverById = async (driverId) => {
-  const [driverRows] = await db.query(
-    "SELECT * FROM driver WHERE driverId = ?",
-    [driverId]
-  );
+  const [driverRows] = await db.query("SELECT * FROM driver WHERE driverId = ?", [driverId]);
 
   if (driverRows.length === 0) return null;
 
-  const [vehicleDetails] = await db.query(
-    "SELECT * FROM vehicle WHERE driverId = ?",
-    [driverId]
-  );
+  const [vehicleDetails] = await db.query("SELECT * FROM vehicle WHERE driverId = ?", [driverId]);
 
   return {
     ...driverRows[0],
@@ -104,24 +121,23 @@ const updateDriver = async ({ driverId, driverName, driverContactNumber, driverE
   }
 };
 
-//get active drivers
+// Get only active drivers (for dropdowns or assignments)
 const getActiveDrivers = async () => {
   try {
-    const [rows] = await db.execute(
-      "SELECT driverId, driverName FROM driver WHERE status = 'active'"
-    );
-    return rows; // Will be empty array if no results
+    const [rows] = await db.query("SELECT driverId, driverName FROM driver WHERE status = 'active'");
+    return rows;
   } catch (error) {
     console.error("Error in getActiveDrivers:", error);
-    throw error; // Let controller handle the error
+    throw error;
   }
 };
 
-
-// Export all model functions
+// Export all functions
 module.exports = {
   generateDriverId,
   createDriver,
+  verifyDriverCredentials,
+  updateDriverPassword,
   addVehicles,
   getAllDrivers,
   getDriverById,

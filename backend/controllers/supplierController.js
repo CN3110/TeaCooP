@@ -1,5 +1,6 @@
 const db = require("../config/database");
 const nodemailer = require("nodemailer");
+const bcrypt = require("bcrypt");
 
 // Generate a random 6-digit passcode
 const generatePasscode = () => {
@@ -77,12 +78,15 @@ exports.addSupplier = async (req, res) => {
 
   const supplierId = await generateSupplierId();
   const passcode = generatePasscode();
+  const hashedPasscode = await bcrypt.hash(passcode, 10);
 
   try {
     // Insert supplier
     await db.query(
-      "INSERT INTO supplier (supplierId, supplierName, supplierContactNumber, supplierEmail, status, notes, addedByEmployeeId) VALUES (?, ?, ?, ?, ?, ?, ?)",
-      [supplierId, name, contact, email, status, notes, addedByEmployeeId]
+      `INSERT INTO supplier 
+       (supplierId, supplierName, supplierContactNumber, supplierEmail, status, notes, addedByEmployeeId, passcode) 
+       VALUES (?, ?, ?, ?, ?, ?, ?, ?)`,
+      [supplierId, name, contact, email, status, notes || null, addedByEmployeeId, hashedPasscode]
     );
 
     // Insert land details if provided
