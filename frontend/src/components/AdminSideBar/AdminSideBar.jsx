@@ -1,34 +1,50 @@
 import React, { useState } from "react";
-import { Link, useNavigate } from "react-router-dom"; // Import Link from React Router
+import { Link, useNavigate } from "react-router-dom";
 import "./AdminSideBar.css";
 
+// Material UI Components
+import {
+  Dialog,
+  DialogTitle,
+  DialogContent,
+  DialogContentText,
+  DialogActions,
+  Snackbar,
+  Alert,
+  Button,
+} from "@mui/material";
+
 const AdminSideBar = () => {
-  const [openDropdown, setOpenDropdown] = useState(null); // Track which dropdown is open
+  const [openDropdown, setOpenDropdown] = useState(null);
+  const [logoutDialogOpen, setLogoutDialogOpen] = useState(false);
+  const [snackbarOpen, setSnackbarOpen] = useState(false);
   const navigate = useNavigate();
-  // Toggle Dropdown
+
   const toggleDropdown = (dropdownName) => {
     setOpenDropdown(openDropdown === dropdownName ? null : dropdownName);
   };
 
-  // Handle logout
-  const handleLogout = () => {
-    localStorage.clear(); // Clear local storage
-    alert("You have been logged out.");
-    navigate("/"); // Redirect to Login page
+  // Trigger confirmation dialog
+  const handleLogoutClick = () => setLogoutDialogOpen(true);
+
+  // Confirm and process logout
+  const confirmLogout = () => {
+    localStorage.clear();
+    setLogoutDialogOpen(false);
+    setSnackbarOpen(true);
+    setTimeout(() => navigate("/"), 1500);
   };
 
   return (
     <div className="menu">
       <div className="menu-list">
-        <Link to="/admin-dashboard" className="item">
-          Dashboard
-        </Link>
-        {/* Manage Deliveries Dropdown */}
+        <Link to="/admin-dashboard" className="item">Dashboard</Link>
+
+        {/* Dropdowns */}
+        {/* --- Keep all your existing dropdowns unchanged --- */}
+        {/* Example: Manage Deliveries */}
         <div className="dropdown">
-          <button
-            className="dropdown-btn"
-            onClick={() => toggleDropdown("deliveries")}
-          >
+          <button className="dropdown-btn" onClick={() => toggleDropdown("deliveries")}>
             Manage Deliveries
           </button>
           {openDropdown === "deliveries" && (
@@ -38,8 +54,7 @@ const AdminSideBar = () => {
             </div>
           )}
         </div>
-
-        {/* Manage Sales Dropdown */}
+        {/* Manage Sales Records Dropdown */}
         <div className="dropdown">
           <button
             className="dropdown-btn"
@@ -89,20 +104,14 @@ const AdminSideBar = () => {
           )}
         </div>
 
-        <Link to="/tea-production" className="item">
-          Tea Production Management
-        </Link>
 
-        <Link to="/notice-list" className="item">
-          Notice Management
-        </Link>
+        <Link to="/tea-production" className="item">Tea Production Management</Link>
+        <Link to="/notice-list" className="item">Notice Management</Link>
+        <Link to="/employee-dashboard-manage-delivery-routes" className="item">Manage Delivery Routes</Link>
 
-        <Link to="/employee-dashboard-manage-delivery-routes" className="item">
-          Manage Delivery Routes
-        </Link>
-
-        {/* Manage Suppliers Dropdown */}
-        <div className="dropdown">
+        
+             {/* Manage Suppliers Dropdown */}
+             <div className="dropdown">
           <button
             className="dropdown-btn"
             onClick={() => toggleDropdown("suppliers")}
@@ -165,12 +174,40 @@ const AdminSideBar = () => {
         </div>
 
         {/* Log Out Button */}
-        <button className="logout-btn" onClick={handleLogout}>
-          Log Out
-        </button>
+        <button className="logout-btn" onClick={handleLogoutClick}>Log Out</button>
       </div>
+
+      {/* Confirmation Dialog */}
+      <Dialog open={logoutDialogOpen} onClose={() => setLogoutDialogOpen(false)}>
+        <DialogTitle>Confirm Logout</DialogTitle>
+        <DialogContent>
+          <DialogContentText>Are you sure you want to log out?</DialogContentText>
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={() => setLogoutDialogOpen(false)} color="primary">
+            Cancel
+          </Button>
+          <Button onClick={confirmLogout} color="error">
+            Log Out
+          </Button>
+        </DialogActions>
+      </Dialog>
+
+      {/* Snackbar */}
+      <Snackbar
+        open={snackbarOpen}
+        autoHideDuration={3000}
+        onClose={() => setSnackbarOpen(false)}
+        anchorOrigin={{ vertical: "bottom", horizontal: "center" }}
+      >
+        <Alert severity="success" onClose={() => setSnackbarOpen(false)}>
+          You have been logged out.
+        </Alert>
+      </Snackbar>
     </div>
   );
 };
 
 export default AdminSideBar;
+
+

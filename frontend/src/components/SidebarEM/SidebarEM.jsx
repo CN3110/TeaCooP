@@ -3,44 +3,51 @@ import { Link, useNavigate } from "react-router-dom";
 import ProfileEM from "../../pages/Employee/ProfileEM/ProfileEM"; 
 import "./SidebarEM.css";
 
+import {
+  Button,
+  Dialog,
+  DialogTitle,
+  DialogContent,
+  DialogContentText,
+  DialogActions,
+  Snackbar,
+  Alert,
+} from "@mui/material";
+
 const SidebarEM = () => {
   const [isProfileModalOpen, setIsProfileModalOpen] = useState(false);
-  const [openDropdown, setOpenDropdown] = useState(null); // Track which dropdown is open
+  const [openDropdown, setOpenDropdown] = useState(null);
+  const [logoutDialogOpen, setLogoutDialogOpen] = useState(false);
+  const [snackbarOpen, setSnackbarOpen] = useState(false);
   const navigate = useNavigate();
 
-  // Open profile modal
-  const openProfileModal = () => {
-    setIsProfileModalOpen(true);
-  };
+  const openProfileModal = () => setIsProfileModalOpen(true);
+  const closeProfileModal = () => setIsProfileModalOpen(false);
 
-  // Close profile modal
-  const closeProfileModal = () => {
-    setIsProfileModalOpen(false);
-  };
-
-  // Toggle Dropdown
   const toggleDropdown = (dropdownName) => {
     setOpenDropdown(openDropdown === dropdownName ? null : dropdownName);
   };
 
-  // Handle logout
-  const handleLogout = () => {
-    localStorage.clear(); // Clear local storage
-    alert("You have been logged out.");
-    navigate("/"); // Redirect to home page
+  // Open confirmation dialog
+  const handleLogoutClick = () => setLogoutDialogOpen(true);
+  const handleDialogClose = () => setLogoutDialogOpen(false);
+
+  // Confirm logout
+  const confirmLogout = () => {
+    localStorage.clear();
+    setLogoutDialogOpen(false);
+    setSnackbarOpen(true); // Show in-app alert
+    setTimeout(() => navigate("/"), 1500); // Navigate after a short delay
   };
 
   return (
     <div className="menu">
       <div className="menu-list">
-        <Link to="/employee-dashboard" className="item">
-          Dashboard
-        </Link>
+        <Link to="/employee-dashboard" className="item">Dashboard</Link>
 
-        {/* Log Out Button */}
-        <button className="logout-btn" onClick={handleLogout}>
-          Log Out
-        </button>
+        {/* Logout button opens confirmation dialog */}
+        <button className="logout-btn" onClick={handleLogoutClick}>Log Out</button>
+
         {/* Manage Deliveries Dropdown */}
         <div className="dropdown">
           <button
@@ -162,18 +169,38 @@ const SidebarEM = () => {
             </div>
           )}
         </div>
-          
-
-        
 
         <Link to="#" className="item" onClick={openProfileModal}>
           Your Profile
         </Link>
-
-        
       </div>
 
+      {/* Profile modal */}
       {isProfileModalOpen && <ProfileEM closeModal={closeProfileModal} />}
+
+      {/* Confirmation Dialog */}
+      <Dialog open={logoutDialogOpen} onClose={handleDialogClose}>
+        <DialogTitle>Confirm Logout</DialogTitle>
+        <DialogContent>
+          <DialogContentText>Are you sure you want to log out?</DialogContentText>
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={handleDialogClose} color="primary">Cancel</Button>
+          <Button onClick={confirmLogout} color="error">Log Out</Button>
+        </DialogActions>
+      </Dialog>
+
+      {/* Snackbar Alert */}
+      <Snackbar
+        open={snackbarOpen}
+        autoHideDuration={3000}
+        onClose={() => setSnackbarOpen(false)}
+        anchorOrigin={{ vertical: "top", horizontal: "center" }}
+      >
+        <Alert onClose={() => setSnackbarOpen(false)} severity="success" sx={{ width: "100%" }}>
+          You have been logged out.
+        </Alert>
+      </Snackbar>
     </div>
   );
 };
