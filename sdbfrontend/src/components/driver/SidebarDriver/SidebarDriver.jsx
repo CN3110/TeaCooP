@@ -5,7 +5,6 @@ import "./SidebarDriver.css";
 import {
   MdDashboard as DashboardIcon,
   MdLocalShipping as DeliveryIcon,
-  MdPayment as PaymentIcon,
   MdAssignment as TransportIcon,
   MdPerson as ProfileIcon,
 } from "react-icons/md";
