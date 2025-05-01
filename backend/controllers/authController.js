@@ -206,3 +206,15 @@ Morawakkorale Tea Co-op
     res.status(500).json({ error: 'Server error during password recovery' });
   }
 };
+
+// In authController.js
+exports.logout = async (req, res) => {
+  try {
+    // Clear JWT cookie (if using cookies)
+    res.cookie('jwt', '', { maxAge: 0 });
+    res.status(200).json({ message: 'Logged out successfully' });
+  } catch (error) {
+    console.log("Error in logout controller", error.message);
+    res.status(500).json({ error: "Internal Server Error" });
+  }
+};

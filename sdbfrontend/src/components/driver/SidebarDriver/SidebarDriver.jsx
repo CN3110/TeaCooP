@@ -10,6 +10,13 @@ import {
   MdPerson as ProfileIcon,
 } from "react-icons/md";
 
+// Handle logout
+const handleLogout = () => {
+  localStorage.clear(); // Clear local storage
+  alert("You have been logged out.");
+  navigate("/login"); // Redirect to Login page
+};
+
 const SidebarDriver = () => {
   return (
     <div className="sidebar-container">
@@ -30,20 +37,17 @@ const SidebarDriver = () => {
             <DeliveryIcon /> Delivery History
           </Link>
         </li>
-        <li className="nav-item">
-          <Link to="/driver-payment-records" className="nav-link">
-            <PaymentIcon /> Payment Records
-          </Link>
-        </li>
+        
         <li className="nav-item">
           <Link to="/driver-profile" className="nav-link">
             <ProfileIcon /> Profile
           </Link>
         </li>
         <li className="nav-item">
-          <Link to="/" className="nav-link text-danger">
-            <i className="bi bi-box-arrow-right"></i> Logout
-          </Link>
+         {/* Log Out Button */}
+        <button className="logout-btn" onClick={handleLogout}>
+          Log Out
+        </button>
         </li>
       </ul>
     </div>

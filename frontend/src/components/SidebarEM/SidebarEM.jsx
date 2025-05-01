@@ -36,6 +36,11 @@ const SidebarEM = () => {
         <Link to="/employee-dashboard" className="item">
           Dashboard
         </Link>
+
+        {/* Log Out Button */}
+        <button className="logout-btn" onClick={handleLogout}>
+          Log Out
+        </button>
         {/* Manage Deliveries Dropdown */}
         <div className="dropdown">
           <button
@@ -165,10 +170,7 @@ const SidebarEM = () => {
           Your Profile
         </Link>
 
-        {/* Log Out Button */}
-        <button className="logout-btn" onClick={handleLogout}>
-          Log Out
-        </button>
+        
       </div>
 
       {isProfileModalOpen && <ProfileEM closeModal={closeProfileModal} />}
