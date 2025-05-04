@@ -37,6 +37,8 @@ import NoticeForm from "./pages/NoticeManagement/NoticeForm/NoticeForm.jsx";
 import NoticeList from "./pages/NoticeManagement/NoticeList/NoticeList.jsx";
 import EditNotice from "./pages/NoticeManagement/EditNotice/EditNotice.jsx";
 import RawTeaRecords from "./pages/RawTeaRecords/RawTeaRecords.jsx";
+import TeaTypeStockManagement from "./pages/TeaTypeStockManagement/TeaTypeStockManagement.jsx";
+
 const App = () => {
   return (
     <AuthProvider>
@@ -77,6 +79,7 @@ const App = () => {
             <Route path="/view-valuations/:lotNumber" element={<ViewValuations />} />
             <Route path="/tea-production" element={<TeaProductionPage />} />
             <Route path="/raw-tea-records" element={<RawTeaRecords />} />
+            <Route path="/tea-type-stock-management" element={<TeaTypeStockManagement />} />
 
             {/* Admin Routes */}
             <Route path="/admin-dashboard" element={<AdminDashboard />} />
