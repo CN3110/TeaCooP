@@ -1,0 +1,95 @@
+.tea-totals-container {
+    background-color: #fff;
+    border-radius: 8px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    padding: 20px;
+    margin-bottom: 30px;
+  }
+  
+  .tea-totals-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px;
+  }
+  
+  .tea-totals-header h2 {
+    margin: 0;
+    color: #33691e;
+    font-size: 1.5rem;
+  }
+  
+  .refresh-btn {
+    background-color: #66bb6a;
+    color: white;
+    border: none;
+    border-radius: 4px;
+    padding: 8px 16px;
+    cursor: pointer;
+    font-weight: 500;
+    transition: background-color 0.3s;
+  }
+  
+  .refresh-btn:hover {
+    background-color: #4caf50;
+  }
+  
+  .tea-totals-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+    gap: 20px;
+  }
+  
+  .tea-total-card {
+    background-color: #f1f8e9;
+    border-radius: 6px;
+    padding: 16px;
+    text-align: center;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+    transition: transform 0.2s, box-shadow 0.2s;
+  }
+  
+  .tea-total-card:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  }
+  
+  .tea-total-card h3 {
+    margin-top: 0;
+    margin-bottom: 12px;
+    color: #33691e;
+    font-size: 1.1rem;
+    font-weight: 600;
+  }
+  
+  .tea-weight {
+    display: flex;
+    justify-content: center;
+    align-items: baseline;
+  }
+  
+  .tea-weight-value {
+    font-size: 1.8rem;
+    font-weight: 700;
+    color: #2e7d32;
+  }
+  
+  .tea-weight-unit {
+    margin-left: 5px;
+    font-size: 1rem;
+    color: #558b2f;
+  }
+  
+  .loading-spinner {
+    text-align: center;
+    color: #666;
+    padding: 20px;
+  }
+  
+  .error-message {
+    color: #d32f2f;
+    background-color: #ffebee;
+    padding: 15px;
+    border-radius: 4px;
+    text-align: center;
+  }
