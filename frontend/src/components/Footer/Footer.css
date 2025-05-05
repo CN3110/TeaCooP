@@ -4,8 +4,4 @@
   padding: 10px;
   text-align: center;
   width: 100%;
-  position: fixed; /* Fix the footer to the bottom */
-  bottom: 0; /* Stick it to the bottom */
-  left: 0; /* Align to the left edge */
-  z-index: 1000; /* Ensure it stays above other content */
 }
