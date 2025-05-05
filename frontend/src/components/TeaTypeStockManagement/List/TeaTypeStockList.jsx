@@ -5,16 +5,20 @@ import {
   Dialog, DialogTitle, DialogContent, DialogContentText, DialogActions,
   Button, Snackbar, Alert, TablePagination
 } from '@mui/material';
-import './TeaTypeStockList.css'; 
+import './TeaTypeStockList.css';
 
 const TeaTypeStockList = () => {
   const [stocks, setStocks] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
   const [editing, setEditing] = useState(null);
-  const [formData, setFormData] = useState({ weightInKg: '', productionDate: '' });
+  const [formData, setFormData] = useState({
+    weightInKg: '',
+    productionDate: '',
+    teaTypeId: ''
+  });
+  const [teaTypes, setTeaTypes] = useState([]);
 
-  // Pagination state
   const [page, setPage] = useState(0);
   const [rowsPerPage, setRowsPerPage] = useState(10);
   const [totalRows, setTotalRows] = useState(0);
@@ -24,13 +28,15 @@ const TeaTypeStockList = () => {
 
   useEffect(() => {
     fetchStocks();
+    fetchTeaTypes();
   }, [page, rowsPerPage]);
 
+  
   const fetchStocks = async () => {
     try {
       const response = await axios.get('http://localhost:3001/api/teaTypeStocks', {
         params: {
-          page: page + 1, // API usually expects 1-based index
+          page: page + 1,
           limit: rowsPerPage
         }
       });
@@ -40,6 +46,17 @@ const TeaTypeStockList = () => {
       setError('Failed to load records. Please try again.');
     } finally {
       setLoading(false);
+    }
+  };
+
+  
+  const fetchTeaTypes = async () => {
+    try {
+      const response = await axios.get('http://localhost:3001/api/teaTypes');
+      console.log('Tea types fetched:', response.data); // <-- Debug
+      setTeaTypes(response.data || []);
+    } catch (err) {
+      console.error('Failed to load tea types', err); // <-- Add error details
     }
   };
 
@@ -65,17 +82,22 @@ const TeaTypeStockList = () => {
   };
 
   const handleEdit = (stock) => {
+    fetchTeaTypes();
     setEditing(stock.stockId);
     setFormData({
       weightInKg: stock.weightInKg,
       productionDate: format(new Date(stock.productionDate), 'yyyy-MM-dd'),
+      teaTypeId: stock.teaTypeId
     });
   };
 
   const handleUpdate = async (e) => {
     e.preventDefault();
     try {
-      await axios.put(`http://localhost:3001/api/teaTypeStocks/${editing}`, formData);
+      await axios.put(`http://localhost:3001/api/teaTypeStocks/${editing}`, {
+        ...formData,
+        teaTypeId: parseInt(formData.teaTypeId, 10),
+      });
       setSnack({ open: true, message: 'Record updated successfully!', severity: 'success' });
       setEditing(null);
       fetchStocks();
@@ -83,6 +105,7 @@ const TeaTypeStockList = () => {
       setSnack({ open: true, message: 'Failed to update record.', severity: 'error' });
     }
   };
+  
 
   return (
     <div className="tea-stock-list">
@@ -114,18 +137,14 @@ const TeaTypeStockList = () => {
                   <td>{parseFloat(stock.weightInKg).toFixed(2)}</td>
                   <td>{stock.employeeName}</td>
                   <td>
-                    <button onClick={() => handleEdit(stock)} className="action-btn edit-btn">
-                      Edit
-                    </button>
-                    <button onClick={() => setDeleteId(stock.stockId)} className="action-btn delete-btn">
-                      Delete
-                    </button>
+                    <button onClick={() => handleEdit(stock)} className="action-btn edit-btn">Edit</button>
+                    <button onClick={() => setDeleteId(stock.stockId)} className="action-btn delete-btn">Delete</button>
                   </td>
                 </tr>
               ))}
             </tbody>
           </table>
-          
+
           <TablePagination
             component="div"
             count={totalRows}
@@ -139,7 +158,6 @@ const TeaTypeStockList = () => {
         </>
       )}
 
-      {/* Edit Modal */}
       {editing && (
         <div className="modal">
           <div className="modal-content">
@@ -164,6 +182,21 @@ const TeaTypeStockList = () => {
                   required
                 />
               </label>
+              <label>
+                Tea Type:
+                <select
+                  value={formData.teaTypeId}
+                  onChange={(e) => setFormData({ ...formData, teaTypeId: e.target.value })}
+                  required
+                >
+                  <option value="">Select Tea Type</option>
+                  {teaTypes.map((type) => (
+                    <option key={type.teaTypeId} value={type.teaTypeId}>
+                      {type.teaTypeName}
+                    </option>
+                  ))}
+                </select>
+              </label>
               <div className="modal-actions">
                 <button type="submit" className="action-btn save-btn">Save</button>
                 <button type="button" onClick={() => setEditing(null)} className="action-btn cancel-btn">Cancel</button>
@@ -173,7 +206,6 @@ const TeaTypeStockList = () => {
         </div>
       )}
 
-      {/* Delete Confirmation Dialog */}
       <Dialog open={!!deleteId} onClose={() => setDeleteId(null)}>
         <DialogTitle>Confirm Delete</DialogTitle>
         <DialogContent>
@@ -187,7 +219,6 @@ const TeaTypeStockList = () => {
         </DialogActions>
       </Dialog>
 
-      {/* Snackbar Notifications */}
       <Snackbar
         open={snack.open}
         autoHideDuration={3000}

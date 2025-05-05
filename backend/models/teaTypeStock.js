@@ -38,12 +38,14 @@ exports.getTeaTypeStockById = async (stockId) => {
   return stock;
 };
 
-exports.updateTeaTypeStock = async (stockId, weightInKg, productionDate) => {
+
+exports.updateTeaTypeStock = async (stockId, weightInKg, productionDate, teaTypeId) => {
   return db.query(
-    "UPDATE tea_type_stock SET weightInKg = ?, productionDate = ? WHERE stockId = ?",
-    [weightInKg, productionDate, stockId]
+    "UPDATE tea_type_stock SET weightInKg = ?, productionDate = ?, teaTypeId = ? WHERE stockId = ?",
+    [weightInKg, productionDate, teaTypeId, stockId]
   );
 };
+
 
 exports.adjustTeaTypeStock = async (stockId, adjustment) => {
   return db.query(

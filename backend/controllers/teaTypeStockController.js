@@ -63,14 +63,20 @@ exports.getTeaTypeStockById = async (req, res) => {
 
 exports.updateTeaTypeStock = async (req, res) => {
   const { stockId } = req.params;
-  const { weightInKg, productionDate } = req.body;
+  const { weightInKg, productionDate, teaTypeId } = req.body;
 
-  if (!weightInKg || !productionDate) {
+  if (!weightInKg || !productionDate || !teaTypeId) {
     return res.status(400).json({ error: "Missing required fields" });
   }
 
   try {
-    const result = await TeaTypeStock.updateTeaTypeStock(stockId, Number(weightInKg), productionDate);
+    const result = await TeaTypeStock.updateTeaTypeStock(
+      stockId,
+      Number(weightInKg),
+      productionDate,
+      Number(teaTypeId)
+    );
+    
 
     if (result[0].affectedRows === 0) {
       return res.status(404).json({ error: "Tea type stock not found" });
