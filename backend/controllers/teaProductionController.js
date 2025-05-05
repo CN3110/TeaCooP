@@ -135,7 +135,7 @@ exports.updateTeaProduction = async (req, res) => {
 
     res.status(200).json({ 
       message: "Production record updated successfully",
-      packetCount
+    
     });
   } catch (error) {
     console.error("Error updating tea production:", error);
@@ -161,5 +161,54 @@ exports.deleteTeaProduction = async (req, res) => {
   } catch (error) {
     console.error("Error deleting tea production:", error);
     res.status(500).json({ error: "Failed to delete tea production record" });
+  }
+};
+
+// Get total tea production with optional date filters
+exports.getTotalTeaProduction = async (req, res) => {
+  try {
+    const { startDate, endDate } = req.query;
+    let query = "SELECT SUM(weightInKg) as totalProduction FROM tea_production";
+    const params = [];
+    
+    // If date filters are provided, add them to the query
+    if (startDate || endDate) {
+      query += " WHERE ";
+      
+      if (startDate) {
+        query += "productionDate >= ?";
+        params.push(startDate);
+      }
+      
+      if (startDate && endDate) {
+        query += " AND ";
+      }
+      
+      if (endDate) {
+        query += "productionDate <= ?";
+        params.push(endDate);
+      }
+    } else {
+      // If no dates provided, default to current month
+      const today = new Date();
+      const firstDayOfMonth = new Date(today.getFullYear(), today.getMonth(), 1);
+      const lastDayOfMonth = new Date(today.getFullYear(), today.getMonth() + 1, 0);
+      
+      query += " WHERE productionDate >= ? AND productionDate <= ?";
+      params.push(
+        firstDayOfMonth.toISOString().split('T')[0],
+        lastDayOfMonth.toISOString().split('T')[0]
+      );
+    }
+    
+    const [result] = await db.query(query, params);
+    
+    res.status(200).json({
+      totalProduction: result[0].totalProduction || 0,
+      period: startDate && endDate ? 'filtered' : 'currentMonth'
+    });
+  } catch (error) {
+    console.error("Error fetching total tea production:", error);
+    res.status(500).json({ error: "Failed to fetch total tea production" });
   }
 };

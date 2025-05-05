@@ -10,6 +10,88 @@
     padding-bottom: 10px;
     border-bottom: 1px solid #e0e0e0;
   }
+
+  /* Add these styles to your TeaProductionList.css file */
+
+.total-production-label {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 20px 0;
+  padding: 15px 20px;
+  background-color: #f8f9fa;
+  border-radius: 12px;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.08);
+  text-align: center;
+  transition: all 0.3s ease;
+}
+
+.total-production-label:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.12);
+}
+
+.total-production-label span:first-child {
+  font-size: 18px;
+  color: #555;
+  font-weight: 600;
+  margin-right: 8px;
+}
+
+.total-production-value {
+  font-size: 20px;
+  font-weight: 700;
+  color: #2e7d32; /* Green color to highlight the value */
+  display: inline-block;
+  position: relative;
+}
+
+/* Add a subtle separator between label and value */
+.total-production-label span:first-child::after {
+  content: "";
+  position: relative;
+  width: 1px;
+  height: 16px;
+  margin: 0 8px;
+  background-color: #ddd;
+  display: inline-block;
+  vertical-align: middle;
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+  .total-production-label {
+    flex-direction: column;
+    padding: 12px 15px;
+  }
+  
+  .total-production-label span:first-child {
+    margin-bottom: 5px;
+    margin-right: 0;
+  }
+  
+  .total-production-label span:first-child::after {
+    display: none;
+  }
+}
+
+/* Optional: Add an icon before the label */
+.total-production-label span:first-child::before {
+  content: "📊";
+  margin-right: 8px;
+  font-size: 20px;
+}
+
+/* Animation for when the total changes */
+@keyframes highlight {
+  0% { background-color: rgba(46, 125, 50, 0.1); }
+  50% { background-color: rgba(46, 125, 50, 0.2); }
+  100% { background-color: rgba(46, 125, 50, 0); }
+}
+
+.total-production-value.highlight {
+  animation: highlight 1.5s ease;
+}
   
   .production-table {
     width: 100%;
