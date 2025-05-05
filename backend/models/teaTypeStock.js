@@ -58,3 +58,23 @@ exports.deleteTeaTypeStock = async (stockId) => {
     [stockId]
   );
 };
+
+//get the total stock of each tea type
+exports.getTotalsByTeaType = async () => {
+  const [totals] = await db.query(
+    `SELECT 
+      t.teaTypeId,
+      t.teaTypeName,
+      COALESCE(SUM(s.weightInKg), 0) as totalWeight
+    FROM 
+      teatype t
+    LEFT JOIN 
+      tea_type_stock s ON t.teaTypeId = s.teaTypeId
+    GROUP BY 
+      t.teaTypeId, t.teaTypeName
+    ORDER BY 
+      t.teaTypeName ASC`
+  );
+  
+  return totals;
+};

@@ -121,3 +121,14 @@ exports.deleteTeaTypeStock = async (req, res) => {
     res.status(500).json({ error: "Failed to delete tea type stock" });
   }
 };
+
+//get the total stock of each tea type
+exports.getTeaTypeTotals = async (req, res) => {
+  try {
+    const totals = await TeaTypeStock.getTotalsByTeaType();
+    res.status(200).json(totals);
+  } catch (error) {
+    console.error("Error fetching tea type totals:", error);
+    res.status(500).json({ error: "Failed to fetch tea type total stock" });
+  }
+};

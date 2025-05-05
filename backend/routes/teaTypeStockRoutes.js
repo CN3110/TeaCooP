@@ -8,5 +8,6 @@ router.post("/", teaTypeStockController.createTeaTypeStock);
 router.put("/:stockId", teaTypeStockController.updateTeaTypeStock);
 router.patch("/:stockId", teaTypeStockController.adjustTeaTypeStock);
 router.delete("/:stockId", teaTypeStockController.deleteTeaTypeStock);
+router.get("/totals", teaTypeStockController.getTeaTypeTotals);
 
 module.exports = router;
