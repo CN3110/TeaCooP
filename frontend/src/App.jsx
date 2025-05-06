@@ -38,6 +38,7 @@ import EditNotice from "./pages/NoticeManagement/EditNotice/EditNotice.jsx";
 import RawTeaRecords from "./pages/RawTeaRecords/RawTeaRecords.jsx";
 import TeaTypeStockManagement from "./pages/TeaTypeStockManagement/TeaTypeStockManagement.jsx";
 import ViewConfirmedLots from "./pages/SalesEM/ViewConfimedLots/ViewConfimedLots.jsx";
+import ViewSoldPrices from "./pages/SalesEM/ViewSoldPrices/ViewSoldPrices.jsx";
 
 const App = () => {
   return (
@@ -80,6 +81,7 @@ const App = () => {
             <Route path="/raw-tea-records" element={<RawTeaRecords />} />
             <Route path="/tea-type-stock-management" element={<TeaTypeStockManagement />} />
             <Route path="/view-confirmed-lots" element={<ViewConfirmedLots />} />
+            <Route path="/view-sold-prices" element={<ViewSoldPrices />} />
 
             {/* Admin Routes */}
             <Route path="/admin-dashboard" element={<AdminDashboard />} />

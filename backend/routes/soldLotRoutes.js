@@ -11,4 +11,7 @@ router.get('/broker/:brokerId', soldLotController.getSoldLotsByBroker);
 // Delete sold price
 router.delete('/:saleId', soldLotController.deleteSoldPrice);
 
+// to view all the sold records - for employee view
+router.get('/all', soldLotController.getAllSoldLotsForEmployee);
+
 module.exports = router;

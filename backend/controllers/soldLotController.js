@@ -45,6 +45,25 @@ exports.getSoldLotsByBroker = async (req, res) => {
     }
 };
 
+exports.getAllSoldLotsForEmployee = async (req, res) => {
+    try {
+        const soldLots = await SoldLot.getAllForEmployee();
+        
+        res.json({
+            success: true,
+            data: soldLots
+        });
+    } catch (err) {
+        console.error('Error in getAllSoldLotsForEmployee:', err);
+        res.status(500).json({
+            success: false,
+            message: err.message || 'Error fetching sold lots data'
+        });
+    }
+};
+
+
+
 exports.deleteSoldPrice = async (req, res) => {
     const { saleId } = req.params;
 
