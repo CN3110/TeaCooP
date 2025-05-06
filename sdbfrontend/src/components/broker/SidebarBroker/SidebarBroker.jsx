@@ -71,8 +71,8 @@ const SidebarBroker = () => {
           </Link>
         </li>
         <li className="nav-item">
-          <Link to="/broker-add-sold-prices" className="nav-link">
-            <TransportIcon /> Add Sold Prices
+          <Link to="/broker-sold-price-management" className="nav-link">
+            <TransportIcon /> Sold Price Management
           </Link>
         </li>
         <li className="nav-item">
