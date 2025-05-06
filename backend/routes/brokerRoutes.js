@@ -7,6 +7,7 @@ const {
   getBrokerById,
   disableBroker,
   getBrokerConfirmedLots,
+  updatePassword,
 } = require("../controllers/brokerController");
 
 // CRUD routes
@@ -16,7 +17,13 @@ router.get("/:brokerId", getBrokerById);
 router.put("/:brokerId", updateBroker);
 router.put("/:brokerId/disable", disableBroker);
 
+// Update password route
+router.put("/:brokerId/password", updatePassword); 
+
+
 // Broker-specific routes
 router.get("/:brokerId/confirmed-lots", getBrokerConfirmedLots);
+
+
 
 module.exports = router;

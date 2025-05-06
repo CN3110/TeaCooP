@@ -24,8 +24,6 @@ const DProfile = () => {
     driverName: '',
     driverContactNumber: '',
     driverEmail: '',
-    status: '',
-    notes: '',
     vehicleDetails: []
   });
 
@@ -180,7 +178,7 @@ const DProfile = () => {
     <DriverLayout>
     <div className="driver-profile-container">
       <div className="profile-header">
-        <h1>Driver Profile</h1>
+        <h1>My Profile</h1>
         {!isEditing && !changingPassword && (
           <button className="btn primary" onClick={() => setIsEditing(true)}>Edit Profile</button>
         )}
@@ -204,15 +202,7 @@ const DProfile = () => {
             <input type="email" name="driverEmail" value={driver.driverEmail} onChange={handleInputChange} disabled={!isEditing} required />
           </label>
 
-          <label>Status
-            <input type="text" value={driver.status} disabled />
-          </label>
-
-          <label>Notes
-            <textarea name="notes" value={driver.notes} onChange={handleInputChange} disabled={!isEditing}></textarea>
-          </label>
-
-          <div className="vehicle-section">
+         <div className="vehicle-section">
             <h2>Vehicle Details</h2>
             {isEditing && <button type="button" className="btn small" onClick={addVehicle}>Add Vehicle</button>}
             {driver.vehicleDetails.map((vehicle, index) => (

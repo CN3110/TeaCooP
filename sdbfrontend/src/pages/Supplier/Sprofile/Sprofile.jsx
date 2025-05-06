@@ -152,7 +152,7 @@ const Sprofile = () => {
     <SupplierLayout>
       <div className="supplier-profile-container">
         <div className="profile-header">
-          <h1>Supplier Profile</h1>
+          <h1>My Profile</h1>
           {!isEditing && !changingPassword && (
             <button className="btn primary" onClick={() => setIsEditing(true)}>Edit Profile</button>
           )}

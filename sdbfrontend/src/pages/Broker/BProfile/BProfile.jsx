@@ -1,19 +1,25 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
-import { 
-  Box, 
-  Typography, 
-  TextField, 
-  Button, 
-  Paper, 
-  Alert,
-  Avatar
-} from '@mui/material';
-import { orange } from '@mui/material/colors';
+import { useParams } from 'react-router-dom';
+import Snackbar from '@mui/material/Snackbar';
+import MuiAlert from '@mui/material/Alert';
+import BrokerLayout from '../../../components/broker/BrokerLayout/BrokerLayout';
+import './BProfile.css';
 
-const BrokerProfile = () => {
-  const [profile, setProfile] = useState(null);
-  const [formData, setFormData] = useState({
+const Alert = React.forwardRef(function Alert(props, ref) {
+  return <MuiAlert elevation={6} ref={ref} variant="filled" {...props} />;
+});
+
+const BProfile = () => {
+  const { brokerId: paramBrokerId } = useParams();
+  const brokerId = paramBrokerId || localStorage.getItem('userId');
+
+  const [loading, setLoading] = useState(true);
+  const [isEditing, setIsEditing] = useState(false);
+  const [changingPassword, setChangingPassword] = useState(false);
+  const [snackbar, setSnackbar] = useState({ open: false, message: '', severity: 'success' });
+
+  const [broker, setBroker] = useState({
     brokerName: '',
     brokerContactNumber: '',
     brokerEmail: '',
@@ -22,202 +28,195 @@ const BrokerProfile = () => {
     brokerCompanyEmail: '',
     brokerCompanyAddress: ''
   });
-  const [error, setError] = useState('');
-  const [success, setSuccess] = useState('');
-  const [isLoading, setIsLoading] = useState(true);
+
+  const [passwords, setPasswords] = useState({
+    newPassword: '',
+    confirmPassword: ''
+  });
 
   useEffect(() => {
-    const fetchProfile = async () => {
-      try {
-        const token = localStorage.getItem('token');
-        const response = await axios.get('/api/auth/profile', {
-          headers: {
-            Authorization: `Bearer ${token}`
-          }
-        });
-        
-        setProfile(response.data);
-        setFormData({
-          brokerName: response.data.brokerName,
-          brokerContactNumber: response.data.brokerContactNumber,
-          brokerEmail: response.data.brokerEmail,
-          brokerCompanyName: response.data.brokerCompanyName,
-          brokerCompanyContact: response.data.brokerCompanyContact,
-          brokerCompanyEmail: response.data.brokerCompanyEmail,
-          brokerCompanyAddress: response.data.brokerCompanyAddress
-        });
-      } catch (err) {
-        setError(err.response?.data?.message || 'Failed to fetch profile');
-      } finally {
-        setIsLoading(false);
-      }
-    };
-    
-    fetchProfile();
-  }, []);
+    if (!brokerId) {
+      setLoading(false);
+      showSnackbar('No broker ID found. Please log in.', 'error');
+      return;
+    }
+    fetchBrokerDetails();
+  }, [brokerId]);
 
-  const handleChange = (e) => {
-    const { name, value } = e.target;
-    setFormData(prev => ({
-      ...prev,
-      [name]: value
-    }));
+  const showSnackbar = (message, severity = 'success') => {
+    setSnackbar({ open: true, message, severity });
   };
 
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-    setIsLoading(true);
-    setError('');
-    setSuccess('');
-    
+  const handleCloseSnackbar = () => {
+    setSnackbar({ ...snackbar, open: false });
+  };
+
+  const fetchBrokerDetails = async () => {
     try {
-      const token = localStorage.getItem('token');
-      await axios.put(`/api/brokers/${profile.brokerId}`, formData, {
-        headers: {
-          Authorization: `Bearer ${token}`
-        }
+      setLoading(true);
+      const response = await axios.get(`http://localhost:3001/api/brokers/${brokerId}`);
+      setBroker({
+        brokerName: response.data.brokerName || '',
+        brokerContactNumber: response.data.brokerContactNumber || '',
+        brokerEmail: response.data.brokerEmail || '',
+        brokerCompanyName: response.data.brokerCompanyName || '',
+        brokerCompanyContact: response.data.brokerCompanyContact || '',
+        brokerCompanyEmail: response.data.brokerCompanyEmail || '',
+        brokerCompanyAddress: response.data.brokerCompanyAddress || ''
       });
-      
-      setSuccess('Profile updated successfully');
-      // Refresh profile data
-      const response = await axios.get('/api/auth/profile', {
-        headers: {
-          Authorization: `Bearer ${token}`
-        }
-      });
-      setProfile(response.data);
-    } catch (err) {
-      setError(err.response?.data?.message || 'Failed to update profile');
+    } catch (error) {
+      showSnackbar('Failed to load broker details', 'error');
     } finally {
-      setIsLoading(false);
+      setLoading(false);
     }
   };
 
-  if (isLoading) return <Typography>Loading...</Typography>;
-  if (!profile) return <Typography>No profile data found</Typography>;
+  const handleInputChange = (e) => {
+    const { name, value } = e.target;
+    setBroker({ ...broker, [name]: value });
+  };
+
+  const handlePasswordChange = (e) => {
+    const { name, value } = e.target;
+    setPasswords({ ...passwords, [name]: value });
+  };
+
+  const validateForm = () => {
+    const requiredFields = [
+      'brokerName', 'brokerContactNumber', 'brokerEmail',
+      'brokerCompanyName', 'brokerCompanyContact',
+      'brokerCompanyEmail', 'brokerCompanyAddress'
+    ];
+    for (const field of requiredFields) {
+      if (!broker[field].trim()) {
+        showSnackbar(`Field ${field} is required`, 'error');
+        return false;
+      }
+    }
+    return true;
+  };
+
+  const validatePasswords = () => {
+    if (passwords.newPassword.length < 6) {
+      showSnackbar('Password must be at least 6 characters', 'error');
+      return false;
+    }
+    if (passwords.newPassword !== passwords.confirmPassword) {
+      showSnackbar('Passwords do not match', 'error');
+      return false;
+    }
+    return true;
+  };
+
+  const handleUpdateProfile = async (e) => {
+    e.preventDefault();
+    if (!validateForm()) return;
+
+    try {
+      await axios.put(`http://localhost:3001/api/brokers/${brokerId}`, broker);
+      showSnackbar('Profile updated successfully');
+      setIsEditing(false);
+      fetchBrokerDetails();
+    } catch (error) {
+      showSnackbar('Failed to update profile', 'error');
+    }
+  };
+
+  const handleUpdatePassword = async (e) => {
+    e.preventDefault();
+    if (!validatePasswords()) return;
+
+    try {
+      await axios.put(`http://localhost:3001/api/brokers/${brokerId}/password`, {
+        newPassword: passwords.newPassword
+      });
+      showSnackbar('Password updated successfully');
+      setChangingPassword(false);
+      setPasswords({ newPassword: '', confirmPassword: '' });
+    } catch (error) {
+      showSnackbar('Failed to update password', 'error');
+    }
+  };
+
+  if (!brokerId) return <div className="error-message">No broker ID found. Please log in.</div>;
+  if (loading) return <div className="loader-container"><div className="loader"></div></div>;
 
   return (
-    <Box sx={{ p: 3 }}>
-      <Paper elevation={3} sx={{ p: 3 }}>
-        <Box display="flex" alignItems="center" mb={3}>
-          <Avatar 
-            sx={{ 
-              bgcolor: orange[500], 
-              width: 56, 
-              height: 56,
-              mr: 2
-            }}
-          >
-            {profile.brokerName.charAt(0)}
-          </Avatar>
-          <Typography variant="h4">Broker Profile</Typography>
-        </Box>
-        
-        {error && <Alert severity="error" sx={{ mb: 2 }}>{error}</Alert>}
-        {success && <Alert severity="success" sx={{ mb: 2 }}>{success}</Alert>}
-        
-        <form onSubmit={handleSubmit}>
-          <TextField
-            label="Broker ID"
-            variant="outlined"
-            fullWidth
-            margin="normal"
-            value={profile.brokerId}
-            disabled
-          />
-          <TextField
-            label="Full Name"
-            name="brokerName"
-            variant="outlined"
-            fullWidth
-            margin="normal"
-            value={formData.brokerName}
-            onChange={handleChange}
-            required
-          />
-          <TextField
-            label="Contact Number"
-            name="brokerContactNumber"
-            variant="outlined"
-            fullWidth
-            margin="normal"
-            value={formData.brokerContactNumber}
-            onChange={handleChange}
-            required
-          />
-          <TextField
-            label="Email"
-            name="brokerEmail"
-            type="email"
-            variant="outlined"
-            fullWidth
-            margin="normal"
-            value={formData.brokerEmail}
-            onChange={handleChange}
-            required
-          />
-          
-          <Typography variant="h6" sx={{ mt: 3, mb: 2 }}>
-            Company Information
-          </Typography>
-          
-          <TextField
-            label="Company Name"
-            name="brokerCompanyName"
-            variant="outlined"
-            fullWidth
-            margin="normal"
-            value={formData.brokerCompanyName}
-            onChange={handleChange}
-            required
-          />
-          <TextField
-            label="Company Contact"
-            name="brokerCompanyContact"
-            variant="outlined"
-            fullWidth
-            margin="normal"
-            value={formData.brokerCompanyContact}
-            onChange={handleChange}
-            required
-          />
-          <TextField
-            label="Company Email"
-            name="brokerCompanyEmail"
-            type="email"
-            variant="outlined"
-            fullWidth
-            margin="normal"
-            value={formData.brokerCompanyEmail}
-            onChange={handleChange}
-            required
-          />
-          <TextField
-            label="Company Address"
-            name="brokerCompanyAddress"
-            variant="outlined"
-            fullWidth
-            margin="normal"
-            multiline
-            rows={3}
-            value={formData.brokerCompanyAddress}
-            onChange={handleChange}
-            required
-          />
-          
-          <Button
-            type="submit"
-            variant="contained"
-            color="primary"
-            sx={{ mt: 2 }}
-            disabled={isLoading}
-          >
-            {isLoading ? 'Updating...' : 'Update Profile'}
-          </Button>
-        </form>
-      </Paper>
-    </Box>
+    <BrokerLayout>
+      <div className="broker-profile-container">
+        <div className="profile-header">
+          <h1>My Profile</h1>
+          {!isEditing && !changingPassword && (
+            <button className="btn primary" onClick={() => setIsEditing(true)}>Edit Profile</button>
+          )}
+        </div>
+
+        {!changingPassword && (
+          <form onSubmit={handleUpdateProfile} className="profile-form">
+            <label>ID
+              <input type="text" value={brokerId} disabled />
+            </label>
+            <label>Full Name
+              <input type="text" name="brokerName" value={broker.brokerName} onChange={handleInputChange} disabled={!isEditing} required />
+            </label>
+            <label>Contact Number
+              <input type="text" name="brokerContactNumber" value={broker.brokerContactNumber} onChange={handleInputChange} disabled={!isEditing} required />
+            </label>
+            <label>Email
+              <input type="email" name="brokerEmail" value={broker.brokerEmail} onChange={handleInputChange} disabled={!isEditing} required />
+            </label>
+            <label>Company Name
+              <input type="text" name="brokerCompanyName" value={broker.brokerCompanyName} onChange={handleInputChange} disabled={!isEditing} required />
+            </label>
+            <label>Company Contact
+              <input type="text" name="brokerCompanyContact" value={broker.brokerCompanyContact} onChange={handleInputChange} disabled={!isEditing} required />
+            </label>
+            <label>Company Email
+              <input type="email" name="brokerCompanyEmail" value={broker.brokerCompanyEmail} onChange={handleInputChange} disabled={!isEditing} required />
+            </label>
+            <label>Company Address
+              <textarea name="brokerCompanyAddress" value={broker.brokerCompanyAddress} onChange={handleInputChange} disabled={!isEditing} required />
+            </label>
+
+            {isEditing && (
+              <div className="form-actions">
+                <button type="submit" className="btn success">Save Changes</button>
+                <button type="button" className="btn secondary" onClick={() => setIsEditing(false)}>Cancel</button>
+              </div>
+            )}
+          </form>
+        )}
+
+        {changingPassword ? (
+          <form onSubmit={handleUpdatePassword} className="password-form">
+            <h2>Change Password</h2>
+            <label>New Password
+              <input type="password" name="newPassword" value={passwords.newPassword} onChange={handlePasswordChange} required />
+            </label>
+            <label>Confirm Password
+              <input type="password" name="confirmPassword" value={passwords.confirmPassword} onChange={handlePasswordChange} required />
+            </label>
+            <div className="form-actions">
+              <button type="submit" className="btn primary">Update Password</button>
+              <button type="button" className="btn secondary" onClick={() => setChangingPassword(false)}>Cancel</button>
+            </div>
+          </form>
+        ) : (
+          !isEditing && (
+            <div className="change-password">
+              <button className="btn info" onClick={() => setChangingPassword(true)}>Change Password</button>
+            </div>
+          )
+        )}
+
+        <Snackbar open={snackbar.open} autoHideDuration={3000} onClose={handleCloseSnackbar} anchorOrigin={{ vertical: 'bottom', horizontal: 'right' }}>
+          <Alert onClose={handleCloseSnackbar} severity={snackbar.severity}>
+            {snackbar.message}
+          </Alert>
+        </Snackbar>
+      </div>
+    </BrokerLayout>
   );
 };
 
-export default BrokerProfile;
+export default BProfile;
