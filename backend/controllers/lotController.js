@@ -26,9 +26,9 @@ exports.getLotById = async (req, res) => {
 };
 
 exports.createLot = async (req, res) => {
-  const { invoiceNumber, manufacturingDate, teaGrade, noOfBags, netWeight, totalNetWeight, valuationPrice } = req.body;
+  const { manufacturingDate, teaGrade, noOfBags, netWeight, totalNetWeight, valuationPrice } = req.body;
 
-  if (!invoiceNumber || !manufacturingDate || !teaGrade || !noOfBags || !netWeight || !totalNetWeight || !valuationPrice) {
+  if (!manufacturingDate || !teaGrade || !noOfBags || !netWeight || !totalNetWeight || !valuationPrice) {
     return res.status(400).json({ message: 'All fields are required' });
   }
 
@@ -37,7 +37,6 @@ exports.createLot = async (req, res) => {
 
     await lot.createLot({
       lotNumber,
-      invoiceNumber,
       manufacturingDate,
       teaGrade,
       noOfBags,
@@ -55,9 +54,9 @@ exports.createLot = async (req, res) => {
 
 exports.updateLot = async (req, res) => {
   const { lotNumber } = req.params;
-  const { invoiceNumber, manufacturingDate, teaGrade, noOfBags, netWeight, totalNetWeight, valuationPrice } = req.body;
+  const { manufacturingDate, teaGrade, noOfBags, netWeight, totalNetWeight, valuationPrice } = req.body;
 
-  if (!invoiceNumber || !manufacturingDate || !teaGrade || !noOfBags || !netWeight || !totalNetWeight || !valuationPrice) {
+  if (!manufacturingDate || !teaGrade || !noOfBags || !netWeight || !totalNetWeight || !valuationPrice) {
     return res.status(400).json({ message: 'All fields are required' });
   }
 
@@ -68,7 +67,6 @@ exports.updateLot = async (req, res) => {
     }
 
     await lot.updateLot(lotNumber, {
-      invoiceNumber,
       manufacturingDate,
       teaGrade,
       noOfBags,

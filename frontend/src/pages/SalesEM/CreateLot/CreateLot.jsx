@@ -18,7 +18,6 @@ const CreateLot = () => {
 
   // Add validation state
   const [errors, setErrors] = useState({
-    invoiceNumber: "",
     teaGrade: "",
     noOfBags: "",
     netWeight: "",
@@ -37,7 +36,6 @@ const CreateLot = () => {
 
   const [lotData, setLotData] = useState({
     lotNumber: "Generating...",
-    invoiceNumber: '',
     manufacturingDate: new Date(),
     teaGrade: '',
     noOfBags: '',
@@ -67,13 +65,6 @@ const CreateLot = () => {
     let errorMessage = "";
     
     switch (name) {
-      case "invoiceNumber":
-        if (!value.trim()) {
-          errorMessage = "Invoice number is required";
-        } else if (!/^\d+$/.test(value)) {
-          errorMessage = "Invoice number must be a positive number";
-        }
-        break;
       case "teaGrade":
         if (!value) {
           errorMessage = "Tea grade is required";
@@ -207,7 +198,6 @@ const CreateLot = () => {
 
       setLotData({
         lotNumber: "Generating...",
-        invoiceNumber: "",
         manufacturingDate: new Date(),
         teaGrade: "",
         noOfBags: "",
@@ -218,7 +208,6 @@ const CreateLot = () => {
       
       // Clear errors
       setErrors({
-        invoiceNumber: "",
         teaGrade: "",
         noOfBags: "",
         netWeight: "",
@@ -280,19 +269,6 @@ const CreateLot = () => {
                 readOnly 
                 className="read-only-input"
               />
-            </div>
-
-            <div className="lot-form-group">
-              <label>Invoice Number:</label>
-              <input
-                type="text"
-                name="invoiceNumber"
-                value={lotData.invoiceNumber}
-                onChange={handleInputChange}
-                required
-                className={errors.invoiceNumber ? "error" : ""}
-              />
-              {errors.invoiceNumber && <div className="error-message">{errors.invoiceNumber}</div>}
             </div>
 
             <div className="lot-form-group">

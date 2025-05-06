@@ -66,7 +66,6 @@ const SoldLot = {
                     sl.soldPrice,
                     sl.total_sold_price,
                     sl.soldDate,
-                    l.invoiceNumber,
                     l.teaGrade,
                     l.noOfBags,
                     l.netWeight,

@@ -98,7 +98,6 @@ const ViewLots = () => {
           <thead>
             <tr>
               <th>Lot Number</th>
-              <th>Invoice Number</th>
               <th>Manufacturing Date</th>
               <th>Tea Grade</th>
               <th>No. of Bags</th>
@@ -112,7 +111,6 @@ const ViewLots = () => {
             {filteredLots.map((lot) => (
               <tr key={lot.lotNumber}>
                 <td>{lot.lotNumber}</td>
-                <td>{lot.invoiceNumber}</td>
                 <td>{new Date(lot.manufacturingDate).toLocaleDateString()}</td>
                 <td>{lot.teaGrade}</td>
                 <td>{lot.noOfBags}</td>

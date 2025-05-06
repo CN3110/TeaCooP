@@ -77,8 +77,7 @@ const ViewNewLots = () => {
           <thead className="table-dark">
             <tr>
               <th>Lot #</th>
-              <th>Invoice #</th>
-              <th>Grade</th>
+              <th>Tea Type (Grade)</th>
               <th>No. of Bags</th>
               <th>Net Weight (kg)</th>
               <th>Total Weight (kg)</th>
@@ -93,7 +92,6 @@ const ViewNewLots = () => {
               lots.map((lot) => (
                 <tr key={lot.lotNumber}>
                   <td>{lot.lotNumber}</td>
-                  <td>{lot.invoiceNumber}</td>
                   <td>{lot.teaGrade}</td>
                   <td>{lot.noOfBags}</td>
                   <td>{lot.netWeight}</td>

@@ -28,7 +28,6 @@ const getLotById = async (lotNumber) => {
 // Create a new lot
 const createLot = async ({
   lotNumber,
-  invoiceNumber,
   manufacturingDate,
   teaGrade,
   noOfBags,
@@ -38,13 +37,12 @@ const createLot = async ({
 }) => {
   const query = `
     INSERT INTO lot (
-      lotNumber, invoiceNumber, manufacturingDate, teaGrade,
+      lotNumber, manufacturingDate, teaGrade,
       noOfBags, netWeight, totalNetWeight, valuationPrice, status
-    ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, 'available')
+    ) VALUES (?, ?, ?, ?, ?, ?, ?, 'available')
   `;
   await db.query(query, [
     lotNumber,
-    invoiceNumber,
     manufacturingDate,
     teaGrade,
     noOfBags,
@@ -58,8 +56,7 @@ const createLot = async ({
 const updateLot = async (lotNumber, lotDetails) => {
   const query = `
     UPDATE lot 
-    SET invoiceNumber=?, 
-        manufacturingDate=?, 
+    SET manufacturingDate=?, 
         teaGrade=?, 
         noOfBags=?, 
         netWeight=?, 
@@ -69,7 +66,6 @@ const updateLot = async (lotNumber, lotDetails) => {
   `;
 
   await db.query(query, [
-    lotDetails.invoiceNumber,
     lotDetails.manufacturingDate,
     lotDetails.teaGrade,
     lotDetails.noOfBags,

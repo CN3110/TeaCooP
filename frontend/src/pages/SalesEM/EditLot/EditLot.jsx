@@ -10,7 +10,6 @@ const EditLot = () => {
   // State to store the lot data
   const [lotData, setLotData] = useState({
     lotNumber: "",
-    invoiceNumber: "",
     manufacturingDate: "",
     teaGrade: "",
     noOfBags: "",
@@ -51,7 +50,6 @@ const EditLot = () => {
     // Validate required fields
     if (
       !lotData.lotNumber ||
-      !lotData.invoiceNumber ||
       !lotData.manufacturingDate ||
       !lotData.teaGrade ||
       !lotData.noOfBags ||
@@ -97,17 +95,6 @@ const EditLot = () => {
                 type="text"
                 name="lotNumber"
                 value={lotData.lotNumber}
-                onChange={handleInputChange}
-                required
-              />
-            </div>
-
-            <div className="form-group">
-              <label>Invoice Number:</label>
-              <input
-                type="text"
-                name="invoiceNumber"
-                value={lotData.invoiceNumber}
                 onChange={handleInputChange}
                 required
               />
