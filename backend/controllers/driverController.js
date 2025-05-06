@@ -206,3 +206,31 @@ exports.disableDriver = async (req, res) => {
     res.status(500).json({ error: "Failed to disable driver" });
   }
 };
+
+
+// Add this method to your driverController.js file
+
+exports.updatePassword = async (req, res) => {
+  const { driverId } = req.params;
+  const { newPassword } = req.body;
+
+  if (!newPassword) {
+    return res.status(400).json({ error: "New password is required" });
+  }
+
+  try {
+    // Check if driver exists
+    const driverExists = await driver.getDriverById(driverId);
+    if (!driverExists) {
+      return res.status(404).json({ error: "Driver not found" });
+    }
+
+    // Update the password
+    await driver.updateDriverPassword(driverId, newPassword);
+
+    res.status(200).json({ message: "Password updated successfully" });
+  } catch (error) {
+    console.error("Error updating password:", error);
+    res.status(500).json({ error: "Failed to update password" });
+  }
+};

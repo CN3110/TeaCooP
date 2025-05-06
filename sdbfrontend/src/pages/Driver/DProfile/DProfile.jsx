@@ -1,194 +1,273 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
-import { 
-  Box, 
-  Typography, 
-  TextField, 
-  Button, 
-  Paper, 
-  Alert,
-  Avatar,
-  List,
-  ListItem,
-  ListItemText
-} from '@mui/material';
-import { blue } from '@mui/material/colors';
+import { useParams } from 'react-router-dom';
+import Snackbar from '@mui/material/Snackbar';
+import MuiAlert from '@mui/material/Alert';
+import './DProfile.css';
 
-const DriverProfile = () => {
-  const [profile, setProfile] = useState(null);
-  const [formData, setFormData] = useState({
+const Alert = React.forwardRef(function Alert(props, ref) {
+  return <MuiAlert elevation={6} ref={ref} variant="filled" {...props} />;
+});
+
+const DProfile = () => {
+  const { driverId: paramDriverId } = useParams();
+  const driverId = paramDriverId || localStorage.getItem('userId');
+  const userRole = localStorage.getItem('userRole');
+
+  const [loading, setLoading] = useState(true);
+  const [isEditing, setIsEditing] = useState(false);
+  const [changingPassword, setChangingPassword] = useState(false);
+  const [snackbar, setSnackbar] = useState({ open: false, message: '', severity: 'success' });
+
+  const [driver, setDriver] = useState({
     driverName: '',
     driverContactNumber: '',
-    driverEmail: ''
+    driverEmail: '',
+    status: '',
+    notes: '',
+    vehicleDetails: []
   });
-  const [vehicleDetails, setVehicleDetails] = useState([]);
-  const [error, setError] = useState('');
-  const [success, setSuccess] = useState('');
-  const [isLoading, setIsLoading] = useState(true);
+
+  const [passwords, setPasswords] = useState({
+    newPassword: '',
+    confirmPassword: ''
+  });
 
   useEffect(() => {
-    const fetchProfile = async () => {
-      try {
-        const token = localStorage.getItem('token');
-        const response = await axios.get('/api/auth/profile', {
-          headers: {
-            Authorization: `Bearer ${token}`
-          }
-        });
-        
-        setProfile(response.data);
-        setFormData({
-          driverName: response.data.driverName,
-          driverContactNumber: response.data.driverContactNumber,
-          driverEmail: response.data.driverEmail
-        });
-        
-        // Fetch vehicle details if available
-        if (response.data.vehicleDetails) {
-          setVehicleDetails(response.data.vehicleDetails);
-        }
-      } catch (err) {
-        setError(err.response?.data?.message || 'Failed to fetch profile');
-      } finally {
-        setIsLoading(false);
-      }
-    };
-    
-    fetchProfile();
-  }, []);
+    if (!driverId) {
+      setLoading(false);
+      showSnackbar('No driver ID found. Please log in.', 'error');
+      return;
+    }
 
-  const handleChange = (e) => {
-    const { name, value } = e.target;
-    setFormData(prev => ({
-      ...prev,
-      [name]: value
-    }));
+    fetchDriverDetails();
+  }, [driverId]);
+
+  const showSnackbar = (message, severity = 'success') => {
+    setSnackbar({ open: true, message, severity });
   };
 
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-    setIsLoading(true);
-    setError('');
-    setSuccess('');
-    
+  const handleCloseSnackbar = () => {
+    setSnackbar({ ...snackbar, open: false });
+  };
+
+  const fetchDriverDetails = async () => {
     try {
-      const token = localStorage.getItem('token');
-      await axios.put(`/api/drivers/${profile.driverId}`, formData, {
-        headers: {
-          Authorization: `Bearer ${token}`
-        }
+      setLoading(true);
+      const response = await axios.get(`http://localhost:3001/api/drivers/${driverId}`);
+      setDriver({
+        ...response.data,
+        vehicleDetails: response.data.vehicleDetails || []
       });
-      
-      setSuccess('Profile updated successfully');
-      // Refresh profile data
-      const response = await axios.get('/api/auth/profile', {
-        headers: {
-          Authorization: `Bearer ${token}`
-        }
-      });
-      setProfile(response.data);
-    } catch (err) {
-      setError(err.response?.data?.message || 'Failed to update profile');
+    } catch (error) {
+      showSnackbar('Failed to load driver details', 'error');
+      console.error(error);
     } finally {
-      setIsLoading(false);
+      setLoading(false);
     }
   };
 
-  if (isLoading) return <Typography>Loading...</Typography>;
-  if (!profile) return <Typography>No profile data found</Typography>;
+  const handleInputChange = (e) => {
+    const { name, value } = e.target;
+    setDriver({ ...driver, [name]: value });
+  };
+
+  const handlePasswordChange = (e) => {
+    const { name, value } = e.target;
+    setPasswords({ ...passwords, [name]: value });
+  };
+
+  const handleVehicleChange = (index, field, value) => {
+    const updatedVehicles = [...driver.vehicleDetails];
+    updatedVehicles[index] = { ...updatedVehicles[index], [field]: value };
+    setDriver({ ...driver, vehicleDetails: updatedVehicles });
+  };
+
+  const addVehicle = () => {
+    setDriver({
+      ...driver,
+      vehicleDetails: [...driver.vehicleDetails, { vehicleNumber: '', vehicleType: '' }]
+    });
+  };
+
+  const removeVehicle = (index) => {
+    const updatedVehicles = [...driver.vehicleDetails];
+    updatedVehicles.splice(index, 1);
+    setDriver({ ...driver, vehicleDetails: updatedVehicles });
+  };
+
+  const validateForm = () => {
+    if (!driver.driverName.trim()) {
+      showSnackbar('Name is required', 'error');
+      return false;
+    }
+    if (!driver.driverContactNumber.trim()) {
+      showSnackbar('Contact number is required', 'error');
+      return false;
+    }
+    if (!driver.driverEmail.trim()) {
+      showSnackbar('Email is required', 'error');
+      return false;
+    }
+    for (const vehicle of driver.vehicleDetails) {
+      if (!vehicle.vehicleNumber.trim() || !vehicle.vehicleType.trim()) {
+        showSnackbar('All vehicle fields are required', 'error');
+        return false;
+      }
+    }
+    return true;
+  };
+
+  const validatePasswords = () => {
+    if (passwords.newPassword.length < 6) {
+      showSnackbar('Password must be at least 6 characters', 'error');
+      return false;
+    }
+    if (passwords.newPassword !== passwords.confirmPassword) {
+      showSnackbar('Passwords do not match', 'error');
+      return false;
+    }
+    return true;
+  };
+
+  const handleUpdateProfile = async (e) => {
+    e.preventDefault();
+    if (!validateForm()) return;
+    try {
+      await axios.put(`http://localhost:3001/api/drivers/${driverId}`, {
+        driverName: driver.driverName,
+        driverContactNumber: driver.driverContactNumber,
+        driverEmail: driver.driverEmail,
+        status: driver.status,
+        notes: driver.notes,
+        vehicleDetails: driver.vehicleDetails
+      });
+      showSnackbar('Profile updated successfully');
+      setIsEditing(false);
+      fetchDriverDetails();
+    } catch (error) {
+      showSnackbar('Failed to update profile', 'error');
+      console.error(error);
+    }
+  };
+
+  const handleUpdatePassword = async (e) => {
+    e.preventDefault();
+    if (!validatePasswords()) return;
+    try {
+      await axios.put(`http://localhost:3001/api/drivers/${driverId}/password`, {
+        newPassword: passwords.newPassword
+      });
+      showSnackbar('Password updated successfully');
+      setChangingPassword(false);
+      setPasswords({ newPassword: '', confirmPassword: '' });
+    } catch (error) {
+      showSnackbar('Failed to update password', 'error');
+      console.error(error);
+    }
+  };
+
+  if (!driverId) {
+    return <div className="error-message">No driver ID found. Please log in.</div>;
+  }
+
+  if (loading) {
+    return <div className="loader-container"><div className="loader"></div></div>;
+  }
 
   return (
-    <Box sx={{ p: 3 }}>
-      <Paper elevation={3} sx={{ p: 3 }}>
-        <Box display="flex" alignItems="center" mb={3}>
-          <Avatar 
-            sx={{ 
-              bgcolor: blue[500], 
-              width: 56, 
-              height: 56,
-              mr: 2
-            }}
-          >
-            {profile.driverName.charAt(0)}
-          </Avatar>
-          <Typography variant="h4">Driver Profile</Typography>
-        </Box>
-        
-        {error && <Alert severity="error" sx={{ mb: 2 }}>{error}</Alert>}
-        {success && <Alert severity="success" sx={{ mb: 2 }}>{success}</Alert>}
-        
-        <form onSubmit={handleSubmit}>
-          <TextField
-            label="Driver ID"
-            variant="outlined"
-            fullWidth
-            margin="normal"
-            value={profile.driverId}
-            disabled
-          />
-          <TextField
-            label="Full Name"
-            name="driverName"
-            variant="outlined"
-            fullWidth
-            margin="normal"
-            value={formData.driverName}
-            onChange={handleChange}
-            required
-          />
-          <TextField
-            label="Contact Number"
-            name="driverContactNumber"
-            variant="outlined"
-            fullWidth
-            margin="normal"
-            value={formData.driverContactNumber}
-            onChange={handleChange}
-            required
-          />
-          <TextField
-            label="Email"
-            name="driverEmail"
-            type="email"
-            variant="outlined"
-            fullWidth
-            margin="normal"
-            value={formData.driverEmail}
-            onChange={handleChange}
-            required
-          />
-          
-          <Button
-            type="submit"
-            variant="contained"
-            color="primary"
-            sx={{ mt: 2 }}
-            disabled={isLoading}
-          >
-            {isLoading ? 'Updating...' : 'Update Profile'}
-          </Button>
-        </form>
-        
-        {vehicleDetails.length > 0 && (
-          <Box mt={4}>
-            <Typography variant="h6" gutterBottom>
-              Vehicle Details
-            </Typography>
-            <List>
-              {vehicleDetails.map((vehicle, index) => (
-                <ListItem key={index}>
-                  <ListItemText
-                    primary={`Vehicle ${index + 1}`}
-                    secondary={`Number: ${vehicle.vehicleNumber} | Type: ${vehicle.vehicleType}`}
-                  />
-                </ListItem>
-              ))}
-            </List>
-          </Box>
+    <div className="driver-profile-container">
+      <div className="profile-header">
+        <h1>Driver Profile</h1>
+        {!isEditing && !changingPassword && (
+          <button className="btn primary" onClick={() => setIsEditing(true)}>Edit Profile</button>
         )}
-      </Paper>
-    </Box>
+      </div>
+
+      {!changingPassword && (
+        <form onSubmit={handleUpdateProfile} className="profile-form">
+          <label>ID
+            <input type="text" value={driver.driverId || ''} disabled />
+          </label>
+
+          <label>Name
+            <input type="text" name="driverName" value={driver.driverName} onChange={handleInputChange} disabled={!isEditing} required />
+          </label>
+
+          <label>Contact Number
+            <input type="text" name="driverContactNumber" value={driver.driverContactNumber} onChange={handleInputChange} disabled={!isEditing} required />
+          </label>
+
+          <label>Email
+            <input type="email" name="driverEmail" value={driver.driverEmail} onChange={handleInputChange} disabled={!isEditing} required />
+          </label>
+
+          <label>Status
+            <input type="text" value={driver.status} disabled />
+          </label>
+
+          <label>Notes
+            <textarea name="notes" value={driver.notes} onChange={handleInputChange} disabled={!isEditing}></textarea>
+          </label>
+
+          <div className="vehicle-section">
+            <h2>Vehicle Details</h2>
+            {isEditing && <button type="button" className="btn small" onClick={addVehicle}>Add Vehicle</button>}
+            {driver.vehicleDetails.map((vehicle, index) => (
+              <div key={index} className="vehicle-card">
+                <div className="vehicle-row">
+                  <label>Vehicle Number
+                    <input type="text" value={vehicle.vehicleNumber} onChange={(e) => handleVehicleChange(index, 'vehicleNumber', e.target.value)} disabled={!isEditing} required />
+                  </label>
+                  <label>Vehicle Type
+                    <input type="text" value={vehicle.vehicleType} onChange={(e) => handleVehicleChange(index, 'vehicleType', e.target.value)} disabled={!isEditing} required />
+                  </label>
+                  {isEditing && (
+                    <button type="button" className="btn danger small" onClick={() => removeVehicle(index)}>Remove</button>
+                  )}
+                </div>
+              </div>
+            ))}
+          </div>
+
+          {isEditing && (
+            <div className="form-actions">
+              <button type="submit" className="btn success">Save Changes</button>
+              <button type="button" className="btn secondary" onClick={() => setIsEditing(false)}>Cancel</button>
+            </div>
+          )}
+        </form>
+      )}
+
+      {changingPassword ? (
+        <form onSubmit={handleUpdatePassword} className="password-form">
+          <h2>Change Password</h2>
+          <label>New Password
+            <input type="password" name="newPassword" value={passwords.newPassword} onChange={handlePasswordChange} required minLength="6" />
+          </label>
+          <label>Confirm Password
+            <input type="password" name="confirmPassword" value={passwords.confirmPassword} onChange={handlePasswordChange} required minLength="6" />
+          </label>
+          <div className="form-actions">
+            <button type="submit" className="btn primary">Update Password</button>
+            <button type="button" className="btn secondary" onClick={() => setChangingPassword(false)}>Cancel</button>
+          </div>
+        </form>
+      ) : (
+        !isEditing && (
+          <div className="change-password">
+            <button className="btn info" onClick={() => setChangingPassword(true)}>Change Password</button>
+          </div>
+        )
+      )}
+
+      <Snackbar open={snackbar.open} autoHideDuration={3000} onClose={handleCloseSnackbar} anchorOrigin={{ vertical: 'bottom', horizontal: 'right' }}>
+        <Alert onClose={handleCloseSnackbar} severity={snackbar.severity}>
+          {snackbar.message}
+        </Alert>
+      </Snackbar>
+    </div>
   );
 };
 
-export default DriverProfile;
+export default DProfile;
