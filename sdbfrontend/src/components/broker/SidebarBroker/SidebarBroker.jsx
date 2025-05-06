@@ -58,6 +58,13 @@ const SidebarBroker = () => {
             <DeliveryIcon /> View New Lots
           </Link>
         </li>
+
+        <li className="nav-item">
+          <Link to="/broker-my-valuations" className="nav-link">
+            <DeliveryIcon /> My Valuation Prices
+          </Link> 
+        </li>
+
         <li className="nav-item">
           <Link to="/broker-confirmed-lots" className="nav-link">
             <PaymentIcon /> My Confirmed Lots

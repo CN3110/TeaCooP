@@ -17,6 +17,7 @@ import ViewDeliveryRecords from './pages/Driver/ViewDeliveryRecords/ViewDelivery
 import ViewNewLots from './pages/Broker/ViewNewLots/ViewNewLots';
 import ViewTeaTypes from './pages/View Tea Types/ViewTeaTypes';
 import Login from './pages/Home Page/Login/Login'
+import BrokerMyValuations from './pages/Broker/MyValuations/BrokerMyValuations';
 
 const App = () => {
   return (
@@ -44,6 +45,9 @@ const App = () => {
           <Route path="/broker-dashboard" element={<BrokerDashboard />} />
           <Route path="/broker-profile" element={<BProfile />} />
           <Route path="/broker-view-new-lots" element={<ViewNewLots />} />
+          <Route path="/broker-my-valuations" element={<BrokerMyValuations />} />
+
+         
         </Routes>
 
         <Footer />
