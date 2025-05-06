@@ -7,13 +7,17 @@ import axios from "axios";
 const ViewNewLots = () => {
   const [lots, setLots] = useState([]);
   const [valuationInputs, setValuationInputs] = useState({});
+  const [brokerId, setBrokerId] = useState("");
 
-  // Simulate brokerId for testing
   useEffect(() => {
-    if (!localStorage.getItem("brokerId")) {
-      localStorage.setItem("brokerId", "B001"); // Test broker
+    const loggedBrokerId = localStorage.getItem("userId");
+
+    if (!loggedBrokerId) {
+      alert("Broker user ID not found in local storage.");
+      return;
     }
 
+    setBrokerId(loggedBrokerId); 
     fetchLots();
   }, []);
 
@@ -34,7 +38,6 @@ const ViewNewLots = () => {
   };
 
   const submitValuation = async (lotNumber) => {
-    const brokerId = localStorage.getItem("brokerId");
     const price = valuationInputs[lotNumber];
 
     if (!price || isNaN(price)) {
@@ -53,7 +56,6 @@ const ViewNewLots = () => {
 
       alert("Valuation submitted!");
 
-      // Update the lot in state without re-fetching
       setLots((prevLots) =>
         prevLots.map((lot) =>
           lot.lotNumber === lotNumber
@@ -110,14 +112,14 @@ const ViewNewLots = () => {
                       onChange={(e) =>
                         handleInputChange(lot.lotNumber, e.target.value)
                       }
-                      disabled={!!lot.brokerValuation} // prevent editing if already submitted
+                      disabled={!!lot.brokerValuation}
                     />
                   </td>
                   <td>
                     <Button
                       variant="success"
                       onClick={() => submitValuation(lot.lotNumber)}
-                      disabled={!!lot.brokerValuation} // disable button if already submitted
+                      disabled={!!lot.brokerValuation}
                     >
                       <FaCheck />
                     </Button>
