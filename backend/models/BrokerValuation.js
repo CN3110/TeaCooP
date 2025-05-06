@@ -14,17 +14,23 @@ const BrokerValuation = {
   async confirmValuation(valuationId, employeeId) {
     await db.query(`
       UPDATE broker_valuation 
-      SET is_confirmed = TRUE, confirmed_by = ?, confirmed_at = NOW()
+      SET is_confirmed = TRUE, 
+          confirmed_by = ?, 
+          confirmed_at = NOW()
       WHERE valuation_id = ?
     `, [employeeId, valuationId]);
-
+  
     await db.query(`
       UPDATE broker_valuation 
       SET is_confirmed = FALSE 
-      WHERE lotNumber = (SELECT lotNumber FROM broker_valuation WHERE valuation_id = ?) 
+      WHERE lotNumber = (
+        SELECT lotNumber FROM (
+          SELECT lotNumber FROM broker_valuation WHERE valuation_id = ?
+        ) AS sub
+      ) 
       AND valuation_id != ?
     `, [valuationId, valuationId]);
-  },
+  }, 
 
   async getValuationsByLot(lotNumber) {
     const [results] = await db.query(`
@@ -40,7 +46,7 @@ const BrokerValuation = {
     `, [lotNumber]);
     return results;
   },
-  
+
   async getValuationsByBroker(brokerId) {
     const [results] = await db.query(`
       SELECT 
@@ -57,17 +63,14 @@ const BrokerValuation = {
   },
 
   async updateValuationPrice(valuationId, valuationPrice) {
-    // First check if this valuation is already confirmed
     const [checkResult] = await db.query(`
       SELECT is_confirmed FROM broker_valuation WHERE valuation_id = ?
     `, [valuationId]);
     
-    // If valuation is confirmed, don't allow updates
     if (checkResult.length > 0 && checkResult[0].is_confirmed) {
       throw new Error('Cannot update a confirmed valuation');
     }
     
-    // Update the valuation price
     const [result] = await db.query(`
       UPDATE broker_valuation 
       SET valuationPrice = ?, 
@@ -80,33 +83,27 @@ const BrokerValuation = {
   },
 
   async deleteValuation(valuationId) {
-    // First check if this valuation is already confirmed
     const [checkResult] = await db.query(`
       SELECT is_confirmed, lotNumber FROM broker_valuation WHERE valuation_id = ?
     `, [valuationId]);
     
-    // If valuation is confirmed, don't allow deletion
     if (checkResult.length > 0 && checkResult[0].is_confirmed) {
       throw new Error('Cannot delete a confirmed valuation');
     }
     
-    // Delete the valuation
     const [result] = await db.query(`
       DELETE FROM broker_valuation 
       WHERE valuation_id = ? 
       AND is_confirmed = FALSE
     `, [valuationId]);
 
-    // If this was the last valuation for this lot, update lot status
     if (result.affectedRows > 0 && checkResult.length > 0) {
       const lotNumber = checkResult[0].lotNumber;
       
-      // Check if there are any other valuations for this lot
       const [countResult] = await db.query(`
         SELECT COUNT(*) as count FROM broker_valuation WHERE lotNumber = ?
       `, [lotNumber]);
       
-      // If no other valuations, update lot status back to 'available'
       if (countResult.length > 0 && countResult[0].count === 0) {
         await db.query(`
           UPDATE lot SET status = 'available' WHERE lotNumber = ?

@@ -14,15 +14,21 @@ exports.getAllGroupedByLot = async (req, res) => {
 exports.confirmValuation = async (req, res) => {
   const { valuationId } = req.params;
   const { employeeId } = req.body;
- 
-  console.log(`Employee ID: ${employeeId}, Valuation ID: ${valuationId}`); // Log for debugging
-
+  
   try {
+    if (!employeeId) {
+      return res.status(400).json({ 
+        message: 'Employee ID is required' 
+      });
+    }
+    
     await BrokerValuation.confirmValuation(valuationId, employeeId);
-    res.send('Valuation confirmed successfully');
+    res.json({ message: 'Valuation confirmed successfully' });
   } catch (err) {
     console.error(err);
-    res.status(500).send('Error confirming valuation');
+    res.status(500).json({ 
+      message: err.message || 'Error confirming valuation' 
+    });
   }
 };
 

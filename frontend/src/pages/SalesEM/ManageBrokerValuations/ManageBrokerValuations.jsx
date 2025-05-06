@@ -22,17 +22,32 @@ const ManageBrokerValuations = () => {
 
   const handleConfirm = async (valuationId) => {
     try {
-      const employeeId = localStorage.getItem("employeeId") || 1; // assuming login
+      // Get employee ID from localStorage
+      const employeeId = localStorage.getItem("userId");
+      
+      if (!employeeId) {
+        alert("Employee ID not found. Please log in again.");
+        return;
+      }
+      
+      if (isNaN(employeeId)) {
+        alert("Invalid employee ID format");
+        return;
+      }
+  
       const res = await fetch(`http://localhost:3001/api/valuations/${valuationId}/confirm`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
         },
-        body: JSON.stringify({ employeeId }),
+        body: JSON.stringify({ employeeId: parseInt(employeeId) }),
       });
-
-      if (!res.ok) throw new Error("Failed to confirm valuation");
-
+  
+      if (!res.ok) {
+        const errorData = await res.json();
+        throw new Error(errorData.message || "Failed to confirm valuation");
+      }
+  
       alert("Valuation confirmed!");
       // Reload updated data
       const updated = await fetch(`http://localhost:3001/api/valuations/lot/${lotNumber}`);
@@ -40,6 +55,7 @@ const ManageBrokerValuations = () => {
       setValuations(data);
     } catch (error) {
       console.error("Error confirming valuation:", error);
+      alert(`Error: ${error.message}`);
     }
   };
 
