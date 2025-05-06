@@ -102,3 +102,14 @@ exports.deleteValuation = async (req, res) => {
     }
   }
 };
+
+//to get all the confirmed valuations - for employee view
+exports.getConfirmedValuations = async (req, res) => {
+  try {
+    const results = await BrokerValuation.getConfirmedValuations();
+    res.json(results);
+  } catch (err) {
+    console.error(err);
+    res.status(500).send('Error fetching confirmed valuations');
+  }
+};

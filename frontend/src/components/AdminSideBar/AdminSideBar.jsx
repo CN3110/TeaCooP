@@ -66,7 +66,7 @@ const AdminSideBar = () => {
             <div className="dropdown-content">
               <Link to="/employee-dashboard-create-lot">Add New Sale</Link>
               <Link to="/view-lots">View Sales Records</Link>
-              <Link to="#">Confirm Sale Orders</Link>
+              <Link to="/view-confirmed-lots">Confirm Sale Orders</Link>
             </div>
           )}
         </div>

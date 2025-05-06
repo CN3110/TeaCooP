@@ -112,6 +112,34 @@ const BrokerValuation = {
     }
     
     return result.affectedRows > 0;
+  },
+
+  async getConfirmedValuations() {
+    const [results] = await db.query(`
+      SELECT 
+        bv.valuation_id,
+        bv.lotNumber,
+        bv.brokerId,
+        bv.valuationPrice AS valuationAmount,
+        bv.valuationDate,
+        bv.is_confirmed,
+        bv.confirmed_at,
+        bv.confirmed_by,
+        b.brokerName,
+        b.brokerCompanyName AS companyName,
+        l.teaGrade,
+        l.noOfBags,
+        l.netWeight,
+        l.totalNetWeight,
+        l.invoiceNumber,
+        l.manufacturingDate
+      FROM broker_valuation bv
+      JOIN broker b ON bv.brokerId = b.brokerId
+      JOIN lot l ON bv.lotNumber = l.lotNumber
+      WHERE bv.is_confirmed = TRUE
+      ORDER BY bv.confirmed_at DESC
+    `);
+    return results;
   }
 };
 

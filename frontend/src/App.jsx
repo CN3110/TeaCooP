@@ -26,7 +26,6 @@ import EditLot from "./pages/SalesEM/EditLot/EditLot.jsx";
 import ViewTransportRequests from "./pages/ViewTransportRequests/ViewTransportRequests.jsx";
 import ManageDeliveryRoutes from "./pages/ManageDeliveryRoutes/ManageDeliveryRoutes.jsx";
 import ViewValuations from "./pages/SalesEM/ViewValuations/ViewValuations.jsx";
-import ManageBrokerValuations from "./pages/SalesEM/ManageBrokerValuations/ManageBrokerValuations.jsx";
 import AddEmployee from "./pages/ManageEmployees/AddEmployee/AddEmployee.jsx";
 import ViewEmployees from "./pages/ManageEmployees/ViewEmployees/ViewEmployees.jsx";
 import EditEmployee from "./pages/ManageEmployees/EditEmployee/EditEmployee.jsx";
@@ -38,6 +37,7 @@ import NoticeList from "./pages/NoticeManagement/NoticeList/NoticeList.jsx";
 import EditNotice from "./pages/NoticeManagement/EditNotice/EditNotice.jsx";
 import RawTeaRecords from "./pages/RawTeaRecords/RawTeaRecords.jsx";
 import TeaTypeStockManagement from "./pages/TeaTypeStockManagement/TeaTypeStockManagement.jsx";
+import ViewConfirmedLots from "./pages/SalesEM/ViewConfimedLots/ViewConfimedLots.jsx";
 
 const App = () => {
   return (
@@ -75,11 +75,11 @@ const App = () => {
             <Route path="/edit-lot/:lotNumber" element={<EditLot />} />
             <Route path="/employee-dashboard-manage-delivery-routes" element={<ManageDeliveryRoutes />} />
             <Route path="/employee-view-transport-requests" element={<ViewTransportRequests />} />
-            <Route path="/employee-view-manage-broker-valuation-price" element={<ManageBrokerValuations/>} />
             <Route path="/view-valuations/:lotNumber" element={<ViewValuations />} />
             <Route path="/tea-production" element={<TeaProductionPage />} />
             <Route path="/raw-tea-records" element={<RawTeaRecords />} />
             <Route path="/tea-type-stock-management" element={<TeaTypeStockManagement />} />
+            <Route path="/view-confirmed-lots" element={<ViewConfirmedLots />} />
 
             {/* Admin Routes */}
             <Route path="/admin-dashboard" element={<AdminDashboard />} />

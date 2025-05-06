@@ -18,4 +18,7 @@ router.delete('/:valuationId', brokerValuationController.deleteValuation);
 router.get('/', brokerValuationController.getAllGroupedByLot);
 router.post('/:valuationId/confirm', brokerValuationController.confirmValuation);
 
+// Get confirmed valuations -all confrim valuations - to employee view
+router.get('/confirmed', brokerValuationController.getConfirmedValuations);
+
 module.exports = router;

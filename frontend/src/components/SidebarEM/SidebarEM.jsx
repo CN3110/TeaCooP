@@ -76,7 +76,7 @@ const SidebarEM = () => {
             <div className="dropdown-content">
               <Link to="/employee-dashboard-create-lot">Add New Lot</Link>
               <Link to="/view-lots">View Lot Records</Link>
-              <Link to="#">Confirm Lot Orders</Link>
+              <Link to="/view-confirmed-lots">Confirm Lot Orders</Link>
             </div>
           )}
         </div>
