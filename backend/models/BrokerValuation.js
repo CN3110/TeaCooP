@@ -140,7 +140,32 @@ const BrokerValuation = {
       ORDER BY bv.confirmed_at DESC
     `);
     return results;
+  }, 
+
+  //to get all confrimed lots for logged broker - broker view
+  async getConfirmedValuationsByBroker(brokerId) {
+    const [results] = await db.query(`
+      SELECT 
+        bv.valuation_id,
+        bv.lotNumber,
+        bv.brokerId,
+        bv.valuationPrice AS valuationAmount,
+        bv.valuationDate,
+        bv.is_confirmed,
+        bv.confirmed_at,
+        bv.confirmed_by,
+        l.teaGrade,
+        l.noOfBags,
+        l.totalNetWeight
+      FROM broker_valuation bv
+      JOIN lot l ON bv.lotNumber = l.lotNumber
+      WHERE bv.brokerId = ? AND bv.is_confirmed = TRUE
+      ORDER BY bv.confirmed_at DESC
+    `, [brokerId]);
+  
+    return results;
   }
+  
 };
 
 module.exports = BrokerValuation;

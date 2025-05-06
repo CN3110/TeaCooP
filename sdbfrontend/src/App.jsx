@@ -18,6 +18,7 @@ import ViewNewLots from './pages/Broker/ViewNewLots/ViewNewLots';
 import ViewTeaTypes from './pages/View Tea Types/ViewTeaTypes';
 import Login from './pages/Home Page/Login/Login'
 import BrokerMyValuations from './pages/Broker/MyValuations/BrokerMyValuations';
+import BrokerConfirmLots from './pages/Broker/BrokerConfirmLots/BrokerConfirmLots';
 
 const App = () => {
   return (
@@ -46,6 +47,9 @@ const App = () => {
           <Route path="/broker-profile" element={<BProfile />} />
           <Route path="/broker-view-new-lots" element={<ViewNewLots />} />
           <Route path="/broker-my-valuations" element={<BrokerMyValuations />} />
+          <Route path="/broker-confirm-lots" element={<BrokerConfirmLots />} />
+
+          {/* 404 Not Found Route */}
 
          
         </Routes>

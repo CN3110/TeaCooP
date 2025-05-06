@@ -66,7 +66,7 @@ const SidebarBroker = () => {
         </li>
 
         <li className="nav-item">
-          <Link to="/broker-confirmed-lots" className="nav-link">
+          <Link to="/broker-confirm-lots" className="nav-link">
             <PaymentIcon /> My Confirmed Lots
           </Link>
         </li>

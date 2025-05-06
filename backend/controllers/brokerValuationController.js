@@ -113,3 +113,16 @@ exports.getConfirmedValuations = async (req, res) => {
     res.status(500).send('Error fetching confirmed valuations');
   }
 };
+
+//to get all confrimed lots for logged broker - broker view
+exports.getConfirmedValuationsByBroker = async (req, res) => {
+  const { brokerId } = req.params;
+
+  try {
+    const results = await BrokerValuation.getConfirmedValuationsByBroker(brokerId);
+    res.json(results);
+  } catch (err) {
+    console.error(err);
+    res.status(500).send('Error fetching confirmed valuations by broker');
+  }
+};

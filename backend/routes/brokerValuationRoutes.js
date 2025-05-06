@@ -21,4 +21,8 @@ router.post('/:valuationId/confirm', brokerValuationController.confirmValuation)
 // Get confirmed valuations -all confrim valuations - to employee view
 router.get('/confirmed', brokerValuationController.getConfirmedValuations);
 
+// Get confirmed valuations by broker - to broker view
+router.get('/broker/:brokerId/confirmed', brokerValuationController.getConfirmedValuationsByBroker);
+
+
 module.exports = router;
