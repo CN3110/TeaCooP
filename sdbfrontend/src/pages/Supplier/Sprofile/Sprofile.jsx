@@ -1,194 +1,238 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
-import { 
-  Box, 
-  Typography, 
-  TextField, 
-  Button, 
-  Paper, 
-  Alert,
-  Avatar,
-  List,
-  ListItem,
-  ListItemText
-} from '@mui/material';
-import { green } from '@mui/material/colors';
+import { useParams } from 'react-router-dom';
+import Snackbar from '@mui/material/Snackbar';
+import MuiAlert from '@mui/material/Alert';
+import SupplierLayout from '../../../components/supplier/SupplierLayout/SupplierLayout';
+import './sprofile.css';
 
-const SupplierProfile = () => {
-  const [profile, setProfile] = useState(null);
-  const [formData, setFormData] = useState({
+const Alert = React.forwardRef(function Alert(props, ref) {
+  return <MuiAlert elevation={6} ref={ref} variant="filled" {...props} />;
+});
+
+const Sprofile = () => {
+  const { supplierId: paramSupplierId } = useParams();
+  const supplierId = paramSupplierId || localStorage.getItem('userId');
+
+  const [loading, setLoading] = useState(true);
+  const [isEditing, setIsEditing] = useState(false);
+  const [changingPassword, setChangingPassword] = useState(false);
+  const [snackbar, setSnackbar] = useState({ open: false, message: '', severity: 'success' });
+
+  const [supplier, setSupplier] = useState({
     supplierName: '',
     supplierContactNumber: '',
-    supplierEmail: ''
+    supplierEmail: '',
+    landDetails: []
   });
-  const [landDetails, setLandDetails] = useState([]);
-  const [error, setError] = useState('');
-  const [success, setSuccess] = useState('');
-  const [isLoading, setIsLoading] = useState(true);
+
+  const [passwords, setPasswords] = useState({
+    newPassword: '',
+    confirmPassword: ''
+  });
 
   useEffect(() => {
-    const fetchProfile = async () => {
-      try {
-        const token = localStorage.getItem('token');
-        const response = await axios.get('/api/auth/profile', {
-          headers: {
-            Authorization: `Bearer ${token}`
-          }
-        });
-        
-        setProfile(response.data);
-        setFormData({
-          supplierName: response.data.supplierName,
-          supplierContactNumber: response.data.supplierContactNumber,
-          supplierEmail: response.data.supplierEmail
-        });
-        
-        // Fetch land details if available
-        if (response.data.landDetails) {
-          setLandDetails(response.data.landDetails);
-        }
-      } catch (err) {
-        setError(err.response?.data?.message || 'Failed to fetch profile');
-      } finally {
-        setIsLoading(false);
-      }
-    };
-    
-    fetchProfile();
-  }, []);
+    if (!supplierId) {
+      setLoading(false);
+      showSnackbar('No supplier ID found. Please log in.', 'error');
+      return;
+    }
 
-  const handleChange = (e) => {
-    const { name, value } = e.target;
-    setFormData(prev => ({
-      ...prev,
-      [name]: value
-    }));
-  };
+    fetchSupplierDetails();
+  }, [supplierId]);
 
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-    setIsLoading(true);
-    setError('');
-    setSuccess('');
-    
+  const fetchSupplierDetails = async () => {
     try {
-      const token = localStorage.getItem('token');
-      await axios.put(`/api/suppliers/${profile.supplierId}`, formData, {
-        headers: {
-          Authorization: `Bearer ${token}`
-        }
+      setLoading(true);
+      const response = await axios.get(`http://localhost:3001/api/suppliers/${supplierId}`);
+      setSupplier({
+        ...response.data,
+        landDetails: response.data.landDetails || []
       });
-      
-      setSuccess('Profile updated successfully');
-      // Refresh profile data
-      const response = await axios.get('/api/auth/profile', {
-        headers: {
-          Authorization: `Bearer ${token}`
-        }
-      });
-      setProfile(response.data);
-    } catch (err) {
-      setError(err.response?.data?.message || 'Failed to update profile');
+    } catch (error) {
+      showSnackbar('Failed to load supplier details', 'error');
+      console.error(error);
     } finally {
-      setIsLoading(false);
+      setLoading(false);
     }
   };
 
-  if (isLoading) return <Typography>Loading...</Typography>;
-  if (!profile) return <Typography>No profile data found</Typography>;
+  const showSnackbar = (message, severity = 'success') => {
+    setSnackbar({ open: true, message, severity });
+  };
+
+  const handleCloseSnackbar = () => {
+    setSnackbar({ ...snackbar, open: false });
+  };
+
+  const handleInputChange = (e) => {
+    const { name, value } = e.target;
+    setSupplier({ ...supplier, [name]: value });
+  };
+
+  const handleLandChange = (index, field, value) => {
+    const updatedLand = [...supplier.landDetails];
+    updatedLand[index] = { ...updatedLand[index], [field]: value };
+    setSupplier({ ...supplier, landDetails: updatedLand });
+  };
+
+  const addLand = () => {
+    setSupplier({
+      ...supplier,
+      landDetails: [...supplier.landDetails, { landSize: '', landAddress: '' }]
+    });
+  };
+
+  const removeLand = (index) => {
+    const updatedLand = [...supplier.landDetails];
+    updatedLand.splice(index, 1);
+    setSupplier({ ...supplier, landDetails: updatedLand });
+  };
+
+  const handleUpdateProfile = async (e) => {
+    e.preventDefault();
+    try {
+      await axios.put(`http://localhost:3001/api/suppliers/${supplierId}`, {
+        supplierName: supplier.supplierName,
+        supplierContactNumber: supplier.supplierContactNumber,
+        supplierEmail: supplier.supplierEmail,
+        landDetails: supplier.landDetails
+      });
+      showSnackbar('Profile updated successfully');
+      setIsEditing(false);
+      fetchSupplierDetails();
+    } catch (error) {
+      showSnackbar('Failed to update profile', 'error');
+      console.error(error);
+    }
+  };
+
+  const handlePasswordChange = (e) => {
+    const { name, value } = e.target;
+    setPasswords({ ...passwords, [name]: value });
+  };
+
+  const validatePasswords = () => {
+    if (passwords.newPassword.length < 6) {
+      showSnackbar('Password must be at least 6 characters', 'error');
+      return false;
+    }
+    if (passwords.newPassword !== passwords.confirmPassword) {
+      showSnackbar('Passwords do not match', 'error');
+      return false;
+    }
+    return true;
+  };
+
+  const handleUpdatePassword = async (e) => {
+    e.preventDefault();
+    if (!validatePasswords()) return;
+    try {
+      await axios.put(`http://localhost:3001/api/suppliers/${supplierId}/password`, {
+        newPassword: passwords.newPassword
+      });
+      showSnackbar('Password updated successfully');
+      setChangingPassword(false);
+      setPasswords({ newPassword: '', confirmPassword: '' });
+    } catch (error) {
+      showSnackbar('Failed to update password', 'error');
+      console.error(error);
+    }
+  };
+
+  if (!supplierId) {
+    return <div className="error-message">No supplier ID found. Please log in.</div>;
+  }
+
+  if (loading) {
+    return <div className="loader-container"><div className="loader"></div></div>;
+  }
 
   return (
-    <Box sx={{ p: 3 }}>
-      <Paper elevation={3} sx={{ p: 3 }}>
-        <Box display="flex" alignItems="center" mb={3}>
-          <Avatar 
-            sx={{ 
-              bgcolor: green[500], 
-              width: 56, 
-              height: 56,
-              mr: 2
-            }}
-          >
-            {profile.supplierName.charAt(0)}
-          </Avatar>
-          <Typography variant="h4">Supplier Profile</Typography>
-        </Box>
-        
-        {error && <Alert severity="error" sx={{ mb: 2 }}>{error}</Alert>}
-        {success && <Alert severity="success" sx={{ mb: 2 }}>{success}</Alert>}
-        
-        <form onSubmit={handleSubmit}>
-          <TextField
-            label="Supplier ID"
-            variant="outlined"
-            fullWidth
-            margin="normal"
-            value={profile.supplierId}
-            disabled
-          />
-          <TextField
-            label="Full Name"
-            name="supplierName"
-            variant="outlined"
-            fullWidth
-            margin="normal"
-            value={formData.supplierName}
-            onChange={handleChange}
-            required
-          />
-          <TextField
-            label="Contact Number"
-            name="supplierContactNumber"
-            variant="outlined"
-            fullWidth
-            margin="normal"
-            value={formData.supplierContactNumber}
-            onChange={handleChange}
-            required
-          />
-          <TextField
-            label="Email"
-            name="supplierEmail"
-            type="email"
-            variant="outlined"
-            fullWidth
-            margin="normal"
-            value={formData.supplierEmail}
-            onChange={handleChange}
-            required
-          />
-          
-          <Button
-            type="submit"
-            variant="contained"
-            color="primary"
-            sx={{ mt: 2 }}
-            disabled={isLoading}
-          >
-            {isLoading ? 'Updating...' : 'Update Profile'}
-          </Button>
-        </form>
-        
-        {landDetails.length > 0 && (
-          <Box mt={4}>
-            <Typography variant="h6" gutterBottom>
-              Land Details
-            </Typography>
-            <List>
-              {landDetails.map((land, index) => (
-                <ListItem key={index}>
-                  <ListItemText
-                    primary={`Land ${index + 1}`}
-                    secondary={`Size: ${land.landSize} acres | Address: ${land.landAddress}`}
-                  />
-                </ListItem>
+    <SupplierLayout>
+      <div className="supplier-profile-container">
+        <div className="profile-header">
+          <h1>Supplier Profile</h1>
+          {!isEditing && !changingPassword && (
+            <button className="btn primary" onClick={() => setIsEditing(true)}>Edit Profile</button>
+          )}
+        </div>
+
+        {!changingPassword && (
+          <form onSubmit={handleUpdateProfile} className="profile-form">
+            <label>Supplier ID
+              <input type="text" value={supplierId} disabled />
+            </label>
+
+            <label>Full Name
+              <input type="text" name="supplierName" value={supplier.supplierName} onChange={handleInputChange} disabled={!isEditing} required />
+            </label>
+
+            <label>Contact Number
+              <input type="text" name="supplierContactNumber" value={supplier.supplierContactNumber} onChange={handleInputChange} disabled={!isEditing} required />
+            </label>
+
+            <label>Email
+              <input type="email" name="supplierEmail" value={supplier.supplierEmail} onChange={handleInputChange} disabled={!isEditing} required />
+            </label>
+
+            <div className="land-section">
+              <h2>Land Details</h2>
+              {isEditing && <button type="button" className="btn small" onClick={addLand}>Add Land</button>}
+              {supplier.landDetails.map((land, index) => (
+                <div key={index} className="land-card">
+                  <label>Size (acres)
+                    <input type="text" value={land.landSize} onChange={(e) => handleLandChange(index, 'landSize', e.target.value)} disabled={!isEditing} required />
+                  </label>
+                  <label>Address
+                    <input type="text" value={land.landAddress} onChange={(e) => handleLandChange(index, 'landAddress', e.target.value)} disabled={!isEditing} required />
+                  </label>
+                  {isEditing && (
+                    <button type="button" className="btn danger small" onClick={() => removeLand(index)}>Remove</button>
+                  )}
+                </div>
               ))}
-            </List>
-          </Box>
+            </div>
+
+            {isEditing && (
+              <div className="form-actions">
+                <button type="submit" className="btn success">Save Changes</button>
+                <button type="button" className="btn secondary" onClick={() => setIsEditing(false)}>Cancel</button>
+              </div>
+            )}
+          </form>
         )}
-      </Paper>
-    </Box>
+
+        {changingPassword ? (
+          <form onSubmit={handleUpdatePassword} className="password-form">
+            <h2>Change Password</h2>
+            <label>New Password
+              <input type="password" name="newPassword" value={passwords.newPassword} onChange={handlePasswordChange} required />
+            </label>
+            <label>Confirm Password
+              <input type="password" name="confirmPassword" value={passwords.confirmPassword} onChange={handlePasswordChange} required />
+            </label>
+            <div className="form-actions">
+              <button type="submit" className="btn primary">Update Password</button>
+              <button type="button" className="btn secondary" onClick={() => setChangingPassword(false)}>Cancel</button>
+            </div>
+          </form>
+        ) : (
+          !isEditing && (
+            <div className="change-password">
+              <button className="btn info" onClick={() => setChangingPassword(true)}>Change Password</button>
+            </div>
+          )
+        )}
+
+        <Snackbar open={snackbar.open} autoHideDuration={3000} onClose={handleCloseSnackbar} anchorOrigin={{ vertical: 'bottom', horizontal: 'right' }}>
+          <Alert onClose={handleCloseSnackbar} severity={snackbar.severity}>
+            {snackbar.message}
+          </Alert>
+        </Snackbar>
+      </div>
+    </SupplierLayout>
   );
 };
 
-export default SupplierProfile;
+export default Sprofile;

@@ -208,8 +208,6 @@ exports.disableDriver = async (req, res) => {
 };
 
 
-// Add this method to your driverController.js file
-
 exports.updatePassword = async (req, res) => {
   const { driverId } = req.params;
   const { newPassword } = req.body;

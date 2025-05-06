@@ -5,9 +5,8 @@ const {
   updateSupplier,
   getSupplierById,
   disableSupplier,
+  updatePassword,
 } = require("../controllers/supplierController");
-const { authenticate, authorize } = require('../middleware/authMiddleware');
-
 const router = express.Router();
 
 // CRUD routes for suppliers
@@ -17,7 +16,6 @@ router.put("/:supplierId", updateSupplier); // Update a supplier
 router.get("/:supplierId", getSupplierById); // Get a single supplier by ID
 router.put("/:supplierId/disable", disableSupplier); // Disable a supplier
 
-// Get supplier profile - protected route
-//router.get('/profile', authenticate, getProfile);
+router.put("/:supplierId/password", updatePassword);
 
 module.exports = router;

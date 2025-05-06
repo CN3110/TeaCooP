@@ -1,6 +1,7 @@
 const db = require("../config/database");
 const nodemailer = require("nodemailer");
 const bcrypt = require("bcrypt");
+const supplier = require("../models/supplier");
 
 // Generate a random 6-digit passcode
 const generatePasscode = () => {
@@ -269,5 +270,30 @@ exports.disableSupplier = async (req, res) => {
   } catch (error) {
     console.error("Error disabling supplier:", error);
     res.status(500).json({ error: "Failed to disable supplier" });
+  }
+};
+
+exports.updatePassword = async (req, res) => {
+  const { supplierId } = req.params;
+  const { newPassword } = req.body;
+
+  if (!newPassword) {
+    return res.status(400).json({ error: "New password is required" });
+  }
+
+  try {
+    // Check if supplier exists
+    const supplierExists = await supplier.getSupplierById(supplierId);
+    if (!supplierExists) {
+      return res.status(404).json({ error: "Supplier not found" });
+    }
+
+    // Update the password
+    await supplier.updateSupplierPassword(supplierId, newPassword);
+
+    res.status(200).json({ message: "Password updated successfully" });
+  } catch (error) {
+    console.error("Error updating password:", error);
+    res.status(500).json({ error: "Failed to update password" });
   }
 };
