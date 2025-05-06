@@ -3,6 +3,7 @@ import axios from 'axios';
 import { useParams } from 'react-router-dom';
 import Snackbar from '@mui/material/Snackbar';
 import MuiAlert from '@mui/material/Alert';
+import DriverLayout from "../../../components/driver/DriverLayout/DriverLayout";
 import './DProfile.css';
 
 const Alert = React.forwardRef(function Alert(props, ref) {
@@ -176,6 +177,7 @@ const DProfile = () => {
   }
 
   return (
+    <DriverLayout>
     <div className="driver-profile-container">
       <div className="profile-header">
         <h1>Driver Profile</h1>
@@ -267,6 +269,7 @@ const DProfile = () => {
         </Alert>
       </Snackbar>
     </div>
+    </DriverLayout>
   );
 };
 

@@ -1,5 +1,5 @@
 .driver-profile-container {
-    max-width: 900px;
+    max-width: 600px;
     margin: auto;
     padding: 2rem;
     font-family: Arial, sans-serif;
@@ -16,7 +16,7 @@
   .password-form {
     display: flex;
     flex-direction: column;
-    gap: 15px;
+    gap: 5px;
     background: #fff;
     padding: 20px;
     border-radius: 8px;
@@ -31,7 +31,7 @@
   
   input,
   textarea {
-    padding: 8px;
+    padding: 5px;
     font-size: 16px;
     border: 1px solid #aaa;
     border-radius: 4px;
