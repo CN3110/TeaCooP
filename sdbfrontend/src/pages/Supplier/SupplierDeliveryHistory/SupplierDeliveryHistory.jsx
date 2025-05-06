@@ -2,10 +2,13 @@ import React, { useState, useEffect } from "react";
 import SupplierLayout from "../../../components/supplier/SupplierLayout/SupplierLayout"; 
 import "./SupplierDeliveryHistory.css"; // Ensure this file exists
 import { BiSearch } from "react-icons/bi";
+import axios from 'axios';
+
 
 const SupplierDeliveryHistory = () => {
   const [deliveries, setDeliveries] = useState([]);
   const [searchDate, setSearchDate] = useState("");
+  const [loading, setLoading] = useState(true);
 
   // Get supplier ID from localStorage (or context)
   const supplierId = localStorage.getItem("supplierId"); // Ensure this is set on login
@@ -13,29 +16,29 @@ const SupplierDeliveryHistory = () => {
   useEffect(() => {
     const fetchDeliveries = async () => {
       try {
-        const response = await fetch("http://localhost:3001/api/deliveries");
-        if (!response.ok) throw new Error("Failed to fetch deliveries");
+        // Get supplierId from localStorage
+        const supplierId = localStorage.getItem('userId');
+        
+        if (!supplierId) {
+          console.error('No supplier ID found in localStorage');
+          setLoading(false);
+          return;
+        }
+        
+        // Fetch only this supplier's deliveries
+        const response = await axios.get(`http://localhost:3001/api/deliveries/by-supplier?supplierId=${supplierId}`);
 
-        const data = await response.json();
-
-        // ✅ Filter deliveries for the specific supplier
-        const supplierDeliveries = data.filter(
-          (record) => record.supplierId === supplierId
-        );
-
-        // ✅ Sort by date (latest first)
-        const sortedDeliveries = supplierDeliveries.sort(
-          (a, b) => new Date(b.date) - new Date(a.date)
-        );
-
-        setDeliveries(sortedDeliveries);
-      } catch (err) {
-        console.error("Error fetching deliveries:", err);
+        setDeliveries(response.data);
+        setLoading(false);
+      } catch (error) {
+        console.error('Error fetching delivery records:', error);
+        setLoading(false);
       }
     };
-
+    
     fetchDeliveries();
-  }, [supplierId]);
+  }, []);
+  
 
   // ✅ Filter by selected date
   const filteredDeliveries = deliveries.filter((delivery) => {

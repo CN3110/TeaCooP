@@ -347,3 +347,35 @@ exports.getLatestDeliveryRawTeaDetails = (req, res) => {
     res.json(result);
   });
 };
+
+exports.getSupplierDeliveryRecords = async (req, res) => {
+  try {
+    const supplierId = req.query.supplierId;
+
+    if (!supplierId) {
+      return res.status(400).json({ error: "Supplier ID is required" });
+    }
+
+    const [deliveryRecords] = await db.query("SELECT * FROM delivery WHERE supplierId = ?", [supplierId]);
+    res.status(200).json(deliveryRecords);
+  } catch (error) {
+    console.error("Error fetching supplier deliveries:", error);
+    res.status(500).json({ error: "Failed to fetch delivery records" });
+  }
+};
+
+exports.getDriverDeliveryRecords = async (req, res) => {
+  try {
+    const driverId = req.query.driverId;
+    if (!driverId) {
+      return res.status(400).json({ error: "Driver ID is required" });
+    }
+
+    const [deliveryRecords] = await db.query("SELECT * FROM delivery WHERE transport = ?", [driverId]);
+    res.status(200).json(deliveryRecords);
+  } catch (error) {
+    console.error("Error fetching driver deliveries:", error);
+    res.status(500).json({ error: "Failed to fetch delivery records" });
+  }
+};
+
