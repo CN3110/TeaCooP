@@ -3,7 +3,7 @@ import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 import { AuthProvider } from './contexts/AuthContext.jsx';
 import "bootstrap/dist/css/bootstrap.min.css";
 import Footer from "./components/Footer/Footer.jsx";
-import EmployeeProfile from "./pages/Employee/ProfileEM/ProfileEM.jsx";
+import EProfile from "./pages/Employee/ProfileEM/EProfile.jsx";
 import EmployeeDashboard from "./pages/Employee/EmployeeDashboard.jsx";
 import AddSupplier from "./pages/AddSupplier/AddSupplier.jsx";
 import ViewSuppliers from "./pages/ViewSuppliers/ViewSuppliers.jsx";
@@ -44,7 +44,7 @@ import TeaProductionSummary from "./pages/TeaProductionSummary/TeaProductionSumm
 
 const App = () => {
   return (
-    <AuthProvider>
+    
       <Router>
         <div className="app">
           
@@ -54,7 +54,7 @@ const App = () => {
             <Route path="/" element={<Login />} />
             
            
-            <Route path="/profile/:userId" element={<EmployeeProfile />} />
+            <Route path="/employee-profile" element={<EProfile />} />
 
             {/* Employee Routes */}
             <Route path="/employee-dashboard" element={<EmployeeDashboard />} />
@@ -105,7 +105,7 @@ const App = () => {
         </div>
         <Footer />
       </Router>
-    </AuthProvider>
+  
   );
 };
 

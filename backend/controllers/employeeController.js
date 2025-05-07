@@ -211,3 +211,19 @@ Morawakkorale Tea Co-op
     res.status(500).json({ error: 'Failed to reset employee password' });
   }
 };  
+
+exports.updatePassword = async (req, res) => {
+  const { employeeId } = req.params;
+  const { newPassword } = req.body;
+
+  if (!newPassword || newPassword.length < 6) {
+    return res.status(400).json({ error: 'Invalid password' });
+  }
+
+  try {
+    await employee.updateEmployeePassword(employeeId, newPassword);
+    res.status(200).json({ message: 'Password updated successfully' });
+  } catch (err) {
+    res.status(500).json({ error: 'Failed to update password' });
+  }
+};

@@ -6,9 +6,10 @@ const {
   getEmployeeById,
   updateEmployee,
   disableEmployee,
-  resetEmployeePassword
+  resetEmployeePassword,
+  updatePassword
 } = require('../controllers/employeeController');
-const { authenticate, authorize } = require('../middleware/authMiddleware');
+
 
 // All employee routes should be protected
 
@@ -20,5 +21,6 @@ router.get('/:employeeId', getEmployeeById);
 router.put('/:employeeId', updateEmployee);
 router.put('/:employeeId/disable', disableEmployee);
 router.post('/:employeeId/reset-password', resetEmployeePassword);
+router.put('/:employeeId/password', updatePassword);
 
 module.exports = router;

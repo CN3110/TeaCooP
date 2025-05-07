@@ -1,6 +1,5 @@
 import React from "react";
 import "bootstrap/dist/css/bootstrap.min.css";
-import Navbar from './components/Navbar/Navbar';
 import Footer from './components/Footer/Footer';
 import { Route, Routes, BrowserRouter } from 'react-router-dom';
 import HomePage from './pages/Home Page/HomePage';
@@ -12,7 +11,7 @@ import DriverDashboard from './pages/Driver/DriverDashboard/DriverDashboard';
 import DProfile from './pages/Driver/Dprofile/Dprofile';
 import ViewTransportRequests from './pages/Driver/ViewTransportRequests/ViewTransportRequests';
 import BrokerDashboard from './pages/Broker/BrokerDashboard/BrokerDashboard';
-import BProfile from './pages/Broker/Bprofile/Bprofile';
+import BProfile from './pages/Broker/BProfile/BProfile';
 import ViewDeliveryRecords from './pages/Driver/ViewDeliveryRecords/ViewDeliveryRecords';
 import ViewNewLots from './pages/Broker/ViewNewLots/ViewNewLots';
 import ViewTeaTypes from './pages/View Tea Types/ViewTeaTypes';

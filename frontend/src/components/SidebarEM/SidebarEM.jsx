@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import ProfileEM from "../../pages/Employee/ProfileEM/ProfileEM"; 
+import ProfileEM from "../../pages/Employee/ProfileEM/EProfile"; 
 import "./SidebarEM.css";
 
 import {
@@ -132,7 +132,7 @@ const SidebarEM = () => {
         <Link to="/employee-view-transport-requests" className="item">View Transport Requests</Link>
         <Link to="/employee-dashboard-manage-delivery-routes" className="item">Manage Delivery Routes</Link>       
         
-        <Link to="#" className="item" onClick={openProfileModal}>
+        <Link to="/employee-profile" className="item" onClick={openProfileModal}>
           Your Profile
         </Link>
       </div>
