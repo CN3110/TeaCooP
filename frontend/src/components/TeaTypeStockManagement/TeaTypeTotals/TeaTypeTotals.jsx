@@ -3,27 +3,27 @@ import axios from 'axios';
 import './TeaTypeTotals.css';
 
 const TeaTypeTotals = () => {
-  const [teaTotals, setTeaTotals] = useState([]);
+  const [teaStock, setTeaStock] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
   const [refreshTrigger, setRefreshTrigger] = useState(0);
 
   useEffect(() => {
-    const fetchTeaTotals = async () => {
+    const fetchTeaStock = async () => {
       try {
         setLoading(true);
-        const response = await axios.get('http://localhost:3001/api/teaTypeStocks/totals');
-        setTeaTotals(response.data);
+        const response = await axios.get('http://localhost:3001/api/teaTypeStocks/available');
+        setTeaStock(response.data);
         setError('');
       } catch (err) {
-        console.error('Error fetching tea totals:', err);
-        setError('Failed to load tea type totals. Please try again.');
+        console.error('Error fetching tea stock:', err);
+        setError('Failed to load tea stock. Please try again.');
       } finally {
         setLoading(false);
       }
     };
 
-    fetchTeaTotals();
+    fetchTeaStock();
   }, [refreshTrigger]);
 
   const handleRefresh = () => {
@@ -33,26 +33,39 @@ const TeaTypeTotals = () => {
   return (
     <div className="tea-totals-container">
       <div className="tea-totals-header">
-        <h2>Current Tea Stock Totals</h2>
+        <h2>Tea Stock Availability</h2>
         <button onClick={handleRefresh} className="refresh-btn">
           Refresh
         </button>
       </div>
 
       {loading ? (
-        <div className="loading-spinner">Loading tea stock totals...</div>
+        <div className="loading-spinner">Loading tea stock...</div>
       ) : error ? (
         <div className="error-message">{error}</div>
-      ) : teaTotals.length === 0 ? (
-        <p>No tea stock totals available.</p>
+      ) : teaStock.length === 0 ? (
+        <p>No tea stock data available.</p>
       ) : (
         <div className="tea-totals-grid">
-          {teaTotals.map((teaTotal) => (
-            <div key={teaTotal.teaTypeId} className="tea-total-card">
-              <h3>{teaTotal.teaTypeName}</h3>
-              <div className="tea-weight">
-                <span className="tea-weight-value">{parseFloat(teaTotal.totalWeight).toFixed(2)}</span>
-                <span className="tea-weight-unit">kg</span>
+          {teaStock.map((tea) => (
+            <div key={tea.teaTypeId} className="tea-total-card">
+              <h3>{tea.teaTypeName}</h3>
+              
+              <div className="stock-info">
+                <div className="stock-row">
+                  <span>Total Stock:</span>
+                  <span>{parseFloat(tea.totalStockWeight).toFixed(2)} kg</span>
+                </div>
+                
+                <div className="stock-row">
+                  <span>Allocated to Lots:</span>
+                  <span>{parseFloat(tea.allocatedWeight).toFixed(2)} kg</span>
+                </div>
+                
+                <div className="stock-row highlight">
+                  <span>Available:</span>
+                  <span>{parseFloat(tea.availableWeight).toFixed(2)} kg</span>
+                </div>
               </div>
             </div>
           ))}

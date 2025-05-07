@@ -61,22 +61,25 @@ exports.deleteTeaTypeStock = async (stockId) => {
   );
 };
 
-//get the total stock of each tea type
-exports.getTotalsByTeaType = async () => {
+// Add this to your existing teaTypeStockModel.js
+exports.getAvailableStockByTeaType = async () => {
   const [totals] = await db.query(
     `SELECT 
       t.teaTypeId,
       t.teaTypeName,
-      COALESCE(SUM(s.weightInKg), 0) as totalWeight
+      COALESCE(SUM(s.weightInKg), 0) as totalStockWeight,
+      COALESCE(SUM(l.totalNetWeight), 0) as allocatedWeight,
+      (COALESCE(SUM(s.weightInKg), 0) - COALESCE(SUM(l.totalNetWeight), 0)) as availableWeight
     FROM 
       teatype t
     LEFT JOIN 
       tea_type_stock s ON t.teaTypeId = s.teaTypeId
+    LEFT JOIN
+      lot l ON t.teaTypeId = l.teaTypeId
     GROUP BY 
       t.teaTypeId, t.teaTypeName
     ORDER BY 
       t.teaTypeName ASC`
   );
-  
   return totals;
 };
