@@ -91,7 +91,7 @@ class TeaSummary {
     return results;
   }
 
-  // Get total lot weights
+  // Get total lot weights for a specific month and year
   static async getTotalLotWeights(month, year) {
     const startDate = `${year}-${month}-01`;
     const endDate = `${year}-${month}-31`;
@@ -106,6 +106,31 @@ class TeaSummary {
     return result[0]?.totalLotWeight || 0;
   }
 
+  // Get total stock for each tea type during a specific time period
+  static async getTotalTeaTypeStock(month, year) {
+    const startDate = `${year}-${month}-01`;
+    const endDate = `${year}-${month}-31`;
+
+    const query = `
+      SELECT 
+        t.teaTypeId,
+        t.teaTypeName,
+        COALESCE(SUM(s.weightInKg), 0) as totalStock
+      FROM 
+        teatype t
+      LEFT JOIN 
+        tea_type_stock s ON t.teaTypeId = s.teaTypeId
+      WHERE s.productionDate >= ? AND s.productionDate <= ?
+      GROUP BY 
+        t.teaTypeId, t.teaTypeName
+      ORDER BY 
+        t.teaTypeName ASC
+    `;
+
+    const [results] = await db.query(query, [startDate, endDate]);
+    return results;
+  }
+
   // Get complete tea production summary for a specific month and year
   static async getTeaProductionSummary(month, year) {
     const currentDate = new Date();
@@ -118,6 +143,7 @@ class TeaSummary {
     const teaProduction = await this.getTeaProductionByType(targetMonth, targetYear);
     const currentStock = await this.getCurrentTeaTypeStock();
     const totalLotWeight = await this.getTotalLotWeights(targetMonth, targetYear);
+    const totalStock = await this.getTotalTeaTypeStock(targetMonth, targetYear);
 
     return {
       rawTeaWeight,
@@ -126,6 +152,7 @@ class TeaSummary {
       teaProduction,
       currentStock,
       totalLotWeight,
+      totalStock,
       month: targetMonth,
       year: targetYear
     };
