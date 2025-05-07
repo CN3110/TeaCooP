@@ -18,7 +18,7 @@ router.get('/total-packets', teaSummaryController.getTotalTeaPackets);
 router.get('/production-by-type', teaSummaryController.getTeaProductionByType);
 
 // Get current tea type stock
-router.get('/current-stock', teaSummaryController.getCurrentTeaTypeStock);
+router.get('/current-stock', teaSummaryController.getAvailableStock);
 
 // Get total lot weights
 router.get('/total-lot-weights', teaSummaryController.getTotalLotWeights);

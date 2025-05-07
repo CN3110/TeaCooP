@@ -159,3 +159,19 @@ exports.getTotalTeaTypeStock = async (req, res) => {
   }
 };
 
+exports.getAvailableStock = async (req, res) => {
+  try {
+    const availableStock = await TeaSummary.getAvailableStockByTeaType();
+    res.status(200).json({
+      success: true,
+      data: availableStock
+    });
+  } catch (error) {
+    console.error('Error fetching available stock:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Failed to fetch available stock',
+      error: error.message
+    });
+  }
+};
