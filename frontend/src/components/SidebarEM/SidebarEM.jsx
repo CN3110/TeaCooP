@@ -79,58 +79,15 @@ const SidebarEM = () => {
           )}
         </div>
 
-        <Link to="/tea-production-summary">Tea Production Summary</Link>
-
-
-        {/* Manage Transport Requests Dropdown */}
-        <div className="dropdown">
-          <button
-            className="dropdown-btn"
-            onClick={() => toggleDropdown("transportRequests")}
-          >
-            Transport Requests
-          </button>
-          {openDropdown === "transportRequests" && (
-            <div className="dropdown-content">
-              <Link to="/employee-view-transport-requests">
-                View Transport Requests
-              </Link>
-            </div>
-          )}
-        </div>
-
-        {/* Manage Tea types Dropdown */}
-        <div className="dropdown">
-          <button
-            className="dropdown-btn"
-            onClick={() => toggleDropdown("teaTypes")}
-          >
-            Tea Types
-          </button>
-          {openDropdown === "teaTypes" && (
-            <div className="dropdown-content">
-              <Link to="/add-tea-type">Add Tea Type</Link>
-              <Link to="/view-tea-types">View Tea Types</Link>
-            </div>
-          )}
-        </div>
-        
-         <Link to="/tea-production" className="item">
-                Tea Production Management
-                        </Link>
-
-        <Link to="/employee-dashboard-manage-delivery-routes" className="item">
-          Manage Delivery Routes
-        </Link>
+        <Link to="/tea-production-summary" className="item">Tea Production Summary</Link>
+        <Link to="/tea-production" className="item">Tea Production Management </Link>
+        <Link to="/tea-type-stock-management" className="item">Tea Type Stock Management</Link>
+        <Link to="/tea-packet" className="item">Tea Packet Management</Link>
+        <Link to="/raw-tea-records" className="item">Raw Tea Records</Link>
 
         {/* Manage Suppliers Dropdown */}
         <div className="dropdown">
-          <button
-            className="dropdown-btn"
-            onClick={() => toggleDropdown("suppliers")}
-          >
-            Manage Suppliers
-          </button>
+          <button className="dropdown-btn" onClick={() => toggleDropdown("suppliers")}>Manage Suppliers</button>
           {openDropdown === "suppliers" && (
             <div className="dropdown-content">
               <Link to="/add-supplier">Add Supplier</Link>
@@ -141,12 +98,7 @@ const SidebarEM = () => {
 
         {/* Manage Drivers Dropdown */}
         <div className="dropdown">
-          <button
-            className="dropdown-btn"
-            onClick={() => toggleDropdown("drivers")}
-          >
-            Manage Drivers
-          </button>
+          <button className="dropdown-btn" onClick={() => toggleDropdown("drivers")}>Manage Drivers</button>
           {openDropdown === "drivers" && (
             <div className="dropdown-content">
               <Link to="/add-driver">Add Driver</Link>
@@ -157,12 +109,7 @@ const SidebarEM = () => {
 
         {/* Manage Brokers Dropdown */}
         <div className="dropdown">
-          <button
-            className="dropdown-btn"
-            onClick={() => toggleDropdown("brokers")}
-          >
-            Manage Brokers
-          </button>
+          <button className="dropdown-btn" onClick={() => toggleDropdown("brokers")}>Manage Brokers</button>
           {openDropdown === "brokers" && (
             <div className="dropdown-content">
               <Link to="/add-broker">Add Broker</Link>
@@ -170,12 +117,26 @@ const SidebarEM = () => {
             </div>
           )} 
         </div>
-        <Link to="/raw-tea-records" className="item">Raw Tea Records</Link>
+
+        {/* Manage Tea types Dropdown */}
+        <div className="dropdown">
+          <button className="dropdown-btn" onClick={() => toggleDropdown("teaTypes")}>Tea Types Management</button>
+          {openDropdown === "teaTypes" && (
+            <div className="dropdown-content">
+              <Link to="/add-tea-type">Add Tea Type</Link>
+              <Link to="/view-tea-types">View Tea Types</Link>
+            </div>
+          )}
+        </div>
+
+        <Link to="/employee-view-transport-requests" className="item">View Transport Requests</Link>
+        <Link to="/employee-dashboard-manage-delivery-routes" className="item">Manage Delivery Routes</Link>       
+        
         <Link to="#" className="item" onClick={openProfileModal}>
           Your Profile
         </Link>
       </div>
-      /tea-packet
+      
       
       {/* Profile modal */}
       {isProfileModalOpen && <ProfileEM closeModal={closeProfileModal} />}
