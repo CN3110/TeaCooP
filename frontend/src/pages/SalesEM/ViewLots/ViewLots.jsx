@@ -6,27 +6,40 @@ import { BiSearch } from "react-icons/bi"; // Import search icon
 
 const ViewLots = () => {
   const [lots, setLots] = useState([]); // State to store lot data
+  const [teaTypes, setTeaTypes] = useState([]); // State to store tea types
   const [searchTerm, setSearchTerm] = useState(""); // State for search term
   const navigate = useNavigate();
 
   // Fetch all lots from the backend
   useEffect(() => {
-    const fetchLots = async () => {
+    const fetchData = async () => {
       try {
-        const response = await fetch("http://localhost:3001/api/lots");
-        if (!response.ok) {
-          throw new Error("Failed to fetch lots");
-        }
-        const data = await response.json();
-        setLots(data); // Set the fetched data to state
+        // Fetch lots
+        const lotsResponse = await fetch("http://localhost:3001/api/lots");
+        if (!lotsResponse.ok) throw new Error("Failed to fetch lots");
+        const lotsData = await lotsResponse.json();
+
+        // Fetch tea types
+        const teaTypesResponse = await fetch("http://localhost:3001/api/teaTypes");
+        if (!teaTypesResponse.ok) throw new Error("Failed to fetch tea types");
+        const teaTypesData = await teaTypesResponse.json();
+
+        setLots(lotsData);
+        setTeaTypes(teaTypesData);
       } catch (error) {
-        console.error("Error fetching lots:", error);
-        alert("Failed to fetch lots. Please try again.");
+        console.error("Error fetching data:", error);
+        alert("Failed to load data. Please try again.");
       }
     };
 
-    fetchLots();
+    fetchData();
   }, []);
+
+  // Function to get tea type name by ID
+  const getTeaTypeName = (teaTypeId) => {
+    const teaType = teaTypes.find(type => type.teaTypeId === teaTypeId);
+    return teaType ? teaType.teaTypeName : "Unknown";
+  };
 
   // Handle Edit button click
   const handleEdit = (lotNumber) => {
@@ -95,57 +108,54 @@ const ViewLots = () => {
           </div>
         </div>
         <table className="lot-table">
-          <thead>
-            <tr>
-              <th>Lot Number</th>
-              <th>Manufacturing Date</th>
-              <th>Tea Grade</th>
-              <th>No. of Bags</th>
-              <th>Net Weight (kg)</th>
-              <th>Total Net Weight (kg)</th>
-              <th>Valuation Price (LKR)</th>
-              <th>Actions</th>
-            </tr>
-          </thead>
-          <tbody>
-            {filteredLots.map((lot) => (
-              <tr key={lot.lotNumber}>
-                <td>{lot.lotNumber}</td>
-                <td>{new Date(lot.manufacturingDate).toLocaleDateString()}</td>
-                <td>{lot.teaGrade}</td>
-                <td>{lot.noOfBags}</td>
-                <td>{lot.netWeight}</td>
-                <td>{lot.totalNetWeight}</td>
-                <td>{lot.valuationPrice}</td>
-                <td>
-                  <div className="form-buttons">
-                    <button
-                      className="edit-button"
-                      onClick={() => handleEdit(lot.lotNumber)}
-                    >
-                      Edit
-                    </button>
-                    <button
-                      className="delete-button"
-                      onClick={() => handleDelete(lot.lotNumber)}
-                    >
-                      Delete
-                    </button>
-
-                    <button
-  className="view-valuations-button"
-  onClick={() =>
-    navigate(`/view-valuations/${lot.lotNumber}`)
-  }
->
-  View Valuations
-</button>
-                  </div>
-                </td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
+  <thead>
+    <tr>
+      <th>Lot Number</th>
+      <th>Manufacturing Date</th>
+      <th>Tea Type</th>
+      <th>No. of Bags</th>
+      <th>Net Weight (kg)</th>
+      <th>Total Net Weight (kg)</th>
+      <th>Valuation Price (LKR)</th>
+      <th>Actions</th>
+    </tr>
+  </thead>
+  <tbody>
+    {filteredLots.map((lot) => (
+      <tr key={lot.lotNumber}>
+        <td>{lot.lotNumber}</td>
+        <td>{new Date(lot.manufacturingDate).toLocaleDateString()}</td>
+        <td>{getTeaTypeName(lot.teaTypeId)}</td>
+        <td>{lot.noOfBags}</td>
+        <td>{lot.netWeight}</td>
+        <td>{lot.totalNetWeight}</td>
+        <td>{lot.valuationPrice}</td>
+        <td>
+          <div className="form-buttons">
+            <button
+              className="edit-button"
+              onClick={() => handleEdit(lot.lotNumber)}
+            >
+              Edit
+            </button>
+            <button
+              className="delete-button"
+              onClick={() => handleDelete(lot.lotNumber)}
+            >
+              Delete
+            </button>
+            <button
+              className="view-valuations-button"
+              onClick={() => navigate(`/view-valuations/${lot.lotNumber}`)}
+            >
+              View Valuations
+            </button>
+          </div>
+        </td>
+      </tr>
+    ))}
+  </tbody>
+</table>
       </div>
     </EmployeeLayout>
   );
