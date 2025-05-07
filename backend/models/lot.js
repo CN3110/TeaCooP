@@ -6,10 +6,9 @@ const generateLotNumber = async () => {
     SELECT MAX(CAST(SUBSTRING(lotNumber, 2) AS UNSIGNED)) AS lastId 
     FROM lot
   `;
-  const [results] = await db.query(query);
-  const lastId = results[0]?.lastId || 1000;
-  const newId = lastId + 1;
-  return `L${newId}`;
+  const [[result]] = await db.query(query);
+  const lastId = result?.lastId || 1000;
+  return `L${lastId + 1}`;
 };
 
 // Get all lots
@@ -21,8 +20,7 @@ const getAllLots = async () => {
 // Get a lot by lotNumber
 const getLotById = async (lotNumber) => {
   const [lots] = await db.query('SELECT * FROM lot WHERE lotNumber = ?', [lotNumber]);
-  if (lots.length === 0) return null;
-  return lots[0];
+  return lots[0] || null;
 };
 
 // Create a new lot
@@ -39,10 +37,11 @@ const createLot = async ({
   const query = `
     INSERT INTO lot (
       lotNumber, manufacturingDate, teaGrade,
-      noOfBags, netWeight, totalNetWeight, valuationPrice, status, teaTypeId
+      noOfBags, netWeight, totalNetWeight,
+      valuationPrice, status, teaTypeId
     ) VALUES (?, ?, ?, ?, ?, ?, ?, 'available', ?)
   `;
-  
+
   await db.query(query, [
     lotNumber,
     manufacturingDate,
@@ -55,44 +54,50 @@ const createLot = async ({
   ]);
 };
 
-
-// Update lot
-const updateLot = async (lotNumber, lotDetails) => {
+// Update an existing lot
+const updateLot = async (lotNumber, {
+  manufacturingDate,
+  teaGrade,
+  noOfBags,
+  netWeight,
+  totalNetWeight,
+  valuationPrice
+}) => {
   const query = `
-    UPDATE lot 
-    SET manufacturingDate=?, 
-        teaGrade=?, 
-        noOfBags=?, 
-        netWeight=?, 
-        totalNetWeight=?, 
-        valuationPrice=?
-    WHERE lotNumber=?
+    UPDATE lot SET
+      manufacturingDate = ?,
+      teaGrade = ?,
+      noOfBags = ?,
+      netWeight = ?,
+      totalNetWeight = ?,
+      valuationPrice = ?
+    WHERE lotNumber = ?
   `;
 
   await db.query(query, [
-    lotDetails.manufacturingDate,
-    lotDetails.teaGrade,
-    lotDetails.noOfBags,
-    lotDetails.netWeight,
-    lotDetails.totalNetWeight,
-    lotDetails.valuationPrice,
+    manufacturingDate,
+    teaGrade,
+    noOfBags,
+    netWeight,
+    totalNetWeight,
+    valuationPrice,
     lotNumber
   ]);
 };
 
-// Delete lot
-const deleteLot = async (id) => {
-  const [result] = await db.query('DELETE FROM lot WHERE lotNumber = ?', [id]);
-  return result.affectedRows;
+// Delete a lot
+const deleteLot = async (lotNumber) => {
+  const [result] = await db.query('DELETE FROM lot WHERE lotNumber = ?', [lotNumber]);
+  return result.affectedRows > 0;
 };
 
-// Get only available lots
+// Get lots marked as available
 const getAvailableLots = async () => {
-  const [rows] = await db.query("SELECT * FROM lot WHERE status = 'available'");
-  return rows;
+  const [lots] = await db.query("SELECT * FROM lot WHERE status = 'available'");
+  return lots;
 };
 
-// Submit broker valuation
+// Submit a broker valuation
 const submitBrokerValuation = async (lotNumber, brokerId, valuationPrice) => {
   await db.query(
     `INSERT INTO broker_valuation (lotNumber, brokerId, valuationPrice) VALUES (?, ?, ?)`,
@@ -106,12 +111,12 @@ const submitBrokerValuation = async (lotNumber, brokerId, valuationPrice) => {
 };
 
 module.exports = {
+  generateLotNumber,
   getAllLots,
   getLotById,
   createLot,
   updateLot,
   deleteLot,
   getAvailableLots,
-  submitBrokerValuation,
-  generateLotNumber,
+  submitBrokerValuation
 };

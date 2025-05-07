@@ -1,8 +1,27 @@
-const lot = require('../models/lot');
+const lotModel = require('../models/lot');
+const db = require('../config/database');
 
+// Helper to calculate available stock for a tea type
+const getAvailableStockByTeaType = async (teaTypeId) => {
+  const [[stockResult]] = await db.query(`
+    SELECT COALESCE(SUM(weightInKg), 0) as totalStock 
+    FROM tea_type_stock 
+    WHERE teaTypeId = ?
+  `, [teaTypeId]);
+
+  const [[lotResult]] = await db.query(`
+    SELECT COALESCE(SUM(totalNetWeight), 0) as usedWeight 
+    FROM lot 
+    WHERE teaTypeId = ?
+  `, [teaTypeId]);
+
+  return stockResult.totalStock - lotResult.usedWeight;
+};
+
+// Get all lots
 exports.getAllLots = async (req, res) => {
   try {
-    const lots = await lot.getAllLots();
+    const lots = await lotModel.getAllLots();
     res.status(200).json(lots);
   } catch (error) {
     console.error("Error fetching lots:", error);
@@ -10,48 +29,42 @@ exports.getAllLots = async (req, res) => {
   }
 };
 
+// Get a lot by lotNumber
 exports.getLotById = async (req, res) => {
   const { lotNumber } = req.params;
-
   try {
-    const result = await lot.getLotById(lotNumber);
-    if (!result) {
-      return res.status(404).json({ message: 'Lot not found' });
-    }
-    res.status(200).json(result);
+    const lot = await lotModel.getLotById(lotNumber);
+    if (!lot) return res.status(404).json({ message: 'Lot not found' });
+    res.status(200).json(lot);
   } catch (error) {
     console.error("Error fetching lot:", error);
     res.status(500).json({ error: "Failed to fetch lot" });
   }
 };
 
+// Create a new lot
 exports.createLot = async (req, res) => {
-  const { manufacturingDate, teaGrade, noOfBags, netWeight, totalNetWeight, valuationPrice, teaTypeId } = req.body;
-  
+  const {
+    manufacturingDate, teaGrade, noOfBags, netWeight,
+    totalNetWeight, valuationPrice, teaTypeId
+  } = req.body;
+
   if (!manufacturingDate || !teaGrade || !noOfBags || !netWeight || !totalNetWeight || !valuationPrice || !teaTypeId) {
     return res.status(400).json({ message: 'All fields are required' });
   }
-  
+
   try {
-    // Check if there's enough stock for the selected tea type
-    const [teaTypeStock] = await db.query(
-      'SELECT SUM(weightInKg) as totalWeight FROM tea_type_stock WHERE teaTypeId = ?',
-      [teaTypeId]
-    );
-    
-    const availableStock = teaTypeStock[0]?.totalWeight || 0;
-    
-    // Compare with the requested weight
-    if (availableStock < totalNetWeight) {
-      return res.status(400).json({ 
-        message: 'Insufficient stock', 
-        availableStock,
-        requestedWeight: totalNetWeight
+    const availableStock = await getAvailableStockByTeaType(teaTypeId);
+
+    if (totalNetWeight > availableStock) {
+      return res.status(400).json({
+        message: `Not enough stock. Available: ${availableStock}kg, Requested: ${totalNetWeight}kg`
       });
     }
-    
-    const lotNumber = await lot.generateLotNumber();
-    await lot.createLot({
+
+    const lotNumber = await lotModel.generateLotNumber();
+
+    await lotModel.createLot({
       lotNumber,
       manufacturingDate,
       teaGrade,
@@ -61,36 +74,31 @@ exports.createLot = async (req, res) => {
       valuationPrice,
       teaTypeId
     });
-    
-    // Reduce the stock after creating the lot
-    await db.query(
-      'UPDATE tea_type_stock SET weightInKg = weightInKg - ? WHERE teaTypeId = ? LIMIT 1',
-      [totalNetWeight, teaTypeId]
-    );
-    
-    res.status(201).json({ message: "Lot added successfully", lotNumber });
+
+    res.status(201).json({ message: 'Lot created successfully', lotNumber });
   } catch (error) {
-    console.error("Error adding lot:", error);
-    res.status(500).json({ error: "Failed to add lot" });
+    console.error("Error creating lot:", error);
+    res.status(500).json({ error: "Failed to create lot" });
   }
 };
 
-
+// Update an existing lot
 exports.updateLot = async (req, res) => {
   const { lotNumber } = req.params;
-  const { manufacturingDate, teaGrade, noOfBags, netWeight, totalNetWeight, valuationPrice } = req.body;
+  const {
+    manufacturingDate, teaGrade, noOfBags,
+    netWeight, totalNetWeight, valuationPrice
+  } = req.body;
 
   if (!manufacturingDate || !teaGrade || !noOfBags || !netWeight || !totalNetWeight || !valuationPrice) {
     return res.status(400).json({ message: 'All fields are required' });
   }
 
   try {
-    const existingLot = await lot.getLotById(lotNumber);
-    if (!existingLot) {
-      return res.status(404).json({ message: 'Lot not found' });
-    }
+    const existingLot = await lotModel.getLotById(lotNumber);
+    if (!existingLot) return res.status(404).json({ message: 'Lot not found' });
 
-    await lot.updateLot(lotNumber, {
+    await lotModel.updateLot(lotNumber, {
       manufacturingDate,
       teaGrade,
       noOfBags,
@@ -99,37 +107,40 @@ exports.updateLot = async (req, res) => {
       valuationPrice
     });
 
-    res.json({ message: 'Lot updated successfully' });
-  } catch (err) {
-    console.error("Error updating lot:", err);
+    res.status(200).json({ message: 'Lot updated successfully' });
+  } catch (error) {
+    console.error("Error updating lot:", error);
     res.status(500).json({ error: "Failed to update lot" });
   }
 };
 
+// Delete a lot
 exports.deleteLot = async (req, res) => {
   const { lotNumber } = req.params;
 
   try {
-    const deleted = await lot.deleteLot(lotNumber);
+    const deleted = await lotModel.deleteLot(lotNumber);
     if (!deleted) return res.status(404).json({ message: 'Lot not found' });
 
-    res.json({ message: 'Lot deleted successfully' });
-  } catch (err) {
-    console.error("Error deleting lot:", err);
+    res.status(200).json({ message: 'Lot deleted successfully' });
+  } catch (error) {
+    console.error("Error deleting lot:", error);
     res.status(500).json({ error: "Failed to delete lot" });
   }
 };
 
+// Get only available lots
 exports.getAvailableLots = async (req, res) => {
   try {
-    const lots = await lot.getAvailableLots();
-    res.json(lots);
-  } catch (err) {
-    console.error("Error fetching available lots:", err);
+    const lots = await lotModel.getAvailableLots();
+    res.status(200).json(lots);
+  } catch (error) {
+    console.error("Error fetching available lots:", error);
     res.status(500).json({ error: "Failed to fetch available lots" });
   }
 };
 
+// Submit broker valuation
 exports.submitBrokerValuation = async (req, res) => {
   const { brokerId, valuationPrice } = req.body;
   const { lotNumber } = req.params;
@@ -139,10 +150,10 @@ exports.submitBrokerValuation = async (req, res) => {
   }
 
   try {
-    await lot.submitBrokerValuation(lotNumber, brokerId, valuationPrice);
-    res.json({ message: 'Valuation submitted successfully' });
-  } catch (err) {
-    console.error("Error submitting valuation:", err);
+    await lotModel.submitBrokerValuation(lotNumber, brokerId, valuationPrice);
+    res.status(200).json({ message: 'Valuation submitted successfully' });
+  } catch (error) {
+    console.error("Error submitting valuation:", error);
     res.status(500).json({ error: "Failed to submit valuation" });
   }
 };
