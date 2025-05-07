@@ -1,73 +1,95 @@
 import React, { useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import EmployeeLayout from "../../../components/EmployeeLayout/EmployeeLayout";
-import "./EditLot.css"; // Add custom styles if needed
+import Snackbar from "@mui/material/Snackbar";
+import MuiAlert from "@mui/material/Alert";
+import "./EditLot.css";
 
 const EditLot = () => {
-  const { lotNumber } = useParams(); // Get the lotNumber from the URL
+  const { lotNumber } = useParams();
   const navigate = useNavigate();
 
-  // State to store the lot data
   const [lotData, setLotData] = useState({
     lotNumber: "",
     manufacturingDate: "",
-    teaGrade: "",
+    teaTypeId: "",
     noOfBags: "",
     netWeight: "",
     totalNetWeight: "",
     valuationPrice: "",
   });
 
-  // Fetch the lot data when the component mounts
+  const [teaTypes, setTeaTypes] = useState([]);
+
+  const [snackbar, setSnackbar] = useState({
+    open: false,
+    message: "",
+    severity: "success",
+  });
+
+  const showAlert = (message, severity = "success") => {
+    setSnackbar({ open: true, message, severity });
+  };
+
+  const handleCloseSnackbar = (event, reason) => {
+    if (reason === "clickaway") return;
+    setSnackbar(prev => ({ ...prev, open: false }));
+  };
+
   useEffect(() => {
-    const fetchLot = async () => {
+    const fetchData = async () => {
       try {
-        const response = await fetch(`http://localhost:3001/api/lots/${lotNumber}`);
-        if (!response.ok) {
-          throw new Error("Failed to fetch lot data");
-        }
-        const data = await response.json();
-        setLotData(data); // Set the fetched data to state
+        const teaTypesResponse = await fetch("http://localhost:3001/api/teaTypes");
+        if (!teaTypesResponse.ok) throw new Error("Failed to fetch tea types");
+        const teaTypesData = await teaTypesResponse.json();
+        setTeaTypes(teaTypesData);
+
+        const lotResponse = await fetch(`http://localhost:3001/api/lots/${lotNumber}`);
+        if (!lotResponse.ok) throw new Error("Failed to fetch lot data");
+        const lotData = await lotResponse.json();
+
+        setLotData({
+          ...lotData,
+          manufacturingDate: lotData.manufacturingDate.split("T")[0],
+        });
       } catch (error) {
-        console.error("Error fetching lot data:", error);
-        alert("Failed to fetch lot data. Please try again.");
+        console.error("Error fetching data:", error);
+        showAlert("Failed to load data. Please try again.", "error");
       }
     };
 
-    fetchLot();
+    fetchData();
   }, [lotNumber]);
 
-  // Handle input changes
   const handleInputChange = (e) => {
     const { name, value } = e.target;
     setLotData({ ...lotData, [name]: value });
   };
 
-  // Handle form submission
   const handleSubmit = async (e) => {
     e.preventDefault();
 
-    // Validate required fields
     if (
       !lotData.lotNumber ||
       !lotData.manufacturingDate ||
-      !lotData.teaGrade ||
+      !lotData.teaTypeId ||
       !lotData.noOfBags ||
       !lotData.netWeight ||
       !lotData.totalNetWeight ||
       !lotData.valuationPrice
     ) {
-      alert("Please fill in all required fields.");
+      showAlert("Please fill in all required fields.", "error");
       return;
     }
 
     try {
       const response = await fetch(`http://localhost:3001/api/lots/${lotNumber}`, {
         method: "PUT",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify(lotData),
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          ...lotData,
+          teaTypeId: Number(lotData.teaTypeId),
+        }),
       });
 
       if (!response.ok) {
@@ -75,16 +97,50 @@ const EditLot = () => {
         throw new Error(errorData.error || "Failed to update lot");
       }
 
-      alert("Lot updated successfully!");
-      navigate("/view-lots"); // Navigate back to the lot list page
+      showAlert("Lot updated successfully!", "success");
+
+      setTimeout(() => {
+        navigate("/view-lots");
+      }, 1500);
     } catch (error) {
       console.error("Error updating lot:", error);
-      alert("An error occurred while updating the lot: " + error.message);
+      showAlert("An error occurred while updating the lot: " + error.message, "error");
     }
   };
 
   return (
     <EmployeeLayout>
+      <Snackbar
+        open={snackbar.open}
+        autoHideDuration={4000}
+        onClose={handleCloseSnackbar}
+        anchorOrigin={{ vertical: "top", horizontal: "center" }}
+      >
+        <MuiAlert
+          onClose={handleCloseSnackbar}
+          severity={snackbar.severity}
+          sx={{
+            width: "100%",
+            fontWeight: "bold",
+            fontSize: "1rem",
+            backgroundColor:
+              snackbar.severity === "success"
+                ? "rgb(14, 152, 16)"
+                : snackbar.severity === "error"
+                ? "rgb(211,47,47)"
+                : snackbar.severity === "warning"
+                ? "rgb(237, 201, 72)"
+                : "#1976d2",
+            color: "white",
+            boxShadow: 3,
+          }}
+          elevation={6}
+          variant="filled"
+        >
+          {snackbar.message}
+        </MuiAlert>
+      </Snackbar>
+
       <div className="edit-lot-container">
         <h2>Edit Lot</h2>
         <form className="edit-lot-form" onSubmit={handleSubmit}>
@@ -112,19 +168,19 @@ const EditLot = () => {
             </div>
 
             <div className="form-group">
-              <label>Tea Grade:</label>
+              <label>Tea Type:</label>
               <select
-                name="teaGrade"
-                value={lotData.teaGrade}
+                name="teaTypeId"
+                value={lotData.teaTypeId}
                 onChange={handleInputChange}
                 required
               >
-                <option value="">Select Grade</option>
-                <option value="BOP">BOP</option>
-                <option value="BOPF">BOPF</option>
-                <option value="OP">OP</option>
-                <option value="FBOP">FBOP</option>
-                <option value="Pekoe">Pekoe</option>
+                <option value="">Select Tea Type</option>
+                {teaTypes.map((teaType) => (
+                  <option key={teaType.teaTypeId} value={teaType.teaTypeId}>
+                    {teaType.teaTypeName}
+                  </option>
+                ))}
               </select>
             </div>
 

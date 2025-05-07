@@ -86,33 +86,50 @@ exports.createLot = async (req, res) => {
 exports.updateLot = async (req, res) => {
   const { lotNumber } = req.params;
   const {
-    manufacturingDate, noOfBags, netWeight,
-    totalNetWeight, teaTypeId
+    manufacturingDate, 
+    noOfBags, 
+    netWeight,
+    totalNetWeight, 
+    valuationPrice, 
+    teaTypeId
   } = req.body;
 
-  if (!manufacturingDate || !noOfBags || !netWeight || !totalNetWeight || !teaTypeId) {
+  // Validate all required fields
+  if (!manufacturingDate || !noOfBags || !netWeight || 
+      !totalNetWeight || !valuationPrice || !teaTypeId) {
     return res.status(400).json({ message: 'All fields are required' });
+  }
+
+  // Validate number types
+  if (isNaN(noOfBags) || isNaN(netWeight) || 
+      isNaN(totalNetWeight) || isNaN(valuationPrice) || isNaN(teaTypeId)) {
+    return res.status(400).json({ message: 'Numeric fields must contain valid numbers' });
   }
 
   try {
     const existingLot = await lotModel.getLotById(lotNumber);
-    if (!existingLot) return res.status(404).json({ message: 'Lot not found' });
+    if (!existingLot) {
+      return res.status(404).json({ message: 'Lot not found' });
+    }
 
     await lotModel.updateLot(lotNumber, {
       manufacturingDate,
-      noOfBags,
-      netWeight,
-      totalNetWeight,
-      teaTypeId
+      noOfBags: Number(noOfBags),
+      netWeight: Number(netWeight),
+      totalNetWeight: Number(totalNetWeight),
+      valuationPrice: Number(valuationPrice),
+      teaTypeId: Number(teaTypeId)
     });
 
     res.status(200).json({ message: 'Lot updated successfully' });
   } catch (error) {
     console.error("Error updating lot:", error);
-    res.status(500).json({ error: "Failed to update lot" });
+    res.status(500).json({ 
+      error: "Failed to update lot",
+      details: error.message 
+    });
   }
 };
-
 
 // Delete a lot
 exports.deleteLot = async (req, res) => {

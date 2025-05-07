@@ -51,6 +51,7 @@ const createLot = async ({
     teaTypeId           // 7
   ]);
 };
+
 // Update an existing lot
 const updateLot = async (lotNumber, {
   manufacturingDate,
@@ -66,19 +67,19 @@ const updateLot = async (lotNumber, {
       noOfBags = ?,
       netWeight = ?,
       totalNetWeight = ?,
-      valuationPrice = ?
-      teaTypeId = ?,
+      valuationPrice = ?,
+      teaTypeId = ?
     WHERE lotNumber = ?
   `;
 
   await db.query(query, [
-  lotNumber,
-  manufacturingDate,
-  noOfBags,
-  netWeight,
-  totalNetWeight,
-  valuationPrice, 
-  teaTypeId
+    manufacturingDate,
+    noOfBags,
+    netWeight,
+    totalNetWeight,
+    valuationPrice,
+    teaTypeId,
+    lotNumber 
   ]);
 };
 
