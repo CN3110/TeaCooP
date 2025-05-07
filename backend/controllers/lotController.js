@@ -26,15 +26,31 @@ exports.getLotById = async (req, res) => {
 };
 
 exports.createLot = async (req, res) => {
-  const { manufacturingDate, teaGrade, noOfBags, netWeight, totalNetWeight, valuationPrice } = req.body;
-
-  if (!manufacturingDate || !teaGrade || !noOfBags || !netWeight || !totalNetWeight || !valuationPrice) {
+  const { manufacturingDate, teaGrade, noOfBags, netWeight, totalNetWeight, valuationPrice, teaTypeId } = req.body;
+  
+  if (!manufacturingDate || !teaGrade || !noOfBags || !netWeight || !totalNetWeight || !valuationPrice || !teaTypeId) {
     return res.status(400).json({ message: 'All fields are required' });
   }
-
+  
   try {
+    // Check if there's enough stock for the selected tea type
+    const [teaTypeStock] = await db.query(
+      'SELECT SUM(weightInKg) as totalWeight FROM tea_type_stock WHERE teaTypeId = ?',
+      [teaTypeId]
+    );
+    
+    const availableStock = teaTypeStock[0]?.totalWeight || 0;
+    
+    // Compare with the requested weight
+    if (availableStock < totalNetWeight) {
+      return res.status(400).json({ 
+        message: 'Insufficient stock', 
+        availableStock,
+        requestedWeight: totalNetWeight
+      });
+    }
+    
     const lotNumber = await lot.generateLotNumber();
-
     await lot.createLot({
       lotNumber,
       manufacturingDate,
@@ -42,15 +58,23 @@ exports.createLot = async (req, res) => {
       noOfBags,
       netWeight,
       totalNetWeight,
-      valuationPrice
+      valuationPrice,
+      teaTypeId
     });
-
+    
+    // Reduce the stock after creating the lot
+    await db.query(
+      'UPDATE tea_type_stock SET weightInKg = weightInKg - ? WHERE teaTypeId = ? LIMIT 1',
+      [totalNetWeight, teaTypeId]
+    );
+    
     res.status(201).json({ message: "Lot added successfully", lotNumber });
   } catch (error) {
     console.error("Error adding lot:", error);
     res.status(500).json({ error: "Failed to add lot" });
   }
 };
+
 
 exports.updateLot = async (req, res) => {
   const { lotNumber } = req.params;

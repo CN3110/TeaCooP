@@ -82,6 +82,7 @@ const SidebarEM = () => {
           )}
         </div>
 
+<Link to="/raw-tea-records" className="item">Raw Tea Records</Link>
         {/* Manage Transport Requests Dropdown */}
         <div className="dropdown">
           <button

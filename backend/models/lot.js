@@ -33,14 +33,16 @@ const createLot = async ({
   noOfBags,
   netWeight,
   totalNetWeight,
-  valuationPrice
+  valuationPrice,
+  teaTypeId
 }) => {
   const query = `
     INSERT INTO lot (
       lotNumber, manufacturingDate, teaGrade,
-      noOfBags, netWeight, totalNetWeight, valuationPrice, status
-    ) VALUES (?, ?, ?, ?, ?, ?, ?, 'available')
+      noOfBags, netWeight, totalNetWeight, valuationPrice, status, teaTypeId
+    ) VALUES (?, ?, ?, ?, ?, ?, ?, 'available', ?)
   `;
+  
   await db.query(query, [
     lotNumber,
     manufacturingDate,
@@ -48,9 +50,11 @@ const createLot = async ({
     noOfBags,
     netWeight,
     totalNetWeight,
-    valuationPrice
+    valuationPrice,
+    teaTypeId
   ]);
 };
+
 
 // Update lot
 const updateLot = async (lotNumber, lotDetails) => {
