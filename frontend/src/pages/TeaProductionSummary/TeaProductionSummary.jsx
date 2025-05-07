@@ -1,6 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
+import DatePicker from 'react-datepicker';
+import 'react-datepicker/dist/react-datepicker.css';
 import './TeaProductionSummary.css';
 
 const TeaProductionSummary = () => {
@@ -17,11 +19,12 @@ const TeaProductionSummary = () => {
   });
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState(null);
-  const [filterMonth, setFilterMonth] = useState('');
-  const [filterYear, setFilterYear] = useState('');
+  const [selectedDate, setSelectedDate] = useState(null);
 
   // Format date for display
   const formatDate = () => {
+    if (!summary.month || !summary.year) return 'All Time';
+    
     const monthNames = ["January", "February", "March", "April", "May", "June",
       "July", "August", "September", "October", "November", "December"];
     
@@ -35,9 +38,11 @@ const TeaProductionSummary = () => {
     try {
       let url = 'http://localhost:3001/api/teaSummary/summary';
       
-      // Add query parameters if filters are set
-      if (filterMonth && filterYear) {
-        url += `?month=${filterMonth}&year=${filterYear}`;
+      // Add query parameters if date is selected
+      if (selectedDate) {
+        const month = selectedDate.getMonth() + 1; // JS months are 0-indexed
+        const year = selectedDate.getFullYear();
+        url += `?month=${month}&year=${year}`;
       }
       
       const response = await axios.get(url);
@@ -58,36 +63,59 @@ const TeaProductionSummary = () => {
     fetchSummary();
   }, []);
 
-  // Apply filters
-  const handleFilter = () => {
+  // Apply filters when date changes
+  useEffect(() => {
+    if (selectedDate) {
+      fetchSummary();
+    }
+  }, [selectedDate]);
+
+  // Handle date change
+  const handleDateChange = (date) => {
+    setSelectedDate(date);
+  };
+
+  // Clear date filter
+  const clearFilter = () => {
+    setSelectedDate(null);
     fetchSummary();
-  };
-
-  // Handle month input change
-  const handleMonthChange = (e) => {
-    setFilterMonth(e.target.value);
-  };
-
-  // Handle year input change
-  const handleYearChange = (e) => {
-    setFilterYear(e.target.value);
   };
 
   // Navigate to respective detail pages
   const navigateToRawTeaDetails = () => {
-    navigate('/raw-tea-records', { state: { month: summary.month, year: summary.year } });
+    navigate('/raw-tea-records', { 
+      state: { 
+        month: selectedDate ? selectedDate.getMonth() + 1 : null,
+        year: selectedDate ? selectedDate.getFullYear() : null 
+      } 
+    });
   };
 
   const navigateToMadeTeaDetails = () => {
-    navigate('/tea-production', { state: { month: summary.month, year: summary.year } });
+    navigate('/tea-production', { 
+      state: { 
+        month: selectedDate ? selectedDate.getMonth() + 1 : null,
+        year: selectedDate ? selectedDate.getFullYear() : null 
+      } 
+    });
   };
 
   const navigateToTeaPacketsDetails = () => {
-    navigate('/tea-packet', { state: { month: summary.month, year: summary.year } });
+    navigate('/tea-packet', { 
+      state: { 
+        month: selectedDate ? selectedDate.getMonth() + 1 : null,
+        year: selectedDate ? selectedDate.getFullYear() : null 
+      } 
+    });
   };
 
   const navigateToLotDetails = () => {
-    navigate('/view-lots', { state: { month: summary.month, year: summary.year } });
+    navigate('/view-lots', { 
+      state: { 
+        month: selectedDate ? selectedDate.getMonth() + 1 : null,
+        year: selectedDate ? selectedDate.getFullYear() : null 
+      } 
+    });
   };
 
   if (isLoading) {
@@ -103,44 +131,29 @@ const TeaProductionSummary = () => {
       <div className="summary-header">
         <h1>Tea Production Summary</h1>
         <div className="filter-container">
-          <select
-            value={filterMonth}
-            onChange={handleMonthChange}
-            className="filter-select"
-          >
-            <option value="">Select Month</option>
-            <option value="01">January</option>
-            <option value="02">February</option>
-            <option value="03">March</option>
-            <option value="04">April</option>
-            <option value="05">May</option>
-            <option value="06">June</option>
-            <option value="07">July</option>
-            <option value="08">August</option>
-            <option value="09">September</option>
-            <option value="10">October</option>
-            <option value="11">November</option>
-            <option value="12">December</option>
-          </select>
-          <select
-            value={filterYear}
-            onChange={handleYearChange}
-            className="filter-select"
-          >
-            <option value="">Select Year</option>
-            <option value="2023">2023</option>
-            <option value="2024">2024</option>
-            <option value="2025">2025</option>
-          </select>
-          <button onClick={handleFilter} className="filter-button">
-            Filter
-          </button>
+          <div className="date-picker-container">
+            <DatePicker
+              selected={selectedDate}
+              onChange={handleDateChange}
+              dateFormat="MMMM yyyy"
+              showMonthYearPicker
+              placeholderText="Select month and year"
+              className="date-picker-input"
+            />
+            {selectedDate && (
+              <button onClick={clearFilter} className="clear-filter-button">
+                Clear Filter
+              </button>
+            )}
+          </div>
         </div>
       </div>
 
       <div className="summary-date">
         <h2>{formatDate()}</h2>
       </div>
+
+
 
       <div className="summary-cards">
         {/* Raw Tea Total Card */}
