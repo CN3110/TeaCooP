@@ -45,7 +45,7 @@ app.use('/api/notices', require("./routes/noticeRoutes"));
 app.use('/api/teaTypeStocks', require("./routes/teaTypeStockRoutes"));
 app.use('/api/soldLots', require("./routes/soldLotRoutes"));
 app.use('/api/tea-packets', require("./routes/teaPacketRoutes"));
-
+app.use ('/api/teaSummary', require("./routes/teaSummaryRoutes"));
 // Test route
 app.get("/", (req, res) => {
   
