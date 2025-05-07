@@ -24,15 +24,15 @@ const getLotById = async (lotNumber) => {
 };
 
 // Create a new lot
-// Current problematic version
+
 const createLot = async ({
   lotNumber,
   manufacturingDate,
   noOfBags,
   netWeight,
   totalNetWeight,
-  valuationPrice,  // 6th position
-  teaTypeId       // 7th position
+  valuationPrice, 
+  teaTypeId      
 }) => {
   const query = `
     INSERT INTO lot (
@@ -42,7 +42,7 @@ const createLot = async ({
   `;
 
   await db.query(query, [
-    lotNumber,          // 1
+    lotNumber,         
     manufacturingDate,  // 2
     noOfBags,           // 3
     netWeight,          // 4
