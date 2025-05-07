@@ -45,11 +45,11 @@ exports.getLotById = async (req, res) => {
 // Create a new lot
 exports.createLot = async (req, res) => {
   const {
-    manufacturingDate, teaGrade, noOfBags, netWeight,
-    totalNetWeight, valuationPrice, teaTypeId
+    manufacturingDate, noOfBags, netWeight,
+    totalNetWeight, valuationPrice, teaTypeId, 
   } = req.body;
 
-  if (!manufacturingDate || !teaGrade || !noOfBags || !netWeight || !totalNetWeight || !valuationPrice || !teaTypeId) {
+  if (!manufacturingDate || !noOfBags || !netWeight || !totalNetWeight || !valuationPrice || !teaTypeId) {
     return res.status(400).json({ message: 'All fields are required' });
   }
 
@@ -67,12 +67,11 @@ exports.createLot = async (req, res) => {
     await lotModel.createLot({
       lotNumber,
       manufacturingDate,
-      teaGrade,
       noOfBags,
       netWeight,
       totalNetWeight,
-      valuationPrice,
-      teaTypeId
+      teaTypeId, 
+      valuationPrice
     });
 
     res.status(201).json({ message: 'Lot created successfully', lotNumber });
@@ -82,15 +81,16 @@ exports.createLot = async (req, res) => {
   }
 };
 
+
 // Update an existing lot
 exports.updateLot = async (req, res) => {
   const { lotNumber } = req.params;
   const {
-    manufacturingDate, teaGrade, noOfBags,
-    netWeight, totalNetWeight, valuationPrice
+    manufacturingDate, noOfBags, netWeight,
+    totalNetWeight, teaTypeId
   } = req.body;
 
-  if (!manufacturingDate || !teaGrade || !noOfBags || !netWeight || !totalNetWeight || !valuationPrice) {
+  if (!manufacturingDate || !noOfBags || !netWeight || !totalNetWeight || !teaTypeId) {
     return res.status(400).json({ message: 'All fields are required' });
   }
 
@@ -100,11 +100,10 @@ exports.updateLot = async (req, res) => {
 
     await lotModel.updateLot(lotNumber, {
       manufacturingDate,
-      teaGrade,
       noOfBags,
       netWeight,
       totalNetWeight,
-      valuationPrice
+      teaTypeId
     });
 
     res.status(200).json({ message: 'Lot updated successfully' });
@@ -113,6 +112,7 @@ exports.updateLot = async (req, res) => {
     res.status(500).json({ error: "Failed to update lot" });
   }
 };
+
 
 // Delete a lot
 exports.deleteLot = async (req, res) => {

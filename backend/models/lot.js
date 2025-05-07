@@ -24,10 +24,36 @@ const getLotById = async (lotNumber) => {
 };
 
 // Create a new lot
+// Current problematic version
 const createLot = async ({
   lotNumber,
   manufacturingDate,
-  teaGrade,
+  noOfBags,
+  netWeight,
+  totalNetWeight,
+  valuationPrice,  // 6th position
+  teaTypeId       // 7th position
+}) => {
+  const query = `
+    INSERT INTO lot (
+      lotNumber, manufacturingDate, noOfBags, netWeight, totalNetWeight,
+      valuationPrice, teaTypeId
+    ) VALUES (?, ?, ?, ?, ?, ?, ?)
+  `;
+
+  await db.query(query, [
+    lotNumber,          // 1
+    manufacturingDate,  // 2
+    noOfBags,           // 3
+    netWeight,          // 4
+    totalNetWeight,     // 5
+    valuationPrice,     // 6
+    teaTypeId           // 7
+  ]);
+};
+// Update an existing lot
+const updateLot = async (lotNumber, {
+  manufacturingDate,
   noOfBags,
   netWeight,
   totalNetWeight,
@@ -35,55 +61,27 @@ const createLot = async ({
   teaTypeId
 }) => {
   const query = `
-    INSERT INTO lot (
-      lotNumber, manufacturingDate, teaGrade,
-      noOfBags, netWeight, totalNetWeight,
-      valuationPrice, status, teaTypeId
-    ) VALUES (?, ?, ?, ?, ?, ?, ?, 'available', ?)
-  `;
-
-  await db.query(query, [
-    lotNumber,
-    manufacturingDate,
-    teaGrade,
-    noOfBags,
-    netWeight,
-    totalNetWeight,
-    valuationPrice,
-    teaTypeId
-  ]);
-};
-
-// Update an existing lot
-const updateLot = async (lotNumber, {
-  manufacturingDate,
-  teaGrade,
-  noOfBags,
-  netWeight,
-  totalNetWeight,
-  valuationPrice
-}) => {
-  const query = `
     UPDATE lot SET
       manufacturingDate = ?,
-      teaGrade = ?,
       noOfBags = ?,
       netWeight = ?,
       totalNetWeight = ?,
       valuationPrice = ?
+      teaTypeId = ?,
     WHERE lotNumber = ?
   `;
 
   await db.query(query, [
-    manufacturingDate,
-    teaGrade,
-    noOfBags,
-    netWeight,
-    totalNetWeight,
-    valuationPrice,
-    lotNumber
+  lotNumber,
+  manufacturingDate,
+  noOfBags,
+  netWeight,
+  totalNetWeight,
+  valuationPrice, 
+  teaTypeId
   ]);
 };
+
 
 // Delete a lot
 const deleteLot = async (lotNumber) => {

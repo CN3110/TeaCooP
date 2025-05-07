@@ -8,7 +8,7 @@ import Snackbar from '@mui/material/Snackbar';
 import MuiAlert from '@mui/material/Alert'; 
 
 const CreateLot = () => {
-  const [teaGradeOptions, setTeaGradeOptions] = useState([]);
+  const [teaTypes, setTeaTypes] = useState([]);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [snackbar, setSnackbar] = useState({
     open: false,
@@ -16,14 +16,39 @@ const CreateLot = () => {
     severity: "success",
   });
 
-  // Add validation state
   const [errors, setErrors] = useState({
-    teaGrade: "",
+    teaTypeId: "",
     noOfBags: "",
     netWeight: "",
     valuationPrice: "",
     manufacturingDate: ""
   });
+
+  const [lotData, setLotData] = useState({
+    lotNumber: "Generating...",
+    manufacturingDate: new Date(),
+    teaTypeId: '', 
+    noOfBags: '',
+    netWeight: '',
+    totalNetWeight: '',
+    valuationPrice: '',
+  });
+
+  const navigate = useNavigate();
+
+  useEffect(() => {
+    const fetchTeaTypes = async () => {
+      try {
+        const response = await fetch("http://localhost:3001/api/teaTypes");
+        const data = await response.json();
+        setTeaTypes(data);
+      } catch (error) {
+        console.error("Error fetching tea types:", error);
+        showAlert("Failed to fetch tea types", "error");
+      }
+    };
+    fetchTeaTypes();
+  }, []);
 
   const showAlert = (message, severity = "success") => {
     setSnackbar({ open: true, message, severity });
@@ -34,40 +59,13 @@ const CreateLot = () => {
     setSnackbar(prev => ({ ...prev, open: false }));
   };
 
-  const [lotData, setLotData] = useState({
-    lotNumber: "Generating...",
-    manufacturingDate: new Date(),
-    teaGrade: '',
-    noOfBags: '',
-    netWeight: '',
-    totalNetWeight: '',
-    valuationPrice: '',
-  });
-
-  const navigate = useNavigate();
-
-  useEffect(() => {
-    const fetchTeaGrades = async () => {
-      try {
-        const response = await fetch("http://localhost:3001/api/teaTypes");
-        const data = await response.json();
-        setTeaGradeOptions(data);
-      } catch (error) {
-        console.error("Error fetching tea grades:", error);
-        showAlert("Failed to fetch tea grades", "error");
-      }
-    };
-    fetchTeaGrades();
-  }, []);
-
-  // Validation function
   const validateField = (name, value) => {
     let errorMessage = "";
     
     switch (name) {
-      case "teaGrade":
+      case "teaTypeId":
         if (!value) {
-          errorMessage = "Tea grade is required";
+          errorMessage = "Tea type is required";
         }
         break;
       case "noOfBags":
@@ -135,8 +133,6 @@ const CreateLot = () => {
 
   const handleDateChange = (date) => {
     setLotData({ ...lotData, manufacturingDate: date });
-    
-    // Validate the date
     const errorMessage = validateField("manufacturingDate", date);
     setErrors(prev => ({ ...prev, manufacturingDate: errorMessage }));
   };
@@ -145,14 +141,13 @@ const CreateLot = () => {
     const formErrors = {};
     let isValid = true;
     
-    // Validate all fields
-    Object.keys(lotData).forEach(key => {
-      if (key !== "lotNumber" && key !== "totalNetWeight") { // Skip auto-generated fields
-        const error = validateField(key, lotData[key]);
-        if (error) {
-          formErrors[key] = error;
-          isValid = false;
-        }
+    const fieldsToValidate = ["teaTypeId", "noOfBags", "netWeight", "valuationPrice", "manufacturingDate"];
+    
+    fieldsToValidate.forEach(key => {
+      const error = validateField(key, lotData[key]);
+      if (error) {
+        formErrors[key] = error;
+        isValid = false;
       }
     });
     
@@ -169,18 +164,22 @@ const CreateLot = () => {
     }
     
     setIsSubmitting(true);
-
+  
     const formattedDate = new Date(lotData.manufacturingDate).toISOString().split('T')[0];
-
+  
     const payload = {
-      ...lotData,
       manufacturingDate: formattedDate,
+      teaTypeId: parseInt(lotData.teaTypeId),
       noOfBags: parseFloat(lotData.noOfBags),
       netWeight: parseFloat(lotData.netWeight),
       totalNetWeight: parseFloat(lotData.totalNetWeight),
       valuationPrice: parseFloat(lotData.valuationPrice),
     };
-
+  
+    // ADD THIS DEBUG LOG
+    console.log("Payload being sent:", payload);
+    
+  
     try {
       const response = await fetch("http://localhost:3001/api/lots", {
         method: "POST",
@@ -190,25 +189,25 @@ const CreateLot = () => {
 
       if (!response.ok) {
         const errorData = await response.json();
-        throw new Error(errorData.error || "Failed to add lot");
+        throw new Error(errorData.message || "Failed to add lot");
       }
 
-      await response.json();
+      const data = await response.json();
       showAlert("Lot added successfully!");
 
+      // Reset form
       setLotData({
         lotNumber: "Generating...",
         manufacturingDate: new Date(),
-        teaGrade: "",
+        teaTypeId: "",
         noOfBags: "",
         netWeight: "",
         totalNetWeight: "",
         valuationPrice: "",
       });
       
-      // Clear errors
       setErrors({
-        teaGrade: "",
+        teaTypeId: "",
         noOfBags: "",
         netWeight: "",
         valuationPrice: "",
@@ -272,22 +271,22 @@ const CreateLot = () => {
             </div>
 
             <div className="lot-form-group">
-              <label>Tea Grade:</label>
+              <label>Tea Type:</label>
               <select
-                name="teaGrade"
-                value={lotData.teaGrade}
+                name="teaTypeId"
+                value={lotData.teaTypeId}
                 onChange={handleInputChange}
                 required
-                className={errors.teaGrade ? "error" : ""}
+                className={errors.teaTypeId ? "error" : ""}
               >
-                <option value="">Select Grade</option>
-                {teaGradeOptions.map((teaType) => (
-                  <option key={teaType.teaTypeId} value={teaType.teaTypeName}>
+                <option value="">Select Tea Type</option>
+                {teaTypes.map((teaType) => (
+                  <option key={teaType.teaTypeId} value={teaType.teaTypeId}>
                     {teaType.teaTypeName}
                   </option>
                 ))}
               </select>
-              {errors.teaGrade && <div className="error-message">{errors.teaGrade}</div>}
+              {errors.teaTypeId && <div className="error-message">{errors.teaTypeId}</div>}
             </div>
 
             <div className="lot-form-group">

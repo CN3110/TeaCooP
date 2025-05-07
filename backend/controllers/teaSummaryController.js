@@ -138,3 +138,23 @@ exports.getTotalLotWeights = async (req, res) => {
     });
   }
 };
+
+// Get total tea type stock
+exports.getTotalTeaTypeStock = async (req, res) => {
+  try {
+    const { month, year } = req.query;
+    const totalTeaTypeStock = await TeaSummary.getTotalTeaTypeStock(month, year);
+
+    res.status(200).json({
+      success: true,
+      data: { totalTeaTypeStock }
+    });
+  } catch (error) {
+    console.error('Error fetching total tea type stock:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Failed to fetch total tea type stock',
+      error: error.message
+    });
+  }
+};
