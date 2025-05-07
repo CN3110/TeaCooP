@@ -4,6 +4,20 @@ import axios from 'axios';
 import DatePicker from 'react-datepicker';
 import 'react-datepicker/dist/react-datepicker.css';
 import './TeaProductionSummary.css';
+import ArrowBack from '@mui/icons-material/ArrowBack';
+import {
+  Card,
+  CardContent,
+  Typography,
+  Grid,
+  Button,
+  CircularProgress,
+  IconButton,
+  Box as MuiBox
+} from '@mui/material';
+
+import { CalendarMonth, Coffee, LocalShipping, Inventory, ArrowForward, BarChart } from '@mui/icons-material';
+import CloseIcon from '@mui/icons-material/Close';
 
 const TeaProductionSummary = () => {
   const navigate = useNavigate();
@@ -21,30 +35,23 @@ const TeaProductionSummary = () => {
   const [error, setError] = useState(null);
   const [selectedDate, setSelectedDate] = useState(null);
 
-  // Format date for display
   const formatDate = () => {
     if (!summary.month || !summary.year) return 'All Time';
-    
     const monthNames = ["January", "February", "March", "April", "May", "June",
       "July", "August", "September", "October", "November", "December"];
-    
-    const month = parseInt(summary.month) - 1; // JS months are 0-indexed
+    const month = parseInt(summary.month) - 1;
     return `${monthNames[month]} ${summary.year}`;
   };
 
-  // Fetch tea production summary data
   const fetchSummary = async () => {
     setIsLoading(true);
     try {
       let url = 'http://localhost:3001/api/teaSummary/summary';
-      
-      // Add query parameters if date is selected
       if (selectedDate) {
-        const month = selectedDate.getMonth() + 1; // JS months are 0-indexed
+        const month = selectedDate.getMonth() + 1;
         const year = selectedDate.getFullYear();
         url += `?month=${month}&year=${year}`;
       }
-      
       const response = await axios.get(url);
       if (response.data.success) {
         setSummary(response.data.data);
@@ -58,177 +65,176 @@ const TeaProductionSummary = () => {
     }
   };
 
-  // Initial data fetch on component mount
-  useEffect(() => {
-    fetchSummary();
-  }, []);
+  useEffect(() => { fetchSummary(); }, []);
+  useEffect(() => { if (selectedDate) fetchSummary(); }, [selectedDate]);
 
-  // Apply filters when date changes
-  useEffect(() => {
-    if (selectedDate) {
-      fetchSummary();
-    }
-  }, [selectedDate]);
+  const handleDateChange = (date) => setSelectedDate(date);
+  const clearFilter = () => { setSelectedDate(null); fetchSummary(); };
 
-  // Handle date change
-  const handleDateChange = (date) => {
-    setSelectedDate(date);
-  };
-
-  // Clear date filter
-  const clearFilter = () => {
-    setSelectedDate(null);
-    fetchSummary();
-  };
-
-  // Navigate to respective detail pages
-  const navigateToRawTeaDetails = () => {
-    navigate('/raw-tea-records', { 
-      state: { 
+  const navigateTo = (path) => {
+    navigate(path, {
+      state: {
         month: selectedDate ? selectedDate.getMonth() + 1 : null,
-        year: selectedDate ? selectedDate.getFullYear() : null 
-      } 
-    });
-  };
-
-  const navigateToMadeTeaDetails = () => {
-    navigate('/tea-production', { 
-      state: { 
-        month: selectedDate ? selectedDate.getMonth() + 1 : null,
-        year: selectedDate ? selectedDate.getFullYear() : null 
-      } 
-    });
-  };
-
-  const navigateToTeaPacketsDetails = () => {
-    navigate('/tea-packet', { 
-      state: { 
-        month: selectedDate ? selectedDate.getMonth() + 1 : null,
-        year: selectedDate ? selectedDate.getFullYear() : null 
-      } 
-    });
-  };
-
-  const navigateToLotDetails = () => {
-    navigate('/view-lots', { 
-      state: { 
-        month: selectedDate ? selectedDate.getMonth() + 1 : null,
-        year: selectedDate ? selectedDate.getFullYear() : null 
-      } 
+        year: selectedDate ? selectedDate.getFullYear() : null
+      }
     });
   };
 
   if (isLoading) {
-    return <div className="loading">Loading...</div>;
+    return (
+      <div className="centered-container">
+        <CircularProgress color="success" />
+        <Typography variant="subtitle1" mt={2}>Loading data...</Typography>
+      </div>
+    );
   }
 
   if (error) {
-    return <div className="error">{error}</div>;
+    return (
+      <div className="centered-container">
+        <Card className="error-card">
+          <CardContent>
+            <Typography variant="h6" color="error">Error</Typography>
+            <Typography variant="body2">{error}</Typography>
+            <Button variant="contained" color="success" onClick={fetchSummary} fullWidth sx={{ mt: 2 }}>
+              Try Again
+            </Button>
+          </CardContent>
+        </Card>
+      </div>
+    );
   }
 
   return (
-    <div className="tea-production-summary">
-      <div className="summary-header">
-        <h1>Tea Production Summary</h1>
-        <div className="filter-container">
-          <div className="date-picker-container">
-            <DatePicker
-              selected={selectedDate}
-              onChange={handleDateChange}
-              dateFormat="MMMM yyyy"
-              showMonthYearPicker
-              placeholderText="Select month and year"
-              className="date-picker-input"
-            />
-            {selectedDate && (
-              <button onClick={clearFilter} className="clear-filter-button">
-                Clear Filter
-              </button>
-            )}
-          </div>
-        </div>
-      </div>
-
-      <div className="summary-date">
-        <h2>{formatDate()}</h2>
-      </div>
-
-
-
-      <div className="summary-cards">
-        {/* Raw Tea Total Card */}
-        <div className="summary-card">
-          <h3>Raw Tea Total</h3>
-          <div className="card-data">
-            <p>{formatDate()}: {summary.rawTeaWeight}kg</p>
-          </div>
-          <button onClick={navigateToRawTeaDetails} className="view-more-button">
-            View more...
-          </button>
-        </div>
-
-        {/* Made Tea Total Card */}
-        <div className="summary-card">
-          <h3>Total Made Tea</h3>
-          <div className="card-data">
-            <p>{formatDate()}: {summary.madeTeaWeight}kg</p>
-          </div>
-          <button onClick={navigateToMadeTeaDetails} className="view-more-button">
-            View more...
-          </button>
-        </div>
-      </div>
-
-      <div className="summary-cards">
-        {/* Tea Categorized by Type - Production */}
-        <div className="summary-card wide-card">
-          <h3>Tea Categorized by tea type ({formatDate()}) - total production</h3>
-          <div className="card-data tea-types">
-            {summary.teaProduction.map((type) => (
-              <p key={type.teaTypeId}>
-                {type.teaTypeName} = {type.totalWeight}kg
-              </p>
-            ))}
-          </div>
-        </div>
-
-        {/* Total Packets Card */}
-        <div className="summary-card">
-          <h3>Total Packets</h3>
-          <div className="card-data">
-            <p>{summary.totalPackets}</p>
-          </div>
-          <button onClick={navigateToTeaPacketsDetails} className="view-more-button">
-            View more...
-          </button>
-        </div>
-      </div>
-
-      <div className="summary-cards">
-        {/* Tea Categorized by Type - Current Stock */}
-        <div className="summary-card wide-card">
-          <h3>Tea Categorized by tea type ({formatDate()}) - current stock</h3>
-          <div className="card-data tea-types">
-            {summary.currentStock.map((type) => (
-              <p key={type.teaTypeId}>
-                {type.teaTypeName} = {type.currentStock}kg
-              </p>
-            ))}
-          </div>
-        </div>
-
-        {/* Total Lot Weights */}
-        <div className="summary-card">
-          <h3>Total Lot weights</h3>
-          <div className="card-data">
-            <p>{summary.totalLotWeight}kg</p>
-          </div>
-          <button onClick={navigateToLotDetails} className="view-more-button">
-            View more...
-          </button>
-        </div>
-      </div>
+    <div className="page-wrapper">
+        <div className="back-button">
+      <Button
+        startIcon={<ArrowBack />}
+        onClick={() => navigate('/employee-dashboard')}
+        variant="outlined"
+        color="success"
+      >
+        Back
+      </Button>
     </div>
+      <div className="header">
+        <div>
+          <Typography variant="h4" className="header-title">
+            <BarChart fontSize="large" color="success" /> Tea Production Summary
+          </Typography>
+          <Typography variant="subtitle1">{formatDate()}</Typography>
+        </div>
+        <div className="filter-box">
+          <CalendarMonth color="action" />
+          <DatePicker
+            selected={selectedDate}
+            onChange={handleDateChange}
+            dateFormat="MMMM yyyy"
+            showMonthYearPicker
+            placeholderText="Filter by month"
+            className="datepicker"
+          />
+          {selectedDate && (
+            <IconButton onClick={clearFilter} size="small">
+              <CloseIcon fontSize="small" />
+            </IconButton>
+          )}
+        </div>
+      </div>
+
+      <Grid container spacing={3} className="section">
+        {[
+          {
+            title: 'Raw Tea Total',
+            value: `${summary.rawTeaWeight} kg`,
+            icon: <Coffee color="primary" />,
+            onClick: () => navigateTo('/raw-tea-records')
+          },
+          {
+            title: 'Made Tea Total',
+            value: `${summary.madeTeaWeight} kg`,
+            icon: <Coffee color="success" />,
+            onClick: () => navigateTo('/tea-production')
+          },
+          {
+            title: 'Total Lot Weights',
+            value: `${summary.totalLotWeight} kg`,
+            icon: <Inventory color="secondary" />,
+            onClick: () => navigateTo('/view-lots')
+          },
+          {
+            title: 'Total Packets',
+            value: summary.totalPackets,
+            icon: <LocalShipping color="warning" />,
+            onClick: () => navigateTo('/tea-packet')
+          }
+          
+        ].map((card, index) => (
+          <Grid item xs={12} sm={6} md={3} key={index}>
+            <Card className="summary-card" onClick={card.onClick}>
+              <CardContent>
+                <div className="card-header">
+                  {card.icon}
+                  <ArrowForward fontSize="small" />
+                </div>
+                <Typography variant="subtitle1">{card.title}</Typography>
+                <Typography variant="h5" mt={1}>{card.value}</Typography>
+                <Typography variant="caption">{formatDate()}</Typography>
+              </CardContent>
+            </Card>
+          </Grid>
+        ))}
+      </Grid>
+
+      {/* Tea Production by Type Section */}
+<Card className="section-box" onClick={() => navigateTo('/tea-type-stock-management')}>
+  <CardContent>
+    <div className="section-header">
+      <Typography variant="h6" className="section-title">
+        Tea Production by Type - {formatDate()}
+      </Typography>
+      <ArrowForward className="arrow-icon" />
+    </div>
+    <Grid container spacing={3} className="section">
+      {summary.teaProduction.map(type => (
+        <Grid item xs={12} sm={6} md={3} key={type.teaTypeId}>
+          <Card className="info-card">
+            <CardContent>
+              <Typography variant="subtitle2">{type.teaTypeName}</Typography>
+              <Typography variant="h6">{type.totalWeight} kg</Typography>
+            </CardContent>
+          </Card>
+        </Grid>
+      ))}
+    </Grid>
+  </CardContent>
+</Card>
+
+{/* Current Stock by Type Section */}
+<Card className="section-box" onClick={() => navigateTo('/tea-type-stock-management')}>
+  <CardContent>
+    <div className="section-header">
+      <Typography variant="h6" className="section-title">
+        Current Stock by Type - {formatDate()}
+      </Typography>
+      <ArrowForward className="arrow-icon" />
+    </div>
+    <Grid container spacing={3} className="section">
+      {summary.currentStock.map(type => (
+        <Grid item xs={12} sm={6} md={3} key={type.teaTypeId}>
+          <Card className="info-card">
+            <CardContent>
+              <Typography variant="subtitle2">{type.teaTypeName}</Typography>
+              <Typography variant="h6">{type.currentStock} kg</Typography>
+            </CardContent>
+          </Card>
+        </Grid>
+      ))}
+    </Grid>
+  </CardContent>
+</Card>
+    
+        </div>
   );
 };
 

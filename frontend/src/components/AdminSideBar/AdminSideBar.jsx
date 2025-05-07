@@ -38,38 +38,30 @@ const AdminSideBar = () => {
   return (
     <div className="menu">
       <div className="menu-list">
+
         <Link to="/admin-dashboard" className="item">Dashboard</Link>
 
-        {/* Dropdowns */}
-        {/* --- Keep all your existing dropdowns unchanged --- */}
-        {/* Example: Manage Deliveries */}
         <div className="dropdown">
-          <button className="dropdown-btn" onClick={() => toggleDropdown("deliveries")}>
-            Manage Deliveries
-          </button>
-          {openDropdown === "deliveries" && (
-            <div className="dropdown-content">
-              <Link to="/add-new-delivery-record">Add New Delivery Record</Link>
-              <Link to="/view-delivery-records">View Delivery Records</Link>
-            </div>
-          )}
+          <button className="dropdown-btn" onClick={() => toggleDropdown("deliveries")}> Manage Deliveries </button>
+              {openDropdown === "deliveries" && (
+                <div className="dropdown-content">
+                  <Link to="/add-new-delivery-record">Add New Delivery Record</Link>
+                  <Link to="/view-delivery-records">View Delivery Records</Link>
+                </div>
+              )}
         </div>
+
         {/* Manage Sales Records Dropdown */}
         <div className="dropdown">
-          <button
-            className="dropdown-btn"
-            onClick={() => toggleDropdown("sales")}
-          >
-            Manage Sales Records
-          </button>
-          {openDropdown === "sales" && (
-            <div className="dropdown-content">
-              <Link to="/employee-dashboard-create-lot">Add New Sale</Link>
-              <Link to="/view-lots">View Sales Records</Link>
-              <Link to="/view-confirmed-lots">Confirm Sale Orders</Link>
-              <Link to="/view-sold-prices">View Sold Prices</Link>
-            </div>
-          )}
+          <button className="dropdown-btn" onClick={() => toggleDropdown("sales")}> Manage Sales Records </button>
+            {openDropdown === "sales" && (
+              <div className="dropdown-content">
+                <Link to="/employee-dashboard-create-lot">Add New Sale</Link>
+                <Link to="/view-lots">View Sales Records</Link>
+                <Link to="/view-confirmed-lots">Confirm Sale Orders</Link>
+                <Link to="/view-sold-prices">View Sold Prices</Link>
+              </div>
+            )}
         </div>
 
         {/* Manage Transport Requests Dropdown */}

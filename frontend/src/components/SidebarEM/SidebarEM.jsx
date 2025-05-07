@@ -45,9 +45,6 @@ const SidebarEM = () => {
       <div className="menu-list">
         <Link to="/employee-dashboard" className="item">Dashboard</Link>
 
-        {/* Logout button opens confirmation dialog */}
-        <button className="logout-btn" onClick={handleLogoutClick}>Log Out</button>
-
         {/* Manage Deliveries Dropdown */}
         <div className="dropdown">
           <button
@@ -62,7 +59,7 @@ const SidebarEM = () => {
               <Link to="/view-delivery-records">View Delivery Records</Link>
             </div>
           )}
-        </div>
+        </div> 
 
         {/* Manage Sales Dropdown */}
         <div className="dropdown">
@@ -82,7 +79,9 @@ const SidebarEM = () => {
           )}
         </div>
 
-<Link to="/raw-tea-records" className="item">Raw Tea Records</Link>
+        <Link to="/tea-production-summary">Tea Production Summary</Link>
+
+
         {/* Manage Transport Requests Dropdown */}
         <div className="dropdown">
           <button
@@ -115,7 +114,7 @@ const SidebarEM = () => {
             </div>
           )}
         </div>
-
+        
          <Link to="/tea-production" className="item">
                 Tea Production Management
                         </Link>
@@ -169,17 +168,21 @@ const SidebarEM = () => {
               <Link to="/add-broker">Add Broker</Link>
               <Link to="/view-brokers">View Brokers</Link>
             </div>
-          )}
+          )} 
         </div>
-
+        <Link to="/raw-tea-records" className="item">Raw Tea Records</Link>
         <Link to="#" className="item" onClick={openProfileModal}>
           Your Profile
         </Link>
       </div>
-
+      /tea-packet
+      
       {/* Profile modal */}
       {isProfileModalOpen && <ProfileEM closeModal={closeProfileModal} />}
 
+
+{/* Logout button opens confirmation dialog */}
+        <button className="logout-btn" onClick={handleLogoutClick}>Log Out</button>
       {/* Confirmation Dialog */}
       <Dialog open={logoutDialogOpen} onClose={handleDialogClose}>
         <DialogTitle>Confirm Logout</DialogTitle>
