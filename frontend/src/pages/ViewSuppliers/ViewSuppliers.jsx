@@ -18,6 +18,8 @@ const Alert = React.forwardRef(function Alert(props, ref) {
   return <MuiAlert elevation={6} ref={ref} variant="filled" {...props} />;
 });
 
+const ITEMS_PER_PAGE = 5;
+
 const ViewSuppliers = () => {
   const [searchId, setSearchId] = useState("");
   const [statusFilter, setStatusFilter] = useState("all");
@@ -30,6 +32,8 @@ const ViewSuppliers = () => {
     severity: "success",
   });
   const [openConfirm, setOpenConfirm] = useState(false);
+  const [currentPage, setCurrentPage] = useState(1);
+
   const navigate = useNavigate();
 
   const showAlert = (message, severity = "success") => {
@@ -88,6 +92,7 @@ const ViewSuppliers = () => {
     }
 
     setFilteredSuppliers(filtered);
+    setCurrentPage(1); // Reset to first page on filter/search change
   }, [searchId, statusFilter, suppliers]);
 
   const handleSearchChange = (e) => {
@@ -124,20 +129,20 @@ const ViewSuppliers = () => {
             : supplier
         )
       );
-      setFilteredSuppliers(prev => 
-        prev.map(supplier => 
-          supplier.supplierId === selectedSupplierId 
-            ? { ...supplier, status: "disabled" } 
-            : supplier
-        )
-      );
-      
+
       showAlert("Supplier disabled successfully", "success");
     } catch (error) {
       console.error("Error disabling supplier:", error);
       showAlert(error.message || "An error occurred while disabling supplier", "error");
     }
   };
+
+  // Pagination logic
+  const totalPages = Math.ceil(filteredSuppliers.length / ITEMS_PER_PAGE);
+  const paginatedSuppliers = filteredSuppliers.slice(
+    (currentPage - 1) * ITEMS_PER_PAGE,
+    currentPage * ITEMS_PER_PAGE
+  );
 
   return (
     <EmployeeLayout>
@@ -187,8 +192,8 @@ const ViewSuppliers = () => {
             </tr>
           </thead>
           <tbody>
-            {filteredSuppliers.length > 0 ? (
-              filteredSuppliers.map((supplier) => (
+            {paginatedSuppliers.length > 0 ? (
+              paginatedSuppliers.map((supplier) => (
                 <tr key={supplier.supplierId}>
                   <td>{supplier.supplierId}</td>
                   <td>{supplier.supplierName}</td>
@@ -214,7 +219,7 @@ const ViewSuppliers = () => {
                         <li>No land details available</li>
                       )}
                     </ul>
-                  </td> 
+                  </td>
                   <td className="supplier-notes">
                     {supplier.notes || "No notes available"}
                   </td>
@@ -234,76 +239,63 @@ const ViewSuppliers = () => {
                       </button>
                     )}
                   </td>
-                  
                   <td>
-          {supplier.addedByEmployeeId} <br />
-          {supplier.employeeName && (
-            <span style={{ marginLeft: 4, color: "#555" }}>
-              ({supplier.employeeName})
-            </span>
-          )}
-        </td>
-        </tr>
-                
+                    {supplier.addedByEmployeeId} <br />
+                    {supplier.employeeName && (
+                      <span style={{ marginLeft: 4, color: "#555" }}>
+                        ({supplier.employeeName})
+                      </span>
+                    )}
+                  </td>
+                </tr>
               ))
             ) : (
               <tr>
-                <td colSpan="8" className="no-results">
+                <td colSpan="9" className="no-results">
                   No suppliers found matching your criteria
                 </td>
-                
               </tr>
             )}
           </tbody>
         </table>
 
+        {/* Pagination Controls */}
+        {totalPages > 1 && (
+          <div className="pagination">
+            <button
+              onClick={() => setCurrentPage((prev) => Math.max(prev - 1, 1))}
+              disabled={currentPage === 1}
+            >
+              Previous
+            </button>
+            <span>
+              Page {currentPage} of {totalPages}
+            </span>
+            <button
+              onClick={() => setCurrentPage((prev) => Math.min(prev + 1, totalPages))}
+              disabled={currentPage === totalPages}
+            >
+              Next
+            </button>
+          </div>
+        )}
+
         {/* Confirmation Dialog */}
-        <Dialog 
-          open={openConfirm} 
-          onClose={handleCloseConfirm}
-          PaperProps={{
-            style: {
-              borderRadius: '12px',
-              padding: '20px',
-              minWidth: '400px'
-            }
-          }}
-        >
-          <DialogTitle sx={{ fontSize: '1.2rem', fontWeight: 600 }}>
-            Confirm Disable Supplier
-          </DialogTitle>
+        <Dialog open={openConfirm} onClose={handleCloseConfirm}>
+          <DialogTitle>Confirm Disable Supplier</DialogTitle>
           <DialogContent>
-            <DialogContentText sx={{ fontSize: '1rem' }}>
+            <DialogContentText>
               Are you sure you want to disable this supplier?
             </DialogContentText>
           </DialogContent>
-          <DialogActions sx={{ padding: '16px 24px' }}>
-            <Button 
-              onClick={handleCloseConfirm}
-              variant="outlined"
-              sx={{
-                textTransform: 'none',
-                padding: '6px 16px',
-                borderRadius: '8px'
-              }}
-            >
-              Cancel
-            </Button>
-            <Button 
-              onClick={handleConfirmDisable} 
-              color="error"
-              variant="contained"
-              sx={{
-                textTransform: 'none',
-                padding: '6px 16px',
-                borderRadius: '8px'
-              }}
-            >
+          <DialogActions>
+            <Button onClick={handleCloseConfirm}>Cancel</Button>
+            <Button onClick={handleConfirmDisable} color="error">
               Confirm Disable
             </Button>
           </DialogActions>
         </Dialog>
-        
+
         <Snackbar
           open={snackbar.open}
           autoHideDuration={4000}

@@ -30,6 +30,9 @@ const ViewDrivers = () => {
     severity: "success",
   });
   const [openConfirm, setOpenConfirm] = useState(false);
+  const [currentPage, setCurrentPage] = useState(1);
+  const itemsPerPage = 5;
+
   const navigate = useNavigate();
 
   const showAlert = (message, severity = "success") => {
@@ -88,6 +91,7 @@ const ViewDrivers = () => {
     }
 
     setFilteredDrivers(filtered);
+    setCurrentPage(1); // reset to page 1 on filter change
   }, [searchId, statusFilter, drivers]);
 
   const handleSearchChange = (e) => {
@@ -105,7 +109,7 @@ const ViewDrivers = () => {
   const handleConfirmDisable = async () => {
     handleCloseConfirm();
     if (!selectedDriverId) return;
-    
+
     try {
       const response = await fetch(
         `http://localhost:3001/api/drivers/${selectedDriverId}/disable`,
@@ -117,26 +121,31 @@ const ViewDrivers = () => {
         throw new Error(errorText || "Failed to disable driver");
       }
 
-      setDrivers(prevDrivers => 
-        prevDrivers.map(driver => 
-          driver.driverId === selectedDriverId 
-            ? { ...driver, status: "disabled" } 
+      setDrivers(prevDrivers =>
+        prevDrivers.map(driver =>
+          driver.driverId === selectedDriverId
+            ? { ...driver, status: "disabled" }
             : driver
         )
       );
-      setFilteredDrivers(prev => 
-        prev.map(driver => 
-          driver.driverId === selectedDriverId 
-            ? { ...driver, status: "disabled" } 
-            : driver
-        )
-      );
-      
+
       showAlert("Driver disabled successfully", "success");
     } catch (error) {
       console.error("Error disabling driver:", error);
       showAlert(error.message || "An error occurred while disabling driver", "error");
     }
+  };
+
+  // Pagination logic
+  const totalPages = Math.ceil(filteredDrivers.length / itemsPerPage);
+  const paginatedDrivers = filteredDrivers.slice(
+    (currentPage - 1) * itemsPerPage,
+    currentPage * itemsPerPage
+  );
+
+  const handlePageChange = (page) => {
+    if (page < 1 || page > totalPages) return;
+    setCurrentPage(page);
   };
 
   return (
@@ -188,8 +197,8 @@ const ViewDrivers = () => {
             </tr>
           </thead>
           <tbody>
-            {filteredDrivers.length > 0 ? (
-              filteredDrivers.map((driver) => (
+            {paginatedDrivers.length > 0 ? (
+              paginatedDrivers.map((driver) => (
                 <tr key={driver.driverId}>
                   <td>{driver.driverId}</td>
                   <td>{driver.driverName}</td>
@@ -200,11 +209,10 @@ const ViewDrivers = () => {
                   </td>
                   <td>
                     <ul className="vehicle-details-list">
-                      {driver.vehicleDetails && driver.vehicleDetails.length > 0 ? (
+                      {driver.vehicleDetails?.length > 0 ? (
                         driver.vehicleDetails.map((vehicle, index) => (
                           <li key={index}>
-                            <span>Vehicle {index + 1}: </span>
-                            <span>{vehicle.vehicleNumber} ({vehicle.vehicleType})</span>
+                            Vehicle {index + 1}: {vehicle.vehicleNumber} ({vehicle.vehicleType})
                           </li>
                         ))
                       ) : (
@@ -212,9 +220,7 @@ const ViewDrivers = () => {
                       )}
                     </ul>
                   </td>
-                  <td className="driver-notes">
-                    {driver.notes || "No notes available"}
-                  </td>
+                  <td>{driver.notes || "No notes available"}</td>
                   <td>
                     <button className="edit-btn" onClick={() => handleEdit(driver)}>Edit</button>
                     {driver.status !== 'disabled' && (
@@ -227,18 +233,16 @@ const ViewDrivers = () => {
                     )}
                   </td>
                   <td>
-          {driver.addedByEmployeeId} <br />
-          {driver.employeeName && (
-            <span style={{ marginLeft: 4, color: "#555" }}>
-              ({driver.employeeName})
-            </span>
-          )}
-        </td>
+                    {driver.addedByEmployeeId}<br />
+                    {driver.employeeName && (
+                      <span style={{ color: "#555" }}>({driver.employeeName})</span>
+                    )}
+                  </td>
                 </tr>
               ))
             ) : (
               <tr>
-                <td colSpan="8" className="no-results">
+                <td colSpan="9" className="no-results">
                   No drivers found matching your criteria
                 </td>
               </tr>
@@ -246,53 +250,40 @@ const ViewDrivers = () => {
           </tbody>
         </table>
 
+        {/* Pagination Controls */}
+        <div className="pagination-controls">
+          <button onClick={() => handlePageChange(currentPage - 1)} disabled={currentPage === 1}>
+            Previous
+          </button>
+          {[...Array(totalPages)].map((_, index) => (
+            <button
+              key={index}
+              className={currentPage === index + 1 ? "active-page" : ""}
+              onClick={() => handlePageChange(index + 1)}
+            >
+              {index + 1}
+            </button>
+          ))}
+          <button
+            onClick={() => handlePageChange(currentPage + 1)}
+            disabled={currentPage === totalPages}
+          >
+            Next
+          </button>
+        </div>
+
         {/* Confirmation Dialog */}
-        <Dialog 
-          open={openConfirm} 
-          onClose={handleCloseConfirm}
-          PaperProps={{
-            style: {
-              borderRadius: '12px',
-              padding: '20px',
-              minWidth: '400px'
-            }
-          }}
-        >
-          <DialogTitle sx={{ fontSize: '1.2rem', fontWeight: 600 }}>
-            Confirm Disable Driver
-          </DialogTitle>
+        <Dialog open={openConfirm} onClose={handleCloseConfirm}>
+          <DialogTitle>Confirm Disable Driver</DialogTitle>
           <DialogContent>
-            <DialogContentText sx={{ fontSize: '1rem' }}>
-              Are you sure you want to disable this driver?
-            </DialogContentText>
+            <DialogContentText>Are you sure you want to disable this driver?</DialogContentText>
           </DialogContent>
-          <DialogActions sx={{ padding: '16px 24px' }}>
-            <Button 
-              onClick={handleCloseConfirm}
-              variant="outlined"
-              sx={{
-                textTransform: 'none',
-                padding: '6px 16px',
-                borderRadius: '8px'
-              }}
-            >
-              Cancel
-            </Button>
-            <Button 
-              onClick={handleConfirmDisable} 
-              color="error"
-              variant="contained"
-              sx={{
-                textTransform: 'none',
-                padding: '6px 16px',
-                borderRadius: '8px'
-              }}
-            >
-              Confirm Disable
-            </Button>
+          <DialogActions>
+            <Button onClick={handleCloseConfirm} variant="outlined">Cancel</Button>
+            <Button onClick={handleConfirmDisable} color="error" variant="contained">Confirm</Button>
           </DialogActions>
         </Dialog>
-        
+
         <Snackbar
           open={snackbar.open}
           autoHideDuration={4000}

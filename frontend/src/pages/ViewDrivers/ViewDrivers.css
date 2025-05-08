@@ -85,3 +85,30 @@
   .drivers-table tbody tr:hover {
     background-color: #f1f1f1;
   }
+
+  .pagination-controls {
+    display: flex;
+    justify-content: center;
+    gap: 8px;
+    margin-top: 20px;
+  }
+  
+  .pagination-controls button {
+    padding: 6px 12px;
+    border: 1px solid #ccc;
+    background-color: #f8f8f8;
+    cursor: pointer;
+    border-radius: 4px;
+  }
+  
+  .pagination-controls button.active-page {
+    background-color: #084008;
+    color: white;
+    font-weight: bold;
+  }
+  
+  .pagination-controls button:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+  }
+  

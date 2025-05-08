@@ -1,6 +1,8 @@
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import EmployeeLayout from "../../../components/EmployeeLayout/EmployeeLayout";
+import Snackbar from "@mui/material/Snackbar";
+import Alert from "@mui/material/Alert";
 import "./AddTeaType.css";
 
 const AddTeaType = () => {
@@ -9,20 +11,32 @@ const AddTeaType = () => {
     teaTypeDescription: "",
   });
 
+  const [snackbar, setSnackbar] = useState({
+    open: false,
+    message: "",
+    severity: "success", // can be 'success', 'error', 'warning', 'info'
+  });
+
   const navigate = useNavigate();
 
-  // Handle input changes for tea type details
   const handleInputChange = (e) => {
     const { name, value } = e.target;
     setTeaTypeData({ ...teaTypeData, [name]: value });
   };
 
-  // Handle form submission
+  const handleSnackbarClose = () => {
+    setSnackbar({ ...snackbar, open: false });
+  };
+
+  const showSnackbar = (message, severity = "success") => {
+    setSnackbar({ open: true, message, severity });
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
 
     if (!teaTypeData.teaTypeName || !teaTypeData.teaTypeDescription) {
-      alert("Please fill in all required fields.");
+      showSnackbar("Please fill in all required fields.", "warning");
       return;
     }
 
@@ -41,15 +55,15 @@ const AddTeaType = () => {
       });
 
       if (response.ok) {
-        alert("Tea type added successfully!");
-        navigate("/view-tea-types");
+        showSnackbar("Tea type added successfully!", "success");
+        setTimeout(() => navigate("/view-tea-types"), 1500);
       } else {
         console.error("Failed to add tea type:", response);
-        alert("Failed to add tea type. Please try again.");
+        showSnackbar("Failed to add tea type. Please try again.", "error");
       }
     } catch (error) {
-      console.error("Failed to add tea type:", error);
-      alert("An error occurred while adding the tea type.");
+      console.error("Error:", error);
+      showSnackbar("An error occurred while adding the tea type.", "error");
     }
   };
 
@@ -92,6 +106,17 @@ const AddTeaType = () => {
             </button>
           </div>
         </form>
+
+        <Snackbar
+          open={snackbar.open}
+          autoHideDuration={3000}
+          onClose={handleSnackbarClose}
+          anchorOrigin={{ vertical: "bottom", horizontal: "center" }}
+        >
+          <Alert onClose={handleSnackbarClose} severity={snackbar.severity} sx={{ width: "100%" }}>
+            {snackbar.message}
+          </Alert>
+        </Snackbar>
       </div>
     </EmployeeLayout>
   );

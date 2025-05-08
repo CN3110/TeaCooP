@@ -16,8 +16,12 @@ const ViewDeliveryRecords = () => {
   const [snackbar, setSnackbar] = useState({
     open: false,
     message: "",
-    severity: "success", // success | error | warning | info
+    severity: "success",
   });
+
+  // 🆕 Pagination State
+  const [currentPage, setCurrentPage] = useState(1);
+  const recordsPerPage = 10;
 
   const showAlert = (message, severity = "success") => {
     setSnackbar({
@@ -56,14 +60,12 @@ const ViewDeliveryRecords = () => {
   useEffect(() => {
     let filtered = deliveries;
 
-    // Filter by Supplier ID
     if (supplierId) {
       filtered = filtered.filter((d) =>
         d.supplierId.toLowerCase().includes(supplierId.toLowerCase())
       );
     }
 
-    // Date range filter
     if (startDate) {
       filtered = filtered.filter(
         (d) => new Date(d.date) >= new Date(startDate)
@@ -79,12 +81,12 @@ const ViewDeliveryRecords = () => {
       return;
     }
 
-    // Route filter
     if (selectedRoute) {
       filtered = filtered.filter((d) => d.route === selectedRoute);
     }
 
     setFilteredDeliveries(filtered);
+    setCurrentPage(1); // 🆕 Reset to first page on filter change
   }, [supplierId, startDate, endDate, selectedRoute, deliveries]);
 
   const handleClearFilters = () => {
@@ -93,6 +95,7 @@ const ViewDeliveryRecords = () => {
     setEndDate("");
     setSelectedRoute("");
     setFilteredDeliveries(deliveries);
+    setCurrentPage(1); // 🆕 Reset pagination
   };
 
   const handleSearchChange = (e) => {
@@ -131,6 +134,15 @@ const ViewDeliveryRecords = () => {
     }
   };
 
+  // 🆕 Pagination Logic
+  const indexOfLastRecord = currentPage * recordsPerPage;
+  const indexOfFirstRecord = indexOfLastRecord - recordsPerPage;
+  const currentRecords = filteredDeliveries.slice(
+    indexOfFirstRecord,
+    indexOfLastRecord
+  );
+  const totalPages = Math.ceil(filteredDeliveries.length / recordsPerPage);
+
   return (
     <EmployeeLayout>
       <div className="view-delivery-records-container">
@@ -166,11 +178,7 @@ const ViewDeliveryRecords = () => {
         </Snackbar>
         <div className="content-header">
           <h3>View Delivery Records</h3>
-
-          <button
-            className="add-delivery-btn"
-            onClick={handleAddDeliveryRecord}
-          >
+          <button className="add-delivery-btn" onClick={handleAddDeliveryRecord}>
             Add New Delivery Record
           </button>
 
@@ -178,15 +186,15 @@ const ViewDeliveryRecords = () => {
           <div className="filter-section">
             <div className="filter-group">
               <div className="search-box">
-              <input
-                type="text"
-                placeholder="Search by Supplier ID"
-                value={supplierId}
-                onChange={handleSearchChange}
-              />
-              <BiSearch className="icon" /> </div>
+                <input
+                  type="text"
+                  placeholder="Search by Supplier ID"
+                  value={supplierId}
+                  onChange={handleSearchChange}
+                />
+                <BiSearch className="icon" />
+              </div>
             </div>
-
             <div className="filter-group">
               <label>Start Date:</label>
               <input
@@ -242,8 +250,8 @@ const ViewDeliveryRecords = () => {
             </tr>
           </thead>
           <tbody>
-            {filteredDeliveries.length > 0 ? (
-              filteredDeliveries.map((delivery) => (
+            {currentRecords.length > 0 ? (
+              currentRecords.map((delivery) => (
                 <tr key={delivery.deliveryId}>
                   <td>{delivery.supplierId}</td>
                   <td>{delivery.date}</td>
@@ -279,6 +287,27 @@ const ViewDeliveryRecords = () => {
             )}
           </tbody>
         </table>
+
+        {/* 🆕 Pagination Controls */}
+        <div className="pagination">
+          <button
+            onClick={() => setCurrentPage((prev) => Math.max(prev - 1, 1))}
+            disabled={currentPage === 1}
+          >
+            Prev
+          </button>
+          <span>
+            Page {currentPage} of {totalPages}
+          </span>
+          <button
+            onClick={() =>
+              setCurrentPage((prev) => Math.min(prev + 1, totalPages))
+            }
+            disabled={currentPage === totalPages}
+          >
+            Next
+          </button>
+        </div>
       </div>
     </EmployeeLayout>
   );

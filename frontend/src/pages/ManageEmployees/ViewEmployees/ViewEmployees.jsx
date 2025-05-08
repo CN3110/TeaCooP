@@ -10,8 +10,8 @@ import {
   DialogContent,
   DialogContentText,
   DialogTitle,
-  Button
-} from '@mui/material';
+  Button,
+} from "@mui/material";
 import "./ViewEmployees.css";
 
 const Alert = React.forwardRef(function Alert(props, ref) {
@@ -30,14 +30,13 @@ const ViewEmployees = () => {
     severity: "success",
   });
   const [openConfirm, setOpenConfirm] = useState(false);
+  const [currentPage, setCurrentPage] = useState(1);
+  const itemsPerPage = 5;
+
   const navigate = useNavigate();
 
   const showAlert = (message, severity = "success") => {
-    setSnackbar({
-      open: true,
-      message,
-      severity,
-    });
+    setSnackbar({ open: true, message, severity });
   };
 
   const handleCloseSnackbar = (event, reason) => {
@@ -88,6 +87,7 @@ const ViewEmployees = () => {
     }
 
     setFilteredEmployees(filtered);
+    setCurrentPage(1); // Reset to page 1 when filters/search change
   }, [searchId, statusFilter, employees]);
 
   const handleSearchChange = (e) => {
@@ -105,7 +105,7 @@ const ViewEmployees = () => {
   const handleConfirmDisable = async () => {
     handleCloseConfirm();
     if (!selectedEmployeeId) return;
-    
+
     try {
       const response = await fetch(
         `http://localhost:3001/api/employees/${selectedEmployeeId}/disable`,
@@ -117,26 +117,29 @@ const ViewEmployees = () => {
         throw new Error(errorText || "Failed to disable employee");
       }
 
-      setEmployees(prevEmployees => 
-        prevEmployees.map(employee => 
-          employee.employeeId === selectedEmployeeId 
-            ? { ...employee, status: "disabled" } 
+      setEmployees((prev) =>
+        prev.map((employee) =>
+          employee.employeeId === selectedEmployeeId
+            ? { ...employee, status: "disabled" }
             : employee
         )
       );
-      setFilteredEmployees(prev => 
-        prev.map(employee => 
-          employee.employeeId === selectedEmployeeId 
-            ? { ...employee, status: "disabled" } 
-            : employee
-        )
-      );
-      
+
       showAlert("Employee disabled successfully", "success");
     } catch (error) {
       console.error("Error disabling employee:", error);
       showAlert(error.message || "An error occurred while disabling employee", "error");
     }
+  };
+
+  // Pagination logic
+  const indexOfLastItem = currentPage * itemsPerPage;
+  const indexOfFirstItem = indexOfLastItem - itemsPerPage;
+  const currentEmployees = filteredEmployees.slice(indexOfFirstItem, indexOfLastItem);
+  const totalPages = Math.ceil(filteredEmployees.length / itemsPerPage);
+
+  const handlePageChange = (pageNumber) => {
+    setCurrentPage(pageNumber);
   };
 
   return (
@@ -185,8 +188,8 @@ const ViewEmployees = () => {
             </tr>
           </thead>
           <tbody>
-            {filteredEmployees.length > 0 ? (
-              filteredEmployees.map((employee) => (
+            {currentEmployees.length > 0 ? (
+              currentEmployees.map((employee) => (
                 <tr key={employee.employeeId}>
                   <td>{employee.employeeId}</td>
                   <td>{employee.employeeName}</td>
@@ -199,13 +202,10 @@ const ViewEmployees = () => {
                     {employee.notes || "No notes available"}
                   </td>
                   <td>
-                    <button
-                      className="edit-btn"
-                      onClick={() => handleEdit(employee)}
-                    >
+                    <button className="edit-btn" onClick={() => handleEdit(employee)}>
                       Edit
                     </button>
-                    {employee.status !== 'disabled' && (
+                    {employee.status !== "disabled" && (
                       <button
                         className="disable-button"
                         onClick={() => handleOpenDisableConfirm(employee.employeeId)}
@@ -226,53 +226,60 @@ const ViewEmployees = () => {
           </tbody>
         </table>
 
+        {/* Pagination Controls */}
+        {totalPages > 1 && (
+          <div className="pagination">
+            {Array.from({ length: totalPages }, (_, index) => (
+              <button
+                key={index + 1}
+                className={`page-btn ${currentPage === index + 1 ? "active" : ""}`}
+                onClick={() => handlePageChange(index + 1)}
+              >
+                {index + 1}
+              </button>
+            ))}
+          </div>
+        )}
+
         {/* Confirmation Dialog */}
-        <Dialog 
-          open={openConfirm} 
+        <Dialog
+          open={openConfirm}
           onClose={handleCloseConfirm}
           PaperProps={{
             style: {
-              borderRadius: '12px',
-              padding: '20px',
-              minWidth: '400px'
-            }
+              borderRadius: "12px",
+              padding: "20px",
+              minWidth: "400px",
+            },
           }}
         >
-          <DialogTitle sx={{ fontSize: '1.2rem', fontWeight: 600 }}>
+          <DialogTitle sx={{ fontSize: "1.2rem", fontWeight: 600 }}>
             Confirm Disable Employee
           </DialogTitle>
           <DialogContent>
-            <DialogContentText sx={{ fontSize: '1rem' }}>
+            <DialogContentText sx={{ fontSize: "1rem" }}>
               Are you sure you want to disable this employee?
             </DialogContentText>
           </DialogContent>
-          <DialogActions sx={{ padding: '16px 24px' }}>
-            <Button 
+          <DialogActions sx={{ padding: "16px 24px" }}>
+            <Button
               onClick={handleCloseConfirm}
               variant="outlined"
-              sx={{
-                textTransform: 'none',
-                padding: '6px 16px',
-                borderRadius: '8px'
-              }}
+              sx={{ textTransform: "none", padding: "6px 16px", borderRadius: "8px" }}
             >
               Cancel
             </Button>
-            <Button 
-              onClick={handleConfirmDisable} 
+            <Button
+              onClick={handleConfirmDisable}
               color="error"
               variant="contained"
-              sx={{
-                textTransform: 'none',
-                padding: '6px 16px',
-                borderRadius: '8px'
-              }}
+              sx={{ textTransform: "none", padding: "6px 16px", borderRadius: "8px" }}
             >
               Confirm Disable
             </Button>
           </DialogActions>
         </Dialog>
-        
+
         <Snackbar
           open={snackbar.open}
           autoHideDuration={4000}

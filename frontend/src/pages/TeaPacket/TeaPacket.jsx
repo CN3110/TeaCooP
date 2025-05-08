@@ -6,13 +6,18 @@ import {
   Button,
   Card,
   Typography,
-  Grid
+  Grid,
+  Snackbar,
+  Alert,
+  Dialog,
+  DialogTitle,
+  DialogContent,
+  DialogActions
 } from '@mui/material';
 import { DataGrid } from '@mui/x-data-grid';
 import axios from 'axios';
 import moment from 'moment';
-import EmployeeLayout from '../../components/EmployeeLayout/EmployeeLayout'; 
-
+import EmployeeLayout from '../../components/EmployeeLayout/EmployeeLayout';
 
 const TeaPacket = () => {
   const [packets, setPackets] = useState([]);
@@ -37,6 +42,13 @@ const TeaPacket = () => {
 
   const [editingPacketId, setEditingPacketId] = useState(null);
 
+  const [snackbar, setSnackbar] = useState({ open: false, message: '', severity: 'success' });
+  const [confirmDialog, setConfirmDialog] = useState({ open: false, packetId: null });
+
+  const showSnackbar = (message, severity = 'success') => {
+    setSnackbar({ open: true, message, severity });
+  };
+
   const fetchPackets = async (params = {}) => {
     setLoading(true);
     try {
@@ -52,7 +64,7 @@ const TeaPacket = () => {
         total: data.total || 0
       }));
     } catch (error) {
-      console.error('Failed to fetch tea packets:', error);
+      showSnackbar('Failed to fetch tea packets', 'error');
     } finally {
       setLoading(false);
     }
@@ -63,7 +75,7 @@ const TeaPacket = () => {
       const { data } = await axios.get('http://localhost:3001/api/tea-packets/available');
       setAvailableData(data);
     } catch (error) {
-      console.error('Failed to fetch available made tea data');
+      showSnackbar('Failed to fetch available made tea data', 'error');
     }
   };
 
@@ -80,12 +92,10 @@ const TeaPacket = () => {
     const remaining = sw - numPackets * pw;
     return { numberOfPackets: numPackets, remaining };
   };
-  
 
   const handleInputChange = (field, value) => {
     const updatedForm = { ...formData, [field]: value };
 
-    // If relevant fields updated, recalculate numberOfPackets
     if (field === 'sourceMadeTeaWeight' || field === 'packetWeight') {
       const { numberOfPackets, remaining } = calculatePackets(
         updatedForm.sourceMadeTeaWeight,
@@ -105,27 +115,27 @@ const TeaPacket = () => {
   const onFinish = async () => {
     const employeeId = localStorage.getItem("userId");
     if (!employeeId) {
-      alert("User ID not found in local storage.");
+      showSnackbar("User ID not found in local storage.", 'error');
       return;
     }
+
     const today = moment().format("YYYY-MM-DD");
     if (formData.productionDate > today) {
-      alert("Production date cannot be in the future.");
+      showSnackbar("Production date cannot be in the future.", 'warning');
       return;
     }
-    // Ensure numberOfPackets is a valid number and not empty
+
     if (
       !formData.productionDate ||
       !formData.sourceMadeTeaWeight ||
       !formData.packetWeight ||
       formData.numberOfPackets === '' ||
-      
-      
       !employeeId
     ) {
-      alert("All fields are required and must be valid.");
+      showSnackbar("All fields are required and must be valid.", 'warning');
       return;
     }
+
     try {
       await axios.post('http://localhost:3001/api/tea-packets', {
         ...formData,
@@ -133,24 +143,29 @@ const TeaPacket = () => {
         numberOfPackets: parseInt(formData.numberOfPackets, 10),
         createdBy: employeeId
       });
-      alert('Packet record added successfully');
+      showSnackbar('Packet record added successfully');
       setFormData({ productionDate: '', sourceMadeTeaWeight: '', packetWeight: '', numberOfPackets: '' });
       fetchPackets();
       fetchAvailableMadeTea();
     } catch (error) {
-      alert(error.response?.data?.error || 'Failed to add packet record');
+      showSnackbar(error.response?.data?.error || 'Failed to add packet record', 'error');
     }
   };
-  
 
-  const handleDelete = async (packetId) => {
-    if (!window.confirm("Are you sure you want to delete this record?")) return;
+  const confirmDelete = (packetId) => {
+    setConfirmDialog({ open: true, packetId });
+  };
+
+  const handleDelete = async () => {
     try {
-      await axios.delete(`http://localhost:3001/api/tea-packets/${packetId}`);
+      await axios.delete(`http://localhost:3001/api/tea-packets/${confirmDialog.packetId}`);
       fetchPackets();
       fetchAvailableMadeTea();
+      showSnackbar("Record deleted successfully");
     } catch (err) {
-      alert("Failed to delete packet record");
+      showSnackbar("Failed to delete packet record", 'error');
+    } finally {
+      setConfirmDialog({ open: false, packetId: null });
     }
   };
 
@@ -171,26 +186,10 @@ const TeaPacket = () => {
       flex: 1,
       valueFormatter: (params) => moment(params.value).format('YYYY-MM-DD')
     },
-    {
-      field: 'sourceMadeTeaWeight',
-      headerName: 'Source Weight (kg)',
-      flex: 1
-    },
-    {
-      field: 'packetWeight',
-      headerName: 'Packet Weight (kg)',
-      flex: 1
-    },
-    {
-      field: 'numberOfPackets',
-      headerName: 'Number of Packets',
-      flex: 1
-    },
-    {
-      field: 'employeeName',
-      headerName: 'Created By',
-      flex: 1
-    },
+    { field: 'sourceMadeTeaWeight', headerName: 'Source Weight (kg)', flex: 1 },
+    { field: 'packetWeight', headerName: 'Packet Weight (kg)', flex: 1 },
+    { field: 'numberOfPackets', headerName: 'Number of Packets', flex: 1 },
+    { field: 'employeeName', headerName: 'Created By', flex: 1 },
     {
       field: 'createdAt',
       headerName: 'Created At',
@@ -204,7 +203,7 @@ const TeaPacket = () => {
       renderCell: (params) => (
         <>
           <Button onClick={() => handleEdit(params.row)}>Edit</Button>
-          <Button color="error" onClick={() => handleDelete(params.row.packetId)}>Delete</Button>
+          <Button color="error" onClick={() => confirmDelete(params.row.packetId)}>Delete</Button>
         </>
       )
     }
@@ -213,118 +212,149 @@ const TeaPacket = () => {
   return (
     <EmployeeLayout>
       <h2>Tea Packet Management</h2>
-    <div style={{ padding: 20 }}>
-      <Grid container spacing={2} style={{ marginBottom: 24 }}>
-        <Grid item xs={12} sm={4}>
-          <Card style={{ padding: 16 }}>
-            <Typography variant="subtitle2">Allocated for Packets (5%)</Typography>
-            <Typography variant="h6">{availableData.allocatedForPackets} kg</Typography>
-          </Card>
+      <div style={{ padding: 20 }}>
+        {/* Summary Cards */}
+        <Grid container spacing={2} style={{ marginBottom: 24 }}>
+          <Grid item xs={12} sm={4}>
+            <Card style={{ padding: 16 }}>
+              <Typography variant="subtitle2">Allocated for Packets (5%)</Typography>
+              <Typography variant="h6">{availableData.allocatedForPackets} kg</Typography>
+            </Card>
+          </Grid>
+          <Grid item xs={12} sm={4}>
+            <Card style={{ padding: 16 }}>
+              <Typography variant="subtitle2">Total Used for Packets</Typography>
+              <Typography variant="h6">{availableData.totalUsedForPackets} kg</Typography>
+            </Card>
+          </Grid>
+          <Grid item xs={12} sm={4}>
+            <Card style={{ padding: 16 }}>
+              <Typography variant="subtitle2">Available for Packets</Typography>
+              <Typography
+                variant="h6"
+                color={availableData.availableForPackets > 0 ? 'green' : 'error'}
+              >
+                {availableData.availableForPackets.toFixed(2)} kg
+              </Typography>
+            </Card>
+          </Grid>
         </Grid>
-        <Grid item xs={12} sm={4}>
-          <Card style={{ padding: 16 }}>
-            <Typography variant="subtitle2">Total Used for Packets</Typography>
-            <Typography variant="h6">{availableData.totalUsedForPackets} kg</Typography>
-          </Card>
-        </Grid>
-        <Grid item xs={12} sm={4}>
-          <Card style={{ padding: 16 }}>
-            <Typography variant="subtitle2">Available for Packets</Typography>
-            <Typography
-              variant="h6"
-              color={availableData.availableForPackets > 0 ? 'green' : 'error'}
-            >
-              {availableData.availableForPackets.toFixed(2)} kg
-            </Typography>
-          </Card>
-        </Grid>
-      </Grid>
 
-      <Card style={{ padding: 24, marginBottom: 24 }}>
-        <Typography variant="h6" gutterBottom>
-          {editingPacketId ? 'Edit Packet Record' : 'Add New Packet Record'}
-        </Typography>
-        <Grid container spacing={2}>
-          <Grid item xs={12} sm={6} md={3}>
-            <FormControl fullWidth>
-              <InputLabel shrink htmlFor="productionDate">Production Date</InputLabel>
-              <Input
-                type="date"
-                inputProps={{ max: moment().format("YYYY-MM-DD") }}
-                id="productionDate"
-                value={formData.productionDate}
-                onChange={(e) => handleInputChange('productionDate', e.target.value)}
-              />
-            </FormControl>
+        {/* Form Section */}
+        <Card style={{ padding: 24, marginBottom: 24 }}>
+          <Typography variant="h6" gutterBottom>
+            {editingPacketId ? 'Edit Packet Record' : 'Add New Packet Record'}
+          </Typography>
+          <Grid container spacing={2}>
+            <Grid item xs={12} sm={6} md={3}>
+              <FormControl fullWidth>
+                <InputLabel shrink htmlFor="productionDate">Production Date</InputLabel>
+                <Input
+                  type="date"
+                  inputProps={{ max: moment().format("YYYY-MM-DD") }}
+                  id="productionDate"
+                  value={formData.productionDate}
+                  onChange={(e) => handleInputChange('productionDate', e.target.value)}
+                />
+              </FormControl>
+            </Grid>
+            <Grid item xs={12} sm={6} md={3}>
+              <FormControl fullWidth>
+                <InputLabel shrink htmlFor="sourceMadeTeaWeight">Source Weight (kg)</InputLabel>
+                <Input
+                  type="number"
+                  inputProps={{ step: 0.01 }}
+                  value={formData.sourceMadeTeaWeight}
+                  onChange={(e) => handleInputChange('sourceMadeTeaWeight', e.target.value)}
+                />
+              </FormControl>
+            </Grid>
+            <Grid item xs={12} sm={6} md={3}>
+              <FormControl fullWidth>
+                <InputLabel shrink htmlFor="packetWeight">Packet Weight (kg)</InputLabel>
+                <Input
+                  type="number"
+                  inputProps={{ step: 0.01 }}
+                  value={formData.packetWeight}
+                  onChange={(e) => handleInputChange('packetWeight', e.target.value)}
+                />
+              </FormControl>
+            </Grid>
+            <Grid item xs={12} sm={6} md={3}>
+              <FormControl fullWidth>
+                <InputLabel shrink htmlFor="numberOfPackets">Number of Packets</InputLabel>
+                <Input
+                  type="number"
+                  value={formData.numberOfPackets}
+                  readOnly
+                />
+              </FormControl>
+            </Grid>
+            <Grid item xs={12}>
+              <Button variant="contained" onClick={onFinish}>
+                {editingPacketId ? 'Update Packet Record' : 'Add Packet Record'}
+              </Button>
+            </Grid>
           </Grid>
-          <Grid item xs={12} sm={6} md={3}>
-            <FormControl fullWidth>
-              <InputLabel shrink htmlFor="sourceMadeTeaWeight">Source Weight (kg)</InputLabel>
-              <Input
-                type="number"
-                inputProps={{ step: 0.01 }}
-                value={formData.sourceMadeTeaWeight}
-                onChange={(e) => handleInputChange('sourceMadeTeaWeight', e.target.value)}
-              />
-            </FormControl>
-          </Grid>
-          <Grid item xs={12} sm={6} md={3}>
-            <FormControl fullWidth>
-              <InputLabel shrink htmlFor="packetWeight">Packet Weight (kg)</InputLabel>
-              <Input
-                type="number"
-                inputProps={{ step: 0.01 }}
-                value={formData.packetWeight}
-                onChange={(e) => handleInputChange('packetWeight', e.target.value)}
-              />
-            </FormControl>
-          </Grid>
-          <Grid item xs={12} sm={6} md={3}>
-            <FormControl fullWidth>
-              <InputLabel shrink htmlFor="numberOfPackets">Number of Packets</InputLabel>
-              <Input
-                type="number"
-                value={formData.numberOfPackets}
-                readOnly
-              />
-            </FormControl>
-          </Grid>
-          <Grid item xs={12}>
-            <Button variant="contained" onClick={onFinish}>
-              {editingPacketId ? 'Update Packet Record' : 'Add Packet Record'}
-            </Button>
-          </Grid>
-        </Grid>
-      </Card>
+        </Card>
 
-      <Card style={{ padding: 24 }}>
-        <Typography variant="h6" gutterBottom>
-          Packet Records
-        </Typography>
-        <div style={{ height: 500, width: '100%' }}>
-          <DataGrid
-            rows={packets}
-            columns={columns}
-            getRowId={(row) => row.packetId}
-            paginationModel={{
-              page: pagination.current - 1,
-              pageSize: pagination.pageSize
-            }}
-            rowCount={pagination.total}
-            loading={loading}
-            paginationMode="server"
-            onPaginationModelChange={(model) =>
-              fetchPackets({
-                pagination: {
-                  current: model.page + 1,
-                  pageSize: model.pageSize
-                }
-              })
-            }
-          />
-        </div>
-      </Card>
-    </div>
+        {/* Table Section */}
+        <Card style={{ padding: 24 }}>
+          <Typography variant="h6" gutterBottom>
+            Packet Records
+          </Typography>
+          <div style={{ height: 500, width: '100%' }}>
+            <DataGrid
+              rows={packets}
+              columns={columns}
+              getRowId={(row) => row.packetId}
+              paginationModel={{
+                page: pagination.current - 1,
+                pageSize: pagination.pageSize
+              }}
+              rowCount={pagination.total}
+              loading={loading}
+              paginationMode="server"
+              onPaginationModelChange={(model) =>
+                fetchPackets({
+                  pagination: {
+                    current: model.page + 1,
+                    pageSize: model.pageSize
+                  }
+                })
+              }
+            />
+          </div>
+        </Card>
+      </div>
+
+      {/* Snackbar */}
+      <Snackbar
+        open={snackbar.open}
+        autoHideDuration={4000}
+        onClose={() => setSnackbar({ ...snackbar, open: false })}
+        anchorOrigin={{ vertical: 'top', horizontal: 'center' }}
+      >
+        <Alert
+          onClose={() => setSnackbar({ ...snackbar, open: false })}
+          severity={snackbar.severity}
+          sx={{ width: '100%' }}
+        >
+          {snackbar.message}
+        </Alert>
+      </Snackbar>
+
+      {/* Delete Confirmation Dialog */}
+      <Dialog open={confirmDialog.open} onClose={() => setConfirmDialog({ open: false, packetId: null })}>
+        <DialogTitle>Confirm Deletion</DialogTitle>
+        <DialogContent>
+          Are you sure you want to delete this packet record?
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={() => setConfirmDialog({ open: false, packetId: null })}>Cancel</Button>
+          <Button color="error" onClick={handleDelete}>Delete</Button>
+        </DialogActions>
+      </Dialog>
     </EmployeeLayout>
   );
 };
