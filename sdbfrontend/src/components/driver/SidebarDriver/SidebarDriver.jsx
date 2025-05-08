@@ -2,6 +2,7 @@ import React, { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import "./SidebarDriver.css";
 import {
+  MdNotifications as NotificationsIcon,
   MdDashboard as DashboardIcon,
   MdLocalShipping as DeliveryIcon,
   MdAssignment as TransportIcon,
@@ -51,6 +52,11 @@ const SidebarDriver = () => {
         <li className="nav-item">
           <Link to="/driver-dashboard" className="nav-link">
             <DashboardIcon /> Dashboard
+          </Link>
+        </li>
+        <li className="nav-item">
+          <Link to="/driver-notices" className="nav-link">
+          <NotificationsIcon /> Notices
           </Link>
         </li>
         <li className="nav-item">

@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import SupplierLayout from "../../../components/Supplier/SupplierLayout/SupplierLayout";
+import SupplierLayout from "../../../components/supplier/SupplierLayout/SupplierLayout";
 import "./RequestTransport.css";
 
 const RequestTransport = () => {

@@ -1,177 +1,296 @@
+.modern-homepage {
+  font-family: 'Inter', sans-serif;
+  color: #333;
+  line-height: 1.6;
+}
+
+/* Hero Section */
+.hero-section {
+  position: relative;
+  height: 90vh;
+  max-height: 800px;
+  overflow: hidden;
+}
+
+.hero-image-container {
+  width: 100%;
+  height: 100%;
+}
+
+.hero-image {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.hero-overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0, 0, 0, 0.4);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.hero-content {
+  text-align: center;
+  color: white;
+  max-width: 800px;
+  padding: 0 20px;
+}
+
+.hero-content h1 {
+  font-size: 3.5rem;
+  margin-bottom: 1rem;
+  font-weight: 700;
+}
+
+.hero-subtitle {
+  font-size: 1.5rem;
+  margin-bottom: 2rem;
+}
+
+.hero-buttons {
+  display: flex;
+  gap: 1rem;
+  justify-content: center;
+}
+
+.btn-primary, .btn-outline {
+  padding: 12px 24px;
+  border-radius: 30px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.btn-primary {
+  background-color: #2a7d2e;
+  color: white;
+  border: none;
+}
+
+.btn-primary:hover {
+  background-color: #1e5a21;
+}
+
+.btn-outline {
+  background-color: transparent;
+  color: white;
+  border: 2px solid white;
+}
+
+.btn-outline:hover {
+  background-color: rgba(255, 255, 255, 0.1);
+}
+
 /* About Section */
 .about-section {
-    background-color: #fff;
-    padding: 4rem 2rem;
-    text-align: center;
-  }
-  
-  .about-section h2 {
+  padding: 5rem 2rem;
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+.section-header {
+  text-align: center;
+  margin-bottom: 3rem;
+}
+
+.section-header h2 {
+  font-size: 2.5rem;
+  color: #2a7d2e;
+  margin-bottom: 1rem;
+}
+
+.section-subtitle {
+  font-size: 1.2rem;
+  color: #666;
+}
+
+.about-cards {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  gap: 2rem;
+  margin-top: 2rem;
+}
+
+.about-card {
+  background: white;
+  border-radius: 10px;
+  padding: 2rem;
+  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+  transition: transform 0.3s ease;
+}
+
+.about-card:hover {
+  transform: translateY(-5px);
+}
+
+.card-icon {
+  font-size: 2.5rem;
+  margin-bottom: 1rem;
+}
+
+.about-card h3 {
+  font-size: 1.5rem;
+  margin-bottom: 1rem;
+  color: #2a7d2e;
+}
+
+.card-button {
+  background: none;
+  border: none;
+  color: #2a7d2e;
+  font-weight: 600;
+  cursor: pointer;
+  padding: 0;
+  margin-top: 1rem;
+  display: flex;
+  align-items: center;
+}
+
+.card-button:hover {
+  text-decoration: underline;
+}
+
+/* Gallery Section */
+.gallery-section {
+  padding: 0 2rem 5rem;
+  max-width: 1400px;
+  margin: 0 auto;
+}
+
+.gallery-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  grid-auto-rows: 200px;
+  gap: 1rem;
+}
+
+.gallery-item {
+  background-size: cover;
+  background-position: center;
+  border-radius: 8px;
+  position: relative;
+  overflow: hidden;
+}
+
+.gallery-item.tall {
+  grid-row: span 2;
+}
+
+.gallery-item.wide {
+  grid-column: span 2;
+}
+
+/* Contact Section */
+.contact-section {
+  background-color: #f8f9fa;
+  padding: 5rem 2rem;
+}
+
+.contact-container {
+  max-width: 1200px;
+  margin: 0 auto;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 3rem;
+}
+
+.contact-info h2 {
+  font-size: 2.5rem;
+  color: #2a7d2e;
+  margin-bottom: 1.5rem;
+}
+
+.contact-details {
+  margin-top: 2rem;
+}
+
+.contact-item {
+  display: flex;
+  align-items: flex-start;
+  gap: 1rem;
+  margin-bottom: 1.5rem;
+}
+
+.contact-icon {
+  font-size: 1.5rem;
+}
+
+.contact-item h4 {
+  margin-bottom: 0.5rem;
+  color: #333;
+}
+
+.social-links {
+  display: flex;
+  gap: 1rem;
+  margin-top: 2rem;
+}
+
+.social-icon {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  color: #2a7d2e;
+  text-decoration: none;
+  font-weight: 600;
+}
+
+.business-hours {
+  background: white;
+  padding: 2rem;
+  border-radius: 10px;
+  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.05);
+}
+
+.business-hours h3 {
+  font-size: 1.5rem;
+  color: #2a7d2e;
+  margin-bottom: 1.5rem;
+}
+
+.business-hours ul {
+  list-style: none;
+  padding: 0;
+}
+
+.business-hours li {
+  margin-bottom: 1rem;
+  display: flex;
+}
+
+.business-hours li span {
+  font-weight: 600;
+  min-width: 80px;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+  .hero-content h1 {
     font-size: 2.5rem;
-    font-weight: 700;
-    color: #333;
-    margin-bottom: 2rem;
   }
   
-  .about-section p {
-    font-size: 1.1rem;
-    color: #555;
-    margin-bottom: 2rem;
+  .contact-container {
+    grid-template-columns: 1fr;
   }
   
-  /* Our Story */
-  .our-story-container {
-    display: flex;
+  .gallery-grid {
+    grid-template-columns: 1fr 1fr;
+  }
+}
+
+@media (max-width: 480px) {
+  .hero-buttons {
     flex-direction: column;
-    gap: 2rem;
-    padding: 2rem;
-  }
-  
-  .our-heritage-container, .sustainable-ethical-practices-container, .our-tea-varieties-container {
-    background-color: #fff;
-    padding: 2rem;
-    border-radius: 8px;
-    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
-  }
-  
-  h3 {
-    font-size: 1.8rem;
-    font-weight: 700;
-    color: #333;
-  }
-  
-  button {
-    background-color: #f1c40f;
-    border: none;
-    padding: 0.8rem 1.5rem;
-    font-size: 1rem;
-    font-weight: 600;
-    margin-top: 1rem;
-    cursor: pointer;
-    border-radius: 4px;
-    transition: background-color 0.3s ease;
-  }
-  
-  button:hover {
-    background-color: #e67e22;
-    transform: scale(1.05);
-  }
-  
-  button:focus {
-    outline: none;
-  }
-  
-  /* Contact Section */
-  .contact-section {
-    background-color: #f9f9f9;
-    padding: 4rem 2rem;
-    text-align: center;
-  }
-  
-  .contact-section h2 {
-    font-size: 2.5rem;
-    font-weight: 700;
-    color: #333;
-    margin-bottom: 2rem;
-  }
-  
-  .contact-info,
-  .business-hours,
-  .social-media {
-    margin-bottom: 2rem;
-  }
-  
-  .contact-info ul,
-  .business-hours ul {
-    list-style: none;
-    padding: 0;
-  }
-  
-  .contact-info li,
-  .business-hours li {
-    font-size: 1rem;
-    color: #555;
-  }
-  
-  .social-media p {
-    font-size: 1rem;
-    color: #555;
-  }
-  
-  a {
-    color: #f1c40f;
-    text-decoration: none;
-  }
-  
-  a:hover {
-    text-decoration: underline;
-  }
-  
-  /* Login Modal */
-  .login-section {
-    position: fixed;
-    top: 0;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    background: rgba(0, 0, 0, 0.6);
-    display: flex;
-    justify-content: center;
     align-items: center;
-    visibility: hidden;
-    opacity: 0;
-    transition: opacity 0.3s ease;
   }
   
-  .login-section.show {
-    visibility: visible;
-    opacity: 1;
+  .gallery-grid {
+    grid-template-columns: 1fr;
   }
-  
-  .login-modal {
-    background-color: #fff;
-    padding: 2rem;
-    border-radius: 8px;
-    width: 300px;
-    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.2);
-  }
-  
-  .login-modal h3 {
-    text-align: center;
-    font-size: 1.8rem;
-    color: #333;
-    margin-bottom: 1.5rem;
-  }
-  
-  .login-modal input {
-    width: 100%;
-    padding: 1rem;
-    margin-bottom: 1rem;
-    font-size: 1rem;
-    border: 1px solid #ddd;
-    border-radius: 4px;
-  }
-  
-  .login-modal button {
-    width: 100%;
-    padding: 1rem;
-    background-color: #f1c40f;
-    border: none;
-    color: #fff;
-    font-size: 1.2rem;
-    border-radius: 4px;
-    cursor: pointer;
-  }
-  
-  .login-modal button:hover {
-    background-color: #e67e22;
-  }
-  
-  /* Close Button */
-  .login-modal button:nth-of-type(2) {
-    background-color: #ddd;
-    margin-top: 1rem;
-  }
-  
-  .login-modal button:nth-of-type(2):hover {
-    background-color: #bbb;
-  }
+}

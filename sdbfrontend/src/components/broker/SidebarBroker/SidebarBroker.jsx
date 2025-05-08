@@ -6,15 +6,16 @@ import {
   MdPayment as PaymentIcon,
   MdAssignment as TransportIcon,
   MdPerson as ProfileIcon,
+  MdNotifications as NotificationsIcon,
 } from "react-icons/md";
 
 // Bootstrap components
-import Button from 'react-bootstrap/Button';
-import Modal from 'react-bootstrap/Modal';
+import Button from "react-bootstrap/Button";
+import Modal from "react-bootstrap/Modal";
 
 // Material-UI components
-import Alert from '@mui/material/Alert';
-import Snackbar from '@mui/material/Snackbar';
+import Alert from "@mui/material/Alert";
+import Snackbar from "@mui/material/Snackbar";
 
 const SidebarBroker = () => {
   const navigate = useNavigate();
@@ -54,6 +55,12 @@ const SidebarBroker = () => {
           </Link>
         </li>
         <li className="nav-item">
+          <Link to="/broker-notices" className="nav-link">
+            <NotificationsIcon /> Notices
+          </Link>
+        </li>
+
+        <li className="nav-item">
           <Link to="/broker-view-new-lots" className="nav-link">
             <DeliveryIcon /> View New Lots
           </Link>
@@ -62,7 +69,7 @@ const SidebarBroker = () => {
         <li className="nav-item">
           <Link to="/broker-my-valuations" className="nav-link">
             <DeliveryIcon /> My Valuation Prices
-          </Link> 
+          </Link>
         </li>
 
         <li className="nav-item">
@@ -82,9 +89,9 @@ const SidebarBroker = () => {
         </li>
         <li className="nav-item">
           {/* Log Out Button */}
-          <Button 
-            variant="outline-danger" 
-            className="logout-btn" 
+          <Button
+            variant="outline-danger"
+            className="logout-btn"
             onClick={handleLogoutClick}
           >
             Log Out
@@ -109,16 +116,16 @@ const SidebarBroker = () => {
       </Modal>
 
       {/* Material-UI Success Alert */}
-      <Snackbar 
-        open={showAlert} 
-        autoHideDuration={3000} 
+      <Snackbar
+        open={showAlert}
+        autoHideDuration={3000}
         onClose={handleCloseAlert}
-        anchorOrigin={{ vertical: 'top', horizontal: 'center' }}
+        anchorOrigin={{ vertical: "top", horizontal: "center" }}
       >
-        <Alert 
-          onClose={handleCloseAlert} 
-          severity="success" 
-          sx={{ width: '100%' }}
+        <Alert
+          onClose={handleCloseAlert}
+          severity="success"
+          sx={{ width: "100%" }}
         >
           You have been successfully logged out.
         </Alert>

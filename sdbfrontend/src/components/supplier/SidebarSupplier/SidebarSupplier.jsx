@@ -6,6 +6,7 @@ import {
   MdLocalShipping as DeliveryIcon,
   MdAssignment as TransportIcon,
   MdPerson as ProfileIcon,
+  MdNotifications as NotificationsIcon,
 } from "react-icons/md";
 
 // Bootstrap components
@@ -54,8 +55,15 @@ const SidebarSupplier = () => {
         <li className="nav-item">
           <Link to="/supplier-dashboard" className="nav-link">
             <DashboardIcon /> Dashboard
-          </Link>
+          </Link> 
         </li>
+        <li className="nav-item">
+                  <Link to="/supplier-notices" className="nav-link">
+                  <NotificationsIcon /> Notices
+                  </Link>
+                </li>
+        
+        
         <li className="nav-item">
           <Link to="/supplier-delivery-history" className="nav-link">
             <DeliveryIcon /> Delivery History

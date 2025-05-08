@@ -5,94 +5,131 @@ import img1 from "../../assets/Carousel-img1.jpg";
 import img2 from "../../assets/Carousel-img2.jpg";
 import img3 from "../../assets/Carousel-img3.jpg";
 import img4 from "../../assets/Carousel-img4.jpg";
+import Login from "./Login/Login";
 
 const HomePage = ({ showLogin, setShowLogin }) => {
   const navigate = useNavigate();
+  const [activeSection, setActiveSection] = useState("home");
 
   return (
-    <div>
-      {/* Hero Section with Carousel */}
-      <section id="home" className="carousel-container">
-        <div id="carouselExampleIndicators" className="carousel slide" data-bs-ride="carousel">
-          <div className="carousel-inner">
-            <div className="carousel-item active"><img src={img1} className="d-block w-100" alt="Slide 1" /></div>
-            <div className="carousel-item"><img src={img2} className="d-block w-100" alt="Slide 2" /></div>
-            <div className="carousel-item"><img src={img3} className="d-block w-100" alt="Slide 3" /></div>
-            <div className="carousel-item"><img src={img4} className="d-block w-100" alt="Slide 4" /></div>
+    <div className="modern-homepage">
+      {/* Hero Section with Full-width Image */}
+      <section id="home" className="hero-section">
+        <div className="hero-image-container">
+          <img src={img1} alt="Morawakkorale Tea Plantation" className="hero-image" />
+          <div className="hero-overlay">
+            <div className="hero-content">
+              <h1>Morawakkorale Tea Factory</h1>
+              <p className="hero-subtitle">Premium Ceylon Tea Since 1955</p>
+              <div className="hero-buttons">
+                <button className="btn-primary" onClick={() => navigate("/login")}>
+                  Login 
+                </button>
+                <button className="btn-outline" onClick={() => navigate("/view-tea-varieties")}>
+                  Discover Teas
+                </button>
+              </div>
+            </div>
           </div>
-          <button className="carousel-control-prev" data-bs-target="#carouselExampleIndicators" data-bs-slide="prev">
-            <span className="carousel-control-prev-icon"></span>
-          </button>
-          <button className="carousel-control-next" data-bs-target="#carouselExampleIndicators" data-bs-slide="next">
-            <span className="carousel-control-next-icon"></span>
-          </button>
         </div>
       </section>
 
-      {/* About Us Section */}
-      <section id="about" className="about-section">
-        <h2>About Us</h2>
-        <p>Established in 1955, Morawakkorale Tea Factory is operated by the Morawakkorale Tea Producers' Cooperative Society Ltd., located in Kotapola, Sri Lanka. For decades, we have upheld a legacy of excellence in tea cultivation and processing, ensuring that every leaf we produce meets the highest standards of quality and authenticity. With a daily processing capacity of approximately 15,000 kg of green leaf, our factory specializes in producing high-quality orthodox teas. By blending traditional craftsmanship with modern technology, we guarantee that each batch of tea retains its freshness, aroma, and rich flavors. Our teas have consistently performed well at Sri Lanka’s tea auctions, further reinforcing our reputation for excellence.</p>        <div className='our-story-container'>
-
-          <div className='our-heritage-container'>
-            <h3>Our Heritage & Commitment to Quality</h3>
-            <p>As an export-only tea producer, we take pride in delivering the purest flavors of Sri Lanka to tea lovers worldwide. Our commitment to sustainability and ethical practices ensures that every tea leaf is cultivated with environmental and social responsibility. Whether you're a tea enthusiast or a business looking for premium Ceylon tea, our diverse range of handpicked and expertly processed teas caters to every preference. We continuously strive to maintain the highest standards in tea production while preserving the rich heritage of Ceylon tea.</p>
-            </div>
-
-          <div className='sustainable-ethical-practices-container'>
-            <h3>Sustainable & Ethical Practices</h3>
-            <p>As an export-only tea producer, we take pride in delivering the purest flavors of Sri Lanka to tea lovers worldwide. Our commitment to sustainability and ethical practices ensures that every tea leaf is cultivated with environmental and social responsibility. Whether you're a tea enthusiast or a business looking for premium Ceylon tea, our diverse range of handpicked and expertly processed teas caters to every preference. We continuously strive to maintain the highest standards in tea production while preserving the rich heritage of Ceylon tea.</p>
-            </div>
-
-          <div className='our-tea-varieties-container'>
-            <h3>Our Tea Varieties & The Taste of Ceylon</h3>
-            <p>We offer a diverse selection of premium tea types, each carefully crafted to highlight the finest flavors of Ceylon tea. Our range includes orthodox black teas, green teas, and specialty blends, all produced with expertise and passion. From our lush plantations to your cup, Morawakkorale Tea Factory ensures that every sip is a celebration of quality, heritage, and sustainability. Join us in exploring the world of authentic Ceylon tea and discover the exquisite flavors that make our teas truly special.</p>
-            <button onClick={() => navigate("/view-tea-varieties")}>Discover Our Tea Varieties</button>
+      {/* About Us Section with Cards */}
+      <section id="about" className={`about-section ${activeSection === "about" ? "active" : ""}`}>
+        <div className="section-header">
+          <h2>Our Legacy in Tea</h2>
+          <p className="section-subtitle">Crafting excellence since 1955</p>
+        </div>
+        
+        <div className="about-cards">
+          <div className="about-card">
+            <div className="card-icon">🌱</div>
+            <h3>Our Heritage</h3>
+            <p>Established in 1955, Morawakkorale Tea Factory blends traditional craftsmanship with modern technology to produce high-quality orthodox teas with a daily capacity of 15,000 kg of green leaf.</p>
           </div>
+          
+          <div className="about-card">
+            <div className="card-icon">🌍</div>
+            <h3>Sustainable Practices</h3>
+            <p>We're committed to ethical and sustainable tea production, ensuring environmental and social responsibility in every leaf we cultivate.</p>
+          </div>
+          
+          <div className="about-card">
+            <div className="card-icon">🍃</div>
+            <h3>Premium Varieties</h3>
+            <p>Discover our diverse range of orthodox black teas, green teas, and specialty blends that consistently perform well at Sri Lanka's tea auctions.</p>
+            <button className="card-button" onClick={() => navigate("/view-tea-varieties")}>
+              Explore Our Teas →
+            </button>
+          </div>
+        </div>
+      </section>
+
+      {/* Image Gallery Section */}
+      <section className="gallery-section">
+        <div className="gallery-grid">
+          <div className="gallery-item tall" style={{ backgroundImage: `url(${img2})` }}></div>
+          <div className="gallery-item" style={{ backgroundImage: `url(${img3})` }}></div>
+          <div className="gallery-item" style={{ backgroundImage: `url(${img4})` }}></div>
+          <div className="gallery-item wide" style={{ backgroundImage: `url(${img1})` }}></div>
         </div>
       </section>
 
       {/* Contact Section */}
       <section id="contact" className="contact-section">
-        <h2>Contact Us</h2>
-        <p>We'd love to hear from you! Whether you have a question, feedback, feel free to reach out.</p>
-        <div className="contact-info">
-          <h5>Our Contact Details:</h5>
-          <ul>
-            <li><strong>Address:</strong> Morawakkorale Tea Factory, Deniyaya Road, Kotapola.</li>
-            <li><strong>Phone:</strong> <a href="tel:+94412271400">+94 412271400</a></li>
-            <li><strong>Email:</strong> <a href="mailto:morawakkoraleteacoop@gmail.com">morawakkoraleteacoop@gmail.com</a></li>
-          </ul>
-        </div>
-
-        <div className="business-hours">
-          <h5>Business Hours:</h5>
-          <ul>
-            <li>Monday to Friday: 9:00 AM – 5:00 PM</li>
-            <li>Saturday: 9:00 AM – 1:00 PM</li>
-            <li>Sunday: Closed</li>
-          </ul>
-        </div>
-
-        <div className="social-media">
-          <h5>Connect With Us:</h5>
-          <p>Follow us on social media for the latest updates and news.<br />
-            <strong>Facebook:</strong> <a href="https://www.facebook.com" target="_blank" rel="noopener noreferrer">www.facebook.com</a></p>
+        <div className="contact-container">
+          <div className="contact-info">
+            <h2>Connect With Us</h2>
+            <p>We'd love to hear from you about our teas, partnerships, or any inquiries.</p>
+            
+            <div className="contact-details">
+              <div className="contact-item">
+                <span className="contact-icon">📍</span>
+                <div>
+                  <h4>Visit Us</h4>
+                  <p>Morawakkorale Tea Factory, Deniyaya Road, Kotapola</p>
+                </div>
+              </div>
+              
+              <div className="contact-item">
+                <span className="contact-icon">📞</span>
+                <div>
+                  <h4>Call Us</h4>
+                  <p><a href="tel:+94412271400">+94 412271400</a></p>
+                </div>
+              </div>
+              
+              <div className="contact-item">
+                <span className="contact-icon">✉️</span>
+                <div>
+                  <h4>Email Us</h4>
+                  <p><a href="mailto:morawakkoraleteacoop@gmail.com">morawakkoraleteacoop@gmail.com</a></p>
+                </div>
+              </div>
+            </div>
+            
+            <div className="social-links">
+              <a href="https://www.facebook.com" target="_blank" rel="noopener noreferrer" className="social-icon">
+                <span className="icon">📘</span> Facebook
+              </a>
+            </div>
+          </div>
+          
+          <div className="business-hours">
+            <h3>Business Hours</h3>
+            <ul>
+              <li><span>Mon-Fri:</span> 9:00 AM – 5:00 PM</li>
+              <li><span>Sat:</span> 9:00 AM – 1:00 PM</li>
+              <li><span>Sun:</span> Closed</li>
+            </ul>
+          </div>
         </div>
       </section>
 
-      {/* Login Modal */}
+      {/* Login Section - Only show if needed */}
       {showLogin && (
-        <section id="login" className="login-section">
-          <div className="login-modal">
-            <div className="login-box">
-              <h3>Login</h3>
-              <input type="text" placeholder="User ID" />
-              <input type="password" placeholder="Password" />
-              <button className="btn btn-primary">Login</button>
-              <button className="btn btn-secondary" onClick={() => setShowLogin(false)}>Close</button>
-            </div>
-          </div>
+        <section className="login-section">
+          <Login setShowLogin={setShowLogin} />
         </section>
       )}
     </div>

@@ -19,6 +19,9 @@ import Login from './pages/Home Page/Login/Login'
 import BrokerMyValuations from './pages/Broker/MyValuations/BrokerMyValuations';
 import BrokerConfirmLots from './pages/Broker/BrokerConfirmLots/BrokerConfirmLots';
 import SoldPriceManagement from './pages/Broker/SoldPriceManagement/SoldPriceManagement';
+import SupplierNotices from './pages/Supplier/SupplierNotices/SupplierNotices';
+import DriverNotices from './pages/Driver/DriverNotices/DriverNotices';
+import BrokerNotices from './pages/Broker/BrokerNotices/BrokerNotices';
 
 const App = () => {
   return (
@@ -29,18 +32,22 @@ const App = () => {
           <Route path="/" element={<HomePage />} />
           <Route path="/login" element={<Login/>} />
           <Route path="/view-tea-varieties" element={<ViewTeaTypes />} />
+         
 
           {/* Supplier Routes */}
           <Route path="/supplier-dashboard" element={<SupplierDashboard />} />
+          <Route path="/supplier-notices" element={<SupplierNotices />} />
           <Route path="/supplier-profile" element={<SProfile />} />
           <Route path="/request-transport" element={<RequestTransport />} />
           <Route path="/supplier-delivery-history" element={<SupplierDeliveryHistory />} />
+
 
           {/* Driver Routes */}
           <Route path="/driver-dashboard" element={<DriverDashboard />} />
           <Route path="/driver-profile" element={<DProfile />} />
           <Route path="/driver-view-transport-requests" element={<ViewTransportRequests />} />
           <Route path="/driver-delivery-history" element={<ViewDeliveryRecords />} />
+          <Route path="/driver-notices" element={<DriverNotices />} />
 
           {/* Broker Routes */}
           <Route path="/broker-dashboard" element={<BrokerDashboard />} />
@@ -49,6 +56,7 @@ const App = () => {
           <Route path="/broker-my-valuations" element={<BrokerMyValuations />} />
           <Route path="/broker-confirm-lots" element={<BrokerConfirmLots />} />
           <Route path="/broker-sold-price-management" element={<SoldPriceManagement />} />
+          <Route path="/broker-notices" element={<BrokerNotices />} />
 
           {/* 404 Not Found Route */}
 

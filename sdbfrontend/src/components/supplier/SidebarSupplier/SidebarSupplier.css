@@ -1,32 +1,54 @@
 .sidebar-container {
-    width: 250px;
     height: 100vh;
-    background-color: #343a40; /* Dark Bootstrap color */
-    color: white;
-    padding: 20px;
-}
-
-.sidebar-container h2 {
-    text-align: center;
-    margin-bottom: 20px;
-}
-
-.sidebar-container .nav-link {
-    color: white;
+    width: 250px;
+    background-color: #fff;
+    box-shadow: 2px 0 5px rgba(0, 0, 0, 0.1);
     display: flex;
-    align-items: center;
-    gap: 10px;
-    padding: 10px;
-    font-size: 18px;
-    transition: background 0.3s ease;
-}
-
-.sidebar-container .nav-link:hover {
-    background: #495057; /* Slightly lighter dark color */
-    border-radius: 5px;
-}
-
-.sidebar-container .nav-link i,
-.sidebar-container .nav-link svg {  /* Applies to both Bootstrap and React Icons */
-    font-size: 24px;  /* Increases icon size */
-}
+    flex-direction: column;
+    padding: 16px;
+  }
+  
+  .sidebar-header {
+    padding: 16px;
+    text-align: center;
+  }
+  
+  .sidebar-header h2 {
+    font-size: 1.25rem;
+    font-weight: 600;
+    color: #333;
+  }
+  
+  .sidebar-nav {
+    flex-grow: 1;
+    padding: 8px 0;
+  }
+  
+  .sidebar-nav .MuiListItem-root {
+    border-radius: 4px;
+    margin-bottom: 4px;
+  }
+  
+  .sidebar-nav .MuiListItem-root:hover {
+    background-color: rgba(25, 118, 210, 0.08);
+  }
+  
+  .sidebar-nav .MuiListItem-root.Mui-selected {
+    background-color: rgba(25, 118, 210, 0.16);
+  }
+  
+  .sidebar-nav .MuiListItem-root.Mui-selected:hover {
+    background-color: rgba(25, 118, 210, 0.24);
+  }
+  
+  .logout-section {
+    padding: 16px 0;
+  }
+  
+  /* Responsive adjustments */
+  @media (max-width: 768px) {
+    .sidebar-container {
+      width: 100%;
+      height: auto;
+    }
+  }

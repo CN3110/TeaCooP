@@ -41,6 +41,7 @@ import ViewConfirmedLots from "./pages/SalesEM/ViewConfimedLots/ViewConfimedLots
 import ViewSoldPrices from "./pages/SalesEM/ViewSoldPrices/ViewSoldPrices.jsx";
 import TeaPacket from "./pages/TeaPacket/TeaPacket.jsx";
 import TeaProductionSummary from "./pages/TeaProductionSummary/TeaProductionSummary.jsx"; 
+import EmployeeNotices from "./pages/EmployeeNoitces/EmployeeNoitces.jsx";
 
 const App = () => {
   return (
@@ -99,6 +100,11 @@ const App = () => {
             <Route path="/edit-notice/:id" element={<EditNotice />} />
 
             {/* Other Routes */}
+
+            <Route path="/employee-notices" element={<EmployeeNotices />} />
+
+           
+
 
            
           </Routes>
