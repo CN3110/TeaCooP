@@ -1,0 +1,16 @@
+.employee-layout {
+    display: flex;
+    height: 100vh;
+  }
+  
+  .employee-layout-content {
+    flex: 1;
+    padding: 20px;
+    background-color: #f9f9f9;
+    overflow-y: auto; /* Allow scrolling if content is long */
+  }
+  
+  .content-wrapper {
+    max-width: 1200px;
+    margin: 0 auto;
+  }

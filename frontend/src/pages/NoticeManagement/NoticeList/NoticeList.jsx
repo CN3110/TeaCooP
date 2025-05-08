@@ -11,6 +11,7 @@ import {
   Button
 } from '@mui/material';
 import './NoticeList.css';
+import AdminLayout from '../../../components/AdminLayout/AdminLayout'; 
 
 const Alert = React.forwardRef(function Alert(props, ref) {
   return <MuiAlert elevation={6} ref={ref} variant="filled" {...props} />;
@@ -106,6 +107,7 @@ const NoticeList = () => {
   };
 
   return (
+    <AdminLayout>
    
     <div className="notice-container">
       
@@ -216,6 +218,7 @@ const NoticeList = () => {
         </DialogActions>
       </Dialog>
     </div>
+    </AdminLayout>
   );
 };
 
