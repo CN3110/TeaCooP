@@ -1,15 +1,16 @@
-//import side bar
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import { FiArrowLeft } from 'react-icons/fi';
 import TeaProductionForm from '../../components/ProductionComponents/Form/TeaProductionForm';
 import TeaProductionList from '../../components/ProductionComponents/List/TeaProductionList';
 import './TeaProduction.css';
+import EmployeeLayout from '../../components/EmployeeLayout/EmployeeLayout'; 
 
 const TeaProductionPage = () => {
   const navigate = useNavigate();
 
   return (
+    <EmployeeLayout> 
     <div className="tea-production-page">
       <div className="page-header">
         <button 
@@ -32,6 +33,7 @@ const TeaProductionPage = () => {
         </div>
       </div>
     </div>
+    </EmployeeLayout>
   );
 };
 

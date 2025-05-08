@@ -14,6 +14,7 @@ import {
 } from '@mui/material';
 import MuiAlert from '@mui/material/Alert';
 import './RawTeaRecords.css';
+import EmployeeLayout from '../../components/EmployeeLayout/EmployeeLayout';
 
 const RawTeaRecords = () => {
   const [deliveries, setDeliveries] = useState([]);
@@ -152,6 +153,7 @@ const RawTeaRecords = () => {
   };
 
   return (
+    <EmployeeLayout>
     <div className="raw-tea-records-container">
       <h2>Raw Tea Records</h2>
 
@@ -265,6 +267,7 @@ const RawTeaRecords = () => {
         </MuiAlert>
       </Snackbar>
     </div>
+    </EmployeeLayout>
   );
 };
 

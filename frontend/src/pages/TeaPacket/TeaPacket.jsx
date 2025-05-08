@@ -11,6 +11,8 @@ import {
 import { DataGrid } from '@mui/x-data-grid';
 import axios from 'axios';
 import moment from 'moment';
+import EmployeeLayout from '../../components/EmployeeLayout/EmployeeLayout'; 
+
 
 const TeaPacket = () => {
   const [packets, setPackets] = useState([]);
@@ -209,6 +211,8 @@ const TeaPacket = () => {
   ];
 
   return (
+    <EmployeeLayout>
+      <h2>Tea Packet Management</h2>
     <div style={{ padding: 20 }}>
       <Grid container spacing={2} style={{ marginBottom: 24 }}>
         <Grid item xs={12} sm={4}>
@@ -321,6 +325,7 @@ const TeaPacket = () => {
         </div>
       </Card>
     </div>
+    </EmployeeLayout>
   );
 };
 
