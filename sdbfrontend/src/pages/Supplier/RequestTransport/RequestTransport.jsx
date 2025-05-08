@@ -60,6 +60,15 @@ const RequestTransport = () => {
     setIsLoading(true);
     setError(null);
 
+    const today = new Date().setHours(0, 0, 0, 0);
+  const selectedDate = new Date(reqDeliveryData.reqDate).setHours(0, 0, 0, 0);
+
+  if (selectedDate < today) {
+    setError("You cannot select a past date.");
+    setIsLoading(false);
+    return;
+  }
+
     try {
       const formattedDate = new Date(reqDeliveryData.reqDate)
         .toISOString()
@@ -134,12 +143,14 @@ const RequestTransport = () => {
           <div className="form-group">
             <label>Date:</label>
             <input
-              type="date"
-              name="reqDate"
-              value={reqDeliveryData.reqDate}
-              onChange={handleInputChange}
-              required
-            />
+  type="date"
+  name="reqDate"
+  value={reqDeliveryData.reqDate}
+  onChange={handleInputChange}
+  required
+  min={new Date().toISOString().split("T")[0]} // sets today as the minimum
+/>
+
           </div>
           <div className="form-group">
             <label>Time:</label>
