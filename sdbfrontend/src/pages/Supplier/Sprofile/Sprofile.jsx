@@ -4,7 +4,7 @@ import { useParams } from 'react-router-dom';
 import Snackbar from '@mui/material/Snackbar';
 import MuiAlert from '@mui/material/Alert';
 import SupplierLayout from '../../../components/supplier/SupplierLayout/SupplierLayout';
-import './sprofile.css';
+import './Sprofile.css';
 
 const Alert = React.forwardRef(function Alert(props, ref) {
   return <MuiAlert elevation={6} ref={ref} variant="filled" {...props} />;
@@ -154,7 +154,7 @@ const Sprofile = () => {
         <div className="profile-header">
           <h1>My Profile</h1>
           {!isEditing && !changingPassword && (
-            <button className="btn primary" onClick={() => setIsEditing(true)}>Edit Profile</button>
+            <button className="btn" onClick={() => setIsEditing(true)}>Edit Profile</button>
           )}
         </div>
 
@@ -196,7 +196,7 @@ const Sprofile = () => {
 
             {isEditing && (
               <div className="form-actions">
-                <button type="submit" className="btn success">Save Changes</button>
+                <button type="submit" className="btn">Save Changes</button>
                 <button type="button" className="btn secondary" onClick={() => setIsEditing(false)}>Cancel</button>
               </div>
             )}
@@ -220,7 +220,7 @@ const Sprofile = () => {
         ) : (
           !isEditing && (
             <div className="change-password">
-              <button className="btn info" onClick={() => setChangingPassword(true)}>Change Password</button>
+              <button className="btn" onClick={() => setChangingPassword(true)}>Change Password</button>
             </div>
           )
         )}

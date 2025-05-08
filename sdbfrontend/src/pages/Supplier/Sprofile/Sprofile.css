@@ -1,0 +1,180 @@
+/* Container and Layout */
+.supplier-profile-container {
+    max-width: 900px;
+    margin: 2rem auto;
+    padding: 2rem;
+    background-color: #ffffff;
+    border-radius: 12px;
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.08);
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  }
+  
+  /* Headings */
+  .profile-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 2rem;
+  }
+  
+  .profile-header h1 {
+    margin: 0;
+    font-size: 2rem;
+    color: #333;
+  }
+  
+  /* Forms */
+  .profile-form label,
+  .password-form label {
+    display: block;
+    margin-bottom: 1rem;
+    color: #333;
+    font-weight: 500;
+  }
+  
+  .profile-form input,
+  .password-form input {
+    width: 100%;
+    padding: 0.6rem 0.8rem;
+    border: 1px solid #ccc;
+    border-radius: 6px;
+    margin-top: 0.3rem;
+    font-size: 1rem;
+    transition: border-color 0.3s;
+  }
+  
+  .profile-form input:focus,
+  .password-form input:focus {
+    border-color: #07267824;
+    outline: none;
+  }
+  
+  /* Land Details Section */
+  .land-section {
+    margin-top: 2rem;
+  }
+  
+  .land-section h2 {
+    font-size: 1.4rem;
+    margin-bottom: 1rem;
+  }
+  
+  .land-card {
+    background-color: #f9f9f9;
+    border: 1px solid #e2e2e2;
+    padding: 1rem;
+    border-radius: 8px;
+    margin-bottom: 1rem;
+    transition: box-shadow 0.3s;
+  }
+  
+  .land-card:hover {
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+  }
+  
+  /* Buttons */
+  .btn {
+    padding: 0.6rem 1.2rem;
+    border: none;
+    border-radius: 6px;
+    font-size: 0.95rem;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+  }
+  
+  .btn{
+    background-color: #267824;
+    color: white;
+  }
+  .btn:hover {
+    background-color: #1f651e;
+  }
+  .btn.primary {
+    background-color: #2f962e;
+    color: white;
+  }
+  
+  .btn.primary:hover {
+    background-color: #1f651e;
+  }
+  
+  .btn.secondary {
+    background-color: #6c757d;
+    color: white;
+  }
+  
+  .btn.secondary:hover {
+    background-color: #5a6268;
+  }
+  
+  .btn.success {
+    background-color: #28a745;
+    color: white;
+  }
+  
+  .btn.success:hover {
+    background-color: #218838;
+  }
+  
+  .btn.danger {
+    background-color: #dc3545;
+    color: white;
+  }
+  
+  .btn.danger:hover {
+    background-color: #c82333;
+  }
+  
+  .btn.info {
+    background-color: #267824;
+    color: white;
+  }
+  
+  .btn.info:hover {
+    background-color: #267824;
+  }
+  
+  .btn.small {
+    padding: 0.4rem 0.8rem;
+    font-size: 0.85rem;
+    margin-top: 0.5rem;
+  }
+  
+  /* Form Actions */
+  .form-actions {
+    display: flex;
+    gap: 1rem;
+    margin-top: 1.5rem;
+  }
+  
+  /* Loader */
+  .loader-container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 60vh;
+  }
+  
+  .loader {
+    border: 6px solid #f3f3f3;
+    border-top: 6px solid #267824;
+    border-radius: 50%;
+    width: 40px;
+    height: 40px;
+    animation: spin 1s linear infinite;
+  }
+  
+  @keyframes spin {
+    to {
+      transform: rotate(360deg);
+    }
+  }
+  
+  /* Error Message */
+  .error-message {
+    text-align: center;
+    color: #dc3545;
+    margin-top: 2rem;
+    font-weight: bold;
+  }
+  

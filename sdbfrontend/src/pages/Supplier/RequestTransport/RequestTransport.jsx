@@ -43,6 +43,15 @@ const RequestTransport = () => {
   };
 
   useEffect(() => {
+    // Fetch supplierId from localStorage and set it
+    const storedUserId = localStorage.getItem("userId");
+    if (storedUserId) {
+      setReqDeliveryData((prev) => ({
+        ...prev,
+        supplierId: storedUserId,
+      }));
+    }
+
     fetchTransportRequests();
   }, []);
 
@@ -76,14 +85,14 @@ const RequestTransport = () => {
       }
 
       alert("Transport request submitted successfully!");
-      setReqDeliveryData({
-        supplierId: "",
+      setReqDeliveryData((prev) => ({
+        supplierId: prev.supplierId, // keep the supplierId
         reqDate: "",
         reqTime: "",
         reqNumberOfSacks: "",
         reqWeight: "",
         reqAddress: "",
-      });
+      }));
       await fetchTransportRequests();
     } catch (error) {
       console.error("Error submitting request:", error);
@@ -94,23 +103,24 @@ const RequestTransport = () => {
   };
 
   const resetForm = () => {
-    setReqDeliveryData({
-      supplierId: "",
+    setReqDeliveryData((prev) => ({
+      supplierId: prev.supplierId,
       reqDate: "",
       reqTime: "",
       reqNumberOfSacks: "",
       reqWeight: "",
       reqAddress: "",
-    });
+    }));
   };
 
   return (
     <SupplierLayout>
       <div className="add-new-delivery-request">
+      
         <h3>Requesting Transport</h3>
-        
+
         {error && <div className="error-message">{error}</div>}
-        
+
         <form onSubmit={handleSubmit}>
           <div className="form-group">
             <label>Supplier ID:</label>
@@ -118,8 +128,7 @@ const RequestTransport = () => {
               type="text"
               name="supplierId"
               value={reqDeliveryData.supplierId}
-              onChange={handleInputChange}
-              required
+              readOnly
             />
           </div>
           <div className="form-group">
@@ -183,9 +192,9 @@ const RequestTransport = () => {
             </button>
           </div>
         </form>
-        </div>
-        <div className="form-separator">
-        {/* View Requests Table */}
+      </div>
+
+      <div className="form-separator">
         <h3 style={{ marginTop: "2rem" }}>My Transport Requests</h3>
         {isLoading ? (
           <p>Loading transport requests...</p>
@@ -221,8 +230,7 @@ const RequestTransport = () => {
             </tbody>
           </table>
         )}
-        </div>
-      
+      </div>
     </SupplierLayout>
   );
 };
