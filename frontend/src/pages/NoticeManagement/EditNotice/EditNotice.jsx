@@ -17,6 +17,7 @@ const EditNotice = () => {
       try {
         setLoading(true);
         const response = await fetch(`http://localhost:3001/api/notices/${id}`);
+
         
         if (!response.ok) {
           throw new Error('Failed to fetch notice details');
@@ -26,8 +27,8 @@ const EditNotice = () => {
 
         // Map backend response to frontend form fields
         const mappedNotice = {
-          title: data.title || '',
-          content: data.content || '',
+          title: data.title,
+          content: data.content,
           recipients: Array.isArray(data.recipient) 
             ? data.recipient 
             : data.recipient ? [data.recipient] : [], // Handle string to array

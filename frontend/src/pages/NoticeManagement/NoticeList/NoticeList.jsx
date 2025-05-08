@@ -106,7 +106,9 @@ const NoticeList = () => {
   };
 
   return (
+   
     <div className="notice-container">
+      
       <div className="notice-header">
   
   
@@ -163,7 +165,7 @@ const NoticeList = () => {
                   </td>
                   <td>
         
-                  <button onClick={() => navigate(`/notices/edit/${notice.id}`)} className="btn-edit">
+                  <button onClick={() => navigate(`/edit-notice/${notice.id}`)} className="btn-edit">
   Edit
 </button>
 
