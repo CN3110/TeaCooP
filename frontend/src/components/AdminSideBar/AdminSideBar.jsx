@@ -83,12 +83,11 @@ const AdminSideBar = () => {
                   >
                     Manage Notices
                   </button>
-                  {openDropdown === "sales" && (
+                  {openDropdown === "notices" && (
                     <div className="dropdown-content">
-                      <Link to="/employee-dashboard-create-lot">Add New Lot</Link>
-                      <Link to="/view-lots">View Lot Records</Link>
-                      <Link to="/view-confirmed-lots">Confirm Lot Orders</Link>
-                      <Link to="/view-sold-prices">View Sold Prices</Link>
+                      <Link to="/notice-form">Add New Notice</Link>
+                      <Link to="/notice-list">View Notices</Link>
+                      
                     </div>
                   )}
                 </div>

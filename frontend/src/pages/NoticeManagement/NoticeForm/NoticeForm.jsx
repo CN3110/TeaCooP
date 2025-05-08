@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import './NoticeForm.css'
+import AdminLayout from '../../../components/AdminLayout/AdminLayout';
 
 const NoticeForm = ({ editMode = false, notice = null }) => {
   const navigate = useNavigate();
@@ -104,6 +105,7 @@ const NoticeForm = ({ editMode = false, notice = null }) => {
   
 
   return (
+    <AdminLayout>
     <div className="notice-form-container">
       <h2>{editMode ? 'Edit Notice' : 'Create New Notice'}</h2>
       {errors.form && <div className="form-error">{errors.form}</div>}
@@ -201,6 +203,7 @@ const NoticeForm = ({ editMode = false, notice = null }) => {
 
       </form>
     </div>
+    </AdminLayout>  
   );
 };
 

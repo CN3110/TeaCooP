@@ -114,9 +114,7 @@ const NoticeList = () => {
       <div className="notice-header">
   
   
-    <button onClick={() => navigate('/admin-dashboard')} className="btn-back">
-      Back
-    </button>
+   
     <h1>Manage Notices</h1>
     <button onClick={() => navigate('/notice-form')} className="btn-create">
       Create New Notice
