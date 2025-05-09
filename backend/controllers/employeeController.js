@@ -142,6 +142,31 @@ exports.updateEmployee = async (req, res) => {
     res.status(500).json({ error: error.message || 'Failed to update Employee' });
   }
 };
+
+// Update employee profile
+exports.updateEmployeeProfile = async (req, res) => {
+  const { employeeId } = req.params;
+  const { employeeName, employeeContact_no, employeeEmail } = req.body;
+
+  if (!employeeName || !employeeContact_no || !employeeEmail) {
+    return res.status(400).json({ error: 'Missing required fields' });
+  }
+
+  try {
+    await employee.updateEmployeeProfile(employeeId, {
+  employeeName,
+  employeeContact_no,
+  employeeEmail,
+});
+
+
+    res.status(200).json({ message: 'Employee updated successfully' });
+  } catch (error) {
+    console.error('Error updating Employee:', error);
+    res.status(500).json({ error: error.message || 'Failed to update Employee' });
+  }
+};
+
     
 exports.disableEmployee = async (req, res) => {
   const { employeeId } = req.params;

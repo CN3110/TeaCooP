@@ -23,6 +23,7 @@ const EProfile = () => {
     employeeName: '',
     employeeContact_no: '',
     employeeEmail: '',
+    
    
   });
 
@@ -103,7 +104,7 @@ const EProfile = () => {
     if (!validateForm()) return;
 
     try {
-      await axios.put(`http://localhost:3001/api/employees/${employeeId}`, employee);
+      await axios.put(`http://localhost:3001/api/employees/profile/${employeeId}`, employee);
       showSnackbar('Profile updated successfully');
       setIsEditing(false);
       fetchEmployeeDetails();

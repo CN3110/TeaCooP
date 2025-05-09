@@ -60,8 +60,19 @@ const updateEmployee = async ({ employeeId, employeeName, employeeContact_no, em
   await db.query(query, [employeeName, employeeContact_no, employeeEmail, status, notes, employeeId]);
 };
 
+//profile update for employee
+const updateEmployeeProfile = async (employeeId, { employeeName, employeeContact_no, employeeEmail }) => {
+    const query = `
+        UPDATE employee
+        SET employeeName = ?, employeeContact_no = ?, employeeEmail = ?
+        WHERE employeeId = ?
+    `;
+    await db.query(query, [employeeName, employeeContact_no, employeeEmail, employeeId]);
+};
+
+
 // Update employee password directly
-const updateEmployeePassword = async (employeeId, newPassword) => {
+const updatePassword = async (employeeId, newPassword) => {
   const hashedPassword = await hashPassword(newPassword);
   
   const query = `
@@ -89,13 +100,16 @@ const verifyEmployeeCredentials = async (employeeId, passcode) => {
   return employee;
 };
 
+
+
 module.exports = {
   generateEmployeeId,
   createEmployee,
   getAllEmployees,
   getEmployeeById,
   updateEmployee,
-  updateEmployeePassword,
+  updateEmployeeProfile,
+  updatePassword,
   verifyEmployeeCredentials,
   hashPassword
 };
