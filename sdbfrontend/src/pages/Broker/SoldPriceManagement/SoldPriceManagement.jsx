@@ -21,9 +21,8 @@ const SoldPriceManagement = () => {
         axios.get(`http://localhost:3001/api/soldLots/broker/${brokerId}`)
       ]);
 
-      // Fix: Access the data array from the response object
       const soldData = soldRes.data.data || [];
-      
+
       const soldPricesMap = soldData.reduce((acc, item) => {
         acc[item.lotNumber] = item.soldPrice;
         return acc;
@@ -32,7 +31,7 @@ const SoldPriceManagement = () => {
       const mergedData = confirmedRes.data.map(lot => ({
         ...lot,
         soldPrice: soldPricesMap[lot.lotNumber] || '',
-        totalSoldPrice: soldPricesMap[lot.lotNumber] 
+        totalSoldPrice: soldPricesMap[lot.lotNumber]
           ? (parseFloat(soldPricesMap[lot.lotNumber]) * lot.totalNetWeight).toFixed(2)
           : ''
       }));
@@ -74,11 +73,11 @@ const SoldPriceManagement = () => {
     setConfirmedLots(prev =>
       prev.map(item =>
         item.lotNumber === lotNumber
-          ? { 
-              ...item, 
+          ? {
+              ...item,
               soldPrice: value,
-              totalSoldPrice: value && !isNaN(value) 
-                ? (parseFloat(value) * item.totalNetWeight).toFixed(2) 
+              totalSoldPrice: value && !isNaN(value)
+                ? (parseFloat(value) * item.totalNetWeight).toFixed(2)
                 : ''
             }
           : item
@@ -92,7 +91,7 @@ const SoldPriceManagement = () => {
 
   const cancelEditing = () => {
     setEditingLot(null);
-    fetchConfirmedLots(); // Reset any changes
+    fetchConfirmedLots();
   };
 
   useEffect(() => {
@@ -102,7 +101,7 @@ const SoldPriceManagement = () => {
   if (loading) {
     return (
       <BrokerLayout>
-        <div className="container mt-4">
+        <div className="container mt-5">
           <div className="d-flex justify-content-center">
             <div className="spinner-border text-primary" role="status">
               <span className="visually-hidden">Loading...</span>
@@ -116,52 +115,51 @@ const SoldPriceManagement = () => {
   return (
     <BrokerLayout>
       <div className="container mt-4">
-        <div className="card">
-          <div className="card-header bg-primary text-white">
-            <h2 className="mb-0">Add Sold Prices</h2>
-          </div>
+        <h3>Manage Sold Prices</h3>
+        <p>Enter the sold prices for your confirmed lots below.</p>
+        <div className="card shadow">
+          
           <div className="card-body">
+
             {error && <div className="alert alert-danger">{error}</div>}
             {successMessage && <div className="alert alert-success">{successMessage}</div>}
 
             {confirmedLots.length === 0 ? (
-              <div className="alert alert-info">
-                No confirmed lots available for price entry.
-              </div>
+              <div className="alert alert-info">No confirmed lots available for price entry.</div>
             ) : (
               <div className="table-responsive">
-                <table className="table table-striped table-hover">
-                  <thead className="table-light">
+                <table className="table table-striped table-hover align-middle">
+                  <thead className="table-dark">
                     <tr>
                       <th>Lot #</th>
                       <th>Tea Type</th>
-                      <th>Total Net Weight (kg)</th>
-                      <th>Valuation Price (LKR/kg)</th>
+                      <th>Net Weight (kg)</th>
+                      <th>Valuation (LKR/kg)</th>
                       <th>Sold Price (LKR/kg)</th>
-                      <th>Total Sold Price (LKR)</th>
+                      <th>Total Sold (LKR)</th>
                       <th>Actions</th>
                     </tr>
                   </thead>
                   <tbody>
-                    {confirmedLots.map(lot => (
+                    {confirmedLots.map((lot) => (
                       <tr key={lot.lotNumber}>
                         <td>{lot.lotNumber}</td>
-                        <td>{lot.teaTypeName}</td>
-                        <td>{lot.totalNetWeight}</td>
-                        <td>{lot.valuationAmount}</td>
+                        <td>{lot.teaTypeName || 'N/A'}</td>
+                        <td>{lot.totalNetWeight || 'N/A'}</td>
+                        <td>{lot.valuationAmount || 'N/A'}</td>
                         <td>
                           <input
                             type="number"
                             value={lot.soldPrice}
                             onChange={(e) => handleInputChange(lot.lotNumber, e.target.value)}
+                            className="form-control"
                             min="0"
                             step="0.01"
                             placeholder="Enter price"
-                            className="form-control"
                             disabled={editingLot !== lot.lotNumber && lot.soldPrice}
                           />
                         </td>
-                        <td>{lot.totalSoldPrice}</td>
+                        <td>{lot.totalSoldPrice || '-'}</td>
                         <td>
                           {editingLot === lot.lotNumber || !lot.soldPrice ? (
                             <>
@@ -173,19 +171,13 @@ const SoldPriceManagement = () => {
                                 Save
                               </button>
                               {editingLot === lot.lotNumber && (
-                                <button
-                                  onClick={cancelEditing}
-                                  className="btn btn-secondary btn-sm"
-                                >
+                                <button onClick={cancelEditing} className="btn btn-secondary btn-sm">
                                   Cancel
                                 </button>
                               )}
                             </>
                           ) : (
-                            <button
-                              onClick={() => startEditing(lot.lotNumber)}
-                              className="btn btn-primary btn-sm"
-                            >
+                            <button onClick={() => startEditing(lot.lotNumber)} className="btn btn-primary btn-sm">
                               Edit
                             </button>
                           )}
@@ -196,6 +188,7 @@ const SoldPriceManagement = () => {
                 </table>
               </div>
             )}
+
           </div>
         </div>
       </div>

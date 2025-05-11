@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import BrokerLayout from "../../../components/broker/BrokerLayout/BrokerLayout";
-import { Table, Button, Form } from "react-bootstrap";
+import { Table, Form, Button, Modal, Toast, ToastContainer } from "react-bootstrap";
 import { FaCheck } from "react-icons/fa";
 import axios from "axios";
 
@@ -9,11 +9,18 @@ const ViewNewLots = () => {
   const [valuationInputs, setValuationInputs] = useState({});
   const [brokerId, setBrokerId] = useState("");
 
+  // Toast state
+  const [toast, setToast] = useState({ show: false, message: "", bg: "success" });
+
+  // Modal state
+  const [showModal, setShowModal] = useState(false);
+  const [selectedLot, setSelectedLot] = useState(null);
+
   useEffect(() => {
     const loggedBrokerId = localStorage.getItem("userId");
 
     if (!loggedBrokerId) {
-      alert("Broker user ID not found in local storage.");
+      showToast("Broker user ID not found.", "danger");
       return;
     }
 
@@ -28,48 +35,52 @@ const ViewNewLots = () => {
 
   const fetchLots = async () => {
     try {
-      const res = await axios.get(`http://localhost:3001/api/lots/available-for-broker?brokerId=${brokerId}`); 
+      const res = await axios.get(`http://localhost:3001/api/lots/available-for-broker?brokerId=${brokerId}`);
       setLots(res.data);
     } catch (err) {
       console.error(err);
+      showToast("Failed to fetch lots.", "danger");
     }
   };
 
   const handleInputChange = (lotNumber, value) => {
-    setValuationInputs((prev) => ({
-      ...prev,
-      [lotNumber]: value,
-    }));
+    setValuationInputs((prev) => ({ ...prev, [lotNumber]: value }));
   };
 
-  const submitValuation = async (lotNumber) => {
+  const handleModalOpen = (lotNumber) => {
+    setSelectedLot(lotNumber);
+    setShowModal(true);
+  };
+
+  const handleModalClose = () => {
+    setShowModal(false);
+    setSelectedLot(null);
+  };
+
+  const showToast = (message, bg = "success") => {
+    setToast({ show: true, message, bg });
+  };
+
+  const submitValuation = async () => {
+    const lotNumber = selectedLot;
     const price = valuationInputs[lotNumber];
 
     if (!price || isNaN(price)) {
-      alert("Please enter a valid valuation price.");
+      showToast("Please enter a valid valuation price.", "warning");
+      handleModalClose();
       return;
     }
 
     try {
-      await axios.post(
-        `http://localhost:3001/api/lots/${lotNumber}/valuation`,
-        {
-          brokerId,
-          valuationPrice: parseFloat(price),
-        }
-      );
+      await axios.post(`http://localhost:3001/api/lots/${lotNumber}/valuation`, {
+        brokerId,
+        valuationPrice: parseFloat(price),
+      });
 
-      alert("Valuation submitted!");
+      showToast("Valuation submitted!", "success");
 
-      // Option 1: Remove lot from table after submission (UX improvement)
-      setLots((prevLots) =>
-        prevLots.filter((lot) => lot.lotNumber !== lotNumber)
-      );
+      setLots((prevLots) => prevLots.filter((lot) => lot.lotNumber !== lotNumber));
 
-      // Option 2: If you prefer to refresh entire list instead:
-      // fetchLots();
-
-      // Clear input field
       setValuationInputs((prev) => {
         const updated = { ...prev };
         delete updated[lotNumber];
@@ -77,7 +88,9 @@ const ViewNewLots = () => {
       });
     } catch (err) {
       console.error(err);
-      alert("Submission failed.");
+      showToast("Submission failed.", "danger");
+    } finally {
+      handleModalClose();
     }
   };
 
@@ -115,16 +128,11 @@ const ViewNewLots = () => {
                       type="number"
                       placeholder="Enter price"
                       value={valuationInputs[lot.lotNumber] ?? ""}
-                      onChange={(e) =>
-                        handleInputChange(lot.lotNumber, e.target.value)
-                      }
+                      onChange={(e) => handleInputChange(lot.lotNumber, e.target.value)}
                     />
                   </td>
                   <td>
-                    <Button
-                      variant="success"
-                      onClick={() => submitValuation(lot.lotNumber)}
-                    >
+                    <Button variant="success" onClick={() => handleModalOpen(lot.lotNumber)}>
                       <FaCheck />
                     </Button>
                   </td>
@@ -139,6 +147,37 @@ const ViewNewLots = () => {
             )}
           </tbody>
         </Table>
+
+        {/* Bootstrap Modal */}
+        <Modal show={showModal} onHide={handleModalClose}>
+          <Modal.Header closeButton>
+            <Modal.Title>Confirm Valuation Submission</Modal.Title>
+          </Modal.Header>
+          <Modal.Body>
+            Are you sure you want to submit the valuation price for Lot #{selectedLot}?
+          </Modal.Body>
+          <Modal.Footer>
+            <Button variant="secondary" onClick={handleModalClose}>
+              Cancel
+            </Button>
+            <Button variant="success" onClick={submitValuation}>
+              Submit
+            </Button>
+          </Modal.Footer>
+        </Modal>
+
+        {/* Bootstrap Toast */}
+        <ToastContainer position="top-center" className="mt-3">
+          <Toast
+            show={toast.show}
+            onClose={() => setToast((prev) => ({ ...prev, show: false }))}
+            delay={3000}
+            autohide
+            bg={toast.bg}
+          >
+            <Toast.Body className="text-white">{toast.message}</Toast.Body>
+          </Toast>
+        </ToastContainer>
       </div>
     </BrokerLayout>
   );
