@@ -86,12 +86,6 @@ const deleteLot = async (lotNumber) => {
   return result.affectedRows > 0;
 };
 
-// Get lots marked as available (not broker-specific)
-const getAvailableLots = async () => {
-  const [lots] = await db.query("SELECT * FROM lot WHERE status = 'available'");
-  return lots;
-};
-
 // Get lots marked as available for a specific broker (not yet valued by them)
 const getAvailableLotsForBroker = async (brokerId) => {
   const [lots] = await db.query(
@@ -102,6 +96,12 @@ const getAvailableLotsForBroker = async (brokerId) => {
      )`,
     [brokerId]
   );
+  return lots;
+};
+
+// Get all available lots (not broker-specific)
+const getAvailableLots = async () => {
+  const [lots] = await db.query("SELECT * FROM lot WHERE status = 'available'");
   return lots;
 };
 
@@ -121,7 +121,7 @@ module.exports = {
   createLot,
   updateLot,
   deleteLot,
-  getAvailableLots,
   getAvailableLotsForBroker,
+  getAvailableLots,
   submitBrokerValuation
 };

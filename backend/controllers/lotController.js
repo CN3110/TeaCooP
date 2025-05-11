@@ -42,7 +42,7 @@ exports.getLotById = async (req, res) => {
 exports.createLot = async (req, res) => {
   const {
     manufacturingDate, noOfBags, netWeight,
-    totalNetWeight, valuationPrice, teaTypeId
+    totalNetWeight, valuationPrice, teaTypeId,
   } = req.body;
 
   if (!manufacturingDate || !noOfBags || !netWeight || !totalNetWeight || !valuationPrice || !teaTypeId) {
@@ -132,7 +132,6 @@ exports.deleteLot = async (req, res) => {
 
 // Get lots available for a specific broker (not yet valued by them)
 exports.getAvailableLotsForBroker = async (req, res) => {
-  // brokerId from auth middleware or query param
   const brokerId = req.user?.brokerId || req.query.brokerId;
   if (!brokerId) {
     return res.status(400).json({ message: 'Broker ID is required' });
@@ -162,7 +161,7 @@ exports.submitBrokerValuation = async (req, res) => {
   }
 };
 
-// Optionally: Get all available lots (not broker-specific)
+// Get all available lots (not broker-specific)
 exports.getAvailableLots = async (req, res) => {
   try {
     const lots = await lotModel.getAvailableLots();

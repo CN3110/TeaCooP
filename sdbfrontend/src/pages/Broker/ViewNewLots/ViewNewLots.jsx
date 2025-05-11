@@ -28,9 +28,7 @@ const ViewNewLots = () => {
 
   const fetchLots = async () => {
     try {
-      const res = await axios.get("http://localhost:3001/api/lots/available", {
-        params: { brokerId }, // Pass brokerId as query param
-      });
+      const res = await axios.get(`http://localhost:3001/api/lots/available-for-broker?brokerId=${brokerId}`); 
       setLots(res.data);
     } catch (err) {
       console.error(err);
@@ -91,7 +89,7 @@ const ViewNewLots = () => {
           <thead className="table-dark">
             <tr>
               <th>Lot #</th>
-              <th>Tea Type (Grade)</th>
+              <th>Tea Type</th>
               <th>No. of Bags</th>
               <th>Net Weight (kg)</th>
               <th>Total Weight (kg)</th>

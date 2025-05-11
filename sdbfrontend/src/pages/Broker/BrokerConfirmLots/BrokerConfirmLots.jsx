@@ -93,7 +93,7 @@ const BrokerConfirmLots = () => {
             <TableHead>
               <TableRow sx={{ backgroundColor: '#f5f5f5' }}>
                 <TableCell>Lot Number</TableCell>
-                <TableCell>Tea Grade</TableCell>
+                <TableCell>Tea Type</TableCell>
                 <TableCell>Bags</TableCell>
                 <TableCell>Net Weight (kg)</TableCell>
                 <TableCell>Valuation Amount LKR per kg</TableCell>
@@ -111,7 +111,7 @@ const BrokerConfirmLots = () => {
                   <TableCell component="th" scope="row">
                     {lot.lotNumber}
                   </TableCell>
-                  <TableCell>{lot.teaGrade || 'N/A'}</TableCell>
+                  <TableCell>{lot.teaTypeName || 'N/A'}</TableCell>
                   <TableCell>{lot.noOfBags || 'N/A'}</TableCell>
                   <TableCell>{lot.totalNetWeight ? `${lot.totalNetWeight} kg` : 'N/A'}</TableCell>
                   <TableCell>{lot.valuationAmount ? (lot.valuationAmount) : 'N/A'}</TableCell>

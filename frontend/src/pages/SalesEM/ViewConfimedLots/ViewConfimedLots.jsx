@@ -136,11 +136,11 @@ const ViewConfirmedLots = () => {
             <div className="vl-modal">
               <h3>Lot Details - {selectedLot.lotNumber}</h3>
               <ul>
-                <li><strong>Tea Grade:</strong> {selectedLot.teaGrade}</li>
+                <li><strong>Tea Type:</strong> {selectedLot.teaTypeName}</li>
                 <li><strong>Net Weight:</strong> {selectedLot.totalNetWeight} kg</li>
                 <li><strong>Broker:</strong> {selectedLot.brokerName}</li>
                 <li><strong>Company:</strong> {selectedLot.companyName}</li>
-                <li><strong>Invoice No:</strong> {selectedLot.invoiceNumber}</li>
+               
                 <li><strong>Manufacturing Date:</strong> {new Date(selectedLot.manufacturingDate).toLocaleDateString()}</li>
                 <li><strong>Confirmed At:</strong> {new Date(selectedLot.confirmed_at).toLocaleString()}</li>
               </ul>

@@ -134,7 +134,7 @@ const SoldPriceManagement = () => {
                   <thead className="table-light">
                     <tr>
                       <th>Lot #</th>
-                      <th>Grade</th>
+                      <th>Tea Type</th>
                       <th>Total Net Weight (kg)</th>
                       <th>Valuation Price (LKR/kg)</th>
                       <th>Sold Price (LKR/kg)</th>
@@ -146,7 +146,7 @@ const SoldPriceManagement = () => {
                     {confirmedLots.map(lot => (
                       <tr key={lot.lotNumber}>
                         <td>{lot.lotNumber}</td>
-                        <td>{lot.teaGrade}</td>
+                        <td>{lot.teaTypeName}</td>
                         <td>{lot.totalNetWeight}</td>
                         <td>{lot.valuationAmount}</td>
                         <td>

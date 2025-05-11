@@ -160,7 +160,7 @@ const BrokerMyValuations = () => {
           <thead className="table-dark">
             <tr>
               <th>Lot #</th>
-              <th>Tea Grade</th>
+              <th>Tea Type</th>
               <th>Bags</th>
               <th>Weight (kg)</th>
               <th>Valuation Date</th>
@@ -174,7 +174,7 @@ const BrokerMyValuations = () => {
               valuations.map((valuation) => (
                 <tr key={valuation.valuation_id}>
                   <td>{valuation.lotNumber}</td>
-                  <td>{valuation.teaGrade}</td>
+                  <td>{valuation.teaTypeName}</td>
                   <td>{valuation.noOfBags}</td>
                   <td>{valuation.totalNetWeight}</td>
                   <td>{formatDate(valuation.valuationDate)}</td>
@@ -230,7 +230,7 @@ const BrokerMyValuations = () => {
           {currentValuation && (
             <>
               <p><strong>Lot Number:</strong> {currentValuation.lotNumber}</p>
-              <p><strong>Tea Grade:</strong> {currentValuation.teaGrade}</p>
+              <p><strong>Tea Type:</strong> {currentValuation.teaTypeName}</p>
               
               <Form.Group className="mb-3">
                 <Form.Label>Valuation Price (LKR)</Form.Label>
