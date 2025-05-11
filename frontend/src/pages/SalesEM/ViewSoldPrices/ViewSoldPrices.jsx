@@ -90,7 +90,7 @@ const ViewSoldPrices = () => {
                     {filteredLots.map(lot => (
                       <tr key={lot.saleId}>
                         <td>{lot.lotNumber}</td>
-                        <td>{lot.teaGrade}</td>
+                        <td>{lot.teaTypeName}</td>
                         <td>{lot.totalNetWeight}</td>
                         <td>{lot.brokerName}</td>
                         <td>{lot.brokerCompanyName}</td>

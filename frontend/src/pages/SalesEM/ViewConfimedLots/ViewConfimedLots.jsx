@@ -13,30 +13,47 @@ const ViewConfirmedLots = () => {
 
   useEffect(() => {
     const fetchConfirmedLots = async () => {
+  try {
+    setLoading(true);
+    const res = await fetch("http://localhost:3001/api/valuations/confirmed");
+    
+    // First read the response as text
+    const responseText = await res.text();
+    
+    if (!res.ok) {
+      // Try to parse as JSON, but fall back to text if it fails
+      let errorData;
       try {
-        setLoading(true);
-        const res = await fetch("http://localhost:3001/api/valuations/confirmed");
-        if (!res.ok) {
-          const errorData = await res.json();
-          throw new Error(errorData.message || "Failed to fetch confirmed lots");
-        }
-        const data = await res.json();
-        setConfirmedLots(data);
-      } catch (error) {
-        setError(error.message);
-        console.error("Failed to fetch confirmed lots:", error);
-      } finally {
-        setLoading(false);
+        errorData = JSON.parse(responseText);
+      } catch (jsonError) {
+        errorData = responseText;
       }
-    };
-
+      throw new Error(
+        typeof errorData === 'object' 
+          ? errorData.message || "Failed to fetch confirmed lots"
+          : errorData || "Failed to fetch confirmed lots"
+      );
+    }
+    
+    // Parse the successful response
+    const data = JSON.parse(responseText);
+    setConfirmedLots(data);
+  } catch (error) {
+    setError(error.message);
+    console.error("Failed to fetch confirmed lots:", error);
+  } finally {
+    setLoading(false);
+  }
+};
     fetchConfirmedLots();
-  }, []);
+  }, []); // <-- Make sure to include the dependency array
 
   const viewLotDetails = (lot) => {
     setSelectedLot(lot);
     setIsModalOpen(true);
   };
+
+  // ... rest of your component remains the same ...
 
   const viewValuationDetails = (lotNumber) => {
     navigate(`/view-valuations/${lotNumber}`);
@@ -71,7 +88,7 @@ const ViewConfirmedLots = () => {
               <thead>
                 <tr>
                   <th>Lot Number</th>
-                  <th>Tea Grade</th>
+                  <th>Tea Type</th>
                   <th>Total Net Weight</th>
                   <th>Broker Name</th>
                   <th>Broker Company</th>
@@ -84,11 +101,12 @@ const ViewConfirmedLots = () => {
                 {confirmedLots.map((lot) => (
                   <tr key={lot.valuation_id}>
                     <td>{lot.lotNumber}</td>
-                    <td>{lot.teaGrade}</td>
+                    <td>{lot.teaTypeName}</td>
                     <td>{lot.totalNetWeight}</td>
                     <td>{lot.brokerName}</td>
                     <td>{lot.companyName}</td>
-                    <td>{lot.valuationAmount}</td>
+                    <td>{lot.valuationPrice}</td>
+
                     <td>
                       {new Date(lot.confirmed_at).toLocaleDateString("en-US", {
                         year: "numeric",

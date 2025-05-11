@@ -19,7 +19,7 @@ const BrokerValuation = {
           confirmed_at = NOW()
       WHERE valuation_id = ?
     `, [employeeId, valuationId]);
-  
+
     await db.query(`
       UPDATE broker_valuation 
       SET is_confirmed = FALSE 
@@ -51,11 +51,12 @@ const BrokerValuation = {
     const [results] = await db.query(`
       SELECT 
         bv.*,
-        l.teaGrade,
+        tt.teaTypeName,
         l.noOfBags,
         l.totalNetWeight
       FROM broker_valuation bv
       JOIN lot l ON bv.lotNumber = l.lotNumber
+      JOIN teaType tt ON l.teaTypeId = tt.teaTypeId
       WHERE bv.brokerId = ?
       ORDER BY bv.valuationDate DESC
     `, [brokerId]);
@@ -117,32 +118,27 @@ const BrokerValuation = {
   async getConfirmedValuations() {
     const [results] = await db.query(`
       SELECT 
-        bv.valuation_id,
-        bv.lotNumber,
-        bv.brokerId,
-        bv.valuationPrice AS valuationAmount,
-        bv.valuationDate,
-        bv.is_confirmed,
-        bv.confirmed_at,
-        bv.confirmed_by,
-        b.brokerName,
-        b.brokerCompanyName AS companyName,
-        l.teaGrade,
-        l.noOfBags,
-        l.netWeight,
-        l.totalNetWeight,
-        l.invoiceNumber,
-        l.manufacturingDate
-      FROM broker_valuation bv
-      JOIN broker b ON bv.brokerId = b.brokerId
-      JOIN lot l ON bv.lotNumber = l.lotNumber
-      WHERE bv.is_confirmed = TRUE
-      ORDER BY bv.confirmed_at DESC
+    bv.*,
+    b.brokerName,
+    b.brokerCompanyName AS companyName,
+    tt.teaTypeName,  
+    l.noOfBags,
+    l.netWeight,
+    l.totalNetWeight,
+    l.manufacturingDate
+FROM broker_valuation bv
+JOIN broker b ON bv.brokerId = b.brokerId
+JOIN lot l ON bv.lotNumber = l.lotNumber
+LEFT JOIN teaType tt ON l.teaTypeId = tt.teaTypeId
+WHERE bv.is_confirmed = 1
+ORDER BY bv.confirmed_at DESC
+LIMIT 0, 1000;
+
     `);
     return results;
-  }, 
+  },
 
-  //to get all confrimed lots for logged broker - broker view
+  // To get all confirmed lots for logged broker - broker view
   async getConfirmedValuationsByBroker(brokerId) {
     const [results] = await db.query(`
       SELECT 
@@ -152,20 +148,21 @@ const BrokerValuation = {
         bv.valuationPrice AS valuationAmount,
         bv.valuationDate,
         bv.is_confirmed,
-        bv.confirmed_at,
         bv.confirmed_by,
-        l.teaGrade,
+        bv.confirmed_at,
+        tt.teaTypeName,
         l.noOfBags,
         l.totalNetWeight
       FROM broker_valuation bv
       JOIN lot l ON bv.lotNumber = l.lotNumber
+      JOIN teaType tt ON l.teaTypeId = tt.teaTypeId
       WHERE bv.brokerId = ? AND bv.is_confirmed = TRUE
       ORDER BY bv.confirmed_at DESC
     `, [brokerId]);
   
     return results;
   }
-  
+
 };
 
 module.exports = BrokerValuation;

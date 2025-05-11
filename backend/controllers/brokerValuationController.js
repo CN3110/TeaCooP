@@ -107,6 +107,7 @@ exports.deleteValuation = async (req, res) => {
 exports.getConfirmedValuations = async (req, res) => {
   try {
     const results = await BrokerValuation.getConfirmedValuations();
+    console.log('Confirmed lots:', results); 
     res.json(results);
   } catch (err) {
     console.error(err);
@@ -120,6 +121,7 @@ exports.getConfirmedValuationsByBroker = async (req, res) => {
 
   try {
     const results = await BrokerValuation.getConfirmedValuationsByBroker(brokerId);
+
     res.json(results);
   } catch (err) {
     console.error(err);
