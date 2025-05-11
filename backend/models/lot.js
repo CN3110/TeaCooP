@@ -3,7 +3,7 @@ const db = require('../config/database');
 // Generate a new unique lot number
 const generateLotNumber = async () => {
   const query = `
-    SELECT MAX(CAST(SUBSTRING(lotNumber, 2) AS UNSIGNED)) AS lastId 
+    SELECT MAX(CAST(SUBSTRING(lotNumber, 2) AS UNSIGNED)) AS lastId
     FROM lot
   `;
   const [[result]] = await db.query(query);
@@ -24,31 +24,29 @@ const getLotById = async (lotNumber) => {
 };
 
 // Create a new lot
-
 const createLot = async ({
   lotNumber,
   manufacturingDate,
   noOfBags,
   netWeight,
   totalNetWeight,
-  valuationPrice, 
-  teaTypeId      
+  valuationPrice,
+  teaTypeId
 }) => {
   const query = `
     INSERT INTO lot (
       lotNumber, manufacturingDate, noOfBags, netWeight, totalNetWeight,
-      valuationPrice, teaTypeId
-    ) VALUES (?, ?, ?, ?, ?, ?, ?)
+      valuationPrice, teaTypeId, status
+    ) VALUES (?, ?, ?, ?, ?, ?, ?, 'available')
   `;
-
   await db.query(query, [
-    lotNumber,         
-    manufacturingDate,  // 2
-    noOfBags,           // 3
-    netWeight,          // 4
-    totalNetWeight,     // 5
-    valuationPrice,     // 6
-    teaTypeId           // 7
+    lotNumber,
+    manufacturingDate,
+    noOfBags,
+    netWeight,
+    totalNetWeight,
+    valuationPrice,
+    teaTypeId
   ]);
 };
 
@@ -71,7 +69,6 @@ const updateLot = async (lotNumber, {
       teaTypeId = ?
     WHERE lotNumber = ?
   `;
-
   await db.query(query, [
     manufacturingDate,
     noOfBags,
@@ -79,10 +76,9 @@ const updateLot = async (lotNumber, {
     totalNetWeight,
     valuationPrice,
     teaTypeId,
-    lotNumber 
+    lotNumber
   ]);
 };
-
 
 // Delete a lot
 const deleteLot = async (lotNumber) => {
@@ -90,23 +86,32 @@ const deleteLot = async (lotNumber) => {
   return result.affectedRows > 0;
 };
 
-// Get lots marked as available
+// Get lots marked as available (not broker-specific)
 const getAvailableLots = async () => {
   const [lots] = await db.query("SELECT * FROM lot WHERE status = 'available'");
   return lots;
 };
 
-// Submit a broker valuation
+// Get lots marked as available for a specific broker (not yet valued by them)
+const getAvailableLotsForBroker = async (brokerId) => {
+  const [lots] = await db.query(
+    `SELECT * FROM lot
+     WHERE status = 'available'
+     AND lotNumber NOT IN (
+       SELECT lotNumber FROM broker_valuation WHERE brokerId = ?
+     )`,
+    [brokerId]
+  );
+  return lots;
+};
+
+// Submit a broker valuation (do NOT update the global lot status)
 const submitBrokerValuation = async (lotNumber, brokerId, valuationPrice) => {
   await db.query(
     `INSERT INTO broker_valuation (lotNumber, brokerId, valuationPrice) VALUES (?, ?, ?)`,
     [lotNumber, brokerId, valuationPrice]
   );
-
-  await db.query(
-    `UPDATE lot SET status = 'valuation_pending' WHERE lotNumber = ?`,
-    [lotNumber]
-  );
+  // Do NOT update lot status here!
 };
 
 module.exports = {
@@ -117,5 +122,6 @@ module.exports = {
   updateLot,
   deleteLot,
   getAvailableLots,
+  getAvailableLotsForBroker,
   submitBrokerValuation
 };

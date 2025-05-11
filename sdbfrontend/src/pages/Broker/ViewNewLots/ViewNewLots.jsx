@@ -17,13 +17,20 @@ const ViewNewLots = () => {
       return;
     }
 
-    setBrokerId(loggedBrokerId); 
-    fetchLots();
+    setBrokerId(loggedBrokerId);
   }, []);
+
+  useEffect(() => {
+    if (brokerId) {
+      fetchLots();
+    }
+  }, [brokerId]);
 
   const fetchLots = async () => {
     try {
-      const res = await axios.get("http://localhost:3001/api/lots/available");
+      const res = await axios.get("http://localhost:3001/api/lots/available", {
+        params: { brokerId }, // Pass brokerId as query param
+      });
       setLots(res.data);
     } catch (err) {
       console.error(err);
@@ -56,13 +63,20 @@ const ViewNewLots = () => {
 
       alert("Valuation submitted!");
 
+      // Option 1: Remove lot from table after submission (UX improvement)
       setLots((prevLots) =>
-        prevLots.map((lot) =>
-          lot.lotNumber === lotNumber
-            ? { ...lot, brokerValuation: parseFloat(price) }
-            : lot
-        )
+        prevLots.filter((lot) => lot.lotNumber !== lotNumber)
       );
+
+      // Option 2: If you prefer to refresh entire list instead:
+      // fetchLots();
+
+      // Clear input field
+      setValuationInputs((prev) => {
+        const updated = { ...prev };
+        delete updated[lotNumber];
+        return updated;
+      });
     } catch (err) {
       console.error(err);
       alert("Submission failed.");
@@ -92,7 +106,7 @@ const ViewNewLots = () => {
               lots.map((lot) => (
                 <tr key={lot.lotNumber}>
                   <td>{lot.lotNumber}</td>
-                  <td>{lot.teaGrade}</td>
+                  <td>{lot.teaTypeName}</td>
                   <td>{lot.noOfBags}</td>
                   <td>{lot.netWeight}</td>
                   <td>{lot.totalNetWeight}</td>
@@ -102,22 +116,16 @@ const ViewNewLots = () => {
                     <Form.Control
                       type="number"
                       placeholder="Enter price"
-                      value={
-                        valuationInputs[lot.lotNumber] ??
-                        lot.brokerValuation ??
-                        ""
-                      }
+                      value={valuationInputs[lot.lotNumber] ?? ""}
                       onChange={(e) =>
                         handleInputChange(lot.lotNumber, e.target.value)
                       }
-                      disabled={!!lot.brokerValuation}
                     />
                   </td>
                   <td>
                     <Button
                       variant="success"
                       onClick={() => submitValuation(lot.lotNumber)}
-                      disabled={!!lot.brokerValuation}
                     >
                       <FaCheck />
                     </Button>
@@ -126,7 +134,7 @@ const ViewNewLots = () => {
               ))
             ) : (
               <tr>
-                <td colSpan="10" className="text-center">
+                <td colSpan="9" className="text-center">
                   No new lots available.
                 </td>
               </tr>
