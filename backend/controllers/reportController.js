@@ -11,13 +11,21 @@ exports.getRawTeaReport = async (req, res) => {
   }
 };
 
-//get supplier wise raw delivery reocrds
+// Get supplier-wise raw tea delivery records
 exports.getRawTeaRecordsOfSupplier = async (req, res) => {
   try {
-    const data = await Report.getRawTeaRecordsOfSupplier();
-    res.json(data);
+    const { from, to, transport } = req.query;
+
+    // Call the updated model function with proper defaults
+    const data = await Report.getRawTeaRecordsOfSupplier(
+      from || null,
+      to || null,
+      transport || 'All'
+    );
+
+    res.status(200).json(data);
   } catch (err) {
-    console.error('Error fetching report:', err);
-    res.status(500).json({ error: 'Server error' });
+    console.error('Error fetching supplier raw tea records:', err);
+    res.status(500).json({ error: 'Failed to fetch supplier report' });
   }
 };

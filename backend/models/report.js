@@ -18,26 +18,36 @@ exports.getAllRawTeaRecords = async () => {
   return results;
 };
 
-//get supplier wise raw delivery reocrds
-exports.getRawTeaRecordsOfSupplier = async () => {
+exports.getRawTeaRecordsOfSupplier = async (fromDate, toDate, transport) => {
   const sql = `
     SELECT 
       d.supplierId,
-      SUM(d.randalu) AS total_randalu,
-      SUM(d.greenTeaLeaves) AS total_green_tea_leaves,
-      (SUM(d.randalu) + SUM(d.greenTeaLeaves)) AS total_raw_tea_weight,
+      SUM(d.randalu) AS randalu,
+      SUM(d.greenTeaLeaves) AS greenTeaLeaves,
+      SUM(d.randalu + d.greenTeaLeaves) AS rawTea,
+      SUM(CASE WHEN d.transport = 'selfTransport' THEN (d.randalu + d.greenTeaLeaves) ELSE 0 END) AS selfTransportedRawTea,
+      SUM(CASE WHEN d.transport != 'selfTransport' THEN (d.randalu + d.greenTeaLeaves) ELSE 0 END) AS usedTransportationRawTea,
       CASE 
-        WHEN SUM(CASE WHEN d.transport = 'selfTransport' THEN 1 ELSE 0 END) > 0 THEN 'Yes'
+        WHEN SUM(d.transport = 'selfTransport') > 0 THEN 'Yes'
         ELSE 'No'
-      END AS self_transport_used
+      END AS transport
     FROM 
       delivery d
+    JOIN 
+      supplier s ON d.supplierId = s.supplierId
+    WHERE 
+      (d.date >= ? OR ? IS NULL)
+      AND (d.date <= ? OR ? IS NULL)
+      AND (? = 'All' OR 
+           (? = 'Yes' AND d.transport = 'selfTransport') OR 
+           (? = 'No' AND d.transport != 'selfTransport'))
     GROUP BY 
       d.supplierId
     ORDER BY 
       d.supplierId ASC
   `;
-  const [results] = await db.query(sql);
+
+  const params = [fromDate, fromDate, toDate, toDate, transport, transport, transport];
+  const [results] = await db.query(sql, params);
   return results;
 };
-  
