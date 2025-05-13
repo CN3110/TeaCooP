@@ -16,6 +16,10 @@ import {
   Paper,
   Typography,
   Pagination,
+  Container,
+  Stack,
+  Tooltip,
+  Chip,
 } from "@mui/material";
 import ClearIcon from "@mui/icons-material/Clear";
 import DownloadIcon from "@mui/icons-material/Download";
@@ -214,59 +218,110 @@ const SupplierRecords = () => {
   const totalPages = Math.ceil(report.length / recordsPerPage);
 
   return ( 
-    <EmployeeLayout>
-    <Box p={3}>
-      <Typography variant="h5" mb={2}>
-        Supplier Records Report
-      </Typography>
+   <EmployeeLayout>
+  <Container maxWidth="lg" sx={{ mt: 4, mb: 8 }}>
+    <Paper elevation={3} sx={{ p: 3, borderRadius: 2 }}>
+      {/* Header */}
+      <Box sx={{ mb: 4, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+        <Typography variant="h4" component="h1" color="primary" fontWeight="500">
+          Supplier Records Report
+        </Typography>
+        <Stack direction="row" spacing={1}>
+          <Tooltip title="Download Excel">
+            <Button
+              variant="outlined"
+              color="success"
+              onClick={downloadExcel}
+              startIcon={<DownloadIcon />}
+            >
+              Excel
+            </Button>
+          </Tooltip>
+          <Tooltip title="Download PDF">
+            <Button
+              variant="outlined"
+              color="error"
+              onClick={downloadPDF}
+              startIcon={<DownloadIcon />}
+            >
+              PDF
+            </Button>
+          </Tooltip>
+        </Stack>
+      </Box>
 
-      <Grid container spacing={2} mb={2}>
-        <Grid item xs={12} sm={3}>
-          <TextField
-            fullWidth
-            label="From Date"
-            type="date"
-            InputLabelProps={{ shrink: true }}
-            value={fromDate}
-            onChange={(e) => setFromDate(e.target.value)}
-          />
+      {/* Filter Section */}
+      <Paper elevation={1} sx={{ p: 2, mb: 4, backgroundColor: '#f5f5f5', borderRadius: 2 }}>
+        <Grid container spacing={2} alignItems="center">
+          <Grid item xs={12} sm={6} md={4}>
+            <TextField
+              fullWidth
+              label="From Date"
+              type="date"
+              value={fromDate}
+              onChange={(e) => setFromDate(e.target.value)}
+              InputLabelProps={{ shrink: true }}
+            />
+          </Grid>
+          <Grid item xs={12} sm={6} md={4}>
+            <TextField
+              fullWidth
+              label="To Date"
+              type="date"
+              value={toDate}
+              onChange={(e) => setToDate(e.target.value)}
+              InputLabelProps={{ shrink: true }}
+            />
+          </Grid>
+          <Grid item xs={12} sm={6} md={4}>
+            <Button
+              fullWidth
+              variant="outlined"
+              color="secondary"
+              startIcon={<ClearIcon />}
+              onClick={handleClearFilters}
+            >
+              Clear Filters
+            </Button>
+          </Grid>
         </Grid>
-        <Grid item xs={12} sm={3}>
-          <TextField
-            fullWidth
-            label="To Date"
-            type="date"
-            InputLabelProps={{ shrink: true }}
-            value={toDate}
-            onChange={(e) => setToDate(e.target.value)}
-          />
-        </Grid>
-        
-        <Grid item xs={12} sm={3}>
-          <Button
-            fullWidth
-            variant="contained"
-            color="primary"
-            startIcon={<ClearIcon />}
-            onClick={handleClearFilters}
-          >
-            Clear Filters
-          </Button>
-        </Grid>
-      </Grid>
+      </Paper>
 
-      <Grid container spacing={2} mb={2}>
-        <Grid item>
-          <Button variant="outlined" startIcon={<DownloadIcon />} onClick={downloadExcel}>
-            Download Excel
-          </Button>
-        </Grid>
-        <Grid item>
-          <Button variant="outlined" startIcon={<DownloadIcon />} onClick={downloadPDF}>
-            Download PDF
-          </Button>
-        </Grid>
-      </Grid>
+      {/* Active Filters */}
+      {(fromDate || toDate || transportFilter !== "All") && (
+        <Box sx={{ mb: 3, display: 'flex', flexWrap: 'wrap', gap: 1 }}>
+          <Typography variant="body2" color="text.secondary" sx={{ mr: 1, mt: 0.5 }}>
+            Active filters:
+          </Typography>
+          {fromDate && (
+            <Chip
+              label={`From: ${format(new Date(fromDate), 'MMM dd, yyyy')}`}
+              size="small"
+              color="primary"
+              variant="outlined"
+            />
+          )}
+          {toDate && (
+            <Chip
+              label={`To: ${format(new Date(toDate), 'MMM dd, yyyy')}`}
+              size="small"
+              color="primary"
+              variant="outlined"
+            />
+          )}
+          {transportFilter !== "All" && (
+            <Chip
+              label={`Transport: ${transportFilter}`}
+              size="small"
+              color="primary"
+              variant="outlined"
+            />
+          )}
+        </Box>
+      )}
+      
+
+      {/* Table and Pagination come here */}
 
       <TableContainer component={Paper} sx={{ maxHeight: 500 }}>
         <Table stickyHeader>
@@ -303,7 +358,8 @@ const SupplierRecords = () => {
           color="primary"
         />
       </Box>
-    </Box>
+    </Paper>
+      </Container>
     </EmployeeLayout>
   );
 };

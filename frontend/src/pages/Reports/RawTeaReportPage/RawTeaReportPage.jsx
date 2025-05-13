@@ -37,6 +37,7 @@ import { format } from 'date-fns';
 import * as XLSX from 'xlsx';
 import { jsPDF } from 'jspdf';
 import autoTable from 'jspdf-autotable';
+import EmployeeLayout from "../../../components/EmployeeLayout/EmployeeLayout.jsx";
 
 const RawTeaReportPage = () => {
   const [fromDate, setFromDate] = useState('');
@@ -181,6 +182,7 @@ const RawTeaReportPage = () => {
   };
 
   return (
+    <EmployeeLayout>
     <Container maxWidth="lg" sx={{ mt: 4, mb: 8 }}>
       <Paper elevation={3} sx={{ p: 3, borderRadius: 2 }}>
         <Box sx={{ mb: 4, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
@@ -428,6 +430,7 @@ const RawTeaReportPage = () => {
         </Box>
       </Paper>
     </Container>
+    </EmployeeLayout>
   );
 };
 
