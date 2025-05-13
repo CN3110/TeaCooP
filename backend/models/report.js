@@ -51,3 +51,19 @@ exports.getRawTeaRecordsOfSupplier = async (fromDate, toDate, transport) => {
   const [results] = await db.query(sql, params);
   return results;
 };
+
+
+exports.getRawTeaRecordsOfDriver = async () => {
+  const sql = `
+    SELECT 
+      d.transport AS driverId,
+      d.date,
+      (d.randalu + d.greenTeaLeaves) AS rawTeaWeight
+    FROM delivery d
+    JOIN driver dr ON d.transport = dr.driverId
+  `;
+
+  const [results] = await db.query(sql);
+  return results;
+ 
+};

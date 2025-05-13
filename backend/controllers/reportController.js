@@ -29,3 +29,19 @@ exports.getRawTeaRecordsOfSupplier = async (req, res) => {
     res.status(500).json({ error: 'Failed to fetch supplier report' });
   }
 };
+
+exports.getRawTeaRecordsOfDriver = (req, res) => {
+  const { driverId } = req.query;
+
+  // Default to null if not provided
+  
+  const driver = driverId || 'All';
+
+  Report.getRawTeaRecordsOfDriver(driver, (err, results) => {
+    if (err) {
+      return res.status(500).json({ error: 'Database error', details: err });
+    }
+
+    res.status(200).json(results);
+  });
+};
