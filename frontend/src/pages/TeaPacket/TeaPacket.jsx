@@ -41,7 +41,6 @@ const TeaPacket = () => {
   });
 
   const [editingPacketId, setEditingPacketId] = useState(null);
-
   const [snackbar, setSnackbar] = useState({ open: false, message: '', severity: 'success' });
   const [confirmDialog, setConfirmDialog] = useState({ open: false, packetId: null });
 
@@ -97,16 +96,11 @@ const TeaPacket = () => {
     const updatedForm = { ...formData, [field]: value };
 
     if (field === 'sourceMadeTeaWeight' || field === 'packetWeight') {
-      const { numberOfPackets, remaining } = calculatePackets(
+      const { numberOfPackets } = calculatePackets(
         updatedForm.sourceMadeTeaWeight,
         updatedForm.packetWeight
       );
       updatedForm.numberOfPackets = numberOfPackets ? numberOfPackets : '';
-
-      setAvailableData((prev) => ({
-        ...prev,
-        availableForPackets: parseFloat(prev.availableForPackets) + remaining
-      }));
     }
 
     setFormData(updatedForm);
@@ -137,18 +131,32 @@ const TeaPacket = () => {
     }
 
     try {
-      await axios.post('http://localhost:3001/api/tea-packets', {
-        ...formData,
-        productionDate: moment(formData.productionDate).format('YYYY-MM-DD'),
-        numberOfPackets: parseInt(formData.numberOfPackets, 10),
-        createdBy: employeeId
-      });
-      showSnackbar('Packet record added successfully');
+      if (editingPacketId) {
+        // Update existing record
+        await axios.put(`http://localhost:3001/api/tea-packets/${editingPacketId}`, {
+          ...formData,
+          productionDate: moment(formData.productionDate).format('YYYY-MM-DD'),
+          numberOfPackets: parseInt(formData.numberOfPackets, 10),
+          updatedBy: employeeId
+        });
+        showSnackbar('Packet record updated successfully');
+      } else {
+        // Add new record
+        await axios.post('http://localhost:3001/api/tea-packets', {
+          ...formData,
+          productionDate: moment(formData.productionDate).format('YYYY-MM-DD'),
+          numberOfPackets: parseInt(formData.numberOfPackets, 10),
+          createdBy: employeeId
+        });
+        showSnackbar('Packet record added successfully');
+      }
+
       setFormData({ productionDate: '', sourceMadeTeaWeight: '', packetWeight: '', numberOfPackets: '' });
+      setEditingPacketId(null);
       fetchPackets();
       fetchAvailableMadeTea();
     } catch (error) {
-      showSnackbar(error.response?.data?.error || 'Failed to add packet record', 'error');
+      showSnackbar(error.response?.data?.error || 'Failed to save packet record', 'error');
     }
   };
 
