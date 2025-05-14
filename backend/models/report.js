@@ -1,3 +1,4 @@
+// Updated Report model with properly implemented driver records function
 const db = require('../config/database');
 
 //get all the raw tea records
@@ -52,18 +53,50 @@ exports.getRawTeaRecordsOfSupplier = async (fromDate, toDate, transport) => {
   return results;
 };
 
+// Fixed function to get driver raw tea records with proper date filtering and aggregation
+exports.getRawTeaRecordsOfDriver = async (fromDate, toDate, driverId) => {
+  let params = [];
+  let whereClause = '';
+  
+  // Build WHERE clause and parameters based on provided filters
+  if (fromDate || toDate || driverId !== 'All') {
+    whereClause = 'WHERE ';
+    
+    if (fromDate) {
+      whereClause += 'd.date >= ? ';
+      params.push(fromDate);
+      
+      if (toDate || driverId !== 'All') {
+        whereClause += 'AND ';
+      }
+    }
+    
+    if (toDate) {
+      whereClause += 'd.date <= ? ';
+      params.push(toDate);
+      
+      if (driverId !== 'All') {
+        whereClause += 'AND ';
+      }
+    }
+    
+    if (driverId !== 'All') {
+      whereClause += 'd.transport = ? ';
+      params.push(driverId);
+    }
+  }
 
-exports.getRawTeaRecordsOfDriver = async () => {
   const sql = `
     SELECT 
       d.transport AS driverId,
-      d.date,
-      (d.randalu + d.greenTeaLeaves) AS rawTeaWeight
+      SUM(d.randalu + d.greenTeaLeaves) AS totalRawTeaWeight
     FROM delivery d
     JOIN driver dr ON d.transport = dr.driverId
+    ${whereClause}
+    GROUP BY d.transport
+    ORDER BY totalRawTeaWeight DESC
   `;
 
-  const [results] = await db.query(sql);
+  const [results] = await db.query(sql, params);
   return results;
- 
 };
