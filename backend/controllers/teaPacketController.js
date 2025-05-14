@@ -56,3 +56,21 @@ exports.getAvailableMadeTea = async (req, res) => {
     res.status(500).json({ error: "Failed to fetch available made tea data" });
   }
 };
+
+
+exports.deleteTeaPacket = async (req, res) => {
+  const { id } = req.params;
+
+  try {
+    const result = await TeaPacket.deleteTeaPacket(id);
+
+    if (result.affectedRows === 0) {
+      return res.status(404).json({ error: "Tea packet not found" });
+    }
+
+    res.status(200).json({ message: "Tea packet deleted successfully" });
+  } catch (error) {
+    console.error("Error deleting tea packet:", error);
+    res.status(500).json({ error: "Failed to delete tea packet" });
+  }
+};

@@ -33,6 +33,16 @@ class TeaPacket {
     return results;
   }
 
+  static async deleteTeaPacket(id) {
+  if (!id) throw new Error("ID is required for deletion");
+
+  const query = `DELETE FROM tea_packets WHERE packetId = ?`;
+
+  const [result] = await db.query(query, [id]);
+  return result;
+}
+
+
   static async getAvailableMadeTea() {
     const monthlyQuery = `
       SELECT SUM(weightInKg) as totalProduction 
