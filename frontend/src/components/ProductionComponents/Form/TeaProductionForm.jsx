@@ -1,3 +1,4 @@
+//procution record eka add kraddi, tot raw weight eka update wenne na
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import { format } from 'date-fns';
@@ -6,24 +7,62 @@ import MuiAlert from "@mui/material/Alert";
 import './TeaProductionForm.css';
 
 const TeaProductionForm = () => {
-  
   const [loading, setLoading] = useState(false);
+  const [rawTeaStock, setRawTeaStock] = useState(0);
   const [formData, setFormData] = useState({
-    
     productionDate: format(new Date(), 'yyyy-MM-dd'),
     weightInKg: '',
+    rawTeaUsed: '',
   });
   
   const [formErrors, setFormErrors] = useState({});
   
-  // Snackbar state
   const [snackbar, setSnackbar] = useState({
     open: false,
     message: '',
-    severity: 'success' // 'success', 'error', 'warning', 'info'
+    severity: 'success'
   });
 
-    const showSnackbar = (message, severity = 'success') => {
+  useEffect(() => {
+    fetchRawTeaStock();
+  }, []);
+
+  const fetchRawTeaStock = async () => {
+  try {
+    const [deliveriesResponse, productionsResponse] = await Promise.all([
+      axios.get('http://localhost:3001/api/deliveries'),
+      axios.get('http://localhost:3001/api/teaProductions')
+    ]);
+
+    // Ensure we're working with arrays
+    const deliveries = Array.isArray(deliveriesResponse.data) 
+      ? deliveriesResponse.data 
+      : [deliveriesResponse.data];
+      
+    const productions = Array.isArray(productionsResponse.data) 
+      ? productionsResponse.data 
+      : [productionsResponse.data];
+
+    const totalRawTeaFromDeliveries = deliveries.reduce((sum, record) => {
+      const greenTea = parseFloat(record.greenTeaLeaves || 0);
+      const randalu = parseFloat(record.randalu || 0);
+      return sum + greenTea + randalu;
+    }, 0);
+
+    const totalRawTeaUsed = productions.reduce((sum, record) => {
+      return sum + parseFloat(record.rawTeaUsed || 0);
+    }, 0);
+
+    const currentStock = totalRawTeaFromDeliveries - totalRawTeaUsed;
+    setRawTeaStock(Number(currentStock.toFixed(2)));
+  } catch (error) {
+    console.error('Error fetching stock data:', error);
+    showSnackbar('Could not fetch raw tea stock levels', 'error');
+    setRawTeaStock(0);
+  }
+};
+
+  const showSnackbar = (message, severity = 'success') => {
     setSnackbar({
       open: true,
       message,
@@ -35,7 +74,6 @@ const TeaProductionForm = () => {
     const { name, value } = e.target;
     setFormData(prev => ({ ...prev, [name]: value }));
     
-    // Clear error when field is updated
     if (formErrors[name]) {
       setFormErrors(prev => {
         const newErrors = {...prev};
@@ -43,8 +81,7 @@ const TeaProductionForm = () => {
         return newErrors;
       });
     }
-    
-   };
+  };
 
   const validateForm = () => {
     const errors = {};
@@ -59,8 +96,19 @@ const TeaProductionForm = () => {
     }
     
     const weight = parseFloat(formData.weightInKg);
-    if (isNaN(weight) || weight <= 0) {
+    if (isNaN(weight)) {
+      errors.weightInKg = 'Please enter a valid number';     
+    } else if (weight <= 0) {
       errors.weightInKg = 'Weight must be greater than zero';
+    }
+    
+    const rawTeaUsed = parseFloat(formData.rawTeaUsed);
+    if (isNaN(rawTeaUsed)) {
+      errors.rawTeaUsed = 'Please enter a valid number';
+    } else if (rawTeaUsed <= 0) {
+      errors.rawTeaUsed = 'Raw tea used must be greater than zero';
+    } else if (rawTeaUsed > rawTeaStock) {
+      errors.rawTeaUsed = `Not enough raw tea in stock. Available: ${rawTeaStock} kg`;
     }
     
     setFormErrors(errors);
@@ -86,12 +134,13 @@ const TeaProductionForm = () => {
       });
 
       showSnackbar('Production record added successfully!');
+      await fetchRawTeaStock();
       
-      // Reset form
       setFormData({
-       
         productionDate: format(new Date(), 'yyyy-MM-dd'),
         weightInKg: '',
+        rawTeaUsed: '',
+        
       });
    
     } catch (error) {
@@ -114,7 +163,13 @@ const TeaProductionForm = () => {
 
   return (
     <div className="tea-production-form">
-      <h2>Add Tea Production Record</h2>
+      <div className="form-header">
+        <h2>Add Tea Production Record</h2>
+        <div className="raw-tea-stock">
+          <span>Current Raw Tea Stock: </span>
+          <span className="stock-amount">{rawTeaStock} kg</span>
+        </div>
+      </div>
       
       <form onSubmit={handleSubmit}>
         <div className={`form-group ${formErrors.productionDate ? 'error' : ''}`}>
@@ -133,10 +188,25 @@ const TeaProductionForm = () => {
           )}
         </div>
         
-        
+        <div className={`form-group ${formErrors.rawTeaUsed ? 'error' : ''}`}>
+          <label htmlFor="rawTeaUsed">Raw Tea Used (kg):</label>
+          <input
+            type="number"
+            id="rawTeaUsed"
+            name="rawTeaUsed"
+            step="0.01"
+            min="0.01"
+            value={formData.rawTeaUsed}
+            onChange={handleChange}
+            required
+          />
+          {formErrors.rawTeaUsed && (
+            <div className="error-text">{formErrors.rawTeaUsed}</div>
+          )}
+        </div>
         
         <div className={`form-group ${formErrors.weightInKg ? 'error' : ''}`}>
-          <label htmlFor="weightInKg">Weight (kg):</label>
+          <label htmlFor="weightInKg">Final Production Weight (kg):</label>
           <input
             type="number"
             id="weightInKg"
@@ -151,12 +221,11 @@ const TeaProductionForm = () => {
             <div className="error-text">{formErrors.weightInKg}</div>
           )}
         </div>
-       
         
         <button 
           type="submit" 
-          
           className={loading ? 'loading-button' : ''}
+          disabled={loading}
         >
           {loading ? (
             <>

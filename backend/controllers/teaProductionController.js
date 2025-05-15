@@ -39,31 +39,32 @@ exports.getAllTeaProductions = async (req, res) => {
 
 
 // Add a new tea production record
+// Add a new tea production record
 exports.addTeaProduction = async (req, res) => {
-  const {productionDate, weightInKg, createdBy } = req.body;
+  const { productionDate, weightInKg, createdBy, rawTeaUsed } = req.body;
 
   // Validate required fields
-  if ( !productionDate || !weightInKg || !createdBy) {
+  if (!productionDate || !weightInKg || !createdBy || !rawTeaUsed) {
     return res.status(400).json({ error: "Missing required fields" });
   }
 
   try {
-    // Insert production record
+    // Insert production record with all required fields
     const [result] = await db.query(
-      "INSERT INTO tea_production (productionDate, weightInKg, createdBy) VALUES (?, ?, ?)",
-      [ productionDate, weightInKg, createdBy]
+      "INSERT INTO tea_production (productionDate, weightInKg, createdBy, rawTeaUsed) VALUES (?, ?, ?, ?)",
+      [productionDate, weightInKg, createdBy, rawTeaUsed] // Added rawTeaUsed here
     );
-    
-  
     
     res.status(201).json({ 
       message: "Production record added successfully",
       productionId: result.insertId,
-      
     });
   } catch (error) {
     console.error("Error adding tea production:", error);
-    res.status(500).json({ error: "Failed to add tea production record" });
+    res.status(500).json({ 
+      error: "Failed to add tea production record",
+      details: error.message 
+    });
   }
 };
 

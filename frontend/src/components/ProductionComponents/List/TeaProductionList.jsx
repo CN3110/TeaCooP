@@ -21,6 +21,7 @@ const TeaProductionList = () => {
   const [error, setError] = useState('');
   const [totalProduction, setTotalProduction] = useState(0);
   const [totalPeriod, setTotalPeriod] = useState('currentMonth');
+  const [currentMonthName, setCurrentMonthName] = useState('');
   const [pagination, setPagination] = useState({
     total: 0,
     page: 1,
@@ -46,11 +47,13 @@ const TeaProductionList = () => {
     productionId: null,
     productionDate: '',
     weightInKg: '',
+    rawTeaUsed: '',
     employeeName: ''
   });
   const [editFormErrors, setEditFormErrors] = useState({
     productionDate: '',
     weightInKg: '',
+    rawTeaUsed: '',
     employeeName: ''
   });
   
@@ -59,6 +62,9 @@ const TeaProductionList = () => {
   const prevTotalRef = useRef(totalProduction);
 
   useEffect(() => {
+    const today = new Date();
+    setCurrentMonthName(format(today, 'MMMM yyyy'));
+    
     const fetchData = async () => {
       try {
         setLoading(true);
@@ -194,11 +200,13 @@ const TeaProductionList = () => {
       productionId: production.productionId,
       productionDate: formattedDate,
       weightInKg: production.weightInKg ? parseFloat(production.weightInKg).toString() : '',
+      rawTeaUsed: production.rawTeaUsed ? parseFloat(production.rawTeaUsed).toString() : '',
       employeeName: production.employeeName || production.createdBy || ''
     });
     setEditFormErrors({
       productionDate: '',
       weightInKg: '',
+      rawTeaUsed: '',
       employeeName: ''
     });
     setEditDialogOpen(true);
@@ -238,6 +246,14 @@ const TeaProductionList = () => {
       valid = false;
     }
     
+    if (!editFormData.rawTeaUsed) {
+      newErrors.rawTeaUsed = 'Raw tea used is required';
+      valid = false;
+    } else if (isNaN(Number(editFormData.rawTeaUsed)) || Number(editFormData.rawTeaUsed) <= 0) {
+      newErrors.rawTeaUsed = 'Raw tea used must be a positive number';
+      valid = false;
+    }
+    
     if (!editFormData.employeeName) {
       newErrors.employeeName = 'Employee name is required';
       valid = false;
@@ -254,6 +270,7 @@ const TeaProductionList = () => {
       await axios.put(`http://localhost:3001/api/teaProductions/${editFormData.productionId}`, {
         productionDate: editFormData.productionDate,
         weightInKg: parseFloat(editFormData.weightInKg),
+        rawTeaUsed: parseFloat(editFormData.rawTeaUsed),
         employeeName: editFormData.employeeName
       });
       
@@ -263,7 +280,8 @@ const TeaProductionList = () => {
           ? { 
               ...p, 
               productionDate: editFormData.productionDate, 
-              weightInKg: parseFloat(editFormData.weightInKg), 
+              weightInKg: parseFloat(editFormData.weightInKg),
+              rawTeaUsed: parseFloat(editFormData.rawTeaUsed),
               employeeName: editFormData.employeeName 
             } 
           : p
@@ -326,10 +344,8 @@ const TeaProductionList = () => {
       return `${formattedTotal} ${periodText}`;
     }
     
-    // For current month
-    const today = new Date();
-    const monthName = format(today, 'MMMM yyyy');
-    return `${formattedTotal} for ${monthName}`;
+    // For current month - use the stored month name
+    return `${formattedTotal} for ${currentMonthName}`;
   };
 
   if (loading && productions.length === 0) {
@@ -371,7 +387,7 @@ const TeaProductionList = () => {
       </div>
 
       <div className="total-production-label">
-        <span>Total Production</span>
+        <span>Total Production:</span>
         <span className="total-production-value" ref={totalValueRef}>
           {getTotalDisplayText()}
         </span>
@@ -383,7 +399,8 @@ const TeaProductionList = () => {
           <thead>
             <tr>
               <th>Date</th>
-              <th>Weight (kg)</th>
+              <th>Raw Tea Used (kg)</th>
+              <th>Production (kg)</th>
               <th>Recorded By</th>
               <th>Actions</th>
             </tr>
@@ -397,9 +414,13 @@ const TeaProductionList = () => {
                 const weight = production.weightInKg 
                   ? parseFloat(production.weightInKg).toFixed(2)
                   : '0.00';
+                const rawTeaUsed = production.rawTeaUsed
+                  ? parseFloat(production.rawTeaUsed).toFixed(2)
+                  : '0.00';
                 return (
                   <tr key={production.productionId}>
                     <td>{productionDate}</td>
+                    <td>{rawTeaUsed}</td>
                     <td>{weight}</td>
                     <td>{production.employeeName || production.createdBy}</td>
                     <td className="action-buttons">
@@ -499,7 +520,24 @@ const TeaProductionList = () => {
             </div>
             
             <div className="form-group">
-              <label htmlFor="weightInKg">Weight (kg) *</label>
+              <label htmlFor="rawTeaUsed">Raw Tea Used (kg) *</label>
+              <input
+                type="number"
+                id="rawTeaUsed"
+                name="rawTeaUsed"
+                value={editFormData.rawTeaUsed}
+                onChange={handleEditFormChange}
+                step="0.01"
+                min="0.01"
+                className={editFormErrors.rawTeaUsed ? 'error' : ''}
+              />
+              {editFormErrors.rawTeaUsed && (
+                <div className="error-message">{editFormErrors.rawTeaUsed}</div>
+              )}
+            </div>
+            
+            <div className="form-group">
+              <label htmlFor="weightInKg">Production Weight (kg) *</label>
               <input
                 type="number"
                 id="weightInKg"
@@ -514,8 +552,6 @@ const TeaProductionList = () => {
                 <div className="error-message">{editFormErrors.weightInKg}</div>
               )}
             </div>
-            
-            
           </div>
         </DialogContent>
         <DialogActions sx={{ padding: '16px 24px' }}>
