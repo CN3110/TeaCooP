@@ -38,6 +38,10 @@ exports.addTeaPacket = async (req, res) => {
 exports.getAllTeaPackets = async (req, res) => {
   try {
     const packets = await TeaPacket.getAllTeaPackets();
+    
+    // Debug logging to verify date fields
+    //console.log("Controller packets:", packets);
+    
     res.json({ data: packets, total: packets.length });
   } catch (err) {
     console.error("Error fetching tea packets:", err);

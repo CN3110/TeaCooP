@@ -22,16 +22,26 @@ class TeaPacket {
   }
 
   static async getAllTeaPackets() {
-    const query = `
-      SELECT p.*, e.employeeName as employeeName
-      FROM tea_packets p
-      JOIN employee e ON p.createdBy = e.employeeId
-      ORDER BY p.productionDate DESC, p.createdAt DESC
-    `;
+  // Use DATE_FORMAT in SQL to format the dates correctly
+  const query = `
+    SELECT 
+      p.packetId,
+      DATE_FORMAT(p.productionDate, '%Y-%m-%d') as productionDate,
+      p.sourceMadeTeaWeight,
+      p.packetWeight,
+      p.numberOfPackets,
+      p.createdBy,
+      DATE_FORMAT(p.createdAt, '%Y-%m-%d') as createdAt,
+      e.employeeName
+    FROM tea_packets p
+    JOIN employee e ON p.createdBy = e.employeeId
+    ORDER BY p.productionDate DESC, p.createdAt DESC
+  `;
 
-    const [results] = await db.query(query);
-    return results;
-  }
+  const [results] = await db.query(query);
+  //console.log("Database results:", results); // Log the results
+  return results;
+}
 
   static async deleteTeaPacket(id) {
   if (!id) throw new Error("ID is required for deletion");
