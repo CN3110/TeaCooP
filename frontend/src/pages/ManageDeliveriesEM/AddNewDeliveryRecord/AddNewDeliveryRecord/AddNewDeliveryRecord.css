@@ -1,0 +1,189 @@
+/* Container layout */
+.add-new-delivery-container {
+    padding: 2rem;
+  }
+  
+  .add-new-delivery {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 1.5rem;
+  }
+  
+  /* Left form section */
+  form {
+    flex: 1 1 60%;
+    background-color: #f8f9fa;
+    padding: 2rem;
+    border-radius: 0.5rem;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+  }
+
+  /* Right cards section */
+  .cards-container {
+    flex: 1 1 35%;
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+  }
+  
+  /* Common card style */
+  .supplier-card,
+  .driver-card {
+    background-color: #ffffff;
+    border: 1px solid #dee2e6;
+    border-radius: 0.5rem;
+    padding: 1rem 1.5rem;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+  }
+  
+  .supplier-card h5,
+  .driver-card h5 {
+    margin-top: 1rem;
+  }
+  
+  /* Form grid layout */
+  .form-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 0.75rem 1.5rem;
+  }
+  
+  .form-group {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+  }
+  
+  /* Label next to input */
+  label {
+    width: 180px;
+    font-weight: 500;
+    margin: 0;
+  }
+  
+  /* Inputs */
+  input[type="text"],
+  input[type="number"],
+  input[type="date"],
+  select {
+    max-width: 250px;
+    padding: 0.45rem 0.75rem;
+    border: 1px solid #ced4da;
+    border-radius: 0.375rem;
+    font-size: 0.95rem;
+    background-color: #fff;
+  }
+  
+  /* Deduction + tea weights section */
+  .total-deductions,
+  .tea-leaves-weights {
+    grid-column: span 2;
+    display: flex;
+    max-width: 400px;
+    flex-direction: column;
+    gap: 0.5rem;
+  }
+  
+  .total-deductions label {
+    font-weight: 600;
+    margin-top: 0.5rem;
+    margin-left: 35px;
+  }
+
+  .tea-leaves-weights label {
+    font-weight: 600;
+    margin-top: 0.5rem;
+    margin-left: 35px;
+  } 
+  
+  /* Autocomplete suggestions */
+  .autocomplete {
+    position: relative;
+  }
+  
+  .suggestions-list {
+    position: absolute;
+    top: 100%;
+    left: 130px; /* to align under input */
+    width: 100%;
+    right: 0;
+    max-height: 200px;
+    overflow-y: auto;
+    border: 1px solid #ced4da;
+    background-color: #fff;
+    border-radius: 0.375rem;
+    z-index: 10;
+    list-style: none;
+    margin: 0;
+    padding: 0;
+  }
+  
+  .suggestions-list li {
+    padding: 0.5rem 0.75rem;
+    cursor: pointer;
+  }
+  
+  .suggestions-list li:hover {
+    background-color: #e9ecef;
+  }
+  
+  /* Buttons */
+  .form-buttons {
+    display: flex;
+    gap: 1rem;
+    margin-top: 1rem;
+  }
+  
+  .submit-btn,
+  .cancel-btn {
+    padding: 0.5rem 1.25rem;
+    font-size: 1rem;
+    border: none;
+    border-radius: 0.375rem;
+    cursor: pointer;
+  }
+  
+  .submit-btn {
+    background-color: #198754;
+    color: white;
+  }
+
+  .submit-btn:hover {
+    background-color: #157347;
+  }
+
+  .cancel-btn:hover {
+    background-color: #c82333;
+  }
+
+  
+  
+  .cancel-btn {
+    background-color: #dc3545;
+    color: white;
+  }
+  
+  /* Responsive adjustments */
+  @media (max-width: 768px) {
+    .add-new-delivery {
+      flex-direction: column;
+    }
+  
+    .form-grid {
+      grid-template-columns: 1fr;
+    }
+  
+    .form-group {
+      flex-direction: column;
+      align-items: flex-start;
+    }
+  
+    label {
+      width: 100%;
+    }
+  
+    .cards-container {
+      flex-direction: column;
+    }
+  }
+  

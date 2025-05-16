@@ -1,0 +1,61 @@
+/* Navbar.css  navbar should be sticky on the top*/
+.navbar-appbar {
+    position: fixed;
+    top: 0;
+    background-color: #154734 !important;
+  }
+  
+  .navbar-toolbar {
+    padding: 0.5rem 2rem;
+  }
+  
+  @media (max-width: 900px) {
+    .navbar-toolbar {
+      padding: 0.5rem 1rem;
+    }
+  }
+  
+  .navbar-brand {
+    flex-grow: 1;
+    font-weight: bold;
+    color: white;
+    text-decoration: none;
+  }
+  
+  .navbar-brand:hover {
+    color: #ddd !important;
+  }
+  
+  .nav-button {
+    color: white !important;
+    font-weight: bold !important;
+    margin: 0 0.5rem !important;
+    text-transform: none !important;
+    font-size: 1rem !important;
+  }
+  
+  .nav-button:hover {
+    background-color: rgba(255, 255, 255, 0.1) !important;
+  }
+  
+  .login-button {
+    background-color: white !important;
+    color: #154734 !important;
+    font-weight: bold !important;
+    margin-left: 1rem !important;
+    text-transform: none !important;
+  }
+  
+  .login-button:hover {
+    background-color: #e0e0e0 !important;
+  }
+  
+  .mobile-menu {
+    width: 200px;
+    background-color: #154734;
+    color: white;
+  }
+  
+  .mobile-menu-item:hover {
+    background-color: rgba(255, 255, 255, 0.1) !important;
+  }

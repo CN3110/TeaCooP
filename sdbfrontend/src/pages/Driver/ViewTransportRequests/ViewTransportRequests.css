@@ -1,0 +1,45 @@
+.driver-requests-container {
+    max-width: 1000px;
+    margin: 2rem auto;
+    padding: 1.5rem;
+    background: #fff;
+    border-radius: 12px;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+  }
+  
+  .driver-requests-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 1rem;
+    font-size: 16px;
+  }
+  
+  .driver-requests-table th,
+  .driver-requests-table td {
+    padding: 12px;
+    border-bottom: 1px solid #ddd;
+    text-align: left;
+  }
+  
+  .driver-requests-table th {
+    background-color: #f2f2f2;
+  }
+  
+  .mark-done-btn {
+    background-color: #28a745;
+    color: white;
+    padding: 6px 12px;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+  }
+  
+  .mark-done-btn:hover {
+    background-color: #218838;
+  }
+  
+  .done-status {
+    color: green;
+    font-weight: bold;
+  }
+  

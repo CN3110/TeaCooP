@@ -7,10 +7,12 @@ const Navbar = ({ setShowLogin }) => {
   return (
     <nav className="navbar navbar-expand-lg fixed-top">
       <div className="container-fluid">
-        <a className="navbar-brand" href="/">Morawakkorale Tea CO-OP</a>
-        
-        {/* Toggler button for mobile */}
-        <button 
+        <a className="navbar-brand" href="/">
+          Morawakkorale Tea CO-OP
+        </a>
+
+        {/*toggle button*/}
+        <button
           className="navbar-toggler"
           type="button"
           data-bs-toggle="collapse"
@@ -24,27 +26,40 @@ const Navbar = ({ setShowLogin }) => {
 
         <div className="collapse navbar-collapse" id="navbarNav">
           <ul className="navbar-nav ms-auto">
+
+
+            {/*About Us*/}
             <li className="nav-item">
-              <a 
+              <a
                 className="nav-link"
                 href="/aboutus"
                 onMouseEnter={() => setHoveredLink("aboutus")}
                 onMouseLeave={() => setHoveredLink(null)}
-              > About Us </a>
+              >
+                {" "}
+                About Us{" "}
+              </a>
             </li>
+
+            
+            {/*Contact*/}
             <li className="nav-item">
-              <a 
+              <a
                 className="nav-link"
                 href="/contact"
                 onMouseEnter={() => setHoveredLink("contact")}
                 onMouseLeave={() => setHoveredLink(null)}
-              > Contact </a>
+              >
+                {" "}
+                Contact{" "}
+              </a>
             </li>
           </ul>
+          
 
-          {/* Sign In Button - Triggers the Modal */}
-          <button 
-            className="btn btn-outline-light me-2" 
+          {/*Login In*/}
+          <button
+            className="btn btn-outline-light me-2"
             onClick={() => setShowLogin(true)}
           >
             Log In

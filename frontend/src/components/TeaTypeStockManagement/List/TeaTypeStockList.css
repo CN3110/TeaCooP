@@ -1,0 +1,182 @@
+.tea-stock-list {
+    padding: 20px;
+    max-width: 1200px;
+    margin: 0 auto;
+  }
+  
+  .tea-stock-list h2 {
+    color: #2c3e50;
+    margin-bottom: 20px;
+    text-align: center;
+  }
+  
+  .error-text {
+    color: #e74c3c;
+    text-align: center;
+    margin: 20px 0;
+  }
+  
+  .stock-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin: 20px 0;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  }
+  
+  .stock-table th, .stock-table td {
+    padding: 12px 15px;
+    text-align: left;
+    border-bottom: 1px solid #e0e0e0;
+  }
+  
+  .stock-table th {
+    background-color: #437a4e;
+    color: white;
+    font-weight: 500;
+  }
+  
+  .stock-table tr:hover {
+    background-color: #f5f5f5;
+  }
+  
+  .action-btn {
+    padding: 6px 12px;
+    margin: 0 5px;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 14px;
+    transition: background-color 0.3s;
+  }
+  
+  .edit-btn {
+    background-color: #5bff71;
+    color: white;
+  }
+  
+  .edit-btn:hover {
+    background-color: #33ff4e;
+  }
+  
+  .delete-btn {
+    background-color: #e74c3c;
+    color: white;
+  }
+  
+  .delete-btn:hover {
+    background-color: #c0392b;
+  }
+  
+  /* Modal Styles */
+  .modal {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.5);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 1000;
+  }
+  
+  .modal-content {
+    background-color: white;
+    padding: 25px;
+    border-radius: 8px;
+    width: 400px;
+    max-width: 90%;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
+  }
+  
+  .modal-content h3 {
+    margin-top: 0;
+    color: #437a4e;
+    text-align: center;
+  }
+  
+  .modal-content label {
+    display: block;
+    margin-bottom: 15px;
+  }
+  
+  .modal-content input {
+    width: 100%;
+    padding: 8px;
+    margin-top: 5px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    box-sizing: border-box;
+  }
+  
+  .modal-actions {
+    display: flex;
+    justify-content: flex-end;
+    margin-top: 20px;
+  }
+  
+  .save-btn {
+    background-color: #437a4e;
+    color: white;
+    margin-left: 10px;
+  }
+  
+  .save-btn:hover {
+    background-color: #325d3b;
+  }
+  
+  .cancel-btn {
+    background-color: #95a5a6;
+    color: white;
+  }
+  
+  .cancel-btn:hover {
+    background-color: #7f8c8d;
+  }
+  
+  /* Pagination Styles */
+  .pagination {
+    display: flex;
+    justify-content: center;
+    margin-top: 20px;
+  }
+  
+  .MuiTablePagination-root {
+    color: #333;
+  }
+  
+  .MuiTablePagination-selectLabel, 
+  .MuiTablePagination-displayedRows {
+    font-size: 14px;
+  }
+  
+  .MuiTablePagination-toolbar {
+    padding: 0;
+  }
+  
+  .MuiTablePagination-actions button {
+    padding: 6px;
+  }
+  
+  /* Responsive adjustments */
+  @media (max-width: 768px) {
+    .stock-table {
+      font-size: 14px;
+    }
+    
+    .stock-table th, .stock-table td {
+      padding: 8px 10px;
+    }
+    
+    .action-btn {
+      padding: 4px 8px;
+      font-size: 12px;
+      margin: 0 2px;
+    }
+    
+    .modal-content {
+      width: 90%;
+      padding: 15px;
+    }
+  }

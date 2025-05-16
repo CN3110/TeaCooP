@@ -1,0 +1,27 @@
+.raw-tea-records-container {
+    padding: 2rem;
+  }
+  
+  .filter-section {
+    display: flex;
+    gap: 1rem;
+    margin-bottom: 1rem;
+  }
+  
+  .total-raw-tea {
+    margin: 1rem 0;
+    font-weight: bold;
+    font-size: 1.2rem;
+  }
+  
+  .records-table {
+    width: 100%;
+    border-collapse: collapse;
+  }
+  
+  .records-table th, .records-table td {
+    padding: 0.5rem;
+    text-align: center;
+    border: 1px solid #ccc;
+  }
+  

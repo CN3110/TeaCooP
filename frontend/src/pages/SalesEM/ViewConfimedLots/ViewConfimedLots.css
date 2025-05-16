@@ -1,0 +1,164 @@
+/* Container styling */
+.vl-container {
+    padding: 2rem;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    background-color: #f9fafb;
+  }
+  
+  /* Title */
+  .vl-title {
+    font-size: 1.8rem;
+    font-weight: 600;
+    margin-bottom: 1.5rem;
+    color: #2d3748;
+  }
+  
+  /* Loading and Error Messages */
+  .vl-loading,
+  .vl-error {
+    padding: 1.5rem;
+    font-size: 1rem;
+  }
+  
+  .vl-error {
+    color: #e53e3e;
+    background-color: #fff5f5;
+    border: 1px solid #feb2b2;
+    border-radius: 6px;
+  }
+  
+  /* Empty state message */
+  .vl-empty {
+    background-color: #fefcbf;
+    border: 1px solid #f6e05e;
+    color: #744210;
+    padding: 1rem;
+    border-radius: 8px;
+    font-size: 1rem;
+  }
+  
+  /* Table container for responsiveness */
+  .vl-table-wrapper {
+    overflow-x: auto;
+    background-color: white;
+    border-radius: 8px;
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.05);
+  }
+  
+  /* Table styling */
+  .vl-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 0.95rem;
+  }
+  
+  .vl-table th,
+  .vl-table td {
+    border: 1px solid #e2e8f0;
+    padding: 0.75rem 1rem;
+    text-align: left;
+  }
+  
+  .vl-table th {
+    background-color: #edf2f7;
+    font-weight: 600;
+    color: #2d3748;
+  }
+  
+  .vl-table tr:hover {
+    background-color: #f7fafc;
+  }
+  
+  /* Actions section */
+  .vl-actions {
+    display: flex;
+    gap: 0.5rem;
+  }
+  
+  /* Buttons */
+  .vl-btn-blue,
+  .vl-btn-green,
+  .vl-btn-red {
+    border: none;
+    border-radius: 6px;
+    padding: 0.4rem 0.8rem;
+    font-size: 0.85rem;
+    font-weight: 500;
+    cursor: pointer;
+    transition: background-color 0.2s ease;
+  }
+  
+  .vl-btn-blue {
+    background-color: #3182ce;
+    color: #fff;
+  }
+  
+  .vl-btn-blue:hover {
+    background-color: #2b6cb0;
+  }
+  
+  .vl-btn-green {
+    background-color: #38a169;
+    color: #fff;
+  }
+  
+  .vl-btn-green:hover {
+    background-color: #2f855a;
+  }
+  
+  .vl-btn-red {
+    background-color: #e53e3e;
+    color: #fff;
+  }
+  
+  .vl-btn-red:hover {
+    background-color: #c53030;
+  }
+  
+  /* Modal overlay */
+  .vl-modal-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.4);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 1000;
+  }
+  
+  /* Modal box */
+  .vl-modal {
+    background-color: #fff;
+    border-radius: 10px;
+    padding: 2rem;
+    max-width: 500px;
+    width: 100%;
+    box-shadow: 0 15px 30px rgba(0, 0, 0, 0.1);
+  }
+  
+  .vl-modal h3 {
+    font-size: 1.25rem;
+    font-weight: 600;
+    margin-bottom: 1rem;
+    color: #2d3748;
+  }
+  
+  /* List inside modal */
+  .vl-modal ul {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+  }
+  
+  .vl-modal ul li {
+    margin-bottom: 0.5rem;
+    color: #4a5568;
+  }
+  
+  /* Modal footer */
+  .vl-modal-footer {
+    display: flex;
+    justify-content: flex-end;
+    margin-top: 1.5rem;
+  }
+  

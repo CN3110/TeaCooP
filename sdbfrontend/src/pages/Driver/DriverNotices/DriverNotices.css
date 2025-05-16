@@ -1,0 +1,206 @@
+/* UserNotices.css - Modern styling */
+:root {
+    --primary-color: #4361ee;
+    --primary-light: #eef2ff;
+    --secondary-color: #3f37c9;
+    --text-primary: #333333;
+    --text-secondary: #666666;
+    --text-light: #888888;
+    --success-color: #4caf50;
+    --warning-color: #ff9800;
+    --danger-color: #f44336;
+    --background-color: #f9fafb;
+    --card-background: #ffffff;
+    --border-radius: 12px;
+    --shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+    --transition: all 0.3s ease;
+  }
+  
+  .user-notices-container {
+    max-width: 900px;
+    margin: 0 auto;
+    padding: 24px;
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+    color: var(--text-primary);
+  }
+  
+  .user-notices-container h2 {
+    font-size: 28px;
+    font-weight: 600;
+    margin-bottom: 24px;
+    position: relative;
+    padding-bottom: 12px;
+  }
+  
+  .user-notices-container h2::after {
+    content: '';
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    width: 64px;
+    height: 4px;
+    background-color: var(--primary-color);
+    border-radius: 2px;
+  }
+  
+  .notices-list {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+    gap: 24px;
+  }
+  
+  .notice-card {
+    background-color: var(--card-background);
+    border-radius: var(--border-radius);
+    box-shadow: var(--shadow);
+    overflow: hidden;
+    transition: var(--transition);
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+  }
+  
+  .notice-card:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 8px 16px rgba(0, 0, 0, 0.08);
+  }
+  
+  .notice-header {
+    padding: 20px 20px 16px;
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    border-bottom: 1px solid rgba(0, 0, 0, 0.05);
+  }
+  
+  .notice-header h3 {
+    font-size: 18px;
+    font-weight: 600;
+    margin: 0;
+    line-height: 1.3;
+    flex: 1;
+    margin-right: 12px;
+  }
+  
+  .priority-badge {
+    font-size: 12px;
+    font-weight: 500;
+    padding: 4px 10px;
+    border-radius: 50px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    white-space: nowrap;
+  }
+  
+  .priority-high {
+    background-color: rgba(244, 67, 54, 0.1);
+    color: var(--danger-color);
+  }
+  
+  .priority-medium {
+    background-color: rgba(255, 152, 0, 0.1);
+    color: var(--warning-color);
+  }
+  
+  .priority-low {
+    background-color: rgba(76, 175, 80, 0.1);
+    color: var(--success-color);
+  }
+  
+  .notice-content {
+    padding: 16px 20px;
+    flex-grow: 1;
+    line-height: 1.6;
+    color: var(--text-secondary);
+  }
+  
+  .notice-content p {
+    margin: 0;
+  }
+  
+  .notice-footer {
+    padding: 16px 20px;
+    display: flex;
+    justify-content: space-between;
+    background-color: var(--primary-light);
+    color: var(--text-secondary);
+    font-size: 14px;
+  }
+  
+  .notice-date, .notice-expiry {
+    font-size: 13px;
+    display: flex;
+    align-items: center;
+  }
+  
+  .notice-date::before {
+    content: '📅';
+    margin-right: 5px;
+  }
+  
+  .notice-expiry::before {
+    content: '⏱️';
+    margin-right: 5px;
+  }
+  
+  /* Loading and error states */
+  .notices-loading, .notices-error, .no-notices {
+    padding: 32px;
+    text-align: center;
+    background-color: var(--card-background);
+    border-radius: var(--border-radius);
+    box-shadow: var(--shadow);
+    color: var(--text-secondary);
+    font-size: 16px;
+  }
+  
+  .notices-loading::before {
+    content: '⏳';
+    display: block;
+    font-size: 32px;
+    margin-bottom: 16px;
+  }
+  
+  .notices-error::before {
+    content: '⚠️';
+    display: block;
+    font-size: 32px;
+    margin-bottom: 16px;
+    color: var(--danger-color);
+  }
+  
+  .no-notices::before {
+    content: '📭';
+    display: block;
+    font-size: 32px;
+    margin-bottom: 16px;
+  }
+  
+  /* Responsive adjustments */
+  @media (max-width: 768px) {
+    .notices-list {
+      grid-template-columns: 1fr;
+    }
+    
+    .user-notices-container {
+      padding: 16px;
+    }
+  }
+  
+  /* Optional dark mode support */
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --primary-color: #4361ee;
+      --primary-light: #1f2a52;
+      --text-primary: #e1e1e1;
+      --text-secondary: #b0b0b0;
+      --text-light: #888888;
+      --background-color: #121212;
+      --card-background: #1e1e1e;
+      --shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+    }
+    
+    .notice-card {
+      border: 1px solid rgba(255, 255, 255, 0.05);
+    }
+  }

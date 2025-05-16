@@ -1,0 +1,130 @@
+.notice-form-container {
+  max-width: 600px;
+  margin: 50px auto;
+  padding: 40px;
+  background: #fff;
+  border-radius: 8px;
+  box-shadow: 0 6px 18px rgba(0, 0, 0, 0.1);
+}
+
+.notice-form-container h2 {
+  text-align: center;
+  font-size: 28px;
+  margin-bottom: 30px;
+  color: #333;
+}
+
+.section-title {
+  font-weight: bold;
+  font-size: 18px;
+  color: #0c5e10e5;
+  margin-bottom: 15px;
+}
+
+.notice-form {
+  display: flex;
+  flex-direction: column;
+  gap: 25px;
+}
+
+.form-group {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+label {
+  font-size: 14px;
+  font-weight: 600;
+  color: #555;
+}
+
+input[type="text"],
+input[type="date"],
+select,
+textarea {
+  background: #f9f9f9;
+  border: 1px solid #ddd;
+  border-radius: 6px;
+  padding: 12px;
+  font-size: 15px;
+}
+
+textarea {
+  resize: vertical;
+}
+
+input[type="checkbox"] {
+  margin-right: 8px;
+}
+
+.recipients-container {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+}
+
+.recipient-checkbox {
+  display: flex;
+  align-items: center;
+}
+
+.error-message {
+  color: #e53935;
+  font-size: 13px;
+}
+
+.form-buttons {
+  display: flex;
+  justify-content: flex-end;
+  gap: 15px;
+  margin-top: 20px;
+}
+
+.btn {
+  padding: 12px 24px;
+  border-radius: 6px;
+  font-weight: 600;
+  font-size: 15px;
+  border: none;
+  cursor: pointer;
+  transition: background 0.3s;
+}
+
+.cancel-btn {
+  background-color: #f0f0f0;
+  color: #666;
+}
+
+.cancel-btn:hover {
+  background-color: #e0e0e0;
+}
+
+.submit-btn {
+  background-color: #367223;
+  color: #fff;
+}
+
+.submit-btn:hover {
+  background-color: #306620;
+}
+
+.form-error {
+  background-color: #ffe6e6;
+  border-left: 5px solid #e53935;
+  padding: 12px;
+  margin-bottom: 20px;
+  border-radius: 6px;
+}
+
+/* Extra styles for flex layouts inside sections */
+.flex-row {
+  display: flex;
+  gap: 15px;
+  align-items: center;
+}
+
+/* Checkbox section adjustments */
+.recipients-container {
+  padding-top: 5px;
+}
