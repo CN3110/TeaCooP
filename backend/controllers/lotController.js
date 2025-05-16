@@ -38,6 +38,18 @@ exports.getLotById = async (req, res) => {
   }
 };
 
+// Get available made tea for lot creation (95% of total production this month)
+exports.getAvailableMadeTeaForTeaTypeCreation = async (req, res) => {
+  try {
+    const availableWeight = await lotModel.getAvailableMadeTeaForTeaTypeCreation();
+    res.status(200).json({ availableWeight });
+  } catch (error) {
+    console.error("Error calculating available made tea:", error);
+    res.status(500).json({ error: "Failed to calculate available made tea" });
+  }
+};
+
+
 // Create a new lot
 exports.createLot = async (req, res) => {
   const {

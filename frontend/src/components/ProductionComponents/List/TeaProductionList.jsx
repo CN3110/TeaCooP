@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import axios from 'axios';
+import { useNavigate } from 'react-router-dom';
 import { format, parseISO } from 'date-fns';
 import {
   Dialog,
@@ -10,11 +11,13 @@ import {
   Button,
   Snackbar,
   Alert,
-  TextField
+  Box,
+  Card, CardActionArea, CardContent, Typography  
 } from '@mui/material';
 import './TeaProductionList.css';
 
 const TeaProductionList = () => {
+  const navigate = useNavigate();
   const [productions, setProductions] = useState([]);
   const [allProductions, setAllProductions] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -22,6 +25,8 @@ const TeaProductionList = () => {
   const [totalProduction, setTotalProduction] = useState(0);
   const [totalPeriod, setTotalPeriod] = useState('currentMonth');
   const [currentMonthName, setCurrentMonthName] = useState('');
+  const [allocatedForPackets, setAllocatedForPackets] = useState(null);
+  const [allocatedForTeaType, setAllocatedForTeaType] = useState(null);
   const [pagination, setPagination] = useState({
     total: 0,
     page: 1,
@@ -62,6 +67,21 @@ const TeaProductionList = () => {
   const prevTotalRef = useRef(totalProduction);
 
   useEffect(() => {
+     fetch('http://localhost:3001/api/tea-packets/available')
+    .then((res) => res.json())
+    .then((data) => {
+      setAllocatedForPackets(data.allocatedForPackets);
+    })
+    .catch((err) => console.error("Error fetching packet data:", err));
+
+    // Fetch Allocated for Tea Type Categorization
+  fetch('http://localhost:3001/api/lots/made-tea-available-for-teaType-creation')
+    .then((res) => res.json())
+    .then((data) => {
+      setAllocatedForTeaType(data.availableWeight);
+    })
+    .catch((err) => console.error("Error fetching categorization data:", err));
+
     const today = new Date();
     setCurrentMonthName(format(today, 'MMMM yyyy'));
     
@@ -142,6 +162,19 @@ const TeaProductionList = () => {
     setProductions(filtered);
     updatePagination(filtered);
   }, [filters, allProductions]);
+
+// Function to handle the click event for the "Allocate for Tea Packet" button
+    const handlePacketAllocationClick = () => {
+    navigate('/tea-packet');
+  };
+
+
+//fuction to handle the click event for the "Allocate for Tea Type Categorization" button
+const handleTeaTypeAllocationClick = () => {
+    navigate('/tea-type-stock-management');
+  };
+
+ 
 
   const updatePagination = (data) => {
     setPagination({
@@ -393,6 +426,28 @@ const TeaProductionList = () => {
         </span>
       </div>
 
+      <div className="cards">
+    <Card sx={{ maxWidth: 300, cursor: 'pointer', backgroundColor: '#f0f4ff', marginBottom: 2 }}>
+        <CardActionArea onClick={handlePacketAllocationClick}>
+          <CardContent>
+            <Typography variant="h6" color="primary">
+              Allocated for Tea Packets: {allocatedForPackets ?? 'Loading...'} kg
+            </Typography>
+          </CardContent>
+        </CardActionArea>
+      </Card>
+
+<Card sx={{ maxWidth: 300, cursor: 'pointer', backgroundColor: '#f9f9f9' }}>
+        <CardActionArea onClick={handleTeaTypeAllocationClick}>
+          <CardContent>
+            <Typography variant="h6" color="secondary">
+              Allocated for Tea Type Categorization: {allocatedForTeaType ?? 'Loading...'} kg
+            </Typography>
+          </CardContent>
+        </CardActionArea>
+      </Card>
+
+</div>
       {/* Table */}
       <div className="table-container">
         <table className="production-table">

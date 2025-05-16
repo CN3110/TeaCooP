@@ -11,7 +11,23 @@
     border-bottom: 1px solid #e0e0e0;
   }
 
-  /* Add these styles to your TeaProductionList.css file */
+ .cards {
+  display: flex;
+  flex-wrap: wrap;       /* Allows cards to wrap to the next line if needed */
+  gap: 90px;             /* Sets both row and column gaps */
+  justify-content: flex-start; /* Align cards to the start horizontally */
+}
+
+.cards .card {
+  flex: 1 1 200px;       /* Grow and shrink with a base width of 200px */
+  max-width: 250px;      /* Ensures all cards have the same max width */
+  height: 250px;         /* Set a fixed height for all cards */
+  box-sizing: border-box;
+  background-color: #f0f0f0; /* Just example styling */
+  border: 1px solid #ccc;
+  border-radius: 6px;
+  
+}
 
 .total-production-label {
   display: flex;

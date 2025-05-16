@@ -23,6 +23,23 @@ const getLotById = async (lotNumber) => {
   return lots[0] || null;
 };
 
+// Get the available made tea weight for lot creation (95% from total made tea production)
+const getAvailableMadeTeaForTeaTypeCreation = async () => {
+  const monthlyQuery = `
+    SELECT SUM(weightInKg) as totalProduction 
+    FROM tea_production 
+    WHERE productionDate >= DATE_FORMAT(NOW(), '%Y-%m-01') 
+      AND productionDate < DATE_FORMAT(NOW() + INTERVAL 1 MONTH, '%Y-%m-01')
+  `;
+  const [[monthlyResult]] = await db.query(monthlyQuery);
+  const monthlyProduction = monthlyResult?.totalProduction || 0;
+
+  const availableMadeTea = monthlyProduction * 0.95; // 95% of the total production
+  return availableMadeTea;
+};
+
+
+
 // Create a new lot
 const createLot = async ({
   lotNumber,
@@ -114,10 +131,12 @@ const submitBrokerValuation = async (lotNumber, brokerId, valuationPrice) => {
   // Do NOT update lot status here!
 };
 
+
 module.exports = {
   generateLotNumber,
   getAllLots,
   getLotById,
+  getAvailableMadeTeaForTeaTypeCreation,
   createLot,
   updateLot,
   deleteLot,
