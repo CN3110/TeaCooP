@@ -10,6 +10,7 @@ const TeaTypeStockForm = () => {
   const [loading, setLoading] = useState(false);
   const [loadingTeaTypes, setLoadingTeaTypes] = useState(true);
   const [formErrors, setFormErrors] = useState({});
+  const [allocatedForTeaType, setAllocatedForTeaType] = useState(null); // New state for allocated weight
   
   const [formData, setFormData] = useState({
     teaTypeId: '',
@@ -42,7 +43,19 @@ const TeaTypeStockForm = () => {
       }
     };
 
+    const fetchAllocatedWeight = async () => {
+      try {
+        const res = await fetch('http://localhost:3001/api/lots/made-tea-available-for-teaType-creation');
+        const data = await res.json();
+        setAllocatedForTeaType(data.availableWeight);
+      } catch (err) {
+        console.error('Error fetching allocated weight:', err);
+        setAllocatedForTeaType(null);
+      }
+    };
+
     fetchTeaTypes();
+    fetchAllocatedWeight();
   }, []);
 
   const showSnackbar = (message, severity = 'success') => {
@@ -76,6 +89,11 @@ const TeaTypeStockForm = () => {
       errors.weightInKg = 'Weight must be greater than zero';
     }
 
+    // Validate against allocated weight if available
+    if (allocatedForTeaType !== null && weight > allocatedForTeaType) {
+      errors.weightInKg = `Weight cannot exceed allocated available weight for tea type categorizing (${allocatedForTeaType.toFixed(2)} kg)`;
+    }
+
     setFormErrors(errors);
     return Object.keys(errors).length === 0;
   };
@@ -101,6 +119,12 @@ const TeaTypeStockForm = () => {
         productionDate: format(new Date(), 'yyyy-MM-dd'),
         weightInKg: '',
       });
+
+      // Optionally, refetch allocated weight to update limit after submission
+      const res = await fetch('http://localhost:3001/api/lots/made-tea-available-for-teaType-creation');
+      const data = await res.json();
+      setAllocatedForTeaType(data.availableWeight);
+
     } catch (error) {
       console.error('Error adding tea stock record:', error);
       showSnackbar(error.response?.data?.message || 'Error adding tea stock record', 'error');

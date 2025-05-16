@@ -7,7 +7,7 @@ const TeaTypeTotals = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
   const [refreshTrigger, setRefreshTrigger] = useState(0);
-  const [allocatedForTeaType, setAllocatedForTeaType] = useState(null); // New state
+  
 
   useEffect(() => {
     const fetchTeaStock = async () => {
@@ -24,18 +24,10 @@ const TeaTypeTotals = () => {
       }
     };
 
-    const fetchAllocatedForTeaType = async () => {
-      try {
-        const res = await fetch('http://localhost:3001/api/lots/made-tea-available-for-teaType-creation');
-        const data = await res.json();
-        setAllocatedForTeaType(data.availableWeight);
-      } catch (err) {
-        console.error('Error fetching categorization data:', err);
-      }
-    };
+    
 
     fetchTeaStock();
-    fetchAllocatedForTeaType();
+    
   }, [refreshTrigger]);
 
   const handleRefresh = () => {
@@ -47,11 +39,7 @@ const TeaTypeTotals = () => {
       <div className="tea-totals-header" style={{ display: 'flex', alignItems: 'center', gap: '15px' }}>
         <h2>Tea Type Stock Availability</h2>
        
-        {allocatedForTeaType !== null && (
-          <h6 className="allocated-label">
-            Allocated Made Tea Weight for Tea Type Categorizing: {parseFloat(allocatedForTeaType).toFixed(2)} kg
-          </h6>
-        )}
+        
 
          <button onClick={handleRefresh} className="refresh-btn">
           Refresh
