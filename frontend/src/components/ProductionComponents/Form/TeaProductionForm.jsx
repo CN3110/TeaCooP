@@ -4,6 +4,7 @@ import axios from 'axios';
 import { format } from 'date-fns';
 import Snackbar from "@mui/material/Snackbar";
 import MuiAlert from "@mui/material/Alert";
+
 import './TeaProductionForm.css';
 
 const TeaProductionForm = () => {
@@ -34,14 +35,13 @@ const TeaProductionForm = () => {
       axios.get('http://localhost:3001/api/teaProductions')
     ]);
 
-    // Ensure we're working with arrays
-    const deliveries = Array.isArray(deliveriesResponse.data) 
-      ? deliveriesResponse.data 
-      : [deliveriesResponse.data];
-      
-    const productions = Array.isArray(productionsResponse.data) 
-      ? productionsResponse.data 
-      : [productionsResponse.data];
+    const deliveries = Array.isArray(deliveriesResponse.data)
+      ? deliveriesResponse.data
+      : [];
+
+    const productions = Array.isArray(productionsResponse.data.productions)
+      ? productionsResponse.data.productions
+      : [];
 
     const totalRawTeaFromDeliveries = deliveries.reduce((sum, record) => {
       const greenTea = parseFloat(record.greenTeaLeaves || 0);
@@ -61,6 +61,7 @@ const TeaProductionForm = () => {
     setRawTeaStock(0);
   }
 };
+
 
   const showSnackbar = (message, severity = 'success') => {
     setSnackbar({

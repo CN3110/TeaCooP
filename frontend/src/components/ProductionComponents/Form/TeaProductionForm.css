@@ -13,6 +13,35 @@
 .form-group {
   margin-bottom: 20px;
 }
+.raw-tea-stock {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background-color: #e8f5e9; /* light green background */
+  padding: 5px 10px;
+  border-radius: 10px;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  max-width: 400px;
+  margin: 20px auto;
+}
+
+.raw-tea-stock span:first-child::before {
+  content: "🍃"; /* Leaf Fluttering in Wind emoji */
+  margin-right: 3px;
+  font-size: 20px;
+}
+
+.raw-tea-stock span {
+  font-size: 18px;
+  color: #2e7d32; /* dark green text */
+}
+
+.stock-amount {
+  font-weight: bold;
+  font-size: 20px;
+  color: #1b5e20; /* deeper green */
+}
 
 .form-group label {
   display: block;
