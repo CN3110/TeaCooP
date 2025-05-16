@@ -3,6 +3,7 @@ const router = express.Router();
 const teaTypeStockController = require("../controllers/teaTypeStockController");
 
 router.get("/", teaTypeStockController.getAllTeaTypeStocks);
+router.get("/total", teaTypeStockController.getTotalTeaTypeStock);
 router.get("/available", teaTypeStockController.getAvailableStock);
 router.get("/:stockId", teaTypeStockController.getTeaTypeStockById);
 router.post("/", teaTypeStockController.createTeaTypeStock);
