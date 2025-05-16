@@ -7,6 +7,7 @@ const TeaTypeTotals = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
   const [refreshTrigger, setRefreshTrigger] = useState(0);
+  
 
   useEffect(() => {
     const fetchTeaStock = async () => {
@@ -23,7 +24,10 @@ const TeaTypeTotals = () => {
       }
     };
 
+    
+
     fetchTeaStock();
+    
   }, [refreshTrigger]);
 
   const handleRefresh = () => {
@@ -32,9 +36,12 @@ const TeaTypeTotals = () => {
 
   return (
     <div className="tea-totals-container">
-      <div className="tea-totals-header">
-        <h2>Tea Stock Availability</h2>
-        <button onClick={handleRefresh} className="refresh-btn">
+      <div className="tea-totals-header" style={{ display: 'flex', alignItems: 'center', gap: '15px' }}>
+        <h2>Tea Type Stock Availability</h2>
+       
+        
+
+         <button onClick={handleRefresh} className="refresh-btn">
           Refresh
         </button>
       </div>

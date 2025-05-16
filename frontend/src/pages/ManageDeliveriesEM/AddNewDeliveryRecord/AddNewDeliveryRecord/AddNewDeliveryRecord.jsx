@@ -67,7 +67,7 @@ const AddNewDeliveryRecord = () => {
 
     const fetchDrivers = async () => {
       try {
-        const response = await fetch("http://localhost:3001/api/drivers");
+        const response = await fetch("http://localhost:3001/api/drivers/active");
         const data = await response.json();
         const driverOptionsWithSelf = [
           { driverId: "selfTransport", driverName: "Self Transport" },

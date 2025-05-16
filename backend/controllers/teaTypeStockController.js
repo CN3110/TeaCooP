@@ -128,6 +128,17 @@ exports.deleteTeaTypeStock = async (req, res) => {
   }
 };
 
+//to get the total tea type stock available (all tea types in one)
+exports.getTotalTeaTypeStock = async (req, res) => {
+  try {
+    const total = await TeaTypeStock.getTotalTeaTypeStock();
+    res.status(200).json({ total });
+  } catch (error) {
+    console.error("Error fetching total tea type stock:", error);
+    res.status(500).json({ error: "Failed to fetch total tea type stock" });
+  }
+};
+
 // Add this to your existing teaTypeStockController.js
 exports.getAvailableStock = async (req, res) => {
   try {

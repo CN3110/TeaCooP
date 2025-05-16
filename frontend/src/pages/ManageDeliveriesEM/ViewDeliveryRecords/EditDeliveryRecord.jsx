@@ -2,6 +2,7 @@ import React, { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import Snackbar from "@mui/material/Snackbar";
 import MuiAlert from "@mui/material/Alert";
+import EmployeeLayout from "../../../components/EmployeeLayout/EmployeeLayout"
 import "./EditDeliveryRecord.css";
 
 const EditDeliveryRecord = () => {
@@ -279,7 +280,7 @@ const EditDeliveryRecord = () => {
   };
 
   return (
-    
+    <EmployeeLayout>
       <div className="edit-delivery-container">
         <h3>Edit Tea Delivery Record</h3>
         <div className="edit-delivery">
@@ -574,7 +575,7 @@ const EditDeliveryRecord = () => {
           </div>
         </div>
       </div>
-  
+  </EmployeeLayout>
   );
 };
 
