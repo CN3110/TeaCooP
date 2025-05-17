@@ -3,15 +3,14 @@ import axios from 'axios';
 import { format } from 'date-fns';
 import Snackbar from "@mui/material/Snackbar";
 import MuiAlert from "@mui/material/Alert";
-import './TeaTypeStockForm.css'; 
+import './TeaTypeStockForm.css';
 
-const TeaTypeStockForm = () => {
+const TeaTypeStockForm = ({ availableWeight, onSuccess }) => {
   const [teaTypes, setTeaTypes] = useState([]);
   const [loading, setLoading] = useState(false);
   const [loadingTeaTypes, setLoadingTeaTypes] = useState(true);
   const [formErrors, setFormErrors] = useState({});
-  const [allocatedForTeaType, setAllocatedForTeaType] = useState(null); // New state for allocated weight
-  
+
   const [formData, setFormData] = useState({
     teaTypeId: '',
     productionDate: format(new Date(), 'yyyy-MM-dd'),
@@ -43,19 +42,7 @@ const TeaTypeStockForm = () => {
       }
     };
 
-    const fetchAllocatedWeight = async () => {
-      try {
-        const res = await fetch('http://localhost:3001/api/lots/made-tea-available-for-teaType-creation');
-        const data = await res.json();
-        setAllocatedForTeaType(data.availableWeight);
-      } catch (err) {
-        console.error('Error fetching allocated weight:', err);
-        setAllocatedForTeaType(null);
-      }
-    };
-
     fetchTeaTypes();
-    fetchAllocatedWeight();
   }, []);
 
   const showSnackbar = (message, severity = 'success') => {
@@ -89,9 +76,8 @@ const TeaTypeStockForm = () => {
       errors.weightInKg = 'Weight must be greater than zero';
     }
 
-    // Validate against allocated weight if available
-    if (allocatedForTeaType !== null && weight > allocatedForTeaType) {
-      errors.weightInKg = `Weight cannot exceed allocated available weight for tea type categorizing (${allocatedForTeaType.toFixed(2)} kg)`;
+    if (availableWeight !== null && weight > availableWeight) {
+      errors.weightInKg = `Weight cannot exceed available made tea weight (${availableWeight.toFixed(2)} kg)`;
     }
 
     setFormErrors(errors);
@@ -120,10 +106,9 @@ const TeaTypeStockForm = () => {
         weightInKg: '',
       });
 
-      // Optionally, refetch allocated weight to update limit after submission
-      const res = await fetch('http://localhost:3001/api/lots/made-tea-available-for-teaType-creation');
-      const data = await res.json();
-      setAllocatedForTeaType(data.availableWeight);
+      if (onSuccess) {
+        onSuccess(); // Parent should refetch updated available weight
+      }
 
     } catch (error) {
       console.error('Error adding tea stock record:', error);

@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import TeaProductionForm from '../../components/TeaTypeStockManagement/Form/TeaTypeStockForm';
 import TeaProductionList from '../../components/TeaTypeStockManagement/List/TeaTypeStockList';
 import TeaTypeTotals from '../../components/TeaTypeStockManagement/TeaTypeTotals/TeaTypeTotals'; 
@@ -11,44 +11,45 @@ const TeaTypeStockManagement = () => {
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState(null);
 
-  useEffect(() => {
-    const fetchData = async () => {
-      try {
-        setIsLoading(true);
-        setError(null);
-        
-        // Fetch both data in parallel
-        const [allocatedRes, usedRes] = await Promise.all([
-          fetch('http://localhost:3001/api/lots/made-tea-available-for-teaType-creation'),
-          fetch('http://localhost:3001/api/teaTypeStocks/total')
-        ]);
+  // Use useCallback to memoize the fetch function so it can be passed as a stable prop
+  const fetchData = useCallback(async () => {
+    try {
+      setIsLoading(true);
+      setError(null);
+      
+      // Fetch both data in parallel
+      const [allocatedRes, usedRes] = await Promise.all([
+        fetch('http://localhost:3001/api/lots/made-tea-available-for-teaType-creation'),
+        fetch('http://localhost:3001/api/teaTypeStocks/total')
+      ]);
 
-        if (!allocatedRes.ok || !usedRes.ok) {
-          throw new Error('Failed to fetch data');
-        }
-
-        const [allocatedData, usedData] = await Promise.all([
-          allocatedRes.json(),
-          usedRes.json()
-        ]);
-
-        const allocated = allocatedData.availableWeight || 0;
-        const used = usedData.total || 0;
-        const available = allocated - used;
-
-        setAllocatedForTeaTypeCategorization(allocated);
-        setUsedForTeaTypeCategorization(used);
-        setAvailableWeight(available);
-      } catch (err) {
-        console.error('Error fetching data:', err);
-        setError(err.message);
-      } finally {
-        setIsLoading(false);
+      if (!allocatedRes.ok || !usedRes.ok) {
+        throw new Error('Failed to fetch data');
       }
-    };
 
-    fetchData();
+      const [allocatedData, usedData] = await Promise.all([
+        allocatedRes.json(),
+        usedRes.json()
+      ]);
+
+      const allocated = allocatedData.availableWeight || 0;
+      const used = usedData.total || 0;
+      const available = allocated - used;
+
+      setAllocatedForTeaTypeCategorization(allocated);
+      setUsedForTeaTypeCategorization(used);
+      setAvailableWeight(available);
+    } catch (err) {
+      console.error('Error fetching data:', err);
+      setError(err.message);
+    } finally {
+      setIsLoading(false);
+    }
   }, []);
+
+  useEffect(() => {
+    fetchData();
+  }, [fetchData]);
 
   if (isLoading) {
     return (
@@ -97,7 +98,10 @@ const TeaTypeStockManagement = () => {
         
         <div className="management-sections" style={{ flexDirection: 'column' }}>
           <div className="form-section">
-            <TeaProductionForm /> 
+            <TeaProductionForm
+              availableWeight={availableWeight}
+              onSuccess={fetchData}  
+            />
           </div>
           <div className="list-section">
             <TeaProductionList />
