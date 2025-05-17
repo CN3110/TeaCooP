@@ -3,7 +3,11 @@ const db = require("../config/database");
 // Fetch all transport requests
 exports.getAllTransportRequests = async (req, res) => {
   try {
-    const query = "SELECT * FROM transport_request";
+    const query = `
+      SELECT tr.*, dr.delivery_routeName 
+      FROM transport_request tr
+      LEFT JOIN delivery_route dr ON tr.delivery_routeId = dr.delivery_routeId
+    `;
     const [transportRequests] = await db.query(query);
     res.status(200).json(transportRequests);
   } catch (error) {
@@ -15,7 +19,6 @@ exports.getAllTransportRequests = async (req, res) => {
 // Fetch a transport request by ID
 exports.getTransportRequestById = async (req, res) => {
   const { requestId } = req.params;
-
   try {
     const query = "SELECT * FROM transport_request WHERE requestId = ?";
     const [transportRequest] = await db.query(query, [requestId]);
@@ -31,16 +34,28 @@ exports.getTransportRequestById = async (req, res) => {
 
 // Add a new transport request
 exports.addTransportRequest = async (req, res) => {
-  const { supplierId, reqDate, reqTime, reqNumberOfSacks, reqWeight, reqAddress } = req.body;
+  const { supplierId, reqDate, reqTime, reqNumberOfSacks, reqWeight, reqAddress, delivery_routeId } = req.body;
 
-  if (!supplierId || !reqDate || !reqTime || !reqNumberOfSacks || !reqWeight || !reqAddress) {
+  if (!supplierId || !reqDate || !reqTime || !reqNumberOfSacks || !reqWeight || !reqAddress || !delivery_routeId) {
     return res.status(400).json({ error: "Missing required fields" });
   }
 
   try {
-    const query =
-      "INSERT INTO transport_request (supplierId, reqDate, reqTime, reqNumberOfSacks, reqWeight, reqAddress) VALUES (?, ?, ?, ?, ?, ?)";
-    const [result] = await db.query(query, [supplierId, reqDate, reqTime, reqNumberOfSacks, reqWeight, reqAddress]);
+    const query = `
+      INSERT INTO transport_request 
+      (supplierId, reqDate, reqTime, reqNumberOfSacks, reqWeight, reqAddress, delivery_routeId) 
+      VALUES (?, ?, ?, ?, ?, ?, ?)
+    `;
+    const [result] = await db.query(query, [
+      supplierId,
+      reqDate,
+      reqTime,
+      reqNumberOfSacks,
+      reqWeight,
+      reqAddress,
+      delivery_routeId,
+    ]);
+
     res.status(201).json({ message: "Transport request added successfully", requestId: result.insertId });
   } catch (error) {
     console.error("Error adding transport request:", error);
@@ -51,16 +66,28 @@ exports.addTransportRequest = async (req, res) => {
 // Update a transport request
 exports.updateTransportRequest = async (req, res) => {
   const { requestId } = req.params;
-  const { reqDate, reqTime, reqNumberOfSacks, reqWeight, reqAddress } = req.body;
+  const { reqDate, reqTime, reqNumberOfSacks, reqWeight, reqAddress, delivery_routeId } = req.body;
 
-  if (!reqDate || !reqTime || !reqNumberOfSacks || !reqWeight || !reqAddress) {
+  if (!reqDate || !reqTime || !reqNumberOfSacks || !reqWeight || !reqAddress || !delivery_routeId) {
     return res.status(400).json({ error: "Missing required fields" });
   }
 
   try {
-    const query =
-      "UPDATE transport_request SET reqDate = ?, reqTime = ?, reqNumberOfSacks = ?, reqWeight = ?, reqAddress = ? WHERE requestId = ?";
-    await db.query(query, [reqDate, reqTime, reqNumberOfSacks, reqWeight, reqAddress, requestId]);
+    const query = `
+      UPDATE transport_request 
+      SET reqDate = ?, reqTime = ?, reqNumberOfSacks = ?, reqWeight = ?, reqAddress = ?, delivery_routeId = ?
+      WHERE requestId = ?
+    `;
+    await db.query(query, [
+      reqDate,
+      reqTime,
+      reqNumberOfSacks,
+      reqWeight,
+      reqAddress,
+      delivery_routeId,
+      requestId,
+    ]);
+
     res.status(200).json({ message: "Transport request updated successfully" });
   } catch (error) {
     console.error("Error updating transport request:", error);
@@ -78,18 +105,14 @@ exports.updateTransportRequestStatus = async (req, res) => {
   }
 
   try {
-    const query =
-      "UPDATE transport_request SET status = ? WHERE requestId = ?";
+    const query = "UPDATE transport_request SET status = ? WHERE requestId = ?";
     await db.query(query, [status, requestId]);
-
     res.status(200).json({ message: "Status updated successfully" });
   } catch (error) {
     console.error("Error updating transport request status:", error);
     res.status(500).json({ error: "Failed to update status" });
   }
 };
-
-
 
 // Delete a transport request
 exports.deleteTransportRequest = async (req, res) => {

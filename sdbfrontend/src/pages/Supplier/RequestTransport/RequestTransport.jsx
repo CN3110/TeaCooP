@@ -3,6 +3,8 @@ import SupplierLayout from "../../../components/supplier/SupplierLayout/Supplier
 import "./RequestTransport.css";
 
 const RequestTransport = () => {
+  const [routes, setRoutes] = useState([]);
+  const [selectedRouteId, setSelectedRouteId] = useState("");
   const [reqDeliveryData, setReqDeliveryData] = useState({
     supplierId: "",
     reqDate: "",
@@ -10,6 +12,7 @@ const RequestTransport = () => {
     reqNumberOfSacks: "",
     reqWeight: "",
     reqAddress: "",
+    delivery_routeId: "",
   });
 
   const [transportRequests, setTransportRequests] = useState([]);
@@ -42,6 +45,17 @@ const RequestTransport = () => {
     }
   };
 
+  const fetchRoutes = async () => {
+  try {
+    const res = await fetch("http://localhost:3001/api/deliveryRoutes");
+    if (!res.ok) throw new Error("Failed to fetch routes");
+    const data = await res.json();
+    setRoutes(data);
+  } catch (err) {
+    console.error("Error fetching routes:", err);
+  }
+};
+
   useEffect(() => {
     // Fetch supplierId from localStorage and set it
     const storedUserId = localStorage.getItem("userId");
@@ -53,6 +67,7 @@ const RequestTransport = () => {
     }
 
     fetchTransportRequests();
+    fetchRoutes();
   }, []);
 
   const handleSubmit = async (e) => {
@@ -185,6 +200,23 @@ const RequestTransport = () => {
             />
           </div>
           <div className="form-group">
+  <label>Delivery Route:</label>
+  <select
+    name="delivery_routeId"
+    value={reqDeliveryData.delivery_routeId}
+    onChange={handleInputChange}
+    required
+  >
+    <option value="">-- Select Route --</option>
+    {routes.map((route) => (
+      <option key={route.delivery_routeId} value={route.delivery_routeId}>
+        {route.delivery_routeName}
+      </option>
+    ))}
+  </select>
+</div>
+
+          <div className="form-group">
             <label>Address/Location:</label>
             <input
               type="text"
@@ -212,33 +244,38 @@ const RequestTransport = () => {
         ) : (
           <table className="transport-requests-table">
             <thead>
-              <tr>
-                <th>Date</th>
-                <th>Number of Sacks</th>
-                <th>Weight (kg)</th>
-                <th>Address/Location</th>
-                <th>Status</th>
-              </tr>
-            </thead>
-            <tbody>
-              {transportRequests.length > 0 ? (
-                transportRequests.map((req, index) => (
-                  <tr key={index}>
-                    <td>{new Date(req.reqDate).toLocaleDateString()}</td>
-                    <td>{req.reqNumberOfSacks}</td>
-                    <td>{req.reqWeight}</td>
-                    <td>{req.reqAddress}</td>
-                    <td>{req.status || "Pending"}</td>
-                  </tr>
-                ))
-              ) : (
-                <tr>
-                  <td colSpan="5" className="no-requests">
-                    No transport requests found.
-                  </td>
-                </tr>
-              )}
-            </tbody>
+  <tr>
+    <th>Date</th>
+    <th>Route</th>
+    <th>Number of Sacks</th>
+    <th>Weight (kg)</th>
+    <th>Address/Location</th>
+    <th>Status</th>
+    <th>Driver ID</th>
+  </tr>
+</thead>
+<tbody>
+  {transportRequests.length > 0 ? (
+    transportRequests.map((req, index) => (
+      <tr key={index}>
+        <td>{new Date(req.reqDate).toLocaleDateString()}</td>
+        <td>{req.delivery_routeName}</td>
+        <td>{req.reqNumberOfSacks}</td>
+        <td>{req.reqWeight}</td>
+        <td>{req.reqAddress}</td>
+        <td>{req.status || "Pending"}</td>
+        <td>{req.driverId}</td> {/*meka peenne na taam, driver view eka hdal iwar wela meka blnna*/}
+      </tr>
+    ))
+  ) : (
+    <tr>
+      <td colSpan="6" className="no-requests">
+        No transport requests found.
+      </td>
+    </tr>
+  )}
+</tbody>
+
           </table>
         )}
       </div>

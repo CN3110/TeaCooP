@@ -91,7 +91,7 @@ const ViewTransportRequests = () => {
               {filteredRequests.map((req) => (
                 <tr key={req._id}>
                   <td>{req.supplierId}</td>
-                  <td>{req.driverId || "N/A"}</td>
+                  <td>{req.driverId}</td>
                   <td>{new Date(req.reqDate).toLocaleDateString()}</td>
                   <td>{req.reqNumberOfSacks}</td>
                   <td>{req.reqWeight}</td>
