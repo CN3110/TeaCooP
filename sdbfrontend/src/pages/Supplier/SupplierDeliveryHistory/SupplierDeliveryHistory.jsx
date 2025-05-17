@@ -84,7 +84,7 @@ const SupplierDeliveryHistory = () => {
             {filteredDeliveries.length > 0 ? (
               filteredDeliveries.map((delivery) => (
                 <tr key={delivery.deliveryId}>
-                  <td>{delivery.date}</td>
+                  <td>{delivery.date.substring(0, 10)}</td>
                   <td>{delivery.transport}</td>
                   <td>{delivery.route}</td>
                   <td>{delivery.totalWeight}</td>
