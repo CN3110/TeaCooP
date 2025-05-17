@@ -13,7 +13,7 @@ const generateLotNumber = async () => {
 
 // Get all lots
 const getAllLots = async () => {
-  const [lots] = await db.query('SELECT * FROM lot');
+  const [lots] = await db.query('SELECT * FROM lot ORDER BY lotNumber DESC');
   return lots;
 };
 
@@ -99,6 +99,15 @@ const updateLot = async (lotNumber, {
 
 // Delete a lot
 const deleteLot = async (lotNumber) => {
+  // Check if there are any broker valuations for this lot
+  const [related] = await db.query('SELECT * FROM broker_valuation WHERE lotNumber = ?', [lotNumber]);
+  
+  if (related.length > 0) {
+    // Prevent deletion if any related entries exist
+    throw new Error('Cannot delete this Lot, because brokers have added valuations for it.');
+  }
+
+  // If no dependencies, proceed with deletion
   const [result] = await db.query('DELETE FROM lot WHERE lotNumber = ?', [lotNumber]);
   return result.affectedRows > 0;
 };

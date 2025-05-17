@@ -134,13 +134,21 @@ exports.deleteLot = async (req, res) => {
   const { lotNumber } = req.params;
   try {
     const deleted = await lotModel.deleteLot(lotNumber);
-    if (!deleted) return res.status(404).json({ message: 'Lot not found' });
-    res.status(200).json({ message: 'Lot deleted successfully' });
+    if (!deleted) return res.status(404).json({ error: "Lot not found" });
+
+    res.status(200).json({ message: "Lot deleted successfully" });
   } catch (error) {
-    console.error("Error deleting lot:", error);
-    res.status(500).json({ error: "Failed to delete lot" });
+    // Do NOT log specific business logic errors
+    if (error.message.includes("Cannot delete this Lot")) {
+      return res.status(400).json({ error: error.message });
+    }
+
+    // Log unexpected errors only
+    console.error("Unexpected error deleting lot:", error);
+    res.status(500).json({ error: "Failed to delete lot due to server error" });
   }
 };
+
 
 // Get lots available for a specific broker (not yet valued by them)
 exports.getAvailableLotsForBroker = async (req, res) => {

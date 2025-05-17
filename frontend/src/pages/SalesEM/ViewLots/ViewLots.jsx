@@ -1,5 +1,14 @@
 import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
+import {
+  Snackbar,
+  Alert,
+  Dialog,
+  DialogTitle,
+  DialogContent,
+  DialogActions,
+  Button
+} from "@mui/material";
 import EmployeeLayout from "../../../components/EmployeeLayout/EmployeeLayout";
 import "./ViewLots.css";
 import { BiSearch } from "react-icons/bi";
@@ -9,8 +18,10 @@ const ViewLots = () => {
   const [teaTypes, setTeaTypes] = useState([]);
   const [searchTerm, setSearchTerm] = useState("");
   const [currentPage, setCurrentPage] = useState(1);
-  const lotsPerPage = 10;
+  const [snackbar, setSnackbar] = useState({ open: false, message: "", severity: "success" });
+  const [confirmDialog, setConfirmDialog] = useState({ open: false, lotNumber: null });
 
+  const lotsPerPage = 10;
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -28,7 +39,7 @@ const ViewLots = () => {
         setTeaTypes(teaTypesData);
       } catch (error) {
         console.error("Error fetching data:", error);
-        alert("Failed to load data. Please try again.");
+        setSnackbar({ open: true, message: "Failed to load data.", severity: "error" });
       }
     };
 
@@ -36,7 +47,7 @@ const ViewLots = () => {
   }, []);
 
   const getTeaTypeName = (teaTypeId) => {
-    const teaType = teaTypes.find(type => type.teaTypeId === teaTypeId);
+    const teaType = teaTypes.find((type) => type.teaTypeId === teaTypeId);
     return teaType ? teaType.teaTypeName : "Unknown";
   };
 
@@ -44,31 +55,39 @@ const ViewLots = () => {
     navigate(`/edit-lot/${lotNumber}`);
   };
 
-  const handleDelete = async (lotNumber) => {
-    const confirmDelete = window.confirm(
-      "Are you sure you want to delete this lot?"
-    );
-    if (!confirmDelete) return;
+  const confirmDeleteLot = (lotNumber) => {
+    setConfirmDialog({ open: true, lotNumber });
+  };
+
+  const handleDeleteConfirmed = async () => {
+    const { lotNumber } = confirmDialog;
+    setConfirmDialog({ open: false, lotNumber: null });
 
     try {
-      const response = await fetch(
-        `http://localhost:3001/api/lots/${lotNumber}`,
-        { method: "DELETE" }
-      );
+      const response = await fetch(`http://localhost:3001/api/lots/${lotNumber}`, {
+        method: "DELETE"
+      });
 
-      if (!response.ok) throw new Error("Failed to delete lot");
+      const result = await response.json();
+      if (!response.ok) throw new Error(result.error || "Failed to delete lot");
 
-      setLots(lots.filter((lot) => lot.lotNumber !== lotNumber));
-      alert("Lot deleted successfully!");
+      setLots((prev) => prev.filter((lot) => lot.lotNumber !== lotNumber));
+      setSnackbar({ open: true, message: "Lot deleted successfully", severity: "success" });
     } catch (error) {
       console.error("Error deleting lot:", error);
-      alert("Failed to delete lot. Please try again.");
+      setSnackbar({
+        open: true,
+        message: error.message.includes("valuations")
+          ? "Cannot delete this lot. Brokers have added valuations."
+          : "Failed to delete lot.",
+        severity: "error"
+      });
     }
   };
 
   const handleSearchChange = (e) => {
     setSearchTerm(e.target.value);
-    setCurrentPage(1); // Reset to first page on search
+    setCurrentPage(1);
   };
 
   const filteredLots = lots.filter((lot) =>
@@ -95,10 +114,7 @@ const ViewLots = () => {
               />
               <BiSearch className="icon" />
             </div>
-            <button
-              className="add-lot-btn"
-              onClick={() => navigate("/employee-dashboard-create-lot")}
-            >
+            <button className="add-lot-btn" onClick={() => navigate("/employee-dashboard-create-lot")}>
               Add New Lot
             </button>
           </div>
@@ -129,16 +145,10 @@ const ViewLots = () => {
                 <td>{lot.valuationPrice}</td>
                 <td>
                   <div className="form-buttons">
-                    <button
-                      className="edit-button"
-                      onClick={() => handleEdit(lot.lotNumber)}
-                    >
+                    <button className="edit-button" onClick={() => handleEdit(lot.lotNumber)}>
                       Edit
                     </button>
-                    <button
-                      className="delete-button"
-                      onClick={() => handleDelete(lot.lotNumber)}
-                    >
+                    <button className="delete-button" onClick={() => confirmDeleteLot(lot.lotNumber)}>
                       Delete
                     </button>
                     <button
@@ -154,15 +164,11 @@ const ViewLots = () => {
           </tbody>
         </table>
 
-        {/* Pagination Controls */}
+        {/* Pagination */}
         <div className="pagination">
-          <button
-            onClick={() => setCurrentPage((prev) => Math.max(prev - 1, 1))}
-            disabled={currentPage === 1}
-          >
+          <button onClick={() => setCurrentPage((prev) => Math.max(prev - 1, 1))} disabled={currentPage === 1}>
             Previous
           </button>
-
           {Array.from({ length: totalPages }, (_, index) => (
             <button
               key={index + 1}
@@ -172,7 +178,6 @@ const ViewLots = () => {
               {index + 1}
             </button>
           ))}
-
           <button
             onClick={() => setCurrentPage((prev) => Math.min(prev + 1, totalPages))}
             disabled={currentPage === totalPages}
@@ -181,6 +186,31 @@ const ViewLots = () => {
           </button>
         </div>
       </div>
+
+      {/* Delete Confirmation Dialog */}
+      <Dialog open={confirmDialog.open} onClose={() => setConfirmDialog({ open: false, lotNumber: null })}>
+        <DialogTitle>Confirm Delete</DialogTitle>
+        <DialogContent>Are you sure you want to delete this lot?</DialogContent>
+        <DialogActions>
+          <Button onClick={() => setConfirmDialog({ open: false, lotNumber: null })}>Cancel</Button>
+          <Button color="error" onClick={handleDeleteConfirmed}>
+            Delete
+          </Button>
+        </DialogActions>
+      </Dialog>
+
+      {/* Snackbar */}
+      <Snackbar
+        open={snackbar.open}
+        autoHideDuration={6000}
+        onClose={() => setSnackbar({ ...snackbar, open: false })}
+        anchorOrigin={{ vertical: "top", horizontal: "center" }}
+
+      >
+        <Alert onClose={() => setSnackbar({ ...snackbar, open: false })} severity={snackbar.severity} variant="filled">
+          {snackbar.message}
+        </Alert>
+      </Snackbar>
     </EmployeeLayout>
   );
 };
