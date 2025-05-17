@@ -156,7 +156,7 @@ const SoldPriceManagement = () => {
                             min="0"
                             step="0.01"
                             placeholder="Enter price"
-                            disabled={editingLot !== lot.lotNumber && lot.soldPrice}
+                            disabled={editingLot !== lot.lotNumber && lot.soldPrice} //meka disalbe wenwa input filed ekata eka nunber ekk add unu gmn
                           />
                         </td>
                         <td>{lot.totalSoldPrice || '-'}</td>

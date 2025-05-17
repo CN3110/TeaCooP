@@ -108,7 +108,9 @@ const ViewNewLots = () => {
               <th>Total Weight (kg)</th>
               <th>Employee Price (LKR)</th>
               <th>Manufacture Date</th>
+              <th>Notes</th>
               <th>My Valuation (LKR)</th>
+              
               <th>Submit</th>
             </tr>
           </thead>
@@ -122,7 +124,8 @@ const ViewNewLots = () => {
                   <td>{lot.netWeight}</td>
                   <td>{lot.totalNetWeight}</td>
                   <td>{lot.valuationPrice}</td>
-                  <td>{lot.manufacturingDate}</td>
+                  <td>{lot.manufacturingDate.substring(0, 10)}</td>
+                  <td>{lot.notes}</td>
                   <td>
                     <Form.Control
                       type="number"
