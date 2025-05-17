@@ -1,278 +1,458 @@
-import React, { useState, useEffect } from "react";
-import axios from "axios";
+import React, { useEffect, useState } from 'react';
+import axios from 'axios';
+import { 
+  FileDownload as FileDownloadIcon, 
+  PictureAsPdf as PdfIcon, 
+  FilterAlt as FilterIcon,
+  RestartAlt as ResetIcon,
+  DateRange as DateRangeIcon,
+  Description as ExcelIcon
+} from '@mui/icons-material';
 import {
-  Box,
+  Snackbar,
+  Alert,
+  Dialog,
+  DialogTitle,
+  DialogContent,
+  DialogContentText,
+  DialogActions,
   Button,
-  Grid,
   TextField,
+  Select,
+  MenuItem,
+  InputLabel,
+  FormControl,
+  IconButton,
+  Tooltip,
+  Paper,
   Table,
+  TableHead,
   TableBody,
+  TableRow,
   TableCell,
   TableContainer,
-  TableHead,
-  TableRow,
-  Paper,
-  Typography,
-  Pagination,
-  Container,
-  Stack,
-  Tooltip,
-  Chip,
-} from "@mui/material";
-import ClearIcon from "@mui/icons-material/Clear";
-import DownloadIcon from "@mui/icons-material/Download";
-import * as XLSX from "xlsx";
-import jsPDF from "jspdf";
-import "jspdf-autotable";
-import { format } from "date-fns";
-import EmployeeLayout from "../../../components/EmployeeLayout/EmployeeLayout.jsx";
+  LinearProgress,
+  Box,
+  Typography
+} from '@mui/material';
+import * as XLSX from 'xlsx';
+import { jsPDF } from 'jspdf';
+import 'jspdf-autotable';
+import dayjs from 'dayjs';
+import EmployeeLayout from '../../../components/EmployeeLayout/EmployeeLayout';
 
 const DriverRecords = () => {
-  const [records, setRecords] = useState([]);
-  const [fromDate, setFromDate] = useState("");
-  const [toDate, setToDate] = useState("");
-  const [driverId, setDriverId] = useState("All");
-  const [currentPage, setCurrentPage] = useState(1);
-  const recordsPerPage = 10;
+  // State
+  const [reportData, setReportData] = useState({
+    detailedReport: [],
+    summaryReport: [],
+  });
+  const [routeFilter, setRouteFilter] = useState('');
+  const [routes, setRoutes] = useState([]);
+  const [startDate, setStartDate] = useState('');
+  const [endDate, setEndDate] = useState('');
+  const [snackbar, setSnackbar] = useState({ open: false, message: '', severity: 'info' });
+  const [dialog, setDialog] = useState({ open: false, action: '' });
+  const [loading, setLoading] = useState(false);
+  const [initialLoad, setInitialLoad] = useState(true);
+
+  // Load routes on mount
+  useEffect(() => {
+    const fetchRoutes = async () => {
+      try {
+        const res = await axios.get('http://localhost:3001/api/deliveryRoutes');
+        setRoutes(res.data);
+      } catch (err) {
+        handleError('Failed to load routes', err);
+      }
+    };
+    fetchRoutes();
+  }, []);
+
+  // Fetch reports
+  const fetchReport = async () => {
+    if (startDate && endDate && startDate > endDate) {
+      setSnackbar({ open: true, message: 'Start date cannot be after end date', severity: 'warning' });
+      return;
+    }
+
+    setLoading(true);
+    try {
+      const params = {
+        route: routeFilter || undefined,
+        startDate: startDate || undefined,
+        endDate: endDate || undefined,
+      };
+      const res = await axios.get('http://localhost:3001/api/reports/driver-report', { params });
+      setReportData(res.data);
+      if (!initialLoad) {
+        setSnackbar({ open: true, message: 'Report data loaded successfully', severity: 'success' });
+      }
+      setInitialLoad(false);
+    } catch (err) {
+      handleError('Failed to fetch report', err);
+    } finally {
+      setLoading(false);
+    }
+  };
 
   useEffect(() => {
-    fetchRecords();
-  }, [fromDate, toDate, driverId]);
+    fetchReport();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
-  const fetchRecords = async () => {
+  const handleError = (message, error) => {
+    console.error(message, error);
+    setSnackbar({ open: true, message, severity: 'error' });
+  };
+
+  // Report metadata
+  const userId = localStorage.getItem('userId') || 'Unknown User';
+  const reportGeneratedAt = new Date().toLocaleString();
+
+  // Dialog handlers
+  const openDialog = (action) => {
+    setDialog({ open: true, action });
+  };
+  const closeDialog = () => setDialog({ open: false, action: null });
+
+  // Export functions
+  const exportToPDF = (type) => {
     try {
-      const response = await axios.get("http://localhost:3001/api/reports/driver-records", {
-        params: { from: fromDate, to: toDate, driverId },
+      const doc = new jsPDF();
+      const title = type === 'detailed' ? 'Detailed Driver Report' : 'Driver Summary Report';
+      const data = type === 'detailed' ? reportData.detailedReport : reportData.summaryReport;
+      const headers = type === 'detailed' 
+        ? ['Driver ID', 'Route', 'Raw Tea Weight (kg)'] 
+        : ['Driver ID', 'Total Raw Tea Weight (kg)'];
+      
+      const rows = data.map(item => 
+        type === 'detailed' 
+          ? [item.driverId, item.route, item.rawTeaWeight]
+          : [item.driverId, item.rawTeaWeight]
+      );
+
+      // Add title and metadata
+      doc.setFontSize(18);
+      doc.text(title, 14, 15);
+      doc.setFontSize(10);
+      doc.text(`Generated by: ${userId} | Date: ${reportGeneratedAt}`, 14, 22);
+      
+      // Add table
+      doc.autoTable({
+        head: [headers],
+        body: rows,
+        startY: 30,
+        styles: { fontSize: 9 },
+        headStyles: { fillColor: [22, 115, 155] }
       });
-      setRecords(response.data || []);
+
+      // Save the PDF
+      doc.save(`${title.replace(/\s+/g, '_')}_${new Date().toISOString().slice(0,10)}.pdf`);
+      
+      setSnackbar({ open: true, message: 'PDF exported successfully', severity: 'success' });
     } catch (err) {
-      console.error("Error fetching driver records:", err);
+      handleError('Failed to export PDF', err);
     }
   };
 
-  const handleClearFilters = () => {
-    setFromDate("");
-    setToDate("");
-    setDriverId("All");
-    setCurrentPage(1);
-  };
-
-  const calculateTotalRawTea = () => {
-    return records.reduce((total, rec) => total + Number(rec.totalRawTeaWeight), 0);
-  };
-
-  const downloadExcel = () => {
-    const worksheet = XLSX.utils.json_to_sheet([]);
-    const total = calculateTotalRawTea();
-
-    const filterInfo = [];
-    if (fromDate) filterInfo.push(`From: ${fromDate}`);
-    if (toDate) filterInfo.push(`To: ${toDate}`);
-    if (driverId !== "All") filterInfo.push(`Driver ID: ${driverId}`);
-
-    const titleText = filterInfo.length
-      ? "Driver Raw Tea Report (Filtered)"
-      : "Driver Raw Tea Report";
-
-    XLSX.utils.sheet_add_aoa(
-      worksheet,
-      [
-        [titleText],
-        [`Filters: ${filterInfo.join(", ")}`],
-        [`Generated: ${format(new Date(), "yyyy-MM-dd HH:mm:ss")}`],
+  const exportToExcel = (type) => {
+    try {
+      const title = type === 'detailed' ? 'Detailed_Driver_Report' : 'Driver_Summary_Report';
+      const data = type === 'detailed' ? reportData.detailedReport : reportData.summaryReport;
+      const headers = type === 'detailed' 
+        ? ['Driver ID', 'Route', 'Raw Tea Weight (kg)'] 
+        : ['Driver ID', 'Total Raw Tea Weight (kg)'];
+      
+      const worksheet = XLSX.utils.json_to_sheet(data, { header: headers });
+      const workbook = XLSX.utils.book_new();
+      XLSX.utils.book_append_sheet(workbook, worksheet, "Report");
+      
+      // Add metadata to first row
+      XLSX.utils.sheet_add_aoa(worksheet, [
+        [`Report: ${title}`],
+        [`Generated by: ${userId}`],
+        [`Generated at: ${reportGeneratedAt}`],
         [],
-      ],
-      { origin: "A1" }
-    );
-
-    const exportData = records.map((rec) => ({
-      "Driver ID": rec.driverId,
-      "Total Raw Tea (kg)": rec.totalRawTeaWeight,
-    }));
-
-    XLSX.utils.sheet_add_json(worksheet, exportData, {
-      origin: "A5",
-      skipHeader: false,
-    });
-
-    XLSX.utils.sheet_add_aoa(
-      worksheet,
-      [["Total Raw Tea (kg):", total]],
-      { origin: `A${exportData.length + 7}` }
-    );
-
-    const workbook = XLSX.utils.book_new();
-    XLSX.utils.book_append_sheet(workbook, worksheet, "Driver Report");
-    XLSX.writeFile(workbook, "Driver_Report.xlsx");
-  };
-
-  const downloadPDF = () => {
-    const doc = new jsPDF();
-    const employeeId = localStorage.getItem("userId") || "Unknown";
-    const generatedAt = new Date().toLocaleString();
-
-    let title = "Driver Raw Tea Report";
-    if (fromDate || toDate || driverId !== "All") {
-      title += " (Filtered)";
+        headers
+      ], { origin: 'A1' });
+      
+      // Merge metadata cells
+      if (!worksheet['!merges']) worksheet['!merges'] = [];
+      worksheet['!merges'].push({ s: { r: 0, c: 0 }, e: { r: 0, c: headers.length - 1 } });
+      worksheet['!merges'].push({ s: { r: 1, c: 0 }, e: { r: 1, c: headers.length - 1 } });
+      worksheet['!merges'].push({ s: { r: 2, c: 0 }, e: { r: 2, c: headers.length - 1 } });
+      
+      XLSX.writeFile(workbook, `${title}_${new Date().toISOString().slice(0,10)}.xlsx`);
+      
+      setSnackbar({ open: true, message: 'Excel exported successfully', severity: 'success' });
+    } catch (err) {
+      handleError('Failed to export Excel', err);
     }
-
-    doc.setFontSize(16);
-    doc.text(title, 14, 15);
-    doc.setFontSize(11);
-
-    let filterStr = "";
-    if (fromDate) filterStr += `From: ${fromDate}  `;
-    if (toDate) filterStr += `To: ${toDate}  `;
-    if (driverId !== "All") filterStr += `Driver ID: ${driverId}`;
-
-    doc.text(filterStr, 14, 25);
-
-    const tableData = records.map((rec) => [rec.driverId, rec.totalRawTeaWeight]);
-
-    doc.autoTable({
-      head: [["Driver ID", "Total Raw Tea (kg)"]],
-      body: tableData,
-      startY: 40,
-    });
-
-    const finalY = doc.lastAutoTable.finalY || 40;
-    doc.text(`Total Raw Tea (kg): ${calculateTotalRawTea().toFixed(2)}`, 14, finalY + 10);
-
-    doc.setFontSize(10);
-    doc.setTextColor(100);
-    doc.text(`Report generated by: ${employeeId}`, 14, doc.internal.pageSize.height - 10);
-    doc.text(`Generated at: ${generatedAt}`, 14, doc.internal.pageSize.height - 5);
-    doc.save("Driver_Report.pdf");
   };
 
-  // Pagination logic
-  const indexOfLastRecord = currentPage * recordsPerPage;
-  const indexOfFirstRecord = indexOfLastRecord - recordsPerPage;
-  const currentRecords = records.slice(indexOfFirstRecord, indexOfLastRecord);
-  const totalPages = Math.ceil(records.length / recordsPerPage);
+  const confirmExport = () => {
+  if (!dialog.action) return; // Add null check
+  
+  try {
+    const [format, type] = dialog.action.split(/(?=[A-Z])/);
+    const actionType = type.toLowerCase();
+    
+    if (format === 'pdf') {
+      exportToPDF(actionType);
+    } else {
+      exportToExcel(actionType);
+    }
+  } catch (err) {
+    handleError('Failed to process export', err);
+  } finally {
+    closeDialog();
+  }
+};
+
+
+
+  const resetFilters = () => {
+    setRouteFilter('');
+    setStartDate('');
+    setEndDate('');
+    fetchReport();
+  };
 
   return (
     <EmployeeLayout>
-      <Container maxWidth="lg" sx={{ mt: 4, mb: 8 }}>
-        <Paper elevation={3} sx={{ p: 3, borderRadius: 2 }}>
-          <Box sx={{ mb: 4, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-            <Typography variant="h4" color="primary">
-              Driver Raw Tea Records
-            </Typography>
-            <Stack direction="row" spacing={1}>
-              <Tooltip title="Download Excel">
-                <Button variant="outlined" color="success" onClick={downloadExcel} startIcon={<DownloadIcon />}>
-                  Excel
-                </Button>
-              </Tooltip>
-              <Tooltip title="Download PDF">
-                <Button variant="outlined" color="error" onClick={downloadPDF} startIcon={<DownloadIcon />}>
-                  PDF
-                </Button>
-              </Tooltip>
-            </Stack>
+    <Paper elevation={3} sx={{ p: 3, mb: 3 }}>
+      <Box display="flex" justifyContent="space-between" alignItems="center" mb={3}>
+        <Typography variant="h4" component="h2">
+          Driver Records
+        </Typography>
+      </Box>
+
+      {/* Filters */}
+      <Paper elevation={2} sx={{ p: 2, mb: 3 }}>
+        <Box 
+          component="form"
+          onSubmit={(e) => {
+            e.preventDefault();
+            fetchReport();
+          }}
+          sx={{ display: 'flex', gap: 2, flexWrap: 'wrap', alignItems: 'center' }}
+        >
+          <FormControl sx={{ minWidth: 200 }} size="small">
+            <InputLabel id="route-filter-label">Route</InputLabel>
+            <Select
+              labelId="route-filter-label"
+              value={routeFilter}
+              label="Route"
+              onChange={(e) => setRouteFilter(e.target.value)}
+            >
+              <MenuItem value="">All Routes</MenuItem>
+              {routes.map((r) => (
+                <MenuItem key={r.delivery_routeId} value={r.delivery_routeName}>
+                  {r.delivery_routeName}
+                </MenuItem>
+              ))}
+            </Select>
+          </FormControl>
+
+          <TextField
+            label="Start Date"
+            type="date"
+            size="small"
+            InputLabelProps={{ shrink: true }}
+            value={startDate}
+            onChange={(e) => setStartDate(e.target.value)}
+            inputProps={{ max: endDate || undefined }}
+            sx={{ width: 180 }}
+          />
+
+          <TextField
+            label="End Date"
+            type="date"
+            size="small"
+            InputLabelProps={{ shrink: true }}
+            value={endDate}
+            onChange={(e) => setEndDate(e.target.value)}
+            inputProps={{ min: startDate || undefined }}
+            sx={{ width: 180 }}
+          />
+
+          <Button 
+            type="submit" 
+            variant="contained" 
+            color="primary"
+            startIcon={<FilterIcon />}
+            disabled={loading}
+          >
+            Apply Filters
+          </Button>
+
+          <Button
+            variant="outlined"
+            color="secondary"
+            onClick={resetFilters}
+            startIcon={<ResetIcon />}
+            disabled={loading}
+          >
+            Reset
+          </Button>
+        </Box>
+      </Paper>
+
+      {/* Report Metadata */}
+      <Typography variant="subtitle2" gutterBottom>
+        Report generated by: <b>{userId}</b> | Date & Time: <b>{reportGeneratedAt}</b>
+      </Typography>
+
+      {loading && <LinearProgress sx={{ mb: 2 }} />}
+
+      {/* Detailed Driver Report */}
+      <Paper elevation={2} sx={{ p: 2, mb: 3 }}>
+        <Box display="flex" justifyContent="space-between" alignItems="center" mb={2}>
+          <Typography variant="h6" component="h3">
+            Detailed Driver Report
+          </Typography>
+          <Box>
+            <Tooltip title="Export to PDF">
+              <IconButton 
+                onClick={() => openDialog('pdfDetailed')} 
+                color="primary"
+                disabled={reportData.detailedReport?.length === 0}
+              >
+                <PdfIcon />
+              </IconButton>
+            </Tooltip>
+            <Tooltip title="Export to Excel">
+              <IconButton 
+                onClick={() => openDialog('excelDetailed')} 
+                color="success"
+                disabled={reportData.detailedReport?.length === 0}
+              >
+                <ExcelIcon />
+              </IconButton>
+            </Tooltip>
           </Box>
+        </Box>
 
-          {/* Filter Section */}
-          <Paper elevation={1} sx={{ p: 2, mb: 4, backgroundColor: '#f5f5f5', borderRadius: 2 }}>
-            <Grid container spacing={2}>
-              <Grid item xs={12} sm={6} md={4}>
-                <TextField
-                  fullWidth
-                  label="From Date"
-                  type="date"
-                  value={fromDate}
-                  onChange={(e) => setFromDate(e.target.value)}
-                  InputLabelProps={{ shrink: true }}
-                />
-              </Grid>
-              <Grid item xs={12} sm={6} md={4}>
-                <TextField
-                  fullWidth
-                  label="To Date"
-                  type="date"
-                  value={toDate}
-                  onChange={(e) => setToDate(e.target.value)}
-                  InputLabelProps={{ shrink: true }}
-                />
-              </Grid>
-              <Grid item xs={12} sm={6} md={4}>
-                <Button
-                  fullWidth
-                  variant="outlined"
-                  color="secondary"
-                  startIcon={<ClearIcon />}
-                  onClick={handleClearFilters}
-                >
-                  Clear Filters
-                </Button>
-              </Grid>
-            </Grid>
-          </Paper>
-
-          {/* Active Filters */}
-          {(fromDate || toDate || driverId !== "All") && (
-            <Box sx={{ mb: 3, display: 'flex', flexWrap: 'wrap', gap: 1 }}>
-              <Typography variant="body2" color="text.secondary" sx={{ mr: 1, mt: 0.5 }}>
-                Active filters:
-              </Typography>
-              {fromDate && (
-                <Chip
-                  label={`From: ${format(new Date(fromDate), 'MMM dd, yyyy')}`}
-                  size="small"
-                  color="primary"
-                  variant="outlined"
-                />
-              )}
-              {toDate && (
-                <Chip
-                  label={`To: ${format(new Date(toDate), 'MMM dd, yyyy')}`}
-                  size="small"
-                  color="primary"
-                  variant="outlined"
-                />
-              )}
-              {driverId !== "All" && (
-                <Chip
-                  label={`Driver ID: ${driverId}`}
-                  size="small"
-                  color="primary"
-                  variant="outlined"
-                />
-              )}
-            </Box>
-          )}
-
-          {/* Data Table */}
-          <TableContainer component={Paper} sx={{ maxHeight: 500 }}>
-            <Table stickyHeader>
-              <TableHead>
-                <TableRow>
-                  <TableCell>Driver ID</TableCell>
-                  <TableCell>Total Raw Tea (kg)</TableCell>
-                </TableRow>
-              </TableHead>
-              <TableBody>
-                {currentRecords.map((rec, index) => (
-                  <TableRow key={index}>
-                    <TableCell>{rec.driverId}</TableCell>
-                    <TableCell>{rec.totalRawTeaWeight}</TableCell>
+        <TableContainer>
+          <Table size="small">
+            <TableHead>
+              <TableRow sx={{ bgcolor: 'primary.main', '& th': { color: 'white' } }}>
+                <TableCell>Driver ID</TableCell>
+                <TableCell>Route</TableCell>
+                <TableCell align="right">Raw Tea Weight (kg)</TableCell>
+              </TableRow>
+            </TableHead>
+            <TableBody>
+              {reportData.detailedReport?.length ? (
+                reportData.detailedReport.map((record, i) => (
+                  <TableRow key={i} hover>
+                    <TableCell>{record.driverId}</TableCell>
+                    <TableCell>{record.route}</TableCell>
+                    <TableCell align="right">{record.rawTeaWeight}</TableCell>
                   </TableRow>
-                ))}
-              </TableBody>
-            </Table>
-          </TableContainer>
+                ))
+              ) : (
+                <TableRow>
+                  <TableCell colSpan={3} align="center" sx={{ py: 3 }}>
+                    {loading ? 'Loading data...' : 'No data available for the selected filters'}
+                  </TableCell>
+                </TableRow>
+              )}
+            </TableBody>
+          </Table>
+        </TableContainer>
+      </Paper>
 
-          <Box mt={2} display="flex" justifyContent="center">
-            <Pagination
-              count={totalPages}
-              page={currentPage}
-              onChange={(e, val) => setCurrentPage(val)}
-              color="primary"
-            />
+      {/* Driver Summary Report */}
+      <Paper elevation={2} sx={{ p: 2 }}>
+        <Box display="flex" justifyContent="space-between" alignItems="center" mb={2}>
+          <Typography variant="h6" component="h3">
+            Driver Summary
+          </Typography>
+          <Box>
+            <Tooltip title="Export to PDF">
+              <IconButton 
+                onClick={() => openDialog('pdfSummary')} 
+                color="primary"
+                disabled={reportData.summaryReport?.length === 0}
+              >
+                <PdfIcon />
+              </IconButton>
+            </Tooltip>
+            <Tooltip title="Export to Excel">
+              <IconButton 
+                onClick={() => openDialog('excelSummary')} 
+                color="success"
+                disabled={reportData.summaryReport?.length === 0}
+              >
+                <ExcelIcon />
+              </IconButton>
+            </Tooltip>
           </Box>
-        </Paper>
-      </Container>
+        </Box>
+
+        <TableContainer>
+          <Table size="small">
+            <TableHead>
+              <TableRow sx={{ bgcolor: 'primary.main', '& th': { color: 'white' } }}>
+                <TableCell>Driver ID</TableCell>
+                <TableCell align="right">Total Raw Tea Weight (kg)</TableCell>
+              </TableRow>
+            </TableHead>
+            <TableBody>
+              {reportData.summaryReport?.length ? (
+                reportData.summaryReport.map((summary, i) => (
+                  <TableRow key={i} hover>
+                    <TableCell>{summary.driverId}</TableCell>
+                    <TableCell align="right">{summary.rawTeaWeight}</TableCell>
+                  </TableRow>
+                ))
+              ) : (
+                <TableRow>
+                  <TableCell colSpan={2} align="center" sx={{ py: 3 }}>
+                    {loading ? 'Loading data...' : 'No data available for the selected filters'}
+                  </TableCell>
+                </TableRow>
+              )}
+            </TableBody>
+          </Table>
+        </TableContainer>
+      </Paper>
+
+      {/* Snackbar for notifications */}
+      <Snackbar
+        open={snackbar.open}
+        autoHideDuration={6000}
+        onClose={() => setSnackbar((s) => ({ ...s, open: false }))}
+        anchorOrigin={{ vertical: 'bottom', horizontal: 'center' }}
+      >
+        <Alert 
+          severity={snackbar.severity} 
+          onClose={() => setSnackbar((s) => ({ ...s, open: false }))}
+          sx={{ width: '100%' }}
+        >
+          {snackbar.message}
+        </Alert>
+      </Snackbar>
+
+      {/* Confirmation Dialog */}
+      <Dialog open={dialog.open} onClose={closeDialog}>
+        <DialogTitle>Confirm Export</DialogTitle>
+        <DialogContent>
+          <DialogContentText>
+            Are you sure you want to export the {dialog.action.includes('Detailed') ? 'Detailed' : 'Summary'} Report as{' '}
+            {dialog.action.includes('pdf') ? 'PDF' : 'Excel'}?
+          </DialogContentText>
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={closeDialog}>Cancel</Button>
+          <Button onClick={confirmExport} color="primary" variant="contained">
+            Export
+          </Button>
+        </DialogActions>
+      </Dialog>
+    </Paper>
     </EmployeeLayout>
   );
 };

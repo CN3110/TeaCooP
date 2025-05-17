@@ -53,50 +53,88 @@ exports.getRawTeaRecordsOfSupplier = async (fromDate, toDate, transport) => {
   return results;
 };
 
-// Fixed function to get driver raw tea records with proper date filtering and aggregation
-exports.getRawTeaRecordsOfDriver = async (fromDate, toDate, driverId) => {
-  let params = [];
-  let whereClause = '';
-  
-  // Build WHERE clause and parameters based on provided filters
-  if (fromDate || toDate || driverId !== 'All') {
-    whereClause = 'WHERE ';
-    
-    if (fromDate) {
-      whereClause += 'd.date >= ? ';
-      params.push(fromDate);
-      
-      if (toDate || driverId !== 'All') {
-        whereClause += 'AND ';
-      }
-    }
-    
-    if (toDate) {
-      whereClause += 'd.date <= ? ';
-      params.push(toDate);
-      
-      if (driverId !== 'All') {
-        whereClause += 'AND ';
-      }
-    }
-    
-    if (driverId !== 'All') {
-      whereClause += 'd.transport = ? ';
-      params.push(driverId);
-    }
+exports.getDriverReport = async (route, startDate, endDate) => {
+  const conditions = ["transport != 'selfTransport'"];
+  const values = [];
+
+  if (route) {
+    conditions.push("route = ?");
+    values.push(route);
   }
 
-  const sql = `
+  if (startDate && endDate) {
+    conditions.push("DATE(date) BETWEEN ? AND ?");
+    values.push(startDate, endDate);
+  }
+
+  const baseWhere = conditions.length > 0 ? "WHERE " + conditions.join(" AND ") : "";
+
+  // Full grouped report by driverId and route
+  const fullQuery = `
     SELECT 
-      d.transport AS driverId,
-      SUM(d.randalu + d.greenTeaLeaves) AS totalRawTeaWeight
-    FROM delivery d
-    JOIN driver dr ON d.transport = dr.driverId
-    ${whereClause}
-    GROUP BY d.transport
-    ORDER BY totalRawTeaWeight DESC
+      transport AS driverId, 
+      route,
+      SUM(CAST(greenTeaLeaves AS DECIMAL(10,2))) + SUM(CAST(randalu AS DECIMAL(10,2))) AS rawTeaWeight
+    FROM delivery
+    ${baseWhere}
+    GROUP BY transport, route
+    ORDER BY rawTeaWeight DESC;
   `;
 
-  const [results] = await db.query(sql, params);
+  // Summary table by driverId only
+  const summaryQuery = `
+    SELECT 
+      transport AS driverId,
+      SUM(CAST(greenTeaLeaves AS DECIMAL(10,2)) + CAST(randalu AS DECIMAL(10,2))) AS rawTeaWeight
+    FROM delivery
+    ${baseWhere}
+    GROUP BY transport
+    ORDER BY rawTeaWeight DESC;
+  `;
+
+  const [detailedReport] = await db.query(fullQuery, values);
+  const [summaryReport] = await db.query(summaryQuery, values);
+
+  return { detailedReport, summaryReport };
+};
+
+exports.getTeaProductionReport = async (startDate, endDate) => {
+  let query = `
+    SELECT 
+      productionId, 
+      DATE_FORMAT(productionDate, '%Y-%m-%d') AS productionDate, 
+      weightInKg, 
+      createdBy, 
+      created_at, 
+      rawTeaUsed
+    FROM tea_production
+  `;
+  
+  const params = [];
+  const conditions = [];
+
+  // Add date filters only if both are provided
+  if (startDate && endDate) {
+    conditions.push(`productionDate BETWEEN ? AND ?`);
+    params.push(startDate, endDate);
+  } 
+  // Optional: Handle cases where only one date is provided
+  else if (startDate) {
+    conditions.push(`productionDate >= ?`);
+    params.push(startDate);
+  } 
+  else if (endDate) {
+    conditions.push(`productionDate <= ?`);
+    params.push(endDate);
+  }
+
+  // Add WHERE clause if there are any conditions
+  if (conditions.length > 0) {
+    query += ` WHERE ${conditions.join(' AND ')}`;
+  }
+
+  query += ` ORDER BY productionDate ASC`;
+
+  const [results] = await db.query(query, params);
   return results;
 };
