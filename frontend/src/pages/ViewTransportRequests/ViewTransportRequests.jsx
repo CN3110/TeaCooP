@@ -83,6 +83,7 @@ const ViewTransportRequests = () => {
                 <th>Date</th>
                 <th>Sacks</th>
                 <th>Weight (kg)</th>
+                <th>Route</th>
                 <th>Address</th>
                 <th>Status</th>
               </tr>
@@ -95,6 +96,7 @@ const ViewTransportRequests = () => {
                   <td>{new Date(req.reqDate).toLocaleDateString()}</td>
                   <td>{req.reqNumberOfSacks}</td>
                   <td>{req.reqWeight}</td>
+                  <td>{req.delivery_routeName}</td>
                   <td>{req.reqAddress}</td>
                   <td
                     style={{

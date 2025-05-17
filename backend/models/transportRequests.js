@@ -37,6 +37,13 @@ class TransportRequest {
     const [result] = await db.query(query, [requestId]);
     return result;
   }
+
+  static async updateStatus(requestId, status, driverId) {
+  const query = "UPDATE transport_request SET status = ?, driverId = ? WHERE requestId = ?";
+  const [result] = await db.query(query, [status, driverId, requestId]);
+  return result;
+}
+
 }
 
 module.exports = TransportRequest;

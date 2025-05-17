@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import DriverLayout from "../../../components/Driver/DriverLayout/DriverLayout";
-import "./ViewTransportRequests.css"; // We'll style it next
+import "./ViewTransportRequests.css";
 
 const DriverTransportRequests = () => {
   const [transportRequests, setTransportRequests] = useState([]);
@@ -28,27 +28,35 @@ const DriverTransportRequests = () => {
     fetchRequests();
   }, []);
 
-  // Update status to "Done"
-  const updateStatus = async (requestId) => {
-    try {
-      const response = await fetch(
-        `http://localhost:3001/api/transportRequests/${requestId}/status`,
-        {
-          method: "PUT",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ status: "done" }), // Status is passed as 'done'
-        }
-      );
+  // Update status to "Done" and assign driverId from localStorage
+const updateStatus = async (requestId) => {
+  try {
+    const driverId = localStorage.getItem("userId"); // Get driverId from localStorage
 
-      if (!response.ok) throw new Error("Failed to update status");
-
-      alert("Status updated to Done!");
-      fetchRequests(); // Refresh the table
-    } catch (err) {
-      console.error("Update error:", err);
-      alert("Failed to update status.");
+    if (!driverId) {
+      alert("Driver ID not found in localStorage.");
+      return;
     }
-  };
+
+    const response = await fetch(
+      `http://localhost:3001/api/transportRequests/${requestId}/status`,
+      {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ status: "done", driverId }), // Send both status and driverId
+      }
+    );
+
+    if (!response.ok) throw new Error("Failed to update status");
+
+    alert("Status updated to Done!");
+    fetchRequests(); // Refresh the table
+  } catch (err) {
+    console.error("Update error:", err);
+    alert("Failed to update status.");
+  }
+};
+
 
   return (
     <DriverLayout>
@@ -66,6 +74,7 @@ const DriverTransportRequests = () => {
                 <th>Date</th>
                 <th>Number of Sacks</th>
                 <th>Weight (kg)</th>
+                <th>Route</th>
                 <th>Address</th>
                 <th>Status</th>
                 <th>Action</th>
@@ -79,6 +88,7 @@ const DriverTransportRequests = () => {
                     <td>{new Date(req.reqDate).toLocaleDateString()}</td>
                     <td>{req.reqNumberOfSacks}</td>
                     <td>{req.reqWeight}</td>
+                    <td>{req.delivery_routeName}</td>
                     <td>{req.reqAddress}</td>
                     <td>{req.status || "Pending"}</td>
                     <td>

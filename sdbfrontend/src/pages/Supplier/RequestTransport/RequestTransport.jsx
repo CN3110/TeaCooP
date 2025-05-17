@@ -13,6 +13,7 @@ const RequestTransport = () => {
     reqWeight: "",
     reqAddress: "",
     delivery_routeId: "",
+    
   });
 
   const [transportRequests, setTransportRequests] = useState([]);
