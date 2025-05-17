@@ -9,6 +9,7 @@ import MuiAlert from '@mui/material/Alert';
 
 const CreateLot = () => {
   const [teaTypes, setTeaTypes] = useState([]);
+  const [teaTypeStock, setTeaTypeStock] = useState([]);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [snackbar, setSnackbar] = useState({
     open: false,
@@ -25,7 +26,7 @@ const CreateLot = () => {
   });
 
   const [lotData, setLotData] = useState({
-    lotNumber: "Generating...",
+    lotNumber: "Auto Generated...",
     manufacturingDate: new Date(),
     teaTypeId: '', 
     noOfBags: '',
@@ -47,7 +48,19 @@ const CreateLot = () => {
         showAlert("Failed to fetch tea types", "error");
       }
     };
+
+    const fetchTeaTypeStocks = async () => {
+    try {
+      const response = await fetch("http://localhost:3001/api/teaTypeStocks/available");
+      const data = await response.json();
+      setTeaTypeStock(data);
+    } catch (error) {
+      console.error("Error fetching available tea stocks:", error);
+    }
+  };
+    
     fetchTeaTypes();
+    fetchTeaTypeStocks();
   }, []);
 
   const showAlert = (message, severity = "success") => {
@@ -197,7 +210,7 @@ const CreateLot = () => {
 
       // Reset form
       setLotData({
-        lotNumber: "Generating...",
+        lotNumber: "Auto Generated...",
         manufacturingDate: new Date(),
         teaTypeId: "",
         noOfBags: "",
@@ -222,8 +235,20 @@ const CreateLot = () => {
   };
 
   return (
-    <EmployeeLayout>
+    <EmployeeLayout> 
+      <div className="page-content">{/* Available Weights Card */}
+      <div className="md:w-1/3 bg-gray-100 p-6 rounded-2xl shadow-md">
+        <h2 className="text-lg font-bold mb-3 text-green-800">Available Weights</h2>
+{teaTypeStock.map((tea, index) => (
+  <div key={index} className="flex justify-between py-1 border-b border-gray-300">
+    <span className="font-medium">{tea.teaTypeName}</span>
+    <span className="text-gray-700">{tea.availableWeight} kg</span>
+  </div>
+))}
+
+      </div>
       <div className="create-lot-container">
+        
         <Snackbar
           open={snackbar.open}
           autoHideDuration={4000}
@@ -305,7 +330,7 @@ const CreateLot = () => {
             </div>
 
             <div className="lot-form-group">
-              <label>Net Weight (kg):</label>
+              <label>Net Weight per bag(kg) :</label>
               <input
                 type="number"
                 name="netWeight"
@@ -372,6 +397,7 @@ const CreateLot = () => {
             </button>
           </div>
         </form>
+      </div>
       </div>
     </EmployeeLayout>
   );
