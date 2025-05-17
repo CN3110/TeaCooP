@@ -1,17 +1,19 @@
 import React, { useState, useEffect } from "react";
+import { Snackbar, Alert, Dialog, DialogTitle, DialogContent, DialogContentText, DialogActions, Button } from "@mui/material";
 import SupplierLayout from "../../../components/supplier/SupplierLayout/SupplierLayout";
 import "./RequestTransport.css";
 
 const RequestTransport = () => {
   const [routes, setRoutes] = useState([]);
   const [selectedRouteId, setSelectedRouteId] = useState("");
+  const [lands, setLands] = useState([]);
   const [reqDeliveryData, setReqDeliveryData] = useState({
     supplierId: "",
     reqDate: "",
     reqTime: "",
     reqNumberOfSacks: "",
     reqWeight: "",
-    reqAddress: "",
+    landId: "",
     delivery_routeId: "",
     
   });
@@ -19,6 +21,12 @@ const RequestTransport = () => {
   const [transportRequests, setTransportRequests] = useState([]);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState(null);
+  const [openDialog, setOpenDialog] = useState(false);
+const [snackbarOpen, setSnackbarOpen] = useState(false);
+const [snackbarMessage, setSnackbarMessage] = useState("");
+const [snackbarSeverity, setSnackbarSeverity] = useState("success"); // or "error"
+const [pendingSubmit, setPendingSubmit] = useState(null); // holds form data until confirmation
+
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
@@ -57,27 +65,48 @@ const RequestTransport = () => {
   }
 };
 
+const fetchLands = async (supplierId) => {
+  try {
+    const res = await fetch(`http://localhost:3001/api/lands/by-supplier/${supplierId}`);
+    if (!res.ok) throw new Error("Failed to fetch lands");
+    const data = await res.json();
+    setLands(data);
+  } catch (err) {
+    console.error("Error fetching lands:", err);
+  }
+};
+
+
   useEffect(() => {
     // Fetch supplierId from localStorage and set it
     const storedUserId = localStorage.getItem("userId");
-    if (storedUserId) {
-      setReqDeliveryData((prev) => ({
-        ...prev,
-        supplierId: storedUserId,
-      }));
-    }
+  if (storedUserId) {
+    setReqDeliveryData((prev) => ({
+      ...prev,
+      supplierId: storedUserId,
+    }));
 
-    fetchTransportRequests();
+    fetchTransportRequests(); // make sure supplierId is set before calling
     fetchRoutes();
-  }, []);
+    fetchLands(storedUserId); // fetch lands
+  }
+}, []);
 
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-    setIsLoading(true);
-    setError(null);
+  const handleSubmit = (e) => {
+  e.preventDefault();
+  setPendingSubmit({ ...reqDeliveryData });
+  setOpenDialog(true); // Show confirmation dialog
+};
 
-    const today = new Date().setHours(0, 0, 0, 0);
-  const selectedDate = new Date(reqDeliveryData.reqDate).setHours(0, 0, 0, 0);
+const confirmSubmit = async () => {
+  setOpenDialog(false);
+  setIsLoading(true);
+  setError(null);
+
+  const { reqDate, reqTime } = pendingSubmit;
+
+  const today = new Date().setHours(0, 0, 0, 0);
+  const selectedDate = new Date(reqDate).setHours(0, 0, 0, 0);
 
   if (selectedDate < today) {
     setError("You cannot select a past date.");
@@ -85,57 +114,70 @@ const RequestTransport = () => {
     return;
   }
 
-    try {
-      const formattedDate = new Date(reqDeliveryData.reqDate)
-        .toISOString()
-        .split("T")[0];
+  const [hour, minute] = reqTime.split(":").map(Number);
+  if (hour < 8 || hour >= 20) {
+    setError("Requested time must be between 08:00 and 20:00 (8AM to 8PM). Because Drivers are not available outside these hours.");
+    setIsLoading(false);
+    return;
+  }
 
-      const requestData = {
-        ...reqDeliveryData,
-        reqDate: formattedDate,
-        reqTime: reqDeliveryData.reqTime + ":00",
-      };
+  try {
+    const formattedDate = new Date(reqDate).toISOString().split("T")[0];
+    const requestData = {
+      ...pendingSubmit,
+      reqDate: formattedDate,
+      reqTime: reqTime + ":00",
+    };
 
-      const response = await fetch(
-        "http://localhost:3001/api/transportRequests",
-        {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify(requestData),
-        }
-      );
+    const response = await fetch("http://localhost:3001/api/transportRequests", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(requestData),
+    });
 
-      if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`);
-      }
+    if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
 
-      alert("Transport request submitted successfully!");
-      setReqDeliveryData((prev) => ({
-        supplierId: prev.supplierId, // keep the supplierId
-        reqDate: "",
-        reqTime: "",
-        reqNumberOfSacks: "",
-        reqWeight: "",
-        reqAddress: "",
-      }));
-      await fetchTransportRequests();
-    } catch (error) {
-      console.error("Error submitting request:", error);
-      setError("Failed to submit transport request. Please try again.");
-    } finally {
-      setIsLoading(false);
-    }
-  };
+    setSnackbarMessage("Transport request submitted successfully!");
+    setSnackbarSeverity("success");
+    setSnackbarOpen(true);
 
-  const resetForm = () => {
     setReqDeliveryData((prev) => ({
       supplierId: prev.supplierId,
       reqDate: "",
       reqTime: "",
       reqNumberOfSacks: "",
       reqWeight: "",
-      reqAddress: "",
+      landId: "",
+      delivery_routeId: "",
     }));
+
+    await fetchTransportRequests();
+  } catch (error) {
+    console.error("Error submitting request:", error);
+    setSnackbarMessage("Failed to submit transport request. Please try again.");
+    setSnackbarSeverity("error");
+    setSnackbarOpen(true);
+  } finally {
+    setIsLoading(false);
+  }
+};
+const handleSnackbarClose = () => {
+  setSnackbarOpen(false);
+};
+
+
+
+  const resetForm = () => {
+    setReqDeliveryData((prev) => ({
+  supplierId: prev.supplierId,
+  reqDate: "",
+  reqTime: "",
+  reqNumberOfSacks: "",
+  reqWeight: "",
+  landId: "",
+  delivery_routeId: "",
+}));
+
   };
 
   return (
@@ -171,12 +213,14 @@ const RequestTransport = () => {
           <div className="form-group">
             <label>Time:</label>
             <input
-              type="time"
-              name="reqTime"
-              value={reqDeliveryData.reqTime}
-              onChange={handleInputChange}
-              required
-            />
+  type="time"
+  name="reqTime"
+  value={reqDeliveryData.reqTime}
+  onChange={handleInputChange}
+  required
+  
+/>
+
           </div>
           <div className="form-group">
             <label>Number of Sacks:</label>
@@ -218,15 +262,22 @@ const RequestTransport = () => {
 </div>
 
           <div className="form-group">
-            <label>Address/Location:</label>
-            <input
-              type="text"
-              name="reqAddress"
-              value={reqDeliveryData.reqAddress}
-              onChange={handleInputChange}
-              required
-            />
-          </div>
+  <label>Select Land:</label>
+  <select
+    name="landId"
+    value={reqDeliveryData.landId}
+    onChange={handleInputChange}
+    required
+  >
+    <option value="">-- Select Land --</option>
+    {lands.map((land) => (
+      <option key={land.landId} value={land.landId}>
+        {land.landAddress}
+      </option>
+    ))}
+  </select>
+</div>
+
           <div className="form-actions">
             <button type="button" onClick={resetForm} disabled={isLoading}>
               Cancel
@@ -247,10 +298,11 @@ const RequestTransport = () => {
             <thead>
   <tr>
     <th>Date</th>
-    <th>Route</th>
+    <th>Time</th>
     <th>Number of Sacks</th>
     <th>Weight (kg)</th>
-    <th>Address/Location</th>
+    <th>Route</th>
+    <th>Address</th>
     <th>Status</th>
     <th>Driver ID</th>
   </tr>
@@ -260,12 +312,13 @@ const RequestTransport = () => {
     transportRequests.map((req, index) => (
       <tr key={index}>
         <td>{new Date(req.reqDate).toLocaleDateString()}</td>
-        <td>{req.delivery_routeName}</td>
+        <td>{req.reqTime}</td>
         <td>{req.reqNumberOfSacks}</td>
         <td>{req.reqWeight}</td>
-        <td>{req.reqAddress}</td>
+        <td>{req.delivery_routeName}</td>
+        <td>{req.landAddress}</td>
         <td>{req.status || "Pending"}</td>
-        <td>{req.driverId}</td> {/*meka peenne na taam, driver view eka hdal iwar wela meka blnna*/}
+        <td>{req.driverId}</td>
       </tr>
     ))
   ) : (
@@ -280,6 +333,32 @@ const RequestTransport = () => {
           </table>
         )}
       </div>
+      <Dialog open={openDialog} onClose={() => setOpenDialog(false)}>
+  <DialogTitle>Confirm Submission</DialogTitle>
+  <DialogContent>
+    <DialogContentText>
+      Are you sure you want to submit this transport request?
+    </DialogContentText>
+  </DialogContent>
+  <DialogActions>
+    <Button onClick={() => setOpenDialog(false)}>Cancel</Button>
+    <Button onClick={confirmSubmit} color="primary" autoFocus>
+      Confirm
+    </Button>
+  </DialogActions>
+</Dialog>
+
+<Snackbar
+  open={snackbarOpen}
+  autoHideDuration={5000}
+  onClose={handleSnackbarClose}
+  anchorOrigin={{ vertical: "top", horizontal: "center" }}
+>
+  <Alert onClose={handleSnackbarClose} severity={snackbarSeverity} sx={{ width: "100%" }}>
+    {snackbarMessage}
+  </Alert>
+</Snackbar>
+
     </SupplierLayout>
   );
 };

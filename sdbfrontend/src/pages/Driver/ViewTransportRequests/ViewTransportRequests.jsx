@@ -1,13 +1,33 @@
 import React, { useEffect, useState } from "react";
 import DriverLayout from "../../../components/Driver/DriverLayout/DriverLayout";
 import "./ViewTransportRequests.css";
+import {
+  Dialog,
+  DialogTitle,
+  DialogActions,
+  Button,
+  Snackbar,
+  Alert,
+} from "@mui/material";
 
 const DriverTransportRequests = () => {
   const [transportRequests, setTransportRequests] = useState([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
 
-  // Fetch all requests
+  const [selectedRequestId, setSelectedRequestId] = useState(null);
+  const [dialogOpen, setDialogOpen] = useState(false);
+
+  const [snackbar, setSnackbar] = useState({
+    open: false,
+    message: "",
+    severity: "success",
+  });
+
+  const showSnackbar = (message, severity = "success") => {
+    setSnackbar({ open: true, message, severity });
+  };
+
   const fetchRequests = async () => {
     setLoading(true);
     setError(null);
@@ -28,35 +48,47 @@ const DriverTransportRequests = () => {
     fetchRequests();
   }, []);
 
-  // Update status to "Done" and assign driverId from localStorage
-const updateStatus = async (requestId) => {
-  try {
-    const driverId = localStorage.getItem("userId"); // Get driverId from localStorage
+  const handleMarkAsDoneClick = (requestId) => {
+    setSelectedRequestId(requestId);
+    setDialogOpen(true);
+  };
 
-    if (!driverId) {
-      alert("Driver ID not found in localStorage.");
-      return;
-    }
+  const handleDialogClose = () => {
+    setDialogOpen(false);
+    setSelectedRequestId(null);
+  };
 
-    const response = await fetch(
-      `http://localhost:3001/api/transportRequests/${requestId}/status`,
-      {
-        method: "PUT",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ status: "done", driverId }), // Send both status and driverId
+  const confirmMarkAsDone = async () => {
+    if (!selectedRequestId) return;
+
+    try {
+      const driverId = localStorage.getItem("userId");
+
+      if (!driverId) {
+        showSnackbar("Driver ID not found in localStorage.", "error");
+        return;
       }
-    );
 
-    if (!response.ok) throw new Error("Failed to update status");
+      const response = await fetch(
+        `http://localhost:3001/api/transportRequests/${selectedRequestId}/status`,
+        {
+          method: "PUT",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ status: "done", driverId }),
+        }
+      );
 
-    alert("Status updated to Done!");
-    fetchRequests(); // Refresh the table
-  } catch (err) {
-    console.error("Update error:", err);
-    alert("Failed to update status.");
-  }
-};
+      if (!response.ok) throw new Error("Failed to update status");
 
+      showSnackbar("Status updated to Done!", "success");
+      fetchRequests();
+    } catch (err) {
+      console.error("Update error:", err);
+      showSnackbar("Failed to update status.", "error");
+    } finally {
+      handleDialogClose();
+    }
+  };
 
   return (
     <DriverLayout>
@@ -83,7 +115,7 @@ const updateStatus = async (requestId) => {
             <tbody>
               {transportRequests.length > 0 ? (
                 transportRequests.map((req) => (
-                  <tr key={req.requestId}> {/* Use requestId here */}
+                  <tr key={req.requestId}>
                     <td>{req.supplierId}</td>
                     <td>{new Date(req.reqDate).toLocaleDateString()}</td>
                     <td>{req.reqNumberOfSacks}</td>
@@ -92,12 +124,12 @@ const updateStatus = async (requestId) => {
                     <td>{req.reqAddress}</td>
                     <td>{req.status || "Pending"}</td>
                     <td>
-                      {req.status === "done" ? ( // Match 'done' in lowercase
+                      {req.status === "done" ? (
                         <span className="done-status">✔ Done</span>
                       ) : (
                         <button
                           className="mark-done-btn"
-                          onClick={() => updateStatus(req.requestId)} // Corrected to use requestId
+                          onClick={() => handleMarkAsDoneClick(req.requestId)}
                         >
                           Mark as Done
                         </button>
@@ -107,13 +139,42 @@ const updateStatus = async (requestId) => {
                 ))
               ) : (
                 <tr>
-                  <td colSpan="7">No transport requests found.</td>
+                  <td colSpan="8">No transport requests found.</td>
                 </tr>
               )}
             </tbody>
           </table>
         )}
       </div>
+
+      {/* Confirmation Dialog */}
+      <Dialog open={dialogOpen} onClose={handleDialogClose}>
+        <DialogTitle>Are you sure you want to mark this as Done?</DialogTitle>
+        <DialogActions>
+          <Button onClick={handleDialogClose} color="inherit">
+            Cancel
+          </Button>
+          <Button onClick={confirmMarkAsDone} color="primary" variant="contained">
+            Confirm
+          </Button>
+        </DialogActions>
+      </Dialog>
+
+      {/* Snackbar Alert */}
+      <Snackbar
+        open={snackbar.open}
+        autoHideDuration={3000}
+        onClose={() => setSnackbar({ ...snackbar, open: false })}
+        anchorOrigin={{ vertical: "top", horizontal: "center" }}
+      >
+        <Alert
+          onClose={() => setSnackbar({ ...snackbar, open: false })}
+          severity={snackbar.severity}
+          variant="filled"
+        >
+          {snackbar.message}
+        </Alert>
+      </Snackbar>
     </DriverLayout>
   );
 };

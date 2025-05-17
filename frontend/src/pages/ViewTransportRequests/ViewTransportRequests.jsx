@@ -97,7 +97,7 @@ const ViewTransportRequests = () => {
                   <td>{req.reqNumberOfSacks}</td>
                   <td>{req.reqWeight}</td>
                   <td>{req.delivery_routeName}</td>
-                  <td>{req.reqAddress}</td>
+                  <td>{req.landAddress}</td>
                   <td
                     style={{
                       color: req.status === "done" ? "green" : "#d08400",

@@ -18,19 +18,28 @@ class TransportRequest {
     return results;
   }
 
-  static async add({ supplierId, reqDate, reqTime, reqNumberOfSacks, reqWeight, reqAddress, delivery_routeId }) {
-    const query =
-      "INSERT INTO transport_request (supplierId, reqDate, reqTime, reqNumberOfSacks, reqWeight, reqAddress, delivery_routeId) VALUES (?, ?, ?, ?, ?, ?, ?)";
-    const [result] = await db.query(query, [supplierId, reqDate, reqTime, reqNumberOfSacks, reqWeight, reqAddress, delivery_routeId]);
-    return result;
-  }
+  // ADD method
+static async add({ supplierId, reqDate, reqTime, reqNumberOfSacks, reqWeight, landId, delivery_routeId }) {
+  const query = `
+    INSERT INTO transport_request 
+    (supplierId, reqDate, reqTime, reqNumberOfSacks, reqWeight, landId, delivery_routeId) 
+    VALUES (?, ?, ?, ?, ?, ?, ?)
+  `;
+  const [result] = await db.query(query, [supplierId, reqDate, reqTime, reqNumberOfSacks, reqWeight, landId, delivery_routeId]);
+  return result;
+}
 
-  static async update(requestId, { reqDate, reqTime, reqNumberOfSacks, reqWeight, reqAddress, delivery_routeId }) {
-    const query =
-      "UPDATE transport_request SET reqDate = ?, reqTime = ?, reqNumberOfSacks = ?, reqWeight = ?, reqAddress = ? delivery_routeId = ? WHERE requestId = ?";
-    const [result] = await db.query(query, [reqDate, reqTime, reqNumberOfSacks, reqWeight, reqAddress, requestId, delivery_routeId]);
-    return result;
-  }
+// UPDATE method
+static async update(requestId, { reqDate, reqTime, reqNumberOfSacks, reqWeight, landId, delivery_routeId }) {
+  const query = `
+    UPDATE transport_request 
+    SET reqDate = ?, reqTime = ?, reqNumberOfSacks = ?, reqWeight = ?, landId = ?, delivery_routeId = ?
+    WHERE requestId = ?
+  `;
+  const [result] = await db.query(query, [reqDate, reqTime, reqNumberOfSacks, reqWeight, landId, delivery_routeId, requestId]);
+  return result;
+}
+
 
   static async delete(requestId) {
     const query = "DELETE FROM transport_request WHERE requestId = ?";

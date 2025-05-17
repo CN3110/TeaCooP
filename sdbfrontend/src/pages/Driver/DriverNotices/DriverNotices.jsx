@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import DriverLayout from "../../../components/Supplier/SupplierLayout/SupplierLayout";
+import DriverLayout from "../../../components/Driver/DriverLayout/DriverLayout";
 import './DriverNotices.css';
 
 const DriverNotices = () => {

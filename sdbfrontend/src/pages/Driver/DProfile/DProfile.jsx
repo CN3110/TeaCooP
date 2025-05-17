@@ -3,7 +3,7 @@ import axios from 'axios';
 import { useParams } from 'react-router-dom';
 import Snackbar from '@mui/material/Snackbar';
 import MuiAlert from '@mui/material/Alert';
-import DriverLayout from "../../../components/driver/DriverLayout/DriverLayout";
+import DriverLayout from "../../../components/Driver/DriverLayout/DriverLayout";
 import './DProfile.css';
 
 const Alert = React.forwardRef(function Alert(props, ref) {
@@ -253,7 +253,7 @@ const DProfile = () => {
         )
       )}
 
-      <Snackbar open={snackbar.open} autoHideDuration={3000} onClose={handleCloseSnackbar} anchorOrigin={{ vertical: 'bottom', horizontal: 'right' }}>
+      <Snackbar open={snackbar.open} autoHideDuration={3000} onClose={handleCloseSnackbar} anchorOrigin={{ vertical: 'top', horizontal: 'center' }}>
         <Alert onClose={handleCloseSnackbar} severity={snackbar.severity}>
           {snackbar.message}
         </Alert>

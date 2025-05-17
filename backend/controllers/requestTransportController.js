@@ -4,9 +4,10 @@ const db = require("../config/database");
 exports.getAllTransportRequests = async (req, res) => {
   try {
     const query = `
-      SELECT tr.*, dr.delivery_routeName 
+      SELECT tr.*, dr.delivery_routeName, l.landAddress
       FROM transport_request tr
       LEFT JOIN delivery_route dr ON tr.delivery_routeId = dr.delivery_routeId
+      LEFT JOIN land l ON tr.landId = l.landId
     `;
     const [transportRequests] = await db.query(query);
     res.status(200).json(transportRequests);
@@ -34,25 +35,26 @@ exports.getTransportRequestById = async (req, res) => {
 
 // Add a new transport request
 exports.addTransportRequest = async (req, res) => {
-  const { supplierId, reqDate, reqTime, reqNumberOfSacks, reqWeight, reqAddress, delivery_routeId } = req.body;
+  const { supplierId, reqDate, reqTime, reqNumberOfSacks, reqWeight, landId, delivery_routeId } = req.body;
 
-  if (!supplierId || !reqDate || !reqTime || !reqNumberOfSacks || !reqWeight || !reqAddress || !delivery_routeId) {
+  if (!supplierId || !reqDate || !reqTime || !reqNumberOfSacks || !reqWeight || !landId || !delivery_routeId) {
     return res.status(400).json({ error: "Missing required fields" });
   }
 
   try {
     const query = `
       INSERT INTO transport_request 
-      (supplierId, reqDate, reqTime, reqNumberOfSacks, reqWeight, reqAddress, delivery_routeId) 
+      (supplierId, reqDate, reqTime, reqNumberOfSacks, reqWeight, landId, delivery_routeId) 
       VALUES (?, ?, ?, ?, ?, ?, ?)
     `;
+    
     const [result] = await db.query(query, [
       supplierId,
       reqDate,
       reqTime,
       reqNumberOfSacks,
       reqWeight,
-      reqAddress,
+      landId,
       delivery_routeId,
     ]);
 
@@ -66,28 +68,20 @@ exports.addTransportRequest = async (req, res) => {
 // Update a transport request
 exports.updateTransportRequest = async (req, res) => {
   const { requestId } = req.params;
-  const { reqDate, reqTime, reqNumberOfSacks, reqWeight, reqAddress, delivery_routeId } = req.body;
+  const { reqDate, reqTime, reqNumberOfSacks, reqWeight, landId, delivery_routeId } = req.body;
 
-  if (!reqDate || !reqTime || !reqNumberOfSacks || !reqWeight || !reqAddress || !delivery_routeId) {
+  if (!reqDate || !reqTime || !reqNumberOfSacks || !reqWeight || !landId || !delivery_routeId) {
     return res.status(400).json({ error: "Missing required fields" });
   }
 
   try {
     const query = `
       UPDATE transport_request 
-      SET reqDate = ?, reqTime = ?, reqNumberOfSacks = ?, reqWeight = ?, reqAddress = ?, delivery_routeId = ?
+      SET reqDate = ?, reqTime = ?, reqNumberOfSacks = ?, reqWeight = ?, landId = ?, delivery_routeId = ?
       WHERE requestId = ?
     `;
-    await db.query(query, [
-      reqDate,
-      reqTime,
-      reqNumberOfSacks,
-      reqWeight,
-      reqAddress,
-      delivery_routeId,
-      requestId,
-    ]);
-
+    
+    await db.query(query, [reqDate, reqTime, reqNumberOfSacks, reqWeight, landId, delivery_routeId, requestId]);
     res.status(200).json({ message: "Transport request updated successfully" });
   } catch (error) {
     console.error("Error updating transport request:", error);
@@ -114,7 +108,6 @@ exports.updateTransportRequestStatus = async (req, res) => {
     res.status(500).json({ error: "Failed to update status" });
   }
 };
-
 
 // Delete a transport request
 exports.deleteTransportRequest = async (req, res) => {
