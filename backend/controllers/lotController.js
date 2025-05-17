@@ -53,11 +53,13 @@ exports.getAvailableMadeTeaForTeaTypeCreation = async (req, res) => {
 // Create a new lot
 exports.createLot = async (req, res) => {
   const {
-    manufacturingDate, noOfBags, netWeight,
-    totalNetWeight, valuationPrice, teaTypeId,
-  } = req.body;
+  manufacturingDate, noOfBags, netWeight,
+  totalNetWeight, valuationPrice, teaTypeId,
+  notes
+} = req.body;
 
-  if (!manufacturingDate || !noOfBags || !netWeight || !totalNetWeight || !valuationPrice || !teaTypeId) {
+
+  if (!manufacturingDate || !noOfBags || !netWeight || !totalNetWeight || !valuationPrice || !teaTypeId ) {
     return res.status(400).json({ message: 'All fields are required' });
   }
 
@@ -71,14 +73,16 @@ exports.createLot = async (req, res) => {
 
     const lotNumber = await lotModel.generateLotNumber();
     await lotModel.createLot({
-      lotNumber,
-      manufacturingDate,
-      noOfBags,
-      netWeight,
-      totalNetWeight,
-      valuationPrice,
-      teaTypeId
-    });
+  lotNumber,
+  manufacturingDate,
+  noOfBags,
+  netWeight,
+  totalNetWeight,
+  valuationPrice,
+  teaTypeId,
+  notes
+});
+
 
     res.status(201).json({ message: 'Lot created successfully', lotNumber });
   } catch (error) {
@@ -91,9 +95,11 @@ exports.createLot = async (req, res) => {
 exports.updateLot = async (req, res) => {
   const { lotNumber } = req.params;
   const {
-    manufacturingDate, noOfBags, netWeight,
-    totalNetWeight, valuationPrice, teaTypeId
-  } = req.body;
+  manufacturingDate, noOfBags, netWeight,
+  totalNetWeight, valuationPrice, teaTypeId,
+  notes
+} = req.body;
+
 
   if (!manufacturingDate || !noOfBags || !netWeight || !totalNetWeight || !valuationPrice || !teaTypeId) {
     return res.status(400).json({ message: 'All fields are required' });
@@ -111,13 +117,14 @@ exports.updateLot = async (req, res) => {
     }
 
     await lotModel.updateLot(lotNumber, {
-      manufacturingDate,
-      noOfBags: Number(noOfBags),
-      netWeight: Number(netWeight),
-      totalNetWeight: Number(totalNetWeight),
-      valuationPrice: Number(valuationPrice),
-      teaTypeId: Number(teaTypeId)
-    });
+  manufacturingDate,
+  noOfBags: Number(noOfBags),
+  netWeight: Number(netWeight),
+  totalNetWeight: Number(totalNetWeight),
+  valuationPrice: Number(valuationPrice),
+  teaTypeId: Number(teaTypeId),
+  notes
+});
 
     res.status(200).json({ message: 'Lot updated successfully' });
   } catch (error) {

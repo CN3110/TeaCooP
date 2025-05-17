@@ -32,7 +32,7 @@ const BrokerValuation = {
     `, [valuationId, valuationId]);
   }, 
 
-  async getValuationsByLot(lotNumber) {
+  async getValuationsByLot(lotNumber) { 
     const [results] = await db.query(`
       SELECT 
         bv.*, 

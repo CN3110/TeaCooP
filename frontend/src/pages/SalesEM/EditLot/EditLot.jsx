@@ -17,6 +17,7 @@ const EditLot = () => {
     netWeight: "",
     totalNetWeight: "",
     valuationPrice: "",
+    notes: "",
   });
 
   const [teaTypes, setTeaTypes] = useState([]);
@@ -76,7 +77,7 @@ const EditLot = () => {
       !lotData.noOfBags ||
       !lotData.netWeight ||
       !lotData.totalNetWeight ||
-      !lotData.valuationPrice
+      !lotData.valuationPrice 
     ) {
       showAlert("Please fill in all required fields.", "error");
       return;
@@ -233,6 +234,19 @@ const EditLot = () => {
                 step="0.01"
                 required
               />
+            </div>
+            <div className="form-group">
+              <label>Notes (optional):</label>
+              <textarea
+                name="notes"
+                value={lotData.notes}
+                onChange={handleInputChange}
+                maxLength="255"
+                rows="3"
+                placeholder="Any additional details..."
+                
+              ></textarea>
+              
             </div>
           </div>
 
