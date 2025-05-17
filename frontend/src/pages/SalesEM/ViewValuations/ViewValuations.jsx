@@ -1,6 +1,16 @@
 import React, { useEffect, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import EmployeeLayout from "../../../components/EmployeeLayout/EmployeeLayout";
+import {
+  Dialog,
+  DialogTitle,
+  DialogContent,
+  DialogContentText,
+  DialogActions,
+  Button,
+  Snackbar,
+  Alert,
+} from "@mui/material";
 
 const ViewValuations = () => {
   const { lotNumber } = useParams();
@@ -9,20 +19,29 @@ const ViewValuations = () => {
   const [error, setError] = useState(null);
   const navigate = useNavigate();
 
- 
+  // Dialog state
+  const [openDialog, setOpenDialog] = useState(false);
+  const [selectedValuationId, setSelectedValuationId] = useState(null);
 
+  // Snackbar state
+  const [snackbarOpen, setSnackbarOpen] = useState(false);
+  const [snackbarMessage, setSnackbarMessage] = useState("");
+  const [snackbarSeverity, setSnackbarSeverity] = useState("success"); // "success" | "error"
 
   useEffect(() => {
     const fetchValuations = async () => {
       try {
         setLoading(true);
-        const res = await fetch(`http://localhost:3001/api/valuations/lot/${lotNumber}`);
+        const res = await fetch(
+          `http://localhost:3001/api/valuations/lot/${lotNumber}`
+        );
         if (!res.ok) {
           const errorData = await res.json();
           throw new Error(errorData.message || "Failed to fetch valuations");
         }
         const data = await res.json();
         setValuations(data);
+        setError(null);
       } catch (error) {
         setError(error.message);
         console.error("Failed to fetch valuations:", error);
@@ -34,33 +53,52 @@ const ViewValuations = () => {
     fetchValuations();
   }, [lotNumber]);
 
-  const handleConfirm = async (valuationId) => {
+  const handleOpenDialog = (valuationId) => {
+    setSelectedValuationId(valuationId);
+    setOpenDialog(true);
+  };
+
+  const handleCloseDialog = () => {
+    setOpenDialog(false);
+    setSelectedValuationId(null);
+  };
+
+  const handleConfirm = async () => {
     try {
-      
-      const employeeId = localStorage.getItem('userId'); 
-      console.log("Employee ID:", employeeId); // Debugging line     
+      const employeeId = localStorage.getItem("userId");
       if (!employeeId) {
-        alert("Employee ID not found. Please log in again.");
+        setSnackbarMessage("Employee ID not found. Please log in again.");
+        setSnackbarSeverity("error");
+        setSnackbarOpen(true);
+        handleCloseDialog();
         return;
       }
-      
-      const res = await fetch(`http://localhost:3001/api/valuations/${valuationId}/confirm`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({ employeeId: employeeId }),
-      });
+
+      const res = await fetch(
+        `http://localhost:3001/api/valuations/${selectedValuationId}/confirm`,
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({ employeeId }),
+        }
+      );
 
       if (!res.ok) {
         const errorData = await res.json();
         throw new Error(errorData.message || "Failed to confirm valuation");
       }
 
-      alert("Valuation confirmed!");
-      
-      // Reload updated data
-      const updated = await fetch(`http://localhost:3001/api/valuations/lot/${lotNumber}`);
+      setSnackbarMessage("Valuation confirmed!");
+      setSnackbarSeverity("success");
+      setSnackbarOpen(true);
+      handleCloseDialog();
+
+      // Reload updated valuations
+      const updated = await fetch(
+        `http://localhost:3001/api/valuations/lot/${lotNumber}`
+      );
       if (!updated.ok) {
         const errorData = await updated.json();
         throw new Error(errorData.message || "Failed to reload valuations");
@@ -69,26 +107,40 @@ const ViewValuations = () => {
       setValuations(data);
     } catch (error) {
       console.error("Error confirming valuation:", error);
-      alert(`Error: ${error.message}`);
+      setSnackbarMessage(`Error: ${error.message}`);
+      setSnackbarSeverity("error");
+      setSnackbarOpen(true);
+      handleCloseDialog();
     }
   };
 
-  if (loading) return (
-    <EmployeeLayout>
-      <div className="p-6">Loading valuations...</div>
-    </EmployeeLayout>
-  );
-  
-  if (error) return (
-    <EmployeeLayout>
-      <div className="p-6 text-red-500">Error: {error}</div>
-    </EmployeeLayout>
-  );
+  const handleSnackbarClose = (event, reason) => {
+    if (reason === "clickaway") {
+      return;
+    }
+    setSnackbarOpen(false);
+  };
+
+  if (loading)
+    return (
+      <EmployeeLayout>
+        <div className="p-6">Loading valuations...</div>
+      </EmployeeLayout>
+    );
+
+  if (error)
+    return (
+      <EmployeeLayout>
+        <div className="p-6 text-red-500">Error: {error}</div>
+      </EmployeeLayout>
+    );
 
   return (
     <EmployeeLayout>
       <div className="p-6">
-        <h2 className="text-xl font-bold mb-4">Valuations for Lot {lotNumber}</h2>
+        <h2 className="text-xl font-bold mb-4">
+          Valuations for Lot {lotNumber}
+        </h2>
         <button
           onClick={() => navigate(-1)}
           className="mb-4 px-3 py-1 bg-gray-300 rounded hover:bg-gray-400"
@@ -109,7 +161,9 @@ const ViewValuations = () => {
           <tbody>
             {valuations.length === 0 ? (
               <tr>
-                <td colSpan="6" className="text-center py-4">No valuations available for this lot.</td>
+                <td colSpan="6" className="text-center py-4">
+                  No valuations available for this lot.
+                </td>
               </tr>
             ) : (
               valuations.map((v) => (
@@ -129,7 +183,7 @@ const ViewValuations = () => {
                     {!v.is_confirmed && !v.is_rejected && (
                       <button
                         className="bg-blue-500 hover:bg-blue-600 text-white px-3 py-1 rounded"
-                        onClick={() => handleConfirm(v.valuation_id)}
+                        onClick={() => handleOpenDialog(v.valuation_id)}
                       >
                         Confirm
                       </button>
@@ -141,6 +195,40 @@ const ViewValuations = () => {
           </tbody>
         </table>
       </div>
+
+      {/* Confirmation Dialog */}
+      <Dialog open={openDialog} onClose={handleCloseDialog}>
+        <DialogTitle>Confirm Valuation</DialogTitle>
+        <DialogContent>
+          <DialogContentText>
+            Are you sure you want to confirm this valuation?
+          </DialogContentText>
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={handleCloseDialog} color="secondary">
+            Cancel
+          </Button>
+          <Button onClick={handleConfirm} color="primary" autoFocus>
+            Confirm
+          </Button>
+        </DialogActions>
+      </Dialog>
+
+      {/* Snackbar for alerts */}
+      <Snackbar
+        open={snackbarOpen}
+        autoHideDuration={4000}
+        onClose={handleSnackbarClose}
+        anchorOrigin={{ vertical: "top", horizontal: "center" }}
+      >
+        <Alert
+          onClose={handleSnackbarClose}
+          severity={snackbarSeverity}
+          sx={{ width: "100%" }}
+        >
+          {snackbarMessage}
+        </Alert>
+      </Snackbar>
     </EmployeeLayout>
   );
 };
