@@ -92,7 +92,7 @@ const Sprofile = () => {
   const handleUpdateProfile = async (e) => {
     e.preventDefault();
     try {
-      await axios.put(`http://localhost:3001/api/suppliers/${supplierId}`, {
+      await axios.put(`http://localhost:3001/api/suppliers/profile/${supplierId}`, {
         supplierName: supplier.supplierName,
         supplierContactNumber: supplier.supplierContactNumber,
         supplierEmail: supplier.supplierEmail,
@@ -225,7 +225,7 @@ const Sprofile = () => {
           )
         )}
 
-        <Snackbar open={snackbar.open} autoHideDuration={3000} onClose={handleCloseSnackbar} anchorOrigin={{ vertical: 'bottom', horizontal: 'right' }}>
+        <Snackbar open={snackbar.open} autoHideDuration={3000} onClose={handleCloseSnackbar} anchorOrigin={{ vertical: 'top', horizontal: 'center' }}>
           <Alert onClose={handleCloseSnackbar} severity={snackbar.severity}>
             {snackbar.message}
           </Alert>
