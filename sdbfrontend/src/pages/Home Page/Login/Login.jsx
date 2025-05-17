@@ -68,8 +68,17 @@ const Login = () => {
         backgroundRepeat: 'no-repeat'
       }}
     >
-      <Paper elevation={5} sx={{ p: 4, width: 400, backdropFilter: 'blur(6px)', backgroundColor: 'rgba(255,255,255,0.85)' }}>
-        <Typography variant="h5" mb={3} align="center">
+      <Paper
+        elevation={5}
+        sx={{
+          p: 4,
+          width: 400,
+          backdropFilter: 'blur(6px)',
+          backgroundColor: 'rgba(255,255,255,0.75)',
+          borderRadius: 3
+        }}
+      >
+        <Typography variant="h5" mb={3} align="center" sx={{ color: '#1b5e20' }}>
           Login
         </Typography>
         <form onSubmit={handleSubmit}>
@@ -98,9 +107,14 @@ const Login = () => {
           <Button
             type="submit"
             variant="contained"
-            color="primary"
             fullWidth
-            sx={{ mt: 3 }}
+            sx={{
+              mt: 3,
+              backgroundColor: '#2e7d32',
+              '&:hover': {
+                backgroundColor: '#1b5e20'
+              }
+            }}
             disabled={loading}
           >
             {loading ? <CircularProgress size={24} color="inherit" /> : 'Login'}
