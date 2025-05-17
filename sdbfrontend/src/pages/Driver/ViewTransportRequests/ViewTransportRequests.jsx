@@ -121,7 +121,7 @@ const DriverTransportRequests = () => {
                     <td>{req.reqNumberOfSacks}</td>
                     <td>{req.reqWeight}</td>
                     <td>{req.delivery_routeName}</td>
-                    <td>{req.reqAddress}</td>
+                    <td>{req.landAddress}</td>
                     <td>{req.status || "Pending"}</td>
                     <td>
                       {req.status === "done" ? (
