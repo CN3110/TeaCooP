@@ -145,6 +145,7 @@ const ViewLots = () => {
               <th>Total Net Weight (kg)</th>
               <th>Valuation Price (LKR)</th>
               <th>Notes</th>
+              <th>Current Status</th>
               <th>Actions</th>
             </tr>
           </thead>
@@ -158,6 +159,7 @@ const ViewLots = () => {
                 <td>{lot.netWeight}</td>
                 <td>{lot.totalNetWeight}</td>
                 <td>{lot.valuationPrice}</td>
+                <td>{lot.status}</td>
                 <td>{lot.notes}</td>
                 <td>
                   <div className="form-buttons">
