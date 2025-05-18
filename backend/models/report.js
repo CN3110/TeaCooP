@@ -158,3 +158,25 @@ exports.getTeaProductionReport = async (startDate, endDate) => {
   const [results] = await db.query(query, params);
   return results;
 };
+
+// Lot summary report
+exports.getLotSummaryReport = async (startDate, endDate, status) => {
+  let sql = `
+  SELECT lot.*, teatype.teaTypeName
+  FROM lot
+  JOIN teatype ON lot.teaTypeId = teatype.teaTypeId
+  WHERE 1=1
+`;
+const params = [];
+if (startDate && endDate) {
+  sql += ` AND manufacturingDate BETWEEN ? AND ?`;
+  params.push(startDate, endDate);
+}
+if (status) {
+  sql += ` AND lot.status = ?`;
+  params.push(status);
+}
+const [results] = await db.query(sql, params);
+return results;
+
+};

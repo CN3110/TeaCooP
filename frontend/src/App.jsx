@@ -48,6 +48,9 @@ import DriverRecords from "./pages/Reports/RawTeaReportPage/DriverRecords.jsx";
 import TeaPacketReport from "./pages/Reports/MadeTeaReports/TeaPacketReport.jsx";
 import MadeTeaProductionReport from "./pages/Reports/MadeTeaReports/madeTeaProductionReport.jsx";
 import DailyTeaDeliveryReport from "./pages/Reports/RawTeaReportPage/DailyTeaDeliveryReport.jsx";
+import LotSummaryReport from "./pages/Reports/MadeTeaReports/LotSummaryReport.jsx";
+
+
 const App = () => {
   return (
     
@@ -101,6 +104,7 @@ const App = () => {
             <Route path="/tea-packet-reports" element={<TeaPacketReport />} />
             <Route path="/made-tea-production-report" element={<MadeTeaProductionReport />} /> 
             <Route path="/daily-tea-delivery-report" element={<DailyTeaDeliveryReport />} />
+            <Route path="/lot-summary-report" element={<LotSummaryReport />} />
 
             {/* Admin Routes */}
             <Route path="/admin-dashboard" element={<AdminDashboard />} />

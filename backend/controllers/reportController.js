@@ -77,3 +77,14 @@ exports.getTeaProductionReport = async (req, res) => {
     });
   }
 };
+
+exports.getLotSummaryReport = async (req, res) => {
+  try {
+    const { startDate, endDate, status } = req.query;
+    const lots = await Report.getLotSummaryReport(startDate, endDate, status);
+    res.status(200).json(lots);
+  } catch (error) {
+    console.error('Error fetching lot summary report:', error);
+    res.status(500).json({ error: 'Internal server error' });
+  }
+};
