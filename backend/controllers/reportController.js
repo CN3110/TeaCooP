@@ -13,6 +13,18 @@ exports.getRawTeaReport = async (req, res) => {
   }
 };
 
+// Get all daily tea delivery summaries
+exports.getAllDailyTeaDeliverySummaries = async (req, res) => {
+  try {
+    const data = await Report.getAllDailyTeaDeliverySummaries();
+    res.status(200).json(data);
+  } catch (error) {
+    console.error('Error fetching daily tea delivery summaries:', error);
+    res.status(500).json({ error: 'Failed to fetch summary' });
+  }
+};
+
+
 // Get supplier-wise raw tea delivery records
 exports.getRawTeaRecordsOfSupplier = async (req, res) => {
   try {

@@ -19,6 +19,26 @@ exports.getAllRawTeaRecords = async () => {
   return results;
 };
 
+exports.getAllDailyTeaDeliverySummaries = async () => {
+  const sql = `
+    SELECT 
+      DATE(date) AS deliveryDate,
+      SUM(totalWeight) AS totalWeight,
+      SUM(totalSackWeight) AS totalSackWeight,
+      SUM(forWater) AS forWater,
+      SUM(forWitheredLeaves) AS forWitheredLeaves,
+      SUM(forRipeLeaves) AS forRipeLeaves,
+      SUM(greenTeaLeaves) AS greenTeaLeaves,
+      SUM(randalu) AS randalu
+    FROM delivery
+    GROUP BY DATE(date)
+    ORDER BY DATE(date) DESC
+  `;
+  const [results] = await db.query(sql);
+  return results;
+};
+
+
 exports.getRawTeaRecordsOfSupplier = async (fromDate, toDate, transport) => {
   const sql = `
     SELECT 

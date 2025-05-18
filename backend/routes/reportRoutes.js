@@ -7,5 +7,7 @@ router.get('/raw-tea', ReportController.getRawTeaReport); //get all the raw tea 
 router.get('/supplier-records', ReportController.getRawTeaRecordsOfSupplier); //get supplier wise raw delivery reocrds
 router.get('/driver-report', ReportController.getDriverReport); //get all the raw tea records of a driver by the selected date range
 router.get('/made-tea-production', ReportController.getTeaProductionReport); //// Add Tea Production Report route
+router.get('/all-daily-tea-deliveries', ReportController.getAllDailyTeaDeliverySummaries); //get all the daily tea delivery summaries
+
 
 module.exports = router;
