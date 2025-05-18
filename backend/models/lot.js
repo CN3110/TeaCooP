@@ -188,13 +188,12 @@ const getValuationById = async (valuationId) => {
 };
 
 // Update lot valuation price and status
-const updateLotValuationAndStatus = async (lotNumber, valuationPrice, status) => {
+const updateLotValuationAndStatus = async (lotNumber, status) => {
   await db.query(
     `UPDATE lot 
-     SET valuationPrice = ?, 
-         status = ? 
+     SET status = ? 
      WHERE lotNumber = ?`,
-    [valuationPrice, status, lotNumber]
+    [status, lotNumber]
   );
 };
 

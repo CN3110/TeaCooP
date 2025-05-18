@@ -224,7 +224,6 @@ exports.confirmValuation = async (req, res) => {
     // 3. Update the lot status and valuation price
     await lotModel.updateLotValuationAndStatus(
       valuation.lotNumber, 
-      valuation.valuationPrice, 
       'confirmed'
     );
 

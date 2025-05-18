@@ -163,9 +163,11 @@ exports.getTeaProductionReport = async (startDate, endDate) => {
 exports.getLotSummaryReport = async (startDate, endDate, status) => {
   let sql = `
   SELECT lot.*, teatype.teaTypeName
-  FROM lot
-  JOIN teatype ON lot.teaTypeId = teatype.teaTypeId
-  WHERE 1=1
+FROM lot
+JOIN teatype ON lot.teaTypeId = teatype.teaTypeId
+WHERE 1=1
+ORDER BY lot.lotNumber DESC;
+
 `;
 const params = [];
 if (startDate && endDate) {
@@ -180,3 +182,46 @@ const [results] = await db.query(sql, params);
 return results;
 
 };
+
+// Sold Lot Report
+exports.getSoldLotsReport = async (startDate, endDate, brokerId) => {
+  let query = `
+    SELECT 
+      lot.lotNumber,
+      broker.brokerName,
+      broker.brokerCompanyName AS brokerCompany,
+      teatype.teaTypeName,
+      lot.noOfBags,
+      lot.netWeight,
+      lot.totalNetWeight,
+      lot.valuationPrice AS employeeValuationPrice,
+      broker_valuation.valuationPrice AS brokerValuationPrice,
+      sold_lot.soldPrice,
+      sold_lot.total_sold_price,
+      sold_lot.soldDate
+    FROM sold_lot
+    JOIN lot ON sold_lot.lotNumber = lot.lotNumber
+    JOIN broker ON sold_lot.brokerId = broker.brokerId
+    JOIN teatype ON lot.teaTypeId = teatype.teaTypeId
+    LEFT JOIN broker_valuation ON lot.lotNumber = broker_valuation.lotNumber
+    WHERE lot.status = 'sold'
+  `;
+
+  const params = [];
+
+  if (startDate && endDate) {
+    query += ` AND sold_lot.soldDate BETWEEN ? AND ?`;
+    params.push(startDate, endDate);
+  }
+
+  if (brokerId) {
+    query += ` AND sold_lot.brokerId = ?`;
+    params.push(brokerId);
+  }
+
+  query += ` ORDER BY sold_lot.soldDate DESC`;
+
+  const [results] = await db.query(query, params);
+  return results;
+};
+

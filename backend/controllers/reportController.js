@@ -88,3 +88,14 @@ exports.getLotSummaryReport = async (req, res) => {
     res.status(500).json({ error: 'Internal server error' });
   }
 };
+
+exports.getSoldLotsReport = async (req, res) => {
+  try {
+    const { startDate, endDate, brokerId } = req.query;
+    const results = await Report.getSoldLotsReport(startDate, endDate, brokerId);
+    res.json(results);
+  } catch (error) {
+    console.error("Error fetching sold lots report:", error);
+    res.status(500).json({ error: "Internal Server Error" });
+  }
+};

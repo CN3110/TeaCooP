@@ -40,23 +40,25 @@ const AdminSideBar = () => {
       <div className="menu-list">
 
          <Link to="/employee-dashboard" className="item">Dashboard</Link>
-        
-                {/* Manage Deliveries Dropdown */}
+         <Link to="/report-dashboard" className="item">Generate Reports</Link> 
+           {/* Manage Notices Dropdown */}
                 <div className="dropdown">
                   <button
                     className="dropdown-btn"
-                    onClick={() => toggleDropdown("deliveries")}
+                    onClick={() => toggleDropdown("notices")}
                   >
-                    Manage Deliveries
+                    Manage Notices
                   </button>
-                  {openDropdown === "deliveries" && (
+                  {openDropdown === "notices" && (
                     <div className="dropdown-content">
-                      <Link to="/add-new-delivery-record">Add New Delivery Record</Link>
-                      <Link to="/view-delivery-records">View Delivery Records</Link>
+                      <Link to="/notice-form">Add New Notice</Link>
+                      <Link to="/notice-list">View Notices</Link>
+                      
                     </div>
                   )}
-                </div> 
+                </div>
         
+                        
                 {/* Manage Sales Dropdown */}
                 <div className="dropdown">
                   <button
@@ -74,23 +76,22 @@ const AdminSideBar = () => {
                     </div>
                   )}
                 </div>
-
-                  {/* Manage Notices Dropdown */}
+{/* Manage Deliveries Dropdown */}
                 <div className="dropdown">
                   <button
                     className="dropdown-btn"
-                    onClick={() => toggleDropdown("notices")}
+                    onClick={() => toggleDropdown("deliveries")}
                   >
-                    Manage Notices
+                    Manage Deliveries
                   </button>
-                  {openDropdown === "notices" && (
+                  {openDropdown === "deliveries" && (
                     <div className="dropdown-content">
-                      <Link to="/notice-form">Add New Notice</Link>
-                      <Link to="/notice-list">View Notices</Link>
-                      
+                      <Link to="/add-new-delivery-record">Add New Delivery Record</Link>
+                      <Link to="/view-delivery-records">View Delivery Records</Link>
                     </div>
                   )}
-                </div>
+                </div> 
+                
 
 
         

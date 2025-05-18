@@ -9,6 +9,7 @@ router.get('/driver-report', ReportController.getDriverReport); //get all the ra
 router.get('/made-tea-production', ReportController.getTeaProductionReport); //// Add Tea Production Report route
 router.get('/all-daily-tea-deliveries', ReportController.getAllDailyTeaDeliverySummaries); //get all the daily tea delivery summaries
 router.get("/lot-summary", ReportController.getLotSummaryReport);
+router.get("/sold-lots", ReportController.getSoldLotsReport);
 
 
 module.exports = router;
