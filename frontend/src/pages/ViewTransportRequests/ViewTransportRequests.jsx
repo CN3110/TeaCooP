@@ -5,11 +5,19 @@ import "./ViewTransportRequests.css";
 const ViewTransportRequests = () => {
   const [requests, setRequests] = useState([]);
   const [loading, setLoading] = useState(true);
+
   const [statusFilter, setStatusFilter] = useState("all");
   const [searchDate, setSearchDate] = useState("");
+  const [routeFilter, setRouteFilter] = useState("all");
+  const [driverFilter, setDriverFilter] = useState("all");
+
+  const [routes, setRoutes] = useState([]);
+  const [drivers, setDrivers] = useState([]);
 
   useEffect(() => {
     fetchRequests();
+    fetchRoutes();
+    fetchDrivers();
   }, []);
 
   const fetchRequests = async () => {
@@ -27,26 +35,57 @@ const ViewTransportRequests = () => {
     }
   };
 
+  const fetchRoutes = async () => {
+    try {
+      const res = await fetch("http://localhost:3001/api/deliveryRoutes");
+      const data = await res.json();
+      setRoutes(data);
+    } catch (error) {
+      console.error("Error fetching routes:", error);
+    }
+  };
+
+  const fetchDrivers = async () => {
+    try {
+      const res = await fetch("http://localhost:3001/api/drivers");
+      const data = await res.json();
+      setDrivers(data);
+    } catch (error) {
+      console.error("Error fetching drivers:", error);
+    }
+  };
+
   const filteredRequests = requests.filter((req) => {
     const matchesStatus = statusFilter === "all" || req.status === statusFilter;
 
-    if (!searchDate) return matchesStatus;
-
     const requestDate = new Date(req.reqDate).toISOString().split("T")[0];
-    return matchesStatus && requestDate === searchDate;
+    const matchesDate = !searchDate || requestDate === searchDate;
+
+    const matchesRoute = routeFilter === "all" || req.delivery_routeName === routeFilter;
+
+    const matchesDriver = driverFilter === "all" || req.driverId === driverFilter;
+
+    return matchesStatus && matchesDate && matchesRoute && matchesDriver;
   });
+
+  const totalWeight = filteredRequests.reduce(
+    (acc, req) => acc + parseFloat(req.reqWeight || 0),
+    0
+  );
 
   return (
     <EmployeeLayout>
       <div className="employee-delivery-container">
         <h2>Delivery Status Overview</h2>
 
+        <div className="summary-card">
+          <h3>Total Weight (kg)</h3>
+          <p>{totalWeight.toFixed(2)}</p>
+        </div>
+
         <div className="filter-controls">
           <label>Filter by Status:</label>
-          <select
-            value={statusFilter}
-            onChange={(e) => setStatusFilter(e.target.value)}
-          >
+          <select value={statusFilter} onChange={(e) => setStatusFilter(e.target.value)}>
             <option value="all">All</option>
             <option value="pending">Pending</option>
             <option value="done">Done</option>
@@ -59,11 +98,33 @@ const ViewTransportRequests = () => {
             onChange={(e) => setSearchDate(e.target.value)}
           />
 
+          <label style={{ marginLeft: "20px" }}>Filter by Route:</label>
+          <select value={routeFilter} onChange={(e) => setRouteFilter(e.target.value)}>
+            <option value="all">All</option>
+            {routes.map((route) => (
+              <option key={route.delivery_routeId} value={route.delivery_routeName}>
+                {route.delivery_routeName}
+              </option>
+            ))}
+          </select>
+
+          <label style={{ marginLeft: "20px" }}>Filter by Driver:</label>
+          <select value={driverFilter} onChange={(e) => setDriverFilter(e.target.value)}>
+            <option value="all">All</option>
+            {drivers.map((driver) => (
+              <option key={driver.driverId} value={driver.driverId}>
+                {driver.driverId} - {driver.driverName}
+              </option>
+            ))}
+          </select>
+
           <button
             className="clear-btn"
             onClick={() => {
               setStatusFilter("all");
               setSearchDate("");
+              setRouteFilter("all");
+              setDriverFilter("all");
             }}
           >
             Clear Filters
