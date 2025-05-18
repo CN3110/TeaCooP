@@ -198,3 +198,50 @@ exports.getAvailableLots = async (req, res) => {
     res.status(500).json({ error: "Failed to fetch available lots" });
   }
 };
+
+exports.confirmValuation = async (req, res) => {
+  const { valuationId } = req.params;
+  const { employeeId } = req.body;
+
+  if (!employeeId) {
+    return res.status(400).json({ message: 'Employee ID is required' });
+  }
+
+  try {
+    // Start transaction
+    await db.query('START TRANSACTION');
+
+    // 1. Get the valuation details first
+    const valuation = await lotModel.getValuationById(valuationId);
+    if (!valuation) {
+      await db.query('ROLLBACK');
+      return res.status(404).json({ message: 'Valuation not found' });
+    }
+
+    // 2. Confirm the valuation
+    await lotModel.confirmBrokerValuation(valuationId, employeeId);
+
+    // 3. Update the lot status and valuation price
+    await lotModel.updateLotValuationAndStatus(
+      valuation.lotNumber, 
+      valuation.valuationPrice, 
+      'confirmed'
+    );
+
+    // Commit transaction
+    await db.query('COMMIT');
+
+    res.status(200).json({ 
+      message: 'Valuation confirmed and lot status updated',
+      lotNumber: valuation.lotNumber
+    });
+  } catch (error) {
+    // Rollback on error
+    await db.query('ROLLBACK');
+    console.error("Error confirming valuation:", error);
+    res.status(500).json({ 
+      error: "Failed to confirm valuation",
+      details: error.message 
+    });
+  }
+};

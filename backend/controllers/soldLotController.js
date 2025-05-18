@@ -89,3 +89,27 @@ exports.deleteSoldPrice = async (req, res) => {
         });
     }
 };
+
+exports.addOrUpdateSoldPrice = async (req, res) => {
+  try {
+    const { lotNumber, brokerId, soldPrice } = req.body;
+    
+    // Add validation if not exists
+    if (!lotNumber || !brokerId || isNaN(soldPrice)) {
+      return res.status(400).json({ error: 'Invalid input' });
+    }
+
+    const result = await SoldLot.addOrUpdateSoldPrice(lotNumber, brokerId, soldPrice);
+    res.json({ 
+      success: true,
+      message: 'Sale recorded and lot marked as sold',
+      data: result
+    });
+  } catch (error) {
+    console.error('Error:', error);
+    res.status(500).json({ 
+      success: false,
+      error: error.message 
+    });
+  }
+};

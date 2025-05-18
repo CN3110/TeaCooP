@@ -13,4 +13,8 @@ router.post('/:lotNumber/valuation', lotController.submitBrokerValuation);
 router.put('/:lotNumber', lotController.updateLot);
 router.delete('/:lotNumber', lotController.deleteLot);
 
+router.post('/valuations/:valuationId/confirm', lotController.confirmValuation);
+router.put('/:lotNumber', lotController.updateLot);
+router.delete('/:lotNumber', lotController.deleteLot);
+
 module.exports = router;

@@ -155,6 +155,50 @@ const submitBrokerValuation = async (lotNumber, brokerId, valuationPrice) => {
   // Do NOT update lot status here!
 };
 
+
+
+const updateLotStatus = async (lotNumber, status) => {
+  const query = `
+    UPDATE lot SET
+      status = ?
+    WHERE lotNumber = ?
+  `;
+  await db.query(query, [status, lotNumber]);
+};
+
+// Confirm a broker valuation
+const confirmBrokerValuation = async (valuationId, employeeId) => {
+  await db.query(
+    `UPDATE broker_valuation 
+     SET is_confirmed = TRUE, 
+         confirmed_by = ?, 
+         confirmed_at = CURRENT_TIMESTAMP 
+     WHERE valuation_id = ?`,
+    [employeeId, valuationId]
+  );
+};
+
+// Get valuation details by ID
+const getValuationById = async (valuationId) => {
+  const [[valuation]] = await db.query(
+    `SELECT * FROM broker_valuation WHERE valuation_id = ?`,
+    [valuationId]
+  );
+  return valuation || null;
+};
+
+// Update lot valuation price and status
+const updateLotValuationAndStatus = async (lotNumber, valuationPrice, status) => {
+  await db.query(
+    `UPDATE lot 
+     SET valuationPrice = ?, 
+         status = ? 
+     WHERE lotNumber = ?`,
+    [valuationPrice, status, lotNumber]
+  );
+};
+
+
 module.exports = {
   generateLotNumber,
   getAllLots,
@@ -166,4 +210,8 @@ module.exports = {
   getAvailableLotsForBroker,
   getAvailableLots,
   submitBrokerValuation,
+  updateLotStatus,
+  confirmBrokerValuation,       
+  getValuationById,
+  updateLotValuationAndStatus
 };

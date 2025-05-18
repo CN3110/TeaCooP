@@ -46,28 +46,46 @@ const SoldPriceManagement = () => {
   };
 
   const handleSavePrice = async (lotNumber, price) => {
-    try {
-      if (!brokerId) throw new Error('User not authenticated');
-      if (!price || isNaN(price) || parseFloat(price) <= 0) {
-        throw new Error('Please enter a valid price greater than 0');
-      }
-
-      const response = await axios.post('http://localhost:3001/api/soldLots', {
-        lotNumber,
-        brokerId,
-        soldPrice: parseFloat(price)
-      });
-
-      setSuccessMessage(response.data.message || 'Price saved successfully!');
-      setTimeout(() => setSuccessMessage(''), 3000);
-      setEditingLot(null);
-      fetchConfirmedLots();
-    } catch (err) {
-      console.error('Save error:', err);
-      setError(err.response?.data?.message || err.message || 'Error saving price. Please try again.');
-      setTimeout(() => setError(''), 3000);
+  try {
+    if (!brokerId) throw new Error('User not authenticated');
+    
+    const priceValue = parseFloat(price);
+    if (!price || isNaN(priceValue) || priceValue <= 0) {
+      throw new Error('Please enter a valid price greater than 0');
     }
-  };
+
+    setLoading(true);
+    setError(null);
+
+    const response = await axios.post('http://localhost:3001/api/soldLots', {
+      lotNumber,
+      brokerId,
+      soldPrice: priceValue
+    });
+
+    if (response.data.success) {
+      setSuccessMessage(response.data.message);
+      
+      // Update local state to reflect the sold status
+      setConfirmedLots(prev =>
+        prev.map(item =>
+          item.lotNumber === lotNumber
+            ? { ...item, soldPrice: priceValue, status: 'sold' }
+            : item
+        )
+      );
+    } else {
+      throw new Error(response.data.message || 'Failed to update status');
+    }
+
+    setEditingLot(null);
+  } catch (err) {
+    console.error('Save error:', err);
+    setError(err.response?.data?.message || err.message || 'Error saving price');
+  } finally {
+    setLoading(false);
+  }
+};
 
   const handleInputChange = (lotNumber, value) => {
     setConfirmedLots(prev =>
@@ -166,7 +184,7 @@ const SoldPriceManagement = () => {
                               <button
                                 onClick={() => handleSavePrice(lot.lotNumber, lot.soldPrice)}
                                 className="btn btn-success btn-sm me-2"
-                                disabled={!lot.soldPrice || isNaN(lot.soldPrice) || parseFloat(lot.soldPrice) <= 0}
+                                
                               >
                                 Save
                               </button>
