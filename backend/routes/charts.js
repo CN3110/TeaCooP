@@ -1,7 +1,11 @@
 const express = require('express');
 const router = express.Router();
 const report = require('../models/report');
-const db = require('../config/database'); // Add this line to import db
+const db = require('../config/database'); 
+const Supplier = require('../models/supplier');
+const Driver = require('../models/driver');
+const Broker = require('../models/broker');
+const Employee = require('../models/employee');
 
 router.get('/daily-tea-summary', async (req, res) => {
   try {
@@ -139,6 +143,27 @@ router.get('/sold-lot-chart', async (req, res) => {
       error: 'Failed to fetch sold lot chart data',
       details: err.message 
     });
+  }
+});
+
+//to get the count of suppliers, drivers, brokers and employees
+router.get('/counts', async (req, res) => {
+  try {
+    // Get counts in parallel
+    const [suppliers, drivers, brokers, employees] = await Promise.all([
+      Supplier.getAllSuppliers ? Supplier.getAllSuppliers() : [], // Use your actual function name
+      Driver.getAllDrivers ? Driver.getAllDrivers() : [],
+      Broker.getAllBrokers ? Broker.getAllBrokers() : [],
+      Employee.getAllEmployees ? Employee.getAllEmployees() : [],
+    ]);
+    res.json({
+      suppliers: suppliers.length,
+      drivers: drivers.length,
+      brokers: brokers.length,
+      employees: employees.length,
+    });
+  } catch (err) {
+    res.status(500).json({ error: 'Failed to fetch summary counts', details: err.message });
   }
 });
 

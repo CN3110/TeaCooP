@@ -36,6 +36,13 @@ class Supplier {
     }
   }
 
+  // At the bottom, before module.exports
+static async getAllSuppliers() {
+  const [rows] = await db.query('SELECT * FROM supplier');
+  return rows;
+}
+
+
   // Verify supplier credentials (for login)
   static async verifySupplierCredentials(supplierId, password) {
     try {
