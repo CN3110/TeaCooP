@@ -254,7 +254,7 @@ const ViewDeliveryRecords = () => {
               currentRecords.map((delivery) => (
                 <tr key={delivery.deliveryId}>
                   <td>{delivery.supplierId}</td>
-                  <td>{delivery.date}</td>
+                  <td>{new Date(delivery.date).toISOString().split('T')[0]}</td>
                   <td>{delivery.transport}</td>
                   <td>{delivery.route}</td>
                   <td>{delivery.totalWeight}</td>
