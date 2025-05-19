@@ -64,56 +64,56 @@ const ViewValuations = () => {
   };
 
   const handleConfirm = async () => {
-  try {
-    const employeeId = localStorage.getItem("userId");
-    if (!employeeId) {
-      setSnackbarMessage("Employee ID not found. Please log in again.");
+    try {
+      const employeeId = localStorage.getItem("userId");
+      if (!employeeId) {
+        setSnackbarMessage("Employee ID not found. Please log in again.");
+        setSnackbarSeverity("error");
+        setSnackbarOpen(true);
+        handleCloseDialog();
+        return;
+      }
+
+      // Confirm the valuation (now handles both confirmation and status update)
+      const res = await fetch(
+        `http://localhost:3001/api/lots/valuations/${selectedValuationId}/confirm`,
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({ employeeId }),
+        }
+      );
+
+      if (!res.ok) {
+        const errorData = await res.json();
+        throw new Error(errorData.message || "Failed to confirm valuation");
+      }
+
+      setSnackbarMessage("Valuation confirmed and lot status updated!");
+      setSnackbarSeverity("success");
+      setSnackbarOpen(true);
+      handleCloseDialog();
+
+      // Reload updated valuations
+      const updated = await fetch(
+        `http://localhost:3001/api/valuations/lot/${lotNumber}`
+      );
+      if (!updated.ok) {
+        const errorData = await updated.json();
+        throw new Error(errorData.message || "Failed to reload valuations");
+      }
+      const data = await updated.json();
+      setValuations(data);
+    } catch (error) {
+      console.error("Error confirming valuation:", error);
+      setSnackbarMessage(`Error: ${error.message}`);
       setSnackbarSeverity("error");
       setSnackbarOpen(true);
       handleCloseDialog();
-      return;
     }
-
-    // Confirm the valuation (now handles both confirmation and status update)
-    const res = await fetch(
-      `http://localhost:3001/api/lots/valuations/${selectedValuationId}/confirm`,
-      {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({ employeeId }),
-      }
-    );
-
-    if (!res.ok) {
-      const errorData = await res.json();
-      throw new Error(errorData.message || "Failed to confirm valuation");
-    }
-
-    setSnackbarMessage("Valuation confirmed and lot status updated!");
-    setSnackbarSeverity("success");
-    setSnackbarOpen(true);
-    handleCloseDialog();
-
-    // Reload updated valuations
-    const updated = await fetch(
-      `http://localhost:3001/api/valuations/lot/${lotNumber}`
-    );
-    if (!updated.ok) {
-      const errorData = await updated.json();
-      throw new Error(errorData.message || "Failed to reload valuations");
-    }
-    const data = await updated.json();
-    setValuations(data);
-  } catch (error) {
-    console.error("Error confirming valuation:", error);
-    setSnackbarMessage(`Error: ${error.message}`);
-    setSnackbarSeverity("error");
-    setSnackbarOpen(true);
-    handleCloseDialog();
-  }
-};
+  };
   const handleSnackbarClose = (event, reason) => {
     if (reason === "clickaway") {
       return;
@@ -176,18 +176,19 @@ const ViewValuations = () => {
                     {v.is_confirmed
                       ? "✅ Confirmed"
                       : v.is_rejected
-                      ? "❌ Rejected"
-                      : "Pending"}
+                      ? "❌ Rejected" : ""}
                   </td>
                   <td className="border px-4 py-2">
-                    {!v.is_confirmed && !v.is_rejected && (
-                      <button
-                        className="bg-blue-500 hover:bg-blue-600 text-white px-3 py-1 rounded"
-                        onClick={() => handleOpenDialog(v.valuation_id)}
-                      >
-                        Confirm
-                      </button>
-                    )}
+                    {!v.is_confirmed && !v.is_rejected && !valuations.some(val => val.is_confirmed) && (
+  <button
+    className="bg-blue-500 hover:bg-blue-600 text-white px-3 py-1 rounded"
+    onClick={() => handleOpenDialog(v.valuation_id)}
+  >
+    Confirm
+  </button>
+)}
+
+                    
                   </td>
                 </tr>
               ))
