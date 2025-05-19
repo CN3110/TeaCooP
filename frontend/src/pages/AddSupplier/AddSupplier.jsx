@@ -167,7 +167,7 @@ const AddSupplier = () => {
 
       if (response.ok) {
         const result = await response.json();
-        showAlert(`Supplier ${result.supplierId} - ${result.supplierName} added successfully!`, "success");
+        showAlert(`Supplier ${result.supplierId} - ${result.name} added successfully!`, "success");
         setTimeout(() => navigate("/view-suppliers"), 3000);
       } else {
         const errorData = await response.json();

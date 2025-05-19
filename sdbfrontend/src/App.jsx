@@ -50,7 +50,7 @@ const App = () => {
           <Route path="/driver-notices" element={<DriverNotices />} />
 
           {/* Broker Routes */}
-          <Route path="/broker-dashboard" element={<BrokerDashboard />} />
+          <Route path="/broker-dashboard" element={<BrokerNotices />} />
           <Route path="/broker-profile" element={<BProfile />} />
           <Route path="/broker-view-new-lots" element={<ViewNewLots />} />
           <Route path="/broker-my-valuations" element={<BrokerMyValuations />} />

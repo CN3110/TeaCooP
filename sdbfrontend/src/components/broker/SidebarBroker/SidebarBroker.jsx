@@ -50,9 +50,9 @@ const SidebarBroker = () => {
       <h2>Broker Panel</h2>
       <ul className="nav flex-column">
         <li className="nav-item">
-          <Link to="/broker-dashboard" className="nav-link">
+          {/*<Link to="/broker-dashboard" className="nav-link">
             <DashboardIcon /> Dashboard
-          </Link>
+          </Link>*/}
         </li>
         <li className="nav-item">
           <Link to="/broker-notices" className="nav-link">
