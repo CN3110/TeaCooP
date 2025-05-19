@@ -5,6 +5,7 @@ import DatePicker from 'react-datepicker';
 import 'react-datepicker/dist/react-datepicker.css';
 import './TeaProductionSummary.css';
 import ArrowBack from '@mui/icons-material/ArrowBack';
+import EmployeeLayout from '../../components/EmployeeLayout/EmployeeLayout';
 import {
   Card,
   CardContent,
@@ -106,6 +107,7 @@ const TeaProductionSummary = () => {
   }
 
   return (
+    <EmployeeLayout>
     <div className="page-wrapper">
         <div className="back-button">
       <Button
@@ -235,6 +237,8 @@ const TeaProductionSummary = () => {
 </Card>
     
         </div>
+            </EmployeeLayout>
+
   );
 };
 
