@@ -66,11 +66,11 @@ const SoldLotChart = () => {
           </Select>
         </FormControl>
         <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
-          <Box sx={{ width: 16, height: 16, bgcolor: '#36A2EB', borderRadius: '50%' }} />
+          <Box sx={{ width: 16, height: 16, bgcolor: '#FF69B4', borderRadius: '50%' }} />
           <Typography variant="body2">Sold Price</Typography>
-          <Box sx={{ width: 16, height: 16, bgcolor: '#FF9F40', borderRadius: '50%' }} />
+          <Box sx={{ width: 16, height: 16, bgcolor: '#006400', borderRadius: '50%' }} />
           <Typography variant="body2">Employee Valuation</Typography>
-          <Box sx={{ width: 16, height: 16, bgcolor: '#9966FF', borderRadius: '50%' }} />
+          <Box sx={{ width: 16, height: 16, bgcolor: '#90EE90', borderRadius: '50%' }} />
           <Typography variant="body2">Broker Valuation</Typography>
         </Box>
       </Box>
@@ -88,9 +88,9 @@ const SoldLotChart = () => {
           <BarChart
             xAxis={[{ data: xLabels, label: 'Lot Number' }]}
             series={[
-              { data: soldPrices, label: 'Sold Price (Rs)', color: '#36A2EB' },
-              { data: employeeValuations, label: 'Employee Valuation (Rs)', color: '#FF9F40' },
-              { data: brokerValuations, label: 'Broker Valuation (Rs)', color: '#9966FF' },
+              { data: soldPrices, label: 'Sold Price (Rs)', color: '#FF69B4' }, // Pink
+              { data: employeeValuations, label: 'Employee Valuation (Rs)', color: '#006400' }, // Dark Green
+              { data: brokerValuations, label: 'Broker Valuation (Rs)', color: '#90EE90' }, // Light Green
             ]}
             height={500}
             margin={{ top: 40, bottom: 80, left: 80, right: 40 }}

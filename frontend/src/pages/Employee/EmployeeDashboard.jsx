@@ -1,101 +1,88 @@
 import React, { useEffect, useState } from 'react';
 import axios from 'axios';
-import EmployeeLayout from '../../components/EmployeeLayout/EmployeeLayout'; 
-import ProductionVsRawTeaChart from '../../components/Charts/ProductionVsRawTeaChart'; 
+import DashboardSummaryCards from '../../components/Charts/DashboardSummaryCards';
+import ProductionVsRawTeaChart from '../../components/Charts/ProductionVsRawTeaChart';
 import SoldLotChart from '../../components/Charts/SoldLotChart';
 import AvailableTeaTypeStockChart from '../../components/Charts/AvailableTeaTypeStockChart';
-import DashboardSummaryCards from '../../components/Charts/DashboardSummaryCards';
+import EmployeeLayout from '../../components/EmployeeLayout/EmployeeLayout';
+
+import ChartCard from '../../components/Charts/ChartCard';
 
 const EmployeeDashboard = () => {
   const [summary, setSummary] = useState({
-    totalDeliveries: 0,
-    totalRawTeaWeight: 0,
-    totalProduction: 0,
+    suppliers: 0,
+    drivers: 0,
+    brokers: 0,
+    employees: 0
   });
   const [chartData, setChartData] = useState([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    const loadReports = async () => {
+    const loadDashboardData = async () => {
       try {
         setLoading(true);
-        const productionVsRawTea = await axios.get('http://localhost:3001/api/charts/production-vs-raw-tea');
-        const data = productionVsRawTea.data || [];
-
-        const dailySupplierData = await axios.get('http://localhost:3001/api/charts/daily-tea-summary');
         
-        // Calculate totals
-        const totalWeight = data.reduce((acc, cur) => acc + (cur.rawTeaWeight || 0), 0);
-        const totalProd = data.reduce((acc, cur) => acc + (cur.teaProduced || 0), 0);
-
-        setSummary({
-          totalDeliveries: data.length,
-          totalRawTeaWeight: totalWeight,
-          totalProduction: totalProd,
-        });
-
-        setChartData(data);
+        // Fetch data in parallel
+        const [countsResponse, productionResponse] = await Promise.all([
+          axios.get('http://localhost:3001/api/charts/counts'),
+          axios.get('http://localhost:3001/api/charts/production-vs-raw-tea')
+        ]);
+        
+        setSummary(countsResponse.data);
+        setChartData(productionResponse.data || []);
       } catch (err) {
-        console.error('Error loading reports:', err);
+        console.error('Error loading dashboard data:', err);
       } finally {
         setLoading(false);
       }
     };
 
-    loadReports();
+    loadDashboardData();
   }, []);
 
   return (
     <EmployeeLayout>
-      <div className="p-6 bg-gray-50 min-h-screen">
-        <div className="max-w-7xl mx-auto">
-          <h1 className="text-3xl font-bold text-gray-800 mb-2">Employee Dashboard</h1>
-          <p className="text-gray-600 mb-6">Overview of tea production and inventory</p>
+    <div className="min-h-screen bg-gray-50">
+      <div className="max-w-7xl mx-auto p-4 sm:p-6">
+        <div className="flex flex-col md:flex-row justify-between items-center mb-6">
+          <div>
+            <h1 className="text-2xl sm:text-3xl font-bold text-gray-800">Dashboard</h1>
+           
+          </div>
           
-          {!loading && (
-            <>
-              {/* Summary Cards - Top Row */}
-              <div className="mb-8">
-                <DashboardSummaryCards />
-              </div>
-              
-              {/* Charts Grid - 2x2 Layout */}
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                {/* First Row */}
-                <div className="bg-white p-6 rounded-lg shadow-md border border-gray-200">
-                  <h2 className="text-xl font-semibold text-gray-700 mb-4">Production vs Raw Tea</h2>
-                  <div className="h-80">
-                    <ProductionVsRawTeaChart data={chartData} />
-                  </div>
-                </div>
-                
-                <div className="bg-white p-6 rounded-lg shadow-md border border-gray-200">
-                  <h2 className="text-xl font-semibold text-gray-700 mb-4">Sold Lots</h2>
-                  <div className="h-80">
-                    <SoldLotChart /> 
-                  </div>
-                </div>
-                
-                {/* Second Row */}
-                <div className="bg-white p-6 rounded-lg shadow-md border border-gray-200">
-                  <h2 className="text-xl font-semibold text-gray-700 mb-4">Available Tea Stock</h2>
-                  <div className="h-80">
-                    <AvailableTeaTypeStockChart />
-                  </div>
-                </div>
-                
-                {/* Optional: Add another chart or component here if needed */}
-                <div className="bg-white p-6 rounded-lg shadow-md border border-gray-200">
-                  <h2 className="text-xl font-semibold text-gray-700 mb-4">Performance Metrics</h2>
-                  <div className="h-80 flex items-center justify-center text-gray-500">
-                    <p>Additional metrics or charts can be added here</p>
-                  </div>
-                </div>
-              </div>
-            </>
-          )}
         </div>
+
+        {loading ? (
+          <div className="flex justify-center items-center h-96">
+            <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-indigo-500"></div>
+          </div>
+        ) : (
+          <>
+            {/* Summary Cards */}
+            <DashboardSummaryCards summary={summary} />
+
+            {/* Chart Grid - 2x2 Layout */}
+            
+              {/* First Row */}
+              <ChartCard>
+                <ProductionVsRawTeaChart data={chartData} />
+              </ChartCard>
+              <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+              <ChartCard>
+                <SoldLotChart />
+              </ChartCard>
+              
+              {/* Second Row */}
+              <ChartCard>
+                <AvailableTeaTypeStockChart />
+              </ChartCard>
+              
+            </div>
+          </>
+        )}
       </div>
+    </div>
     </EmployeeLayout>
   );
 };
