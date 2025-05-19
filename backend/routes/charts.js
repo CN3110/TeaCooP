@@ -1,13 +1,15 @@
 const express = require('express');
 const router = express.Router();
-const report = require('../models/report'); 
+const report = require('../models/report');
+const db = require('../config/database'); // Add this line to import db
 
 router.get('/daily-tea-summary', async (req, res) => {
   try {
     const result = await report.getAllDailyTeaDeliverySummaries();
     res.json(result);
   } catch (err) {
-    res.status(500).json({ error: 'Failed to fetch daily tea summary' });
+    console.error('Error in daily-tea-summary:', err);
+    res.status(500).json({ error: 'Failed to fetch daily tea summary', details: err.message });
   }
 });
 
@@ -17,7 +19,8 @@ router.get('/driver-performance', async (req, res) => {
     const result = await report.getDriverReport(route, startDate, endDate);
     res.json(result);
   } catch (err) {
-    res.status(500).json({ error: 'Failed to fetch driver performance' });
+    console.error('Error in driver-performance:', err);
+    res.status(500).json({ error: 'Failed to fetch driver performance', details: err.message });
   }
 });
 
@@ -27,7 +30,8 @@ router.get('/supplier-raw-tea', async (req, res) => {
     const result = await report.getRawTeaRecordsOfSupplier(fromDate, toDate, transport);
     res.json(result);
   } catch (err) {
-    res.status(500).json({ error: 'Failed to fetch supplier raw tea data' });
+    console.error('Error in supplier-raw-tea:', err);
+    res.status(500).json({ error: 'Failed to fetch supplier raw tea data', details: err.message });
   }
 });
 
@@ -37,10 +41,10 @@ router.get('/tea-production', async (req, res) => {
     const result = await report.getTeaProductionReport(startDate, endDate);
     res.json(result);
   } catch (err) {
-    res.status(500).json({ error: 'Failed to fetch tea production data' });
+    console.error('Error in tea-production:', err);
+    res.status(500).json({ error: 'Failed to fetch tea production data', details: err.message });
   }
 });
-
 
 router.get('/production-vs-raw-tea', async (req, res) => {
   try {
@@ -87,15 +91,15 @@ router.get('/production-vs-raw-tea', async (req, res) => {
 
     rawTeaData.forEach(row => {
       const date = row.date;
-      map[date] = { date, rawTeaWeight: row.rawTeaWeight, teaProduced: 0 };
+      map[date] = { date, rawTeaWeight: row.rawTeaWeight || 0, teaProduced: 0 };
     });
 
     teaProductionData.forEach(row => {
       const date = row.date;
       if (!map[date]) {
-        map[date] = { date, rawTeaWeight: 0, teaProduced: row.teaProduced };
+        map[date] = { date, rawTeaWeight: 0, teaProduced: row.teaProduced || 0 };
       } else {
-        map[date].teaProduced = row.teaProduced;
+        map[date].teaProduced = row.teaProduced || 0;
       }
     });
 
@@ -103,11 +107,39 @@ router.get('/production-vs-raw-tea', async (req, res) => {
     res.json(result);
 
   } catch (err) {
-    console.error(err);
-    res.status(500).json({ error: 'Failed to fetch Tea Production vs Raw Tea Over Time data' });
+    console.error('Error in production-vs-raw-tea:', err);
+    res.status(500).json({ 
+      error: 'Failed to fetch Tea Production vs Raw Tea Over Time data',
+      details: err.message 
+    });
   }
 });
 
+router.get('/sold-lot-chart', async (req, res) => {
+  try {
+    const { startDate, endDate, brokerId, teaType } = req.query;
+    // Note: The model function only accepts startDate, endDate, and brokerId
+    const soldLots = await report.getSoldLotsReport(startDate, endDate, brokerId);
 
+    // Filter by teaType on the API side if needed
+    const chartData = soldLots
+      .filter(lot => !teaType || lot.teaTypeName === teaType)
+      .map(lot => ({
+        lotNumber: lot.lotNumber,
+        soldPrice: lot.soldPrice,
+        teaType: lot.teaTypeName,
+        employeeValuationPrice: lot.employeeValuationPrice,
+        brokerValuationPrice: lot.brokerValuationPrice || null // Handle potential undefined
+      }));
+
+    res.json(chartData);
+  } catch (err) {
+    console.error('Error in sold-lot-chart:', err);
+    res.status(500).json({ 
+      error: 'Failed to fetch sold lot chart data',
+      details: err.message 
+    });
+  }
+});
 
 module.exports = router;

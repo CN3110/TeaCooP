@@ -1,8 +1,8 @@
 import React, { useEffect, useState } from 'react';
 import axios from 'axios';
-import ProductionVsRawTeaChart from '../../components/Charts/ProductionVsRawTeaChart';
-import DailyRawTeaChart from '../../components/Charts/DailyRawTeaChart';
-import EmployeeLayout from '../../components/EmployeeLayout/EmployeeLayout';  
+import EmployeeLayout from '../../components/EmployeeLayout/EmployeeLayout'; 
+import ProductionVsRawTeaChart from '../../components/Charts/ProductionVsRawTeaChart'; 
+import SoldLotChart from '../../components/Charts/SoldLotChart';
 
 const EmployeeDashboard = () => {
   const [summary, setSummary] = useState({
@@ -48,14 +48,13 @@ const EmployeeDashboard = () => {
       <div className="p-6 bg-gray-50 min-h-screen">
         <h1 className="text-3xl font-bold mb-6">Employee Dashboard</h1>
         
-        {loading ? (
-          <div className="text-center py-8">Loading data...</div>
-        ) : (
-          <>
-            {/* <DashboardCards summary={summary} /> */}
-            <ProductionVsRawTeaChart data={chartData} />
-          </>
-        )}
+        {!loading && (
+  <>
+    {/* <DashboardCards summary={summary} /> */}
+    <ProductionVsRawTeaChart data={chartData} />
+    <SoldLotChart/> 
+  </>
+)}
       </div>
     </EmployeeLayout>
   );

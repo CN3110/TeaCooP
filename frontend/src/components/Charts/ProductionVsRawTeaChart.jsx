@@ -31,7 +31,7 @@ const ProductionVsRawTeaChart = ({ data }) => {
 
   return (
     <div className="bg-white p-4 rounded-2xl shadow-md mt-6">
-      <h2 className="text-xl font-bold mb-4">Tea Production vs Raw Tea Over Time</h2>
+      <h2 className="text-xl font-bold mb-4">Tea Production vs Raw Tea Over the Date</h2>
       {chartData.length > 0 ? (
         <ResponsiveContainer width="100%" height={300}>
           <LineChart data={chartData}>
@@ -47,6 +47,7 @@ const ProductionVsRawTeaChart = ({ data }) => {
               name="Raw Tea Weight (kg)"
               dot={false}
               activeDot={{ r: 8 }}
+              strokeWidth={4}
             />
             <Line
               type="monotone"
@@ -54,6 +55,7 @@ const ProductionVsRawTeaChart = ({ data }) => {
               stroke="#8884d8"
               name="Production Weight (kg)"
               dot={false}
+              strokeWidth={4}
             />
           </LineChart>
         </ResponsiveContainer>
