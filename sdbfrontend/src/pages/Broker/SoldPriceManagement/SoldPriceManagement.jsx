@@ -1,6 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import BrokerLayout from '../../../components/broker/BrokerLayout/BrokerLayout';
+import Pagination from '@mui/material/Pagination';
+import Stack from '@mui/material/Stack';
 
 const SoldPriceManagement = () => {
   const [confirmedLots, setConfirmedLots] = useState([]);
@@ -8,6 +10,8 @@ const SoldPriceManagement = () => {
   const [error, setError] = useState(null);
   const [successMessage, setSuccessMessage] = useState('');
   const [editingLot, setEditingLot] = useState(null);
+  const [currentPage, setCurrentPage] = useState(1);
+  const itemsPerPage = 5;
 
   const brokerId = localStorage.getItem('userId');
 
@@ -46,46 +50,45 @@ const SoldPriceManagement = () => {
   };
 
   const handleSavePrice = async (lotNumber, price) => {
-  try {
-    if (!brokerId) throw new Error('User not authenticated');
-    
-    const priceValue = parseFloat(price);
-    if (!price || isNaN(priceValue) || priceValue <= 0) {
-      throw new Error('Please enter a valid price greater than 0');
+    try {
+      if (!brokerId) throw new Error('User not authenticated');
+
+      const priceValue = parseFloat(price);
+      if (!price || isNaN(priceValue) || priceValue <= 0) {
+        throw new Error('Please enter a valid price greater than 0');
+      }
+
+      setLoading(true);
+      setError(null);
+
+      const response = await axios.post('http://localhost:3001/api/soldLots', {
+        lotNumber,
+        brokerId,
+        soldPrice: priceValue
+      });
+
+      if (response.data.success) {
+        setSuccessMessage(response.data.message);
+
+        setConfirmedLots(prev =>
+          prev.map(item =>
+            item.lotNumber === lotNumber
+              ? { ...item, soldPrice: priceValue, status: 'sold' }
+              : item
+          )
+        );
+      } else {
+        throw new Error(response.data.message || 'Failed to update status');
+      }
+
+      setEditingLot(null);
+    } catch (err) {
+      console.error('Save error:', err);
+      setError(err.response?.data?.message || err.message || 'Error saving price');
+    } finally {
+      setLoading(false);
     }
-
-    setLoading(true);
-    setError(null);
-
-    const response = await axios.post('http://localhost:3001/api/soldLots', {
-      lotNumber,
-      brokerId,
-      soldPrice: priceValue
-    });
-
-    if (response.data.success) {
-      setSuccessMessage(response.data.message);
-      
-      // Update local state to reflect the sold status
-      setConfirmedLots(prev =>
-        prev.map(item =>
-          item.lotNumber === lotNumber
-            ? { ...item, soldPrice: priceValue, status: 'sold' }
-            : item
-        )
-      );
-    } else {
-      throw new Error(response.data.message || 'Failed to update status');
-    }
-
-    setEditingLot(null);
-  } catch (err) {
-    console.error('Save error:', err);
-    setError(err.response?.data?.message || err.message || 'Error saving price');
-  } finally {
-    setLoading(false);
-  }
-};
+  };
 
   const handleInputChange = (lotNumber, value) => {
     setConfirmedLots(prev =>
@@ -116,6 +119,12 @@ const SoldPriceManagement = () => {
     fetchConfirmedLots();
   }, []);
 
+  // Pagination logic
+  const totalPages = Math.ceil(confirmedLots.length / itemsPerPage);
+  const indexOfLastItem = currentPage * itemsPerPage;
+  const indexOfFirstItem = indexOfLastItem - itemsPerPage;
+  const currentLots = confirmedLots.slice(indexOfFirstItem, indexOfLastItem);
+
   if (loading) {
     return (
       <BrokerLayout>
@@ -136,7 +145,6 @@ const SoldPriceManagement = () => {
         <h3>Manage Sold Prices</h3>
         <p>Enter the sold prices for your confirmed lots below.</p>
         <div className="card shadow">
-          
           <div className="card-body">
 
             {error && <div className="alert alert-danger">{error}</div>}
@@ -159,7 +167,7 @@ const SoldPriceManagement = () => {
                     </tr>
                   </thead>
                   <tbody>
-                    {confirmedLots.map((lot) => (
+                    {currentLots.map((lot) => (
                       <tr key={lot.lotNumber}>
                         <td>{lot.lotNumber}</td>
                         <td>{lot.teaTypeName || 'N/A'}</td>
@@ -174,7 +182,7 @@ const SoldPriceManagement = () => {
                             min="0"
                             step="0.01"
                             placeholder="Enter price"
-                            disabled={editingLot !== lot.lotNumber && lot.soldPrice} //meka disalbe wenwa input filed ekata eka nunber ekk add unu gmn
+                            disabled={editingLot !== lot.lotNumber && lot.soldPrice}
                           />
                         </td>
                         <td>{lot.totalSoldPrice || '-'}</td>
@@ -184,7 +192,6 @@ const SoldPriceManagement = () => {
                               <button
                                 onClick={() => handleSavePrice(lot.lotNumber, lot.soldPrice)}
                                 className="btn btn-success btn-sm me-2"
-                                
                               >
                                 Save
                               </button>
@@ -205,6 +212,21 @@ const SoldPriceManagement = () => {
                   </tbody>
                 </table>
               </div>
+            )}
+
+            {/* Material UI Pagination */}
+            {totalPages > 1 && (
+              <Stack spacing={2} justifyContent="center" alignItems="center" mt={3}>
+                <Pagination
+                  count={totalPages}
+                  page={currentPage}
+                  onChange={(event, value) => setCurrentPage(value)}
+                  color="primary"
+                  shape="rounded"
+                  showFirstButton
+                  showLastButton
+                />
+              </Stack>
             )}
 
           </div>

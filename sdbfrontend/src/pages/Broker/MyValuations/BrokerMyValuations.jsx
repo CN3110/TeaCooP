@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import BrokerLayout from "../../../components/broker/BrokerLayout/BrokerLayout";
-import { Table, Badge, Button, Modal, Form, Alert } from "react-bootstrap";
+import { Table, Badge, Button, Modal, Form, Alert, Pagination } from "react-bootstrap";
 import { FaEdit, FaTrash } from "react-icons/fa";
 import axios from "axios";
 
@@ -9,17 +9,21 @@ const BrokerMyValuations = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [brokerId, setBrokerId] = useState("");
-  
-  // For edit functionality
+
+  // Edit modal states
   const [showEditModal, setShowEditModal] = useState(false);
   const [currentValuation, setCurrentValuation] = useState(null);
   const [editPrice, setEditPrice] = useState("");
   const [editError, setEditError] = useState("");
   const [editSuccess, setEditSuccess] = useState("");
-  
-  // For delete functionality
+
+  // Delete modal states
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [valuationToDelete, setValuationToDelete] = useState(null);
+
+  // Pagination
+  const [currentPage, setCurrentPage] = useState(1);
+  const itemsPerPage = 5;
 
   useEffect(() => {
     const loggedBrokerId = localStorage.getItem("userId");
@@ -35,10 +39,7 @@ const BrokerMyValuations = () => {
   const fetchMyValuations = async (brokerId) => {
     try {
       setLoading(true);
-      
-      // Fetch only this broker's valuations using the dedicated endpoint
       const res = await axios.get(`http://localhost:3001/api/valuations/broker/${brokerId}`);
-      
       setValuations(res.data);
       setLoading(false);
     } catch (err) {
@@ -57,13 +58,8 @@ const BrokerMyValuations = () => {
     });
   };
 
-  // Handle edit button click
   const handleEditClick = (valuation) => {
-    // Don't allow editing confirmed valuations
-    if (valuation.is_confirmed) {
-      return;
-    }
-    
+    if (valuation.is_confirmed) return;
     setCurrentValuation(valuation);
     setEditPrice(valuation.valuationPrice);
     setEditError("");
@@ -71,18 +67,12 @@ const BrokerMyValuations = () => {
     setShowEditModal(true);
   };
 
-  // Handle delete button click
   const handleDeleteClick = (valuation) => {
-    // Don't allow deleting confirmed valuations
-    if (valuation.is_confirmed) {
-      return;
-    }
-    
+    if (valuation.is_confirmed) return;
     setValuationToDelete(valuation);
     setShowDeleteModal(true);
   };
 
-  // Submit edit changes
   const handleEditSubmit = async () => {
     if (!editPrice || isNaN(editPrice) || editPrice <= 0) {
       setEditError("Please enter a valid price.");
@@ -91,66 +81,71 @@ const BrokerMyValuations = () => {
 
     try {
       await axios.put(`http://localhost:3001/api/valuations/${currentValuation.valuation_id}`, {
-        valuationPrice: parseFloat(editPrice)
+        valuationPrice: parseFloat(editPrice),
       });
 
-      // Update local state
-      setValuations(prevValuations => 
-        prevValuations.map(val => 
-          val.valuation_id === currentValuation.valuation_id 
-            ? { ...val, valuationPrice: parseFloat(editPrice) } 
+      setValuations((prev) =>
+        prev.map((val) =>
+          val.valuation_id === currentValuation.valuation_id
+            ? { ...val, valuationPrice: parseFloat(editPrice) }
             : val
         )
       );
 
       setEditSuccess("Valuation updated successfully!");
-      
-      // Close modal after a short delay so user can see success message
       setTimeout(() => {
         setShowEditModal(false);
         setCurrentValuation(null);
       }, 1500);
-      
     } catch (err) {
       console.error("Error updating valuation:", err);
       setEditError("Failed to update valuation. Please try again.");
     }
   };
 
-  // Confirm delete
   const handleDeleteConfirm = async () => {
     try {
       await axios.delete(`http://localhost:3001/api/valuations/${valuationToDelete.valuation_id}`);
-      
-      // Remove from local state
-      setValuations(prevValuations => 
-        prevValuations.filter(val => val.valuation_id !== valuationToDelete.valuation_id)
+      setValuations((prev) =>
+        prev.filter((val) => val.valuation_id !== valuationToDelete.valuation_id)
       );
-      
       setShowDeleteModal(false);
       setValuationToDelete(null);
-      
     } catch (err) {
       console.error("Error deleting valuation:", err);
       alert("Failed to delete valuation. Please try again.");
     }
   };
 
-  if (loading) return (
-    <BrokerLayout>
-      <div className="container mt-4 text-center">
-        <h3>Loading your valuations...</h3>
-      </div>
-    </BrokerLayout>
+  const totalPages = Math.ceil(valuations.length / itemsPerPage);
+  const paginatedValuations = valuations.slice(
+    (currentPage - 1) * itemsPerPage,
+    currentPage * itemsPerPage
   );
 
-  if (error) return (
-    <BrokerLayout>
-      <div className="container mt-4">
-        <div className="alert alert-danger">{error}</div>
-      </div>
-    </BrokerLayout>
-  );
+  const handlePageChange = (pageNumber) => {
+    setCurrentPage(pageNumber);
+  };
+
+  if (loading) {
+    return (
+      <BrokerLayout>
+        <div className="container mt-4 text-center">
+          <h3>Loading your valuations...</h3>
+        </div>
+      </BrokerLayout>
+    );
+  }
+
+  if (error) {
+    return (
+      <BrokerLayout>
+        <div className="container mt-4">
+          <div className="alert alert-danger">{error}</div>
+        </div>
+      </BrokerLayout>
+    );
+  }
 
   return (
     <BrokerLayout>
@@ -170,8 +165,8 @@ const BrokerMyValuations = () => {
             </tr>
           </thead>
           <tbody>
-            {valuations.length > 0 ? (
-              valuations.map((valuation) => (
+            {paginatedValuations.length > 0 ? (
+              paginatedValuations.map((valuation) => (
                 <tr key={valuation.valuation_id}>
                   <td>{valuation.lotNumber}</td>
                   <td>{valuation.teaTypeName}</td>
@@ -187,18 +182,19 @@ const BrokerMyValuations = () => {
                     )}
                   </td>
                   <td>
-                    <Button 
-                      variant="primary" 
-                      size="sm" 
-                      className="me-2" 
+                    <Button
+                      variant=" #023020"
+                      size="sm"
+                      className="me-2"
+                      colour=" #023020"
                       onClick={() => handleEditClick(valuation)}
                       disabled={valuation.is_confirmed}
                     >
                       <FaEdit />
                     </Button>
-                    <Button 
-                      variant="danger" 
-                      size="sm" 
+                    <Button
+                      variant="danger"
+                      size="sm"
                       onClick={() => handleDeleteClick(valuation)}
                       disabled={valuation.is_confirmed}
                     >
@@ -216,6 +212,23 @@ const BrokerMyValuations = () => {
             )}
           </tbody>
         </Table>
+
+        {/* Pagination Controls */}
+        {valuations.length > itemsPerPage && (
+          <div className="d-flex justify-content-center">
+            <Pagination>
+              {[...Array(totalPages).keys()].map((pageNum) => (
+                <Pagination.Item
+                  key={pageNum + 1}
+                  active={pageNum + 1 === currentPage}
+                  onClick={() => handlePageChange(pageNum + 1)}
+                >
+                  {pageNum + 1}
+                </Pagination.Item>
+              ))}
+            </Pagination>
+          </div>
+        )}
       </div>
 
       {/* Edit Modal */}
@@ -226,17 +239,17 @@ const BrokerMyValuations = () => {
         <Modal.Body>
           {editError && <Alert variant="danger">{editError}</Alert>}
           {editSuccess && <Alert variant="success">{editSuccess}</Alert>}
-          
+
           {currentValuation && (
             <>
               <p><strong>Lot Number:</strong> {currentValuation.lotNumber}</p>
               <p><strong>Tea Type:</strong> {currentValuation.teaTypeName}</p>
-              
+
               <Form.Group className="mb-3">
                 <Form.Label>Valuation Price (LKR)</Form.Label>
-                <Form.Control 
-                  type="number" 
-                  value={editPrice} 
+                <Form.Control
+                  type="number"
+                  value={editPrice}
                   onChange={(e) => setEditPrice(e.target.value)}
                   min="0"
                   step="0.01"
@@ -255,7 +268,7 @@ const BrokerMyValuations = () => {
         </Modal.Footer>
       </Modal>
 
-      {/* Delete Confirmation Modal */}
+      {/* Delete Modal */}
       <Modal show={showDeleteModal} onHide={() => setShowDeleteModal(false)}>
         <Modal.Header closeButton>
           <Modal.Title>Confirm Delete</Modal.Title>

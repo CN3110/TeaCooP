@@ -3,27 +3,27 @@ import BrokerLayout from "../../../components/broker/BrokerLayout/BrokerLayout";
 import { Table, Form, Button, Modal, Toast, ToastContainer } from "react-bootstrap";
 import { FaCheck } from "react-icons/fa";
 import axios from "axios";
+import Pagination from '@mui/material/Pagination';
+import Stack from '@mui/material/Stack';
 
 const ViewNewLots = () => {
   const [lots, setLots] = useState([]);
   const [valuationInputs, setValuationInputs] = useState({});
   const [brokerId, setBrokerId] = useState("");
-
-  // Toast state
+  const [teaTypes, setTeaTypes] = useState([]);
   const [toast, setToast] = useState({ show: false, message: "", bg: "success" });
-
-  // Modal state
   const [showModal, setShowModal] = useState(false);
   const [selectedLot, setSelectedLot] = useState(null);
 
+  const [currentPage, setCurrentPage] = useState(1);
+  const lotsPerPage = 5;
+
   useEffect(() => {
     const loggedBrokerId = localStorage.getItem("userId");
-
     if (!loggedBrokerId) {
       showToast("Broker user ID not found.", "danger");
       return;
     }
-
     setBrokerId(loggedBrokerId);
   }, []);
 
@@ -36,12 +36,30 @@ const ViewNewLots = () => {
   const fetchLots = async () => {
     try {
       const res = await axios.get(`http://localhost:3001/api/lots/available-for-broker?brokerId=${brokerId}`);
+      console.log("Fetched lots:", res.data);
       setLots(res.data);
     } catch (err) {
       console.error(err);
       showToast("Failed to fetch lots.", "danger");
     }
   };
+
+  useEffect(() => {
+  axios.get('http://localhost:3001/api/teaTypes')
+    .then((response) => {
+      console.log("Fetched tea types:", response.data);
+      setTeaTypes(response.data);
+    })
+    .catch((error) => {
+      console.error("Error fetching tea types:", error);
+    });
+}, []);
+
+const getTeaTypeName = (id) => {
+  const teaType = teaTypes.find((type) => type.teaTypeId === id);
+  return teaType ? teaType.teaTypeName : "Unknown";
+};
+
 
   const handleInputChange = (lotNumber, value) => {
     setValuationInputs((prev) => ({ ...prev, [lotNumber]: value }));
@@ -94,6 +112,16 @@ const ViewNewLots = () => {
     }
   };
 
+  const handlePageChange = (event, value) => {
+    setCurrentPage(value);
+  };
+
+  // Calculate paginated data
+  const indexOfLastLot = currentPage * lotsPerPage;
+  const indexOfFirstLot = indexOfLastLot - lotsPerPage;
+  const currentLots = lots.slice(indexOfFirstLot, indexOfLastLot);
+  const totalPages = Math.ceil(lots.length / lotsPerPage);
+
   return (
     <BrokerLayout>
       <div className="container mt-4">
@@ -110,16 +138,15 @@ const ViewNewLots = () => {
               <th>Manufacture Date</th>
               <th>Notes</th>
               <th>My Valuation (LKR)</th>
-              
               <th>Submit</th>
             </tr>
           </thead>
           <tbody>
-            {lots.length > 0 ? (
-              lots.map((lot) => (
+            {currentLots.length > 0 ? (
+              currentLots.map((lot) => (
                 <tr key={lot.lotNumber}>
                   <td>{lot.lotNumber}</td>
-                  <td>{lot.teaTypeName}</td>
+                  <td>{getTeaTypeName(lot.teaTypeId)}</td>
                   <td>{lot.noOfBags}</td>
                   <td>{lot.netWeight}</td>
                   <td>{lot.totalNetWeight}</td>
@@ -143,7 +170,7 @@ const ViewNewLots = () => {
               ))
             ) : (
               <tr>
-                <td colSpan="9" className="text-center">
+                <td colSpan="10" className="text-center">
                   No new lots available.
                 </td>
               </tr>
@@ -151,7 +178,21 @@ const ViewNewLots = () => {
           </tbody>
         </Table>
 
-        {/* Bootstrap Modal */}
+        {/* Material UI Pagination */}
+        {lots.length > lotsPerPage && (
+          <Stack spacing={2} direction="row" justifyContent="center" className="mt-3">
+            <Pagination
+              count={totalPages}
+              page={currentPage}
+              onChange={handlePageChange}
+              color="primary"
+              variant="outlined"
+              shape="rounded"
+            />
+          </Stack>
+        )}
+
+        {/* Modal */}
         <Modal show={showModal} onHide={handleModalClose}>
           <Modal.Header closeButton>
             <Modal.Title>Confirm Valuation Submission</Modal.Title>
@@ -169,7 +210,7 @@ const ViewNewLots = () => {
           </Modal.Footer>
         </Modal>
 
-        {/* Bootstrap Toast */}
+        {/* Toast */}
         <ToastContainer position="top-center" className="mt-3">
           <Toast
             show={toast.show}
