@@ -1,204 +1,282 @@
+/* General container styles */
 .view-supplier-container {
   padding: 20px;
   width: 100%;
 }
 
+/* Card styles */
+.supplier-card {
+  padding: 24px;
+  border-radius: 12px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+  transition: all 0.3s ease;
+}
+
+.supplier-card:hover {
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12);
+}
+
+.suppliers-table-container {
+  overflow-x: scroll;
+}
+
+/* Header section styles */
 .content-header {
+  margin-bottom: 24px;
+}
+
+.page-title {
+  font-size: 1.5rem;
+  font-weight: 700;
+  margin: 0;
+}
+
+.header-controls {
   display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-bottom: 20px;
+  gap: 16px;
   flex-wrap: wrap;
 }
 
-.header-activity {
-  display: flex;
-  align-items: center;
-  gap: 15px;
-  flex-wrap: wrap;
+/* Search box customization */
+.search-field input {
+  transition: all 0.2s ease;
 }
 
-.search-box {
-  position: relative;
-  display: flex;
-  align-items: center;
+.search-field input:focus {
+  box-shadow: 0 0 0 2px rgba(25, 118, 210, 0.2);
 }
 
-.search-box input {
-  padding: 8px 15px 8px 35px;
-  border: 1px solid #ddd;
-  border-radius: 4px;
-  width: 250px;
+/* Table styling enhancements */
+.suppliers-table-container {
+  border-radius: 8px;
+  overflow: hidden;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
 }
 
-.search-box .icon {
-  position: absolute;
-  left: 10px;
-  color: #777;
-}
-
-.filters {
-  display: flex;
-  align-items: center;
-  gap: 15px;
-}
-
-.status-filter {
-  padding: 8px 15px;
-  border: 1px solid #ddd;
-  border-radius: 4px;
-  background-color: white;
-}
-
-.add-supplier-btn {
-  padding: 8px 15px;
-  background-color: #4CAF50;
-  color: white;
-  border: none;
-  border-radius: 4px;
-  cursor: pointer;
-}
-
-.add-supplier-btn:hover {
-  background-color: #45a049;
-}
-
-.suppliers-table {
-  width: 100%;
-  border-collapse: collapse;
-  margin-top: 20px;
-}
-
-.suppliers-table th, .suppliers-table td {
-  padding: 12px 15px;
-  text-align: left;
-  border-bottom: 1px solid #ddd;
+.suppliers-table thead {
+  background-color: #f5f7fa;
 }
 
 .suppliers-table th {
-  background-color: #f8f9fa;
+  background-color: #0f361f;
   font-weight: 600;
+  color: #efefef;
+  padding: 16px;
+  font-size: 0.875rem;
+  border-bottom: 2px solid #e0e0e0;
+}
+
+.suppliers-table tr {
+  transition: background-color 0.2s ease;
 }
 
 .suppliers-table tr:hover {
-  background-color: #f5f5f5;
+  background-color: #f9fafc;
 }
 
-.status-cell {
+.suppliers-table td {
+  padding: 16px;
+  font-size: 0.875rem;
+  vertical-align: top;
+}
+
+/* Status chip custom styles */
+.status-chip {
   font-weight: 500;
   text-transform: capitalize;
 }
 
-.status-active {
-  color: #4CAF50;
+.status-chip.active {
+  background-color: #e8f5e9;
+  color: #2e7d32;
 }
 
-.status-pending {
-  color: #FFC107;
+.status-chip.pending {
+  background-color: #fff8e1;
+  color: #f57c00;
 }
 
-.status-disabled {
-  color: #F44336;
+.status-chip.disabled {
+  background-color: #ffebee;
+  color: #c62828;
 }
 
-.land-details-list {
-  margin: 0;
-  padding: 0;
-  list-style: none;
+/* Land details section styling */
+.land-details-column {
+  min-width: 350px;
+  max-width: 400px;
 }
 
-.land-details-list li {
+.land-detail-card {
+  padding: 12px;
+  background-color: #f9f9f9;
+  border-radius: 8px;
+  border: 1px solid #eaeaea;
   margin-bottom: 8px;
-  padding-bottom: 8px;
-  border-bottom: 1px dashed #eee;
+  transition: all 0.2s ease;
 }
 
-.land-details-list li:last-child {
-  margin-bottom: 0;
-  padding-bottom: 0;
-  border-bottom: none;
+.land-detail-card:hover {
+  background-color: #f5f5f5;
+  border-color: #e0e0e0;
+}
+
+.land-detail-title {
+  font-weight: 600;
+  font-size: 0.875rem;
+  margin-bottom: 8px;
+  color: #333;
+}
+
+.land-detail-info {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
 }
 
 .land-detail-label {
   font-weight: 600;
-  margin-right: 8px;
+  font-size: 0.8125rem;
 }
 
-.land-details-list span {
-  display: inline-block;
-  margin-right: 10px;
+.land-detail-value {
+  font-size: 0.8125rem;
+  word-break: break-word;
+}
+
+.land-detail-address {
+  width: 100%;
+}
+
+/* Notes column styling */
+.notes-column {
+  max-width: 200px;
 }
 
 .supplier-notes {
-  max-width: 250px;
-  white-space: pre-wrap;
-  word-wrap: break-word;
+  font-size: 0.875rem;
+  line-height: 1.5;
+  word-break: break-word;
 }
 
-.edit-btn {
-  padding: 6px 12px;
-  background-color: #2196F3;
-  color: white;
-  border: none;
-  border-radius: 4px;
-  cursor: pointer;
+.no-data-text {
+  font-style: italic;
+  color: #757575;
 }
 
-.edit-btn:hover {
-  background-color: #0b7dda;
+/* Action buttons styling */
+.action-button {
+  margin-right: 8px;
 }
 
-.no-results {
+.edit-button:hover {
+  background-color: rgba(25, 118, 210, 0.12);
+}
+
+.disable-button:hover {
+  background-color: rgba(211, 47, 47, 0.12);
+}
+
+/* Added by styling */
+.employee-id {
+  font-weight: 500;
+  font-size: 0.875rem;
+}
+
+.employee-name {
+  font-size: 0.75rem;
+  color: #757575;
+}
+
+/* Pagination custom styles */
+.pagination-controls {
+  display: flex;
+  justify-content: flex-end;
+  padding: 16px;
+}
+
+/* Empty state styling */
+.empty-state {
+  padding: 32px;
   text-align: center;
-  padding: 20px;
-  color: #666;
+  color: #757575;
   font-style: italic;
 }
 
-.modal-overlay {
-  position: fixed;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  background-color: rgba(0, 0, 0, 0.5);
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  z-index: 1000;
-}
-
-.modal {
-  background-color: white;
-  padding: 20px;
-  border-radius: 8px;
-  width: 80%;
-  max-width: 800px;
-  max-height: 90vh;
-  overflow-y: auto;
-}
-
-@media (max-width: 768px) {
+/* Responsive adjustments */
+@media (max-width: 960px) {
   .content-header {
     flex-direction: column;
     align-items: flex-start;
-    gap: 15px;
   }
   
-  .header-activity {
+  .header-controls {
+    width: 100%;
+    margin-top: 16px;
+  }
+  
+  .land-details-column {
+    min-width: 300px;
+  }
+}
+
+@media (max-width: 600px) {
+  .view-supplier-container {
+    padding: 12px;
+  }
+  
+  .supplier-card {
+    padding: 16px;
+  }
+  
+  .search-field {
     width: 100%;
   }
   
-  .search-box {
-    width: 100%;
+  .header-controls {
+    flex-direction: column;
   }
   
-  .search-box input {
-    width: 100%;
+  .suppliers-table {
+    font-size: 0.75rem;
   }
   
-  .filters {
-    width: 100%;
-    justify-content: space-between;
+  .suppliers-table th,
+  .suppliers-table td {
+    padding: 12px 8px;
   }
+  
+  .land-details-column {
+    min-width: 250px;
+  }
+}
+
+/* Dialog customization */
+.confirm-dialog-title {
+  background-color: #f9f9f9;
+  border-bottom: 1px solid #eaeaea;
+}
+
+.confirm-dialog-actions {
+  padding: 16px;
+  border-top: 1px solid #eaeaea;
+}
+
+/* Snackbar customization */
+.alert-snackbar {
+  border-radius: 8px;
+}
+
+/* Animation for row updates */
+@keyframes highlightRow {
+  0% {
+    background-color: rgba(25, 118, 210, 0.1);
+  }
+  100% {
+    background-color: transparent;
+  }
+}
+
+.highlight-animation {
+  animation: highlightRow 2s ease;
 }

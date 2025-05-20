@@ -1,22 +1,41 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import { BiSearch } from "react-icons/bi";
 import EmployeeLayout from "../../components/EmployeeLayout/EmployeeLayout";
-import Snackbar from "@mui/material/Snackbar";
-import MuiAlert from "@mui/material/Alert";
 import {
+  Box,
+  Typography,
+  Paper,
+  Table,
+  TableBody,
+  TableCell,
+  TableContainer,
+  TableHead,
+  TableRow,
+  TextField,
+  Button,
+  MenuItem,
+  IconButton,
+  Chip,
   Dialog,
   DialogActions,
   DialogContent,
   DialogContentText,
   DialogTitle,
-  Button
-} from '@mui/material';
-import "./ViewSuppliers.css";
-
-const Alert = React.forwardRef(function Alert(props, ref) {
-  return <MuiAlert elevation={6} ref={ref} variant="filled" {...props} />;
-});
+  Snackbar,
+  Alert,
+  Card,
+  TablePagination,
+  InputAdornment,
+  Grid,
+  Stack
+} from "@mui/material";
+import {
+  Search as SearchIcon,
+  Edit as EditIcon,
+  Block as DeleteIcon,
+  Add as AddIcon
+} from "@mui/icons-material";
+import "./ViewSuppliers.css"; // Import the CSS file
 
 const ITEMS_PER_PAGE = 5;
 
@@ -32,7 +51,8 @@ const ViewSuppliers = () => {
     severity: "success",
   });
   const [openConfirm, setOpenConfirm] = useState(false);
-  const [currentPage, setCurrentPage] = useState(1);
+  const [page, setPage] = useState(0);
+  const [rowsPerPage, setRowsPerPage] = useState(ITEMS_PER_PAGE);
 
   const navigate = useNavigate();
 
@@ -88,11 +108,13 @@ const ViewSuppliers = () => {
     }
 
     if (statusFilter !== "all") {
-      filtered = filtered.filter((supplier) => supplier.status === statusFilter);
+      filtered = filtered.filter(
+        (supplier) => supplier.status === statusFilter
+      );
     }
 
     setFilteredSuppliers(filtered);
-    setCurrentPage(1); // Reset to first page on filter/search change
+    setPage(0); // Reset to first page on filter/search change
   }, [searchId, statusFilter, suppliers]);
 
   const handleSearchChange = (e) => {
@@ -110,7 +132,7 @@ const ViewSuppliers = () => {
   const handleConfirmDisable = async () => {
     handleCloseConfirm();
     if (!selectedSupplierId) return;
-    
+
     try {
       const response = await fetch(
         `http://localhost:3001/api/suppliers/${selectedSupplierId}/disable`,
@@ -122,10 +144,10 @@ const ViewSuppliers = () => {
         throw new Error(errorText || "Failed to disable supplier");
       }
 
-      setSuppliers(prevSuppliers => 
-        prevSuppliers.map(supplier => 
-          supplier.supplierId === selectedSupplierId 
-            ? { ...supplier, status: "disabled" } 
+      setSuppliers((prevSuppliers) =>
+        prevSuppliers.map((supplier) =>
+          supplier.supplierId === selectedSupplierId
+            ? { ...supplier, status: "disabled" }
             : supplier
         )
       );
@@ -133,164 +155,235 @@ const ViewSuppliers = () => {
       showAlert("Supplier disabled successfully", "success");
     } catch (error) {
       console.error("Error disabling supplier:", error);
-      showAlert(error.message || "An error occurred while disabling supplier", "error");
+      showAlert(
+        error.message || "An error occurred while disabling supplier",
+        "error"
+      );
     }
   };
 
-  // Pagination logic
-  const totalPages = Math.ceil(filteredSuppliers.length / ITEMS_PER_PAGE);
-  const paginatedSuppliers = filteredSuppliers.slice(
-    (currentPage - 1) * ITEMS_PER_PAGE,
-    currentPage * ITEMS_PER_PAGE
-  );
+  // Pagination handlers
+  const handleChangePage = (event, newPage) => {
+    setPage(newPage);
+  };
+
+  const handleChangeRowsPerPage = (event) => {
+    setRowsPerPage(parseInt(event.target.value, 10));
+    setPage(0);
+  };
+
+  // Get paginated data
+  const emptyRows = page > 0 ? Math.max(0, (1 + page) * rowsPerPage - filteredSuppliers.length) : 0;
+  const paginatedSuppliers = filteredSuppliers.slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage);
 
   return (
     <EmployeeLayout>
       <div className="view-supplier-container">
-        <div className="content-header">
-          <h3>View Suppliers</h3>
-          <div className="header-activity">
-            <div className="search-box">
-              <input
-                type="text"
+        <Card className="supplier-card">
+          <Box className="content-header">
+            <Typography variant="h5" component="h1" className="page-title">
+              View Suppliers
+            </Typography>
+            
+            <Stack 
+              direction={{ xs: "column", sm: "row" }} 
+              spacing={2} 
+              className="header-controls"
+            >
+              <TextField
                 placeholder="Search by Supplier ID"
                 value={searchId}
                 onChange={handleSearchChange}
+                size="small"
+                className="search-field"
+                InputProps={{
+                  startAdornment: (
+                    <InputAdornment position="start">
+                      <SearchIcon fontSize="small" />
+                    </InputAdornment>
+                  ),
+                }}
               />
-              <BiSearch className="icon" />
-            </div>
-            <div className="filters">
-              <select
+              
+              <TextField
+                select
                 value={statusFilter}
                 onChange={(e) => setStatusFilter(e.target.value)}
-                className="status-filter"
+                size="small"
+                label="Status"
               >
-                <option value="all">All Statuses</option>
-                <option value="active">Active</option>
-                <option value="pending">Pending</option>
-                <option value="disabled">Disabled</option>
-              </select>
-              <button className="add-supplier-btn" onClick={handleAddSupplier}>
+                <MenuItem value="all">All Statuses</MenuItem>
+                <MenuItem value="active">Active</MenuItem>
+                <MenuItem value="pending">Pending</MenuItem>
+                <MenuItem value="disabled">Disabled</MenuItem>
+              </TextField>
+              
+              <Button
+                variant="contained"
+                color="primary"
+                startIcon={<AddIcon />}
+                onClick={handleAddSupplier}
+              >
                 Add New Supplier
-              </button>
-            </div>
-          </div>
-        </div>
+              </Button>
+            </Stack>
+          </Box>
 
-        <table className="suppliers-table">
-          <thead>
-            <tr>
-              <th>Supplier ID</th>
-              <th>Supplier Name</th>
-              <th>Contact Number</th>
-              <th>Email</th>
-              <th>Status</th>
-              <th>Land Details</th>
-              <th>Notes</th>
-              <th>Actions</th>
-              <th>Added by:</th>
-            </tr>
-          </thead>
-          <tbody>
-            {paginatedSuppliers.length > 0 ? (
-              paginatedSuppliers.map((supplier) => (
-                <tr key={supplier.supplierId}>
-                  <td>{supplier.supplierId}</td>
-                  <td>{supplier.supplierName}</td>
-                  <td>{supplier.supplierContactNumber}</td>
-                  <td>{supplier.supplierEmail}</td>
-                  <td className={`status-cell status-${supplier.status}`}>
-                    {supplier.status.charAt(0).toUpperCase() + supplier.status.slice(1)}
-                  </td>
-                  <td>
-                    <ul className="land-details-list">
-                      {supplier.landDetails && supplier.landDetails.length > 0 ? (
-                        supplier.landDetails.map((land, index) => (
-                          <li key={index}>
-                            <span className="land-detail-label">Land {index + 1}:</span>
-                            <span>Size: {land.landSize} acres</span>
-                            <span>Address: {land.landAddress}</span>
-                            {land.delivery_routeName && (
-                              <span>Route: {land.delivery_routeName}</span>
-                            )}
-                          </li>
-                        ))
-                      ) : (
-                        <li>No land details available</li>
-                      )}
-                    </ul>
-                  </td>
-                  <td className="supplier-notes">
-                    {supplier.notes || "No notes available"}
-                  </td>
-                  <td>
-                    <button
-                      className="edit-btn"
-                      onClick={() => handleEdit(supplier)}
+          <TableContainer component={Paper} className="suppliers-table-container">
+            <Table className="suppliers-table">
+              <TableHead>
+                <TableRow>
+                  <TableCell>Supplier ID</TableCell>
+                  <TableCell>Supplier Name</TableCell>
+                  <TableCell>Contact Number</TableCell>
+                  <TableCell>Email</TableCell>
+                  <TableCell>Status</TableCell>
+                  <TableCell className="land-details-column">Land Details</TableCell>
+                  <TableCell className="notes-column">Notes</TableCell>
+                  <TableCell>Actions</TableCell>
+                  <TableCell>Added by</TableCell>
+                </TableRow>
+              </TableHead>
+              <TableBody>
+                {paginatedSuppliers.length > 0 ? (
+                  paginatedSuppliers.map((supplier) => (
+                    <TableRow 
+                      key={supplier.supplierId}
+                      hover
                     >
-                      Edit
-                    </button>
-                    {supplier.status !== 'disabled' && (
-                      <button
-                        className="disable-button"
-                        onClick={() => handleOpenDisableConfirm(supplier.supplierId)}
-                      >
-                        Disable
-                      </button>
-                    )}
-                  </td>
-                  <td>
-                    {supplier.addedByEmployeeId} <br />
-                    {supplier.employeeName && (
-                      <span style={{ marginLeft: 4, color: "#555" }}>
-                        ({supplier.employeeName})
-                      </span>
-                    )}
-                  </td>
-                </tr>
-              ))
-            ) : (
-              <tr>
-                <td colSpan="9" className="no-results">
-                  No suppliers found matching your criteria
-                </td>
-              </tr>
-            )}
-          </tbody>
-        </table>
+                      <TableCell>{supplier.supplierId}</TableCell>
+                      <TableCell>{supplier.supplierName}</TableCell>
+                      <TableCell>{supplier.supplierContactNumber}</TableCell>
+                      <TableCell>{supplier.supplierEmail}</TableCell>
+                      <TableCell>
+                        <Chip 
+                          label={supplier.status.charAt(0).toUpperCase() + supplier.status.slice(1)}
+                          color={supplier.status === 'active' ? 'success' : supplier.status === 'pending' ? 'warning' : 'error'}
+                          size="small"
+                          className={`status-chip ${supplier.status}`}
+                        />
+                      </TableCell>
+                      <TableCell className="land-details-column">
+                        {supplier.landDetails && supplier.landDetails.length > 0 ? (
+                          <div>
+                            {supplier.landDetails.map((land, index) => (
+                              <div key={index} className="land-detail-card">
+                                <div className="land-detail-title">
+                                  Land {index + 1}
+                                </div>
+                                <div className="land-detail-info">
+                                  <div>
+                                    <span className="land-detail-label">Size:</span>{" "}
+                                    <span className="land-detail-value">{land.landSize} acres</span>
+                                  </div>
+                                  <div className="land-detail-address">
+                                    <span className="land-detail-label">Address:</span>{" "}
+                                    <span className="land-detail-value">{land.landAddress}</span>
+                                  </div>
+                                  {land.delivery_routeName && (
+                                    <div>
+                                      <span className="land-detail-label">Route:</span>{" "}
+                                      <span className="land-detail-value">{land.delivery_routeName}</span>
+                                    </div>
+                                  )}
+                                </div>
+                              </div>
+                            ))}
+                          </div>
+                        ) : (
+                          <Typography className="no-data-text">
+                            No land details available
+                          </Typography>
+                        )}
+                      </TableCell>
+                      <TableCell className="notes-column">
+                        <div className="supplier-notes">
+                          {supplier.notes || (
+                            <span className="no-data-text">No notes available</span>
+                          )}
+                        </div>
+                      </TableCell>
+                      <TableCell>
+                        <IconButton
+                          onClick={() => handleEdit(supplier)}
+                          color="primary"
+                          size="small"
+                          className="action-button edit-button"
+                        >
+                          <EditIcon fontSize="small" />
+                        </IconButton>
 
-        {/* Pagination Controls */}
-        {totalPages > 1 && (
-          <div className="pagination">
-            <button
-              onClick={() => setCurrentPage((prev) => Math.max(prev - 1, 1))}
-              disabled={currentPage === 1}
-            >
-              Previous
-            </button>
-            <span>
-              Page {currentPage} of {totalPages}
-            </span>
-            <button
-              onClick={() => setCurrentPage((prev) => Math.min(prev + 1, totalPages))}
-              disabled={currentPage === totalPages}
-            >
-              Next
-            </button>
-          </div>
-        )}
+                        {supplier.status !== "disabled" && (
+                          <IconButton
+                            onClick={() => handleOpenDisableConfirm(supplier.supplierId)}
+                            color="error"
+                            size="small"
+                            className="action-button disable-button"
+                          >
+                            <DeleteIcon fontSize="small" />
+                          </IconButton>
+                        )}
+                      </TableCell>
+                      <TableCell>
+                        <div className="employee-id">
+                          {supplier.addedByEmployeeId}
+                        </div>
+                        {supplier.employeeName && (
+                          <div className="employee-name">
+                            ({supplier.employeeName})
+                          </div>
+                        )}
+                      </TableCell>
+                    </TableRow>
+                  ))
+                ) : (
+                  <TableRow>
+                    <TableCell colSpan={9} className="empty-state">
+                      No suppliers found matching your criteria
+                    </TableCell>
+                  </TableRow>
+                )}
+                {emptyRows > 0 && (
+                  <TableRow style={{ height: 53 * emptyRows }}>
+                    <TableCell colSpan={9} />
+                  </TableRow>
+                )}
+              </TableBody>
+            </Table>
+          </TableContainer>
+
+          <TablePagination
+            rowsPerPageOptions={[5, 10, 25]}
+            component="div"
+            count={filteredSuppliers.length}
+            rowsPerPage={rowsPerPage}
+            page={page}
+            onPageChange={handleChangePage}
+            onRowsPerPageChange={handleChangeRowsPerPage}
+            className="pagination-controls"
+          />
+        </Card>
 
         {/* Confirmation Dialog */}
-        <Dialog open={openConfirm} onClose={handleCloseConfirm}>
-          <DialogTitle>Confirm Disable Supplier</DialogTitle>
+        <Dialog
+          open={openConfirm}
+          onClose={handleCloseConfirm}
+          aria-labelledby="alert-dialog-title"
+          aria-describedby="alert-dialog-description"
+        >
+          <DialogTitle id="alert-dialog-title" className="confirm-dialog-title">
+            Confirm Disable Supplier
+          </DialogTitle>
           <DialogContent>
-            <DialogContentText>
-              Are you sure you want to disable this supplier?
+            <DialogContentText id="alert-dialog-description">
+              Are you sure you want to disable this supplier? This action cannot be undone.
             </DialogContentText>
           </DialogContent>
-          <DialogActions>
-            <Button onClick={handleCloseConfirm}>Cancel</Button>
-            <Button onClick={handleConfirmDisable} color="error">
+          <DialogActions className="confirm-dialog-actions">
+            <Button onClick={handleCloseConfirm} color="primary">
+              Cancel
+            </Button>
+            <Button onClick={handleConfirmDisable} color="error" variant="contained">
               Confirm Disable
             </Button>
           </DialogActions>
@@ -306,6 +399,9 @@ const ViewSuppliers = () => {
             onClose={handleCloseSnackbar}
             severity={snackbar.severity}
             sx={{ width: "100%" }}
+            variant="filled"
+            elevation={6}
+            className="alert-snackbar"
           >
             {snackbar.message}
           </Alert>

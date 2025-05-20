@@ -11,7 +11,13 @@ import {
   DialogContentText,
   DialogTitle,
   Button,
+  IconButton,
+  Tooltip
 } from "@mui/material";
+import EditIcon from '@mui/icons-material/Edit';
+import BlockIcon from '@mui/icons-material/Block';
+import AddCircleIcon from '@mui/icons-material/AddCircle';
+import SearchIcon from '@mui/icons-material/Search';
 import "./ViewBrokers.css";
 
 const Alert = React.forwardRef(function Alert(props, ref) {
@@ -181,16 +187,26 @@ const ViewBrokers = () => {
                     </td>
                     <td>
                       <div className="action-buttons">
-                        <button className="edit-button" onClick={() => handleEdit(broker.brokerId)}>
-                          Edit
-                        </button>
+                        <Tooltip title="Edit Broker">
+                                                <IconButton 
+                                                  className="edit-button" 
+                         onClick={() => handleEdit(broker.brokerId)}
+                        size="small"
+                        >
+                          <EditIcon />
+                        </IconButton>
+                      </Tooltip>
                         {broker.status !== "disabled" && (
-                          <button
-                            className="disable-button"
+                          <Tooltip title="Disable Broker">
+                                                    <IconButton
+                                                      className="disable-button"
                             onClick={() => handleOpenDisableConfirm(broker.brokerId)}
+                          color="error"
+                            size="small"
                           >
-                            Disable
-                          </button>
+                            <BlockIcon />
+                          </IconButton>
+                        </Tooltip>
                         )}
                       </div>
                     </td>
