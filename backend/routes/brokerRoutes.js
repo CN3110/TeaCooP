@@ -4,6 +4,7 @@ const {
   getAllBrokers,
   addBroker,
   updateBroker,
+  updateBrokerProfile,
   getBrokerById,
   disableBroker,
   getBrokerConfirmedLots,
@@ -15,6 +16,7 @@ router.get("/", getAllBrokers);
 router.post("/add", addBroker);
 router.get("/:brokerId", getBrokerById);
 router.put("/:brokerId", updateBroker);
+router.put('/profile-edit/:brokerId', updateBrokerProfile);
 router.put("/:brokerId/disable", disableBroker);
 
 // Update password route

@@ -213,6 +213,7 @@ Morawakkorale Tea Co-op
   }
 };
 
+
 exports.disableBroker = async (req, res) => {
   const { brokerId } = req.params;
 
@@ -228,6 +229,43 @@ exports.disableBroker = async (req, res) => {
   } catch (error) {
     console.error("Error disabling broker:", error);
     res.status(500).json({ error: "Failed to disable broker" });
+  }
+};
+
+//update broker profille - by broker side
+exports.updateBrokerProfile = async (req, res) => {
+  const { brokerId } = req.params;
+  const {
+    brokerName,
+    brokerContact,
+    brokerEmail,
+    brokerCompanyName,
+    brokerCompanyContact,
+    brokerCompanyEmail,
+    brokerCompanyAddress
+  } = req.body;
+
+  try {
+    const [result] = await db.query("SELECT * FROM broker WHERE brokerId = ?", [brokerId]);
+
+    if (!result.length) {
+      return res.status(404).json({ error: "Broker not found" });
+    }
+
+    await broker.updateBrokerProfile(brokerId, {
+      brokerName,
+      brokerContact,
+      brokerEmail,
+      brokerCompanyName,
+      brokerCompanyContact,
+      brokerCompanyEmail,
+      brokerCompanyAddress
+    });
+
+    res.status(200).json({ message: "Broker profile updated successfully" });
+  } catch (error) {
+    console.error("Error updating broker profile:", error);
+    res.status(500).json({ error: "Internal Server Error" });
   }
 };
 
