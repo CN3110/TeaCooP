@@ -46,7 +46,7 @@ const SidebarBroker = () => {
   };
 
   return (
-    <div className="sidebar-container">
+    <div className="sidebar-container" style={{height:"100%"}}>
       <h2>Broker Panel</h2>
       <ul className="nav flex-column">
         <li className="nav-item">
