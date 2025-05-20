@@ -173,6 +173,7 @@ const Layout = userRole === 'admin' ? AdminLayout : EmployeeLayout;
                 <th>Email</th>
                 <th>Company</th>
                 <th>Status</th>
+                <th>Notes</th>
                 <th>Actions</th>
                 <th>Added by:</th>
               </tr>
@@ -189,6 +190,7 @@ const Layout = userRole === 'admin' ? AdminLayout : EmployeeLayout;
                     <td>
                       <span className={`status-badge ${broker.status}`}>{broker.status}</span>
                     </td>
+                    <td>{broker.notes}</td>
                     <td>
                       <div className="action-buttons">
                         <Tooltip title="Edit Broker">
