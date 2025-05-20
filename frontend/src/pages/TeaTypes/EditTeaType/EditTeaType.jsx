@@ -1,5 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
+import AdminLayout from "../../../components/AdminLayout/AdminLayout";
+import EmployeeLayout from "../../../components/EmployeeLayout/EmployeeLayout";
 import "./EditTeaType.css";
 
 const EditTeaType = () => {
@@ -71,7 +73,11 @@ const EditTeaType = () => {
     }
   };
 
+const userRole = localStorage.getItem('userRole');
+const Layout = userRole === 'admin' ? AdminLayout : EmployeeLayout;
+
   return (
+    <Layout>
     <div className="edit-tea-type-container">
       <h3>Edit Tea Type</h3>
       <form onSubmit={handleSubmit}>
@@ -108,6 +114,7 @@ const EditTeaType = () => {
         </div>
       </form>
     </div>
+    </Layout>
   );
 };
 

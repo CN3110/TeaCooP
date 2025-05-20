@@ -10,8 +10,12 @@ import {
   DialogContentText,
   DialogActions,
   Button,
+  IconButton,
+  Tooltip
 } from "@mui/material";
+import { Edit as EditIcon, Delete as DeleteIcon } from "@mui/icons-material";
 import EmployeeLayout from "../../../components/EmployeeLayout/EmployeeLayout";
+import AdminLayout from "../../../components/AdminLayout/AdminLayout";
 import "./ViewTeaTypes.css";
 
 const ViewTeaTypes = () => {
@@ -21,6 +25,7 @@ const ViewTeaTypes = () => {
   const [snackbar, setSnackbar] = useState({ open: false, message: "", severity: "success" });
   const [openDialog, setOpenDialog] = useState(false);
   const [selectedTeaTypeId, setSelectedTeaTypeId] = useState(null);
+  const [selectedTeaTypeName, setSelectedTeaTypeName] = useState("");
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -59,14 +64,16 @@ const ViewTeaTypes = () => {
     navigate(`/edit-tea-type/${teaType.teaTypeId}`);
   };
 
-  const handleOpenDialog = (teaTypeId) => {
+  const handleOpenDialog = (teaTypeId, teaTypeName) => {
     setSelectedTeaTypeId(teaTypeId);
+    setSelectedTeaTypeName(teaTypeName);
     setOpenDialog(true);
   };
 
   const handleCloseDialog = () => {
     setOpenDialog(false);
     setSelectedTeaTypeId(null);
+    setSelectedTeaTypeName("");
   };
 
   const handleConfirmDelete = async () => {
@@ -95,8 +102,12 @@ const ViewTeaTypes = () => {
     setSnackbar({ ...snackbar, open: false });
   };
 
+  
+const userRole = localStorage.getItem('userRole');
+const Layout = userRole === 'admin' ? AdminLayout : EmployeeLayout;
+
   return (
-    <EmployeeLayout>
+    <Layout>
       <div className="view-tea-types-container">
         <div className="content-header">
           <h3>View Tea Types</h3>
@@ -129,12 +140,16 @@ const ViewTeaTypes = () => {
                 <td>{teaType.teaTypeName}</td>
                 <td>{teaType.teaTypeDescription}</td>
                 <td>
-                  <button className="edit-btn" onClick={() => handleEdit(teaType)}>
-                    Edit
-                  </button>
-                  <button className="delete-btn" onClick={() => handleOpenDialog(teaType.teaTypeId)}>
-                    Delete
-                  </button>
+                  <Tooltip title="Edit" arrow>
+                    <IconButton color="primary" onClick={() => handleEdit(teaType)}>
+                      <EditIcon />
+                    </IconButton>
+                  </Tooltip>
+                  <Tooltip title="Delete" arrow>
+                    <IconButton color="error" onClick={() => handleOpenDialog(teaType.teaTypeId, teaType.teaTypeName)}>
+                      <DeleteIcon />
+                    </IconButton>
+                  </Tooltip>
                 </td>
               </tr>
             ))}
@@ -156,20 +171,21 @@ const ViewTeaTypes = () => {
 
       {/* Delete Confirmation Dialog */}
       <Dialog open={openDialog} onClose={handleCloseDialog}>
-        <DialogTitle>Delete Tea Type</DialogTitle>
+        <DialogTitle>Confirm Deletion</DialogTitle>
         <DialogContent>
           <DialogContentText>
-            Are you sure you want to delete this tea type? This action cannot be undone.
+            Are you sure you want to delete the tea type{" "}
+            <strong>{selectedTeaTypeName}</strong>? This action cannot be undone.
           </DialogContentText>
         </DialogContent>
         <DialogActions>
           <Button onClick={handleCloseDialog}>Cancel</Button>
-          <Button onClick={handleConfirmDelete} color="error">
+          <Button onClick={handleConfirmDelete} color="error" variant="contained">
             Delete
           </Button>
         </DialogActions>
       </Dialog>
-    </EmployeeLayout>
+    </Layout>
   );
 };
 

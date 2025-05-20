@@ -20,11 +20,9 @@ const TeaTypeStockList = () => {
     teaTypeId: ''
   });
   const [teaTypes, setTeaTypes] = useState([]);
-
   const [page, setPage] = useState(0);
   const [rowsPerPage, setRowsPerPage] = useState(10);
   const [totalRows, setTotalRows] = useState(0);
-
   const [deleteId, setDeleteId] = useState(null);
   const [snack, setSnack] = useState({ open: false, message: '', severity: 'success' });
 
@@ -33,8 +31,8 @@ const TeaTypeStockList = () => {
     fetchTeaTypes();
   }, [page, rowsPerPage]);
 
-  
   const fetchStocks = async () => {
+    setLoading(true);
     try {
       const response = await axios.get('http://localhost:3001/api/teaTypeStocks', {
         params: {
@@ -43,7 +41,8 @@ const TeaTypeStockList = () => {
         }
       });
       setStocks(response.data.stocks || []);
-      setTotalRows(response.data.total || 0);
+      setTotalRows(response.data.pagination?.total || 0);
+      setError('');
     } catch (err) {
       setError('Failed to load records. Please try again.');
     } finally {
@@ -51,14 +50,12 @@ const TeaTypeStockList = () => {
     }
   };
 
-  
   const fetchTeaTypes = async () => {
     try {
       const response = await axios.get('http://localhost:3001/api/teaTypes');
-      console.log('Tea types fetched:', response.data); // <-- Debug
       setTeaTypes(response.data || []);
     } catch (err) {
-      console.error('Failed to load tea types', err); // <-- Add error details
+      console.error('Failed to load tea types', err);
     }
   };
 
@@ -84,30 +81,34 @@ const TeaTypeStockList = () => {
   };
 
   const handleEdit = (stock) => {
-    fetchTeaTypes();
     setEditing(stock.stockId);
     setFormData({
       weightInKg: stock.weightInKg,
       productionDate: format(new Date(stock.productionDate), 'yyyy-MM-dd'),
-      teaTypeId: stock.teaTypeId
+      teaTypeId: String(stock.teaTypeId)
     });
   };
 
   const handleUpdate = async (e) => {
     e.preventDefault();
+    if (!formData.teaTypeId) {
+      setSnack({ open: true, message: 'Please select a tea type.', severity: 'warning' });
+      return;
+    }
     try {
       await axios.put(`http://localhost:3001/api/teaTypeStocks/${editing}`, {
         ...formData,
+        weightInKg: parseFloat(formData.weightInKg),
         teaTypeId: parseInt(formData.teaTypeId, 10),
       });
       setSnack({ open: true, message: 'Record updated successfully!', severity: 'success' });
       setEditing(null);
+      setFormData({ weightInKg: '', productionDate: '', teaTypeId: '' });
       fetchStocks();
     } catch (err) {
       setSnack({ open: true, message: 'Failed to update record.', severity: 'error' });
     }
   };
-  
 
   return (
     <div className="tea-stock-list">
@@ -139,23 +140,13 @@ const TeaTypeStockList = () => {
                   <td>{parseFloat(stock.weightInKg).toFixed(2)}</td>
                   <td>{stock.employeeName}</td>
                   <td>
-  <IconButton 
-    onClick={() => handleEdit(stock)} 
-    color="primary"
-    aria-label="edit"
-    size="small"
-  >
-    <EditIcon fontSize="small" style={{ color: 'rgb(33, 101, 33)' }} />
-  </IconButton>
-  <IconButton 
-    onClick={() => setDeleteId(stock.stockId)} 
-    color="error"
-    aria-label="delete"
-    size="small"
-  >
-    <DeleteIcon fontSize="small" />
-  </IconButton>
-</td>
+                    <IconButton onClick={() => handleEdit(stock)} size="small" aria-label="edit">
+                      <EditIcon fontSize="small" style={{ color: 'rgb(33, 101, 33)' }} />
+                    </IconButton>
+                    <IconButton onClick={() => setDeleteId(stock.stockId)} size="small" aria-label="delete">
+                      <DeleteIcon fontSize="small" color="error" />
+                    </IconButton>
+                  </td>
                 </tr>
               ))}
             </tbody>
@@ -215,14 +206,14 @@ const TeaTypeStockList = () => {
               </label>
               <div className="modal-actions">
                 <button type="submit" className="action-btn save-btn">Save</button>
-                <button type="button" onClick={() => setEditing(null)} className="action-btn cancel-btn">Cancel</button>
+                <button type="button" onClick={() => { setEditing(null); setFormData({ weightInKg: '', productionDate: '', teaTypeId: '' }); }} className="action-btn cancel-btn">Cancel</button>
               </div>
             </form>
           </div>
         </div>
       )}
 
-      <Dialog open={!!deleteId} onClose={() => setDeleteId(null)}>
+      <Dialog open={Boolean(deleteId)} onClose={() => setDeleteId(null)}>
         <DialogTitle>Confirm Delete</DialogTitle>
         <DialogContent>
           <DialogContentText>

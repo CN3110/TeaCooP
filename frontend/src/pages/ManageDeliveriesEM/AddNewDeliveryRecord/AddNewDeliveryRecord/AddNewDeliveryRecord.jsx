@@ -1,9 +1,14 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import EmployeeLayout from "../../../../components/EmployeeLayout/EmployeeLayout";
+import AdminLayout from "../../../../components/AdminLayout/AdminLayout";
 import Snackbar from "@mui/material/Snackbar";
 import MuiAlert from "@mui/material/Alert";
 import "./AddNewDeliveryRecord.css";
+
+  const userRole = localStorage.getItem('userRole');
+const Layout = userRole === 'admin' ? AdminLayout : EmployeeLayout;
+
 
 // Separate component for the supplier suggestions dropdown
 const SupplierAutocomplete = ({ value, onChange, suppliers, onSelect }) => {
@@ -24,8 +29,12 @@ const SupplierAutocomplete = ({ value, onChange, suppliers, onSelect }) => {
       setFilteredSuggestions([]);
     }
   };
+
+  
+
   
   return (
+   
     <div className="form-group autocomplete">
       <label htmlFor="supplierId">Supplier ID:</label>
       <input
@@ -56,6 +65,7 @@ const SupplierAutocomplete = ({ value, onChange, suppliers, onSelect }) => {
         </ul>
       )}
     </div>
+    
   );
 };
 
@@ -74,6 +84,7 @@ const InfoCard = ({ title, data, details, detailsTitle, detailsFields }) => {
   const type = data.supplierId ? 'supplier' : 'driver';
   
   return (
+
     <div className="info-card">
       <h5>{title}</h5>
       
@@ -336,8 +347,9 @@ const AddNewDeliveryRecord = () => {
     }
   };
 
+
   return (
-    <EmployeeLayout>
+    <Layout>
       <div className="add-new-delivery-container">
         <h2 className="page-title">Add New Tea Delivery</h2>
         
@@ -634,7 +646,7 @@ const AddNewDeliveryRecord = () => {
 </div>
         </div>
       </div>
-    </EmployeeLayout>
+    </Layout>
   );
 };
 

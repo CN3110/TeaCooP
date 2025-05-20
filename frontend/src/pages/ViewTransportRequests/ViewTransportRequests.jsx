@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from "react";
 import EmployeeLayout from "../../components/EmployeeLayout/EmployeeLayout";
+import AdminLayout from "../../components/AdminLayout/AdminLayout";
 import "./ViewTransportRequests.css";
 
 const ViewTransportRequests = () => {
@@ -73,8 +74,12 @@ const ViewTransportRequests = () => {
     0
   );
 
+  
+const userRole = localStorage.getItem('userRole');
+const Layout = userRole === 'admin' ? AdminLayout : EmployeeLayout;
+
   return (
-    <EmployeeLayout>
+    <Layout>
       <div className="employee-delivery-container">
         <h2>Delivery Status Overview</h2>
 
@@ -101,21 +106,21 @@ const ViewTransportRequests = () => {
           <label style={{ marginLeft: "20px" }}>Filter by Route:</label>
           <select value={routeFilter} onChange={(e) => setRouteFilter(e.target.value)}>
             <option value="all">All</option>
-            {routes.map((route) => (
-              <option key={route.delivery_routeId} value={route.delivery_routeName}>
-                {route.delivery_routeName}
-              </option>
-            ))}
+            {routes.map((route, index) => (
+  <option key={route.delivery_routeId || index} value={route.delivery_routeName}>
+    {route.delivery_routeName}
+  </option>
+))}
           </select>
 
           <label style={{ marginLeft: "20px" }}>Filter by Driver:</label>
           <select value={driverFilter} onChange={(e) => setDriverFilter(e.target.value)}>
             <option value="all">All</option>
-            {drivers.map((driver) => (
-              <option key={driver.driverId} value={driver.driverId}>
-                {driver.driverId} - {driver.driverName}
-              </option>
-            ))}
+            {drivers.map((driver, index) => (
+  <option key={driver.driverId || index} value={driver.driverId}>
+    {driver.driverId} - {driver.driverName}
+  </option>
+))}
           </select>
 
           <button
@@ -173,7 +178,7 @@ const ViewTransportRequests = () => {
           </table>
         )}
       </div>
-    </EmployeeLayout>
+    </Layout>
   );
 };
 

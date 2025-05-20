@@ -1,5 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
+import AdminLayout from "../../components/AdminLayout/AdminLayout";
+import EmployeeLayout from "../../components/EmployeeLayout/EmployeeLayout";
 import Snackbar from "@mui/material/Snackbar";
 import MuiAlert from "@mui/material/Alert";
 import "./EditDriver.css";
@@ -124,9 +126,14 @@ const EditDriverPage = () => {
     }
   };
 
+  
+const userRole = localStorage.getItem('userRole');
+const Layout = userRole === 'admin' ? AdminLayout : EmployeeLayout;
+
   if (isLoading) return <div className="loading">Loading driver data...</div>;
 
   return (
+    <Layout>
     <div className="edit-driver-container">
       <button className="back-btn" onClick={() => navigate("/view-drivers")}>← Back</button>
 
@@ -276,6 +283,7 @@ const EditDriverPage = () => {
         </Alert>
       </Snackbar>
     </div>
+    </Layout>
   );
 };
 

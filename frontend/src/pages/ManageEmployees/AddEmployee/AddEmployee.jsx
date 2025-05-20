@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import EmployeeLayout from "../../../components/EmployeeLayout/EmployeeLayout";
+import AdminLayout from "../../../components/AdminLayout/AdminLayout";
 import Snackbar from "@mui/material/Snackbar";
 import MuiAlert from "@mui/material/Alert";
 import "./AddEmployee.css";
@@ -121,7 +121,7 @@ const AddEmployee = () => {
   };
 
   return (
-    <EmployeeLayout>
+    <AdminLayout>
       <div className="add-employee-container">
         <h2>Add Employee</h2>
         <form onSubmit={handleSubmit} className="employee-form">
@@ -225,7 +225,7 @@ const AddEmployee = () => {
           </Alert>
         </Snackbar>
       </div>
-    </EmployeeLayout>
+    </AdminLayout>
   );
 };
 

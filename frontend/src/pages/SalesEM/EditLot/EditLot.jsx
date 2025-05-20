@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import EmployeeLayout from "../../../components/EmployeeLayout/EmployeeLayout";
+import AdminLayout from "../../../components/AdminLayout/AdminLayout";
 import Snackbar from "@mui/material/Snackbar";
 import MuiAlert from "@mui/material/Alert";
 import "./EditLot.css";
@@ -109,8 +110,12 @@ const EditLot = () => {
     }
   };
 
+  
+const userRole = localStorage.getItem('userRole');
+const Layout = userRole === 'admin' ? AdminLayout : EmployeeLayout;
+
   return (
-    <EmployeeLayout>
+    <Layout>
       <Snackbar
         open={snackbar.open}
         autoHideDuration={4000}
@@ -264,7 +269,7 @@ const EditLot = () => {
           </div>
         </form>
       </div>
-    </EmployeeLayout>
+    </Layout>
   );
 };
 

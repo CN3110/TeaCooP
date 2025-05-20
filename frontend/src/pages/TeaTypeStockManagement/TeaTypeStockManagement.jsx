@@ -3,6 +3,7 @@ import TeaProductionForm from '../../components/TeaTypeStockManagement/Form/TeaT
 import TeaProductionList from '../../components/TeaTypeStockManagement/List/TeaTypeStockList';
 import TeaTypeTotals from '../../components/TeaTypeStockManagement/TeaTypeTotals/TeaTypeTotals'; 
 import EmployeeLayout from '../../components/EmployeeLayout/EmployeeLayout'; 
+import AdminLayout from '../../components/AdminLayout/AdminLayout';
 
 const TeaTypeStockManagement = () => {
   const [allocatedForTeaTypeCategorization, setAllocatedForTeaTypeCategorization] = useState(null); 
@@ -51,30 +52,34 @@ const TeaTypeStockManagement = () => {
     fetchData();
   }, [fetchData]);
 
+  
+const userRole = localStorage.getItem('userRole');
+const Layout = userRole === 'admin' ? AdminLayout : EmployeeLayout;
+
   if (isLoading) {
     return (
-      <EmployeeLayout>
+      <Layout>
         <div className="tea-stock-management">
           <h1>Tea Type Stock Management</h1>
           <p>Loading data...</p>
         </div>
-      </EmployeeLayout>
+      </Layout>
     );
   }
 
   if (error) {
     return (
-      <EmployeeLayout>
+      <Layout>
         <div className="tea-stock-management">
           <h1>Tea Type Stock Management</h1>
           <p className="error-message">Error: {error}</p>
         </div>
-      </EmployeeLayout>
+      </Layout>
     );
   }
 
   return (
-    <EmployeeLayout>
+    <Layout>
       <div className="tea-stock-management">
         <h1 style = {{color: 'rgb(32, 84, 34)'}}>Tea Type Stock Management</h1>
         
@@ -138,7 +143,7 @@ const TeaTypeStockManagement = () => {
           </div>
         </div>
       </div>
-    </EmployeeLayout>
+    </Layout>
   );
 };
 

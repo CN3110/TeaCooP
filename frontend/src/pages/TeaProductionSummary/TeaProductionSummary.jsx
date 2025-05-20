@@ -6,6 +6,7 @@ import 'react-datepicker/dist/react-datepicker.css';
 import './TeaProductionSummary.css';
 import ArrowBack from '@mui/icons-material/ArrowBack';
 import EmployeeLayout from '../../components/EmployeeLayout/EmployeeLayout';
+import AdminLayout from '../../components/AdminLayout/AdminLayout';
 import {
   Card,
   CardContent,
@@ -19,6 +20,9 @@ import {
 
 import { CalendarMonth, Coffee, LocalShipping, Inventory, ArrowForward, BarChart } from '@mui/icons-material';
 import CloseIcon from '@mui/icons-material/Close';
+  const userRole = localStorage.getItem('userRole');
+const Layout = userRole === 'admin' ? AdminLayout : EmployeeLayout;
+
 
 const TeaProductionSummary = () => {
   const navigate = useNavigate();
@@ -107,7 +111,7 @@ const TeaProductionSummary = () => {
   }
 
   return (
-    <EmployeeLayout>
+    <Layout>
     <div className="page-wrapper">
        
       <div className="header">
@@ -228,7 +232,7 @@ const TeaProductionSummary = () => {
 </Card>
     
         </div>
-            </EmployeeLayout>
+            </Layout>
 
   );
 };

@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import EmployeeLayout from "../../../components/EmployeeLayout/EmployeeLayout";
+import AdminLayout from "../../../components/AdminLayout/AdminLayout";
 import Snackbar from "@mui/material/Snackbar";
 import MuiAlert from "@mui/material/Alert";
 import "./AddBroker.css";
@@ -183,9 +184,11 @@ const AddBroker = () => {
       setIsSubmitting(false);
     }
   };
+const userRole = localStorage.getItem('userRole');
+  const Layout = userRole === 'admin' ? AdminLayout : EmployeeLayout;
 
   return (
-    <EmployeeLayout>
+    <Layout>
       <div className="add-broker-container">
         <h2>Add Broker</h2>
         <form onSubmit={handleSubmit} className="two-column-form">
@@ -342,7 +345,7 @@ const AddBroker = () => {
           </Alert>
         </Snackbar>
       </div>
-    </EmployeeLayout>
+    </Layout>
   );
 };
 

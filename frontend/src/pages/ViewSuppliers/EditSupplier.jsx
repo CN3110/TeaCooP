@@ -4,6 +4,7 @@ import Snackbar from "@mui/material/Snackbar";
 import MuiAlert from "@mui/material/Alert";
 import "./EditSupplier.css";
 import EmployeeLayout from "../../components/EmployeeLayout/EmployeeLayout";
+import AdminLayout from "../../components/AdminLayout/AdminLayout";
 
 const Alert = React.forwardRef(function Alert(props, ref) {
   return <MuiAlert elevation={6} ref={ref} variant="filled" {...props} />;
@@ -142,8 +143,12 @@ const EditSupplierPage = () => {
 
   if (isLoading) return <div className="loading">Loading supplier data...</div>;
 
+  
+const userRole = localStorage.getItem('userRole');
+const Layout = userRole === 'admin' ? AdminLayout : EmployeeLayout;
+
   return (
-    <EmployeeLayout>
+    <Layout>
     <div className="edit-supplier-container">
       {/* Snackbar for alerts */}
       <Snackbar
@@ -331,7 +336,7 @@ const EditSupplierPage = () => {
         </div>
       </form>
     </div>
-    </EmployeeLayout>
+    </Layout>
   );
 };
 

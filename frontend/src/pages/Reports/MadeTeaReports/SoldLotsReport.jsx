@@ -21,6 +21,7 @@ import {
   GridOn,
 } from "@mui/icons-material";
 import EmployeeLayout from "../../../components/EmployeeLayout/EmployeeLayout";
+import AdminLayout from "../../../components/AdminLayout/AdminLayout";
 
 const SoldLotsReport = () => {
   const [lots, setLots] = useState([]);
@@ -214,8 +215,12 @@ const SoldLotsReport = () => {
 
   const navigate = useNavigate();
 
+  
+const userRole = localStorage.getItem('userRole');
+const Layout = userRole === 'admin' ? AdminLayout : EmployeeLayout;
+
   return (
-    <EmployeeLayout>
+    <Layout>
       <div className="container mt-4 mb-5">
         <div className="d-flex justify-content-between align-items-center mb-4">
           <Button 
@@ -389,7 +394,7 @@ const SoldLotsReport = () => {
           </Alert>
         </Snackbar>
       </div>
-    </EmployeeLayout>
+    </Layout>
   );
 };
 

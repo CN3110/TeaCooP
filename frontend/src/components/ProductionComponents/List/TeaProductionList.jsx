@@ -477,36 +477,35 @@ const TeaProductionList = () => {
       </div>
 
       <div className="cards">
-        <Card
-          sx={{
-            maxWidth: 300,
-            cursor: "pointer",
-            backgroundColor: "#f0f4ff",
-            marginBottom: 2,
-          }}
-        >
-          <CardActionArea onClick={handlePacketAllocationClick}>
-            <CardContent>
-              <Typography variant="h6" color="primary">
-                Allocated for Tea Packets: {allocatedForPackets ?? "Loading..."}{" "}
-                kg
-              </Typography>
-            </CardContent>
-          </CardActionArea>
-        </Card>
+<Card
+  sx={{
+    maxWidth: 300,
+    cursor: "pointer",
+    backgroundColor: "#f0f4ff",
+    marginBottom: 2,
+  }}
+>
+  <CardActionArea onClick={handlePacketAllocationClick}>
+    <CardContent>
+      <Typography variant="h6" color="primary">
+        Allocated for Tea Packets:{" "}
+        {allocatedForPackets != null ? allocatedForPackets.toFixed(2) : "Loading..."} kg
+      </Typography>
+    </CardContent>
+  </CardActionArea>
+</Card>
 
-        <Card
-          sx={{ maxWidth: 300, cursor: "pointer", backgroundColor: "#f9f9f9" }}
-        >
-          <CardActionArea onClick={handleTeaTypeAllocationClick}>
-            <CardContent>
-              <Typography variant="h6" color="secondary">
-                Allocated for Tea Type Categorization:{" "}
-                {allocatedForTeaType ?? "Loading..."} kg
-              </Typography>
-            </CardContent>
-          </CardActionArea>
-        </Card>
+<Card sx={{ maxWidth: 300, cursor: "pointer", backgroundColor: "#f9f9f9" }}>
+  <CardActionArea onClick={handleTeaTypeAllocationClick}>
+    <CardContent>
+      <Typography variant="h6" color="secondary">
+        Allocated for Tea Type Categorization:{" "}
+        {allocatedForTeaType != null ? allocatedForTeaType.toFixed(2) : "Loading..."} kg
+      </Typography>
+    </CardContent>
+  </CardActionArea>
+</Card>
+
       </div>
       {/* Table */}
       <div className="table-container">

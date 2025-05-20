@@ -10,6 +10,7 @@ import 'jspdf-autotable';
 import axios from 'axios';
 import moment from 'moment';
 import EmployeeLayout from '../../../components/EmployeeLayout/EmployeeLayout.jsx';
+import AdminLayout from '../../../components/AdminLayout/AdminLayout.jsx';
 
 const TeaPacketReport = () => {
   const [allPackets, setAllPackets] = useState([]);
@@ -132,9 +133,12 @@ const TeaPacketReport = () => {
 
     const navigate = useNavigate();
 
+    
+const userRole = localStorage.getItem('userRole');
+const Layout = userRole === 'admin' ? AdminLayout : EmployeeLayout;
 
   return (
-    <EmployeeLayout>
+    <Layout>
       <div style={{ padding: 20 }}>
          <Button 
   variant="outlined" 
@@ -298,7 +302,7 @@ const TeaPacketReport = () => {
           </>
         )}
       </div>
-    </EmployeeLayout>
+    </Layout>
   );
 };
 

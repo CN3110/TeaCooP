@@ -19,6 +19,7 @@ import { DataGrid } from "@mui/x-data-grid";
 import axios from "axios";
 import moment from "moment";
 import EmployeeLayout from "../../components/EmployeeLayout/EmployeeLayout";
+import AdminLayout from "../../components/AdminLayout/AdminLayout";
 
 const TeaPacket = () => {
   const [packets, setPackets] = useState([]);
@@ -294,15 +295,19 @@ const TeaPacket = () => {
     },
   ];
 
+  
+const userRole = localStorage.getItem('userRole');
+const Layout = userRole === 'admin' ? AdminLayout : EmployeeLayout;
+
   return (
-    <EmployeeLayout>
+    <Layout>
       <h2>Tea Packet Management</h2>
       <div style={{ padding: 20 }}>
         <Grid container spacing={2} style={{ marginBottom: 24 }}>
           <Grid item xs={12} sm={4}>
             <Card style={{ padding: 16 }}>
               <Typography variant="subtitle2">Allocated for Packets (5%)</Typography>
-              <Typography variant="h6">{availableData.allocatedForPackets} kg</Typography>
+              <Typography variant="h6">{availableData.allocatedForPackets.toFixed(2)} kg</Typography>
             </Card>
           </Grid>
           <Grid item xs={12} sm={4}>
@@ -439,7 +444,7 @@ const TeaPacket = () => {
           <Button color="error" onClick={handleDelete}>Delete</Button>
         </DialogActions>
       </Dialog>
-    </EmployeeLayout>
+    </Layout>
   );
 };
 

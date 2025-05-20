@@ -2,6 +2,7 @@ import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { BiSearch } from "react-icons/bi";
 import EmployeeLayout from "../../../components/EmployeeLayout/EmployeeLayout";
+import AdminLayout from "../../../components/AdminLayout/AdminLayout";
 import Snackbar from "@mui/material/Snackbar";
 import MuiAlert from "@mui/material/Alert";
 import {
@@ -126,8 +127,11 @@ const ViewBrokers = () => {
   const currentBrokers = filteredBrokers.slice(indexOfFirstBroker, indexOfLastBroker);
   const totalPages = Math.ceil(filteredBrokers.length / brokersPerPage);
 
+  const userRole = localStorage.getItem('userRole');
+const Layout = userRole === 'admin' ? AdminLayout : EmployeeLayout;
+
   return (
-    <EmployeeLayout>
+    <Layout>
       <div className="view-broker-container">
         <div className="content-header">
           <h2>View Brokers</h2>
@@ -292,7 +296,7 @@ const ViewBrokers = () => {
           </Alert>
         </Snackbar>
       </div>
-    </EmployeeLayout>
+    </Layout>
   );
 };
 

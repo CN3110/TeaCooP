@@ -2,6 +2,7 @@ import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom"; 
 import { v4 as uuidv4 } from "uuid";
 import EmployeeLayout from "../../components/EmployeeLayout/EmployeeLayout";
+import AdminLayout from "../../components/AdminLayout/AdminLayout";
 import Snackbar from "@mui/material/Snackbar";
 import MuiAlert from "@mui/material/Alert";
 import "./AddSupplier.css";
@@ -182,9 +183,11 @@ const AddSupplier = () => {
 
   const handleCancel = () => navigate("/view-suppliers");
 
-  
+const userRole = localStorage.getItem('userRole');
+const Layout = userRole === 'admin' ? AdminLayout : EmployeeLayout;
+
 return (
-    <EmployeeLayout>
+    <Layout>
       <div className="add-supplier-container">
         <h3>Add New Supplier</h3>
 
@@ -317,7 +320,7 @@ return (
 </Snackbar>
 
       </div>
-    </EmployeeLayout>
+    </Layout>
   );
 };
 
