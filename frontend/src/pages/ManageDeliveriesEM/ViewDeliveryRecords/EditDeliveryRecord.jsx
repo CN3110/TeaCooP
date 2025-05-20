@@ -3,6 +3,7 @@ import { useParams, useNavigate } from "react-router-dom";
 import Snackbar from "@mui/material/Snackbar";
 import MuiAlert from "@mui/material/Alert";
 import EmployeeLayout from "../../../components/EmployeeLayout/EmployeeLayout"
+import AdminLayout from "../../../components/AdminLayout/AdminLayout";
 import './EditDeliveryRecord.css';
 
 const EditDeliveryRecord = () => {
@@ -279,8 +280,13 @@ const EditDeliveryRecord = () => {
     }
   };
 
+  
+const userRole = localStorage.getItem('userRole');
+const Layout = userRole === 'admin' ? AdminLayout : EmployeeLayout;
+  
+
   return (
-    <EmployeeLayout>
+    <Layout>
       <div className="edit-delivery-container">
         <h3>Edit Tea Delivery Record</h3>
         <div className="edit-delivery">
@@ -575,7 +581,7 @@ const EditDeliveryRecord = () => {
           </div>
         </div>
       </div>
-  </EmployeeLayout>
+  </Layout>
   );
 };
 

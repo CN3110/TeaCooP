@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import EmployeeLayout from "../../../components/EmployeeLayout/EmployeeLayout";
+import AdminLayout from "../../../components/AdminLayout/AdminLayout";
 import DatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
 import "./CreateLot.css";
@@ -261,8 +262,13 @@ const CreateLot = () => {
     }
   };
 
+  
+
+const userRole = localStorage.getItem('userRole');
+const Layout = userRole === 'admin' ? AdminLayout : EmployeeLayout;
+
   return (
-    <EmployeeLayout>
+    <Layout>
       <div className="page-content">
         {/* Available Weights Card */}
         <div className="md:w-1/3 bg-gray-100 p-6 rounded-2xl shadow-md">
@@ -461,7 +467,7 @@ const CreateLot = () => {
           </form>
         </div>
       </div>
-    </EmployeeLayout>
+    </Layout>
   );
 };
 

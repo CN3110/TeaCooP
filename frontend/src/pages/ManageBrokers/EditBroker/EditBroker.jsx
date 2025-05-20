@@ -1,5 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
+import EmployeeLayout from "../../../components/EmployeeLayout/EmployeeLayout";
+import AdminLayout from "../../../components/AdminLayout/AdminLayout";
 import Snackbar from "@mui/material/Snackbar";
 import MuiAlert from "@mui/material/Alert";
 import "./EditBroker.css";
@@ -191,8 +193,11 @@ const EditBroker = () => {
     }
   };
 
+  const userRole = localStorage.getItem('userRole');
+  const Layout = userRole === 'admin' ? AdminLayout : EmployeeLayout;
+  
   return (
-    
+    <Layout>
       <div className="edit-broker-container">
         <h2>Edit Broker - {brokerData.brokerId} {brokerData.brokerName}</h2>
         <form onSubmit={handleSubmit} className="two-column-form">
@@ -344,6 +349,7 @@ const EditBroker = () => {
           </Alert>
         </Snackbar>
       </div>
+      </Layout>
   );
 };
 

@@ -15,6 +15,7 @@ import {
 } from "@mui/material";
 import { Edit as EditIcon, Delete as DeleteIcon } from "@mui/icons-material";
 import EmployeeLayout from "../../../components/EmployeeLayout/EmployeeLayout";
+import AdminLayout from "../../../components/AdminLayout/AdminLayout";
 import "./ViewTeaTypes.css";
 
 const ViewTeaTypes = () => {
@@ -101,8 +102,12 @@ const ViewTeaTypes = () => {
     setSnackbar({ ...snackbar, open: false });
   };
 
+  
+const userRole = localStorage.getItem('userRole');
+const Layout = userRole === 'admin' ? AdminLayout : EmployeeLayout;
+
   return (
-    <EmployeeLayout>
+    <Layout>
       <div className="view-tea-types-container">
         <div className="content-header">
           <h3>View Tea Types</h3>
@@ -180,7 +185,7 @@ const ViewTeaTypes = () => {
           </Button>
         </DialogActions>
       </Dialog>
-    </EmployeeLayout>
+    </Layout>
   );
 };
 

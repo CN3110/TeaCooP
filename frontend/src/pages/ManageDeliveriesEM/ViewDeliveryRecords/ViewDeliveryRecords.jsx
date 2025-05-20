@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import EmployeeLayout from "../../../components/EmployeeLayout/EmployeeLayout";
+import AdminLayout from "../../../components/AdminLayout/AdminLayout";
 
 // Material UI Components
 import Snackbar from "@mui/material/Snackbar";
@@ -191,8 +192,12 @@ const ViewDeliveryRecords = () => {
     });
   };
 
+  
+const userRole = localStorage.getItem('userRole');
+const Layout = userRole === 'admin' ? AdminLayout : EmployeeLayout;
+
   return (
-    <EmployeeLayout>
+    <Layout>
       <div className="view-delivery-records-container">
         <Snackbar
           open={snackbar.open}
@@ -412,7 +417,7 @@ const ViewDeliveryRecords = () => {
           </div>
         )}
       </div>
-    </EmployeeLayout>
+    </Layout>
   );
 };
 

@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import EmployeeLayout from "../../components/EmployeeLayout/EmployeeLayout";
+import AdminLayout from "../../components/AdminLayout/AdminLayout";
 import {
   Box,
   Typography,
@@ -176,8 +177,12 @@ const ViewSuppliers = () => {
   const emptyRows = page > 0 ? Math.max(0, (1 + page) * rowsPerPage - filteredSuppliers.length) : 0;
   const paginatedSuppliers = filteredSuppliers.slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage);
 
+  
+const userRole = localStorage.getItem('userRole');
+const Layout = userRole === 'admin' ? AdminLayout : EmployeeLayout;
+
   return (
-    <EmployeeLayout>
+    <Layout>
       <div className="view-supplier-container">
         <Card className="supplier-card">
           <Box className="content-header">
@@ -407,7 +412,7 @@ const ViewSuppliers = () => {
           </Alert>
         </Snackbar>
       </div>
-    </EmployeeLayout>
+    </Layout>
   );
 };
 

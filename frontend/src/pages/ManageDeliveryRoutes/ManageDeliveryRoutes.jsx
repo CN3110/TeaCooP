@@ -2,6 +2,7 @@ import React, { useState, useEffect } from "react";
 import axios from "axios";
 import './ManageDeliveryRoutes.css';
 import EmployeeLayout from "../../components/EmployeeLayout/EmployeeLayout";
+import AdminLayout from "../../components/AdminLayout/AdminLayout";
 
 const ManageDeliveryRoutes = () => {
   const [routes, setRoutes] = useState([]);
@@ -72,8 +73,12 @@ const ManageDeliveryRoutes = () => {
     }
   };
 
+  
+const userRole = localStorage.getItem('userRole');
+const Layout = userRole === 'admin' ? AdminLayout : EmployeeLayout;
+
   return (
-    <EmployeeLayout>
+    <Layout>
       <div>
         <h1>Delivery Routes</h1>
 
@@ -139,7 +144,7 @@ const ManageDeliveryRoutes = () => {
           </tbody>
         </table>
       </div>
-    </EmployeeLayout>
+    </Layout>
   );
 };
 

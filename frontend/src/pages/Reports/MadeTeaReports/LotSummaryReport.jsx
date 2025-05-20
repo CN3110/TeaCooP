@@ -2,6 +2,7 @@ import React, { useEffect, useState } from "react";
 import { useNavigate } from 'react-router-dom';
 import { ArrowBack } from '@mui/icons-material';
 import EmployeeLayout from "../../../components/EmployeeLayout/EmployeeLayout";
+import AdminLayout from "../../../components/AdminLayout/AdminLayout";
 import jsPDF from "jspdf";
 import "jspdf-autotable";
 import {
@@ -131,8 +132,12 @@ const LotSummaryReport = () => {
 
    const navigate = useNavigate();
 
+   
+const userRole = localStorage.getItem('userRole');
+const Layout = userRole === 'admin' ? AdminLayout : EmployeeLayout;
+
   return (
-    <EmployeeLayout>
+    <Layout>
       <div className="container mt-4 mb-5">
         <Button 
   variant="outlined" 
@@ -277,7 +282,7 @@ const LotSummaryReport = () => {
           </Alert>
         </Snackbar>
       </div>
-    </EmployeeLayout>
+    </Layout>
   );
 };
 

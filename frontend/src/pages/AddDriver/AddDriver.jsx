@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import EmployeeLayout from "../../components/EmployeeLayout/EmployeeLayout";
+import AdminLayout from "../../components/AdminLayout/AdminLayout";
 import Snackbar from "@mui/material/Snackbar";
 import MuiAlert from "@mui/material/Alert";
 import "./AddDriver.css";
@@ -143,8 +144,11 @@ const AddDriver = () => {
     }
   };
 
+const userRole = localStorage.getItem('userRole');
+const Layout = userRole === 'admin' ? AdminLayout : EmployeeLayout;
+
   return (
-    <EmployeeLayout>
+    <Layout>
       <div className="add-driver-container">
 
         {/* Snackbar for alerts */}
@@ -286,7 +290,7 @@ const AddDriver = () => {
           </div>
         </form>
       </div>
-    </EmployeeLayout>
+    </Layout>
   );
 };
 

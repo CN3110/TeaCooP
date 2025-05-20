@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import EmployeeLayout from '../../../components/EmployeeLayout/EmployeeLayout.jsx';
+import AdminLayout from '../../../components/AdminLayout/AdminLayout.jsx';
 import {
   Table,
   TableBody,
@@ -73,18 +74,21 @@ const ViewSoldPrices = () => {
     }).format(amount);
   };
 
+const userRole = localStorage.getItem('userRole');
+const Layout = userRole === 'admin' ? AdminLayout : EmployeeLayout;
+
   if (loading) {
     return (
-      <EmployeeLayout>
+      <Layout>
         <Box display="flex" justifyContent="center" alignItems="center" minHeight="200px">
           <CircularProgress />
         </Box>
-      </EmployeeLayout>
+      </Layout>
     );
   }
 
   return (
-    <EmployeeLayout>
+    <Layout>
       <Box sx={{ p: 3 }}>
         <Paper elevation={3} sx={{ p: 3, mb: 3 }}>
           <Box display="flex" justifyContent="space-between" alignItems="center" mb={3}>
@@ -172,7 +176,7 @@ const ViewSoldPrices = () => {
           )}
         </Paper>
       </Box>
-    </EmployeeLayout>
+    </Layout>
   );
 };
 

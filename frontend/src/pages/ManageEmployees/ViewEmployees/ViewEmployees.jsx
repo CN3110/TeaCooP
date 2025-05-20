@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { BiSearch } from "react-icons/bi";
-import EmployeeLayout from "../../../components/EmployeeLayout/EmployeeLayout";
+import AdminLayout from "../../../components/AdminLayout/AdminLayout";
 import Snackbar from "@mui/material/Snackbar";
 import MuiAlert from "@mui/material/Alert";
 import {
@@ -143,7 +143,7 @@ const ViewEmployees = () => {
   };
 
   return (
-    <EmployeeLayout>
+    <AdminLayout>
       <div className="view-employee-container">
         <div className="content-header">
           <h3>View Employees</h3>
@@ -295,7 +295,7 @@ const ViewEmployees = () => {
           </Alert>
         </Snackbar>
       </div>
-    </EmployeeLayout>
+    </AdminLayout>
   );
 };
 

@@ -34,6 +34,7 @@ import {
   NavigateNext
 } from "@mui/icons-material";
 import EmployeeLayout from "../../../components/EmployeeLayout/EmployeeLayout";
+import AdminLayout from "../../../components/AdminLayout/AdminLayout";
 import { styled } from "@mui/material/styles";
 
 const DarkGreenButton = styled(Button)(({ theme }) => ({
@@ -168,8 +169,12 @@ const ViewLots = () => {
     }
   };
 
+  
+const userRole = localStorage.getItem('userRole');
+const Layout = userRole === 'admin' ? AdminLayout : EmployeeLayout;
+
   return (
-    <EmployeeLayout>
+    <Layout>
       <Box sx={{ p: 3 }}>
         {/* Header Section */}
         <Box sx={{ 
@@ -370,7 +375,7 @@ const ViewLots = () => {
           {snackbar.message}
         </Alert>
       </Snackbar>
-    </EmployeeLayout>
+    </Layout>
   );
 };
 

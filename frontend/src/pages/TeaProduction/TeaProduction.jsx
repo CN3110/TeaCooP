@@ -5,13 +5,17 @@ import TeaProductionForm from '../../components/ProductionComponents/Form/TeaPro
 import TeaProductionList from '../../components/ProductionComponents/List/TeaProductionList';
 import './TeaProduction.css';
 import EmployeeLayout from '../../components/EmployeeLayout/EmployeeLayout'; 
-
+import AdminLayout from '../../components/AdminLayout/AdminLayout';
 
 const TeaProductionPage = () => {
   const navigate = useNavigate();
 
+  
+const userRole = localStorage.getItem('userRole');
+const Layout = userRole === 'admin' ? AdminLayout : EmployeeLayout;
+
   return (
-    <EmployeeLayout> 
+    <Layout> 
     <div className="tea-production-page">
       <div className="page-header">
         
@@ -28,7 +32,7 @@ const TeaProductionPage = () => {
         </div>
       </div>
     </div>
-    </EmployeeLayout>
+    </Layout>
   );
 };
 

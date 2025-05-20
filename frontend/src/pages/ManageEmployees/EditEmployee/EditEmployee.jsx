@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate, useParams } from "react-router-dom";
-import EmployeeLayout from "../../../components/EmployeeLayout/EmployeeLayout";
+import AdminLayout from "../../../components/AdminLayout/AdminLayout";
 import Snackbar from "@mui/material/Snackbar";
 import MuiAlert from "@mui/material/Alert";
 import "./EditEmployee.css";
@@ -149,16 +149,16 @@ const EditEmployee = () => {
 
   if (loading) {
     return (
-      <EmployeeLayout>
+      <AdminLayout>
         <div className="edit-employee-container">
           <div className="loading-indicator">Loading employee data...</div>
         </div>
-      </EmployeeLayout>
+      </AdminLayout>
     );
   }
 
   return (
-    <EmployeeLayout>
+    <AdminLayout>
       <div className="edit-employee-container">
         <h2>Edit Employee</h2>
         <form onSubmit={handleSubmit} className="employee-form">
@@ -262,7 +262,7 @@ const EditEmployee = () => {
           </Alert>
         </Snackbar>
       </div>
-    </EmployeeLayout>
+    </AdminLayout>
   );
 };
 

@@ -2,6 +2,7 @@ import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { BiSearch } from "react-icons/bi";
 import EmployeeLayout from "../../components/EmployeeLayout/EmployeeLayout";
+import AdminLayout from "../../components/AdminLayout/AdminLayout";
 import Snackbar from "@mui/material/Snackbar";
 import MuiAlert from "@mui/material/Alert";
 import {
@@ -154,8 +155,11 @@ const ViewDrivers = () => {
     setCurrentPage(page);
   };
 
+const userRole = localStorage.getItem('userRole');
+const Layout = userRole === 'admin' ? AdminLayout : EmployeeLayout;
+  
   return (
-    <EmployeeLayout>
+    <Layout>
       <div className="view-driver-container">
         <div className="content-header">
           <h3>View Drivers</h3>
@@ -328,7 +332,7 @@ const ViewDrivers = () => {
           </Alert>
         </Snackbar>
       </div>
-    </EmployeeLayout>
+    </Layout>
   );
 };
 

@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import EmployeeLayout from "../../../components/EmployeeLayout/EmployeeLayout";
+import AdminLayout from "../../../components/AdminLayout/AdminLayout";
 import {
   Dialog,
   DialogTitle,
@@ -121,22 +122,26 @@ const ViewValuations = () => {
     setSnackbarOpen(false);
   };
 
+  
+const userRole = localStorage.getItem('userRole');
+const Layout = userRole === 'admin' ? AdminLayout : EmployeeLayout;
+
   if (loading)
     return (
-      <EmployeeLayout>
+      <Layout>
         <div className="p-6">Loading valuations...</div>
-      </EmployeeLayout>
+      </Layout>
     );
 
   if (error)
     return (
-      <EmployeeLayout>
+      <Layout>
         <div className="p-6 text-red-500">Error: {error}</div>
-      </EmployeeLayout>
+      </Layout>
     );
 
   return (
-    <EmployeeLayout>
+    <Layout>
       <div className="p-6">
         <h2 className="text-xl font-bold mb-4">
           Valuations for Lot {lotNumber}
@@ -230,7 +235,7 @@ const ViewValuations = () => {
           {snackbarMessage}
         </Alert>
       </Snackbar>
-    </EmployeeLayout>
+    </Layout>
   );
 };
 

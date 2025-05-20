@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import EmployeeLayout from "../../../components/EmployeeLayout/EmployeeLayout";
+import AdminLayout from "../../../components/AdminLayout/AdminLayout";
 import { 
   Snackbar, 
   Alert, 
@@ -205,8 +206,12 @@ const ViewConfirmedLots = () => {
     });
   };
 
+  
+const userRole = localStorage.getItem('userRole');
+const Layout = userRole === 'admin' ? AdminLayout : EmployeeLayout;
+
   return (
-    <EmployeeLayout>
+    <Layout>
       <Box sx={{ p: 3 }}>
          <Typography variant="h4" component="h1" sx={{ 
           mb: 3, 
@@ -481,7 +486,7 @@ const ViewConfirmedLots = () => {
           </Alert>
         </Snackbar>
       </Box>
-    </EmployeeLayout>
+    </Layout>
   );
 };
 

@@ -15,6 +15,7 @@ import {
 import MuiAlert from '@mui/material/Alert';
 import './RawTeaRecords.css';
 import EmployeeLayout from '../../components/EmployeeLayout/EmployeeLayout';
+import AdminLayout from '../../components/AdminLayout/AdminLayout';
 
 const RawTeaRecords = () => {
   const [deliveries, setDeliveries] = useState([]);
@@ -152,8 +153,12 @@ const RawTeaRecords = () => {
     return (greenTea + randalu).toFixed(2);
   };
 
+  
+const userRole = localStorage.getItem('userRole');
+const Layout = userRole === 'admin' ? AdminLayout : EmployeeLayout;
+
   return (
-    <EmployeeLayout>
+    <Layout>
     <div className="raw-tea-records-container">
       <h2>Raw Tea Records</h2>
 
@@ -268,7 +273,7 @@ const RawTeaRecords = () => {
         </MuiAlert>
       </Snackbar>
     </div>
-    </EmployeeLayout>
+    </Layout>
   );
 };
 

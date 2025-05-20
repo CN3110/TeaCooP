@@ -26,6 +26,7 @@ import { jsPDF } from 'jspdf';
 import 'jspdf-autotable';
 import { format } from 'date-fns';
 import EmployeeLayout from '../../../components/EmployeeLayout/EmployeeLayout'; 
+import AdminLayout from '../../../components/AdminLayout/AdminLayout';
 
 const MadeTeaProductionReport = () => {
   const [reportData, setReportData] = useState([]);
@@ -157,8 +158,12 @@ const MadeTeaProductionReport = () => {
   
 const navigate = useNavigate();
 
+
+const userRole = localStorage.getItem('userRole');
+const Layout = userRole === 'admin' ? AdminLayout : EmployeeLayout;
+
   return (
-    <EmployeeLayout>
+    <Layout>
     <Paper elevation={3} sx={{ p: 3 }}>
       <Button 
   variant="outlined" 
@@ -291,7 +296,7 @@ const navigate = useNavigate();
         </Alert>
       </Snackbar>
     </Paper>
-    </EmployeeLayout>
+    </Layout>
   );
 };
 
