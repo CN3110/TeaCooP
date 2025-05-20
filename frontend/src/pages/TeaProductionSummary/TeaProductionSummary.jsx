@@ -109,16 +109,7 @@ const TeaProductionSummary = () => {
   return (
     <EmployeeLayout>
     <div className="page-wrapper">
-        <div className="back-button">
-      <Button
-        startIcon={<ArrowBack />}
-        onClick={() => navigate('/employee-dashboard')}
-        variant="outlined"
-        color="success"
-      >
-        Back
-      </Button>
-    </div>
+       
       <div className="header">
         <div>
           <Typography variant="h4" className="header-title">

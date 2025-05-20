@@ -16,6 +16,7 @@
     margin: 20px 0;
   }
   
+  
   .stock-table {
     width: 100%;
     border-collapse: collapse;
@@ -38,35 +39,21 @@
   .stock-table tr:hover {
     background-color: #f5f5f5;
   }
+  /* Add these styles to your TeaTypeStockList.css */
+.stock-table .MuiIconButton-root {
+  padding: 8px;
+  margin: 0 4px;
   
-  .action-btn {
-    padding: 6px 12px;
-    margin: 0 5px;
-    border: none;
-    border-radius: 4px;
-    cursor: pointer;
-    font-size: 14px;
-    transition: background-color 0.3s;
-  }
-  
-  .edit-btn {
-    background-color: #5bff71;
-    color: white;
-  }
-  
-  .edit-btn:hover {
-    background-color: #33ff4e;
-  }
-  
-  .delete-btn {
-    background-color: #e74c3c;
-    color: white;
-  }
-  
-  .delete-btn:hover {
-    background-color: #c0392b;
-  }
-  
+}
+
+.stock-table .MuiIconButton-root:hover {
+  background-color: rgba(0, 0, 0, 0.04);
+}
+
+.stock-table .MuiSvgIcon-root {
+  font-size: 1.2rem;
+}
+
   /* Modal Styles */
   .modal {
     position: fixed;

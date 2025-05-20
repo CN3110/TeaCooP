@@ -76,18 +76,48 @@ const TeaTypeStockManagement = () => {
   return (
     <EmployeeLayout>
       <div className="tea-stock-management">
-        <h1>Tea Type Stock Management</h1>
+        <h1 style = {{color: 'rgb(32, 84, 34)'}}>Tea Type Stock Management</h1>
         
-        <div className="weight-info">
-          <h6 className="allocated-label">
-            Allocated Made Tea Weight for Tea Type Categorizing: {parseFloat(allocatedForTeaTypeCategorization).toFixed(2)} kg
-          </h6>
-          <h6 className="used-label">
-            Used Made Tea Weight for Tea Type Categorizing: {parseFloat(usedForTeaTypeCategorization).toFixed(2)} kg
-          </h6>
-          <h6 className="available-label">
-            Available Made Tea Weight: {parseFloat(availableWeight).toFixed(2)} kg
-          </h6>
+        <div style={{ display: 'flex', gap: '1rem', marginBottom: '2rem', flexWrap: 'wrap' }}>
+          <div style={{
+            background: '#e8f5e9',
+            borderLeft: '6px solid #43a047',
+            padding: '1rem',
+            flex: '1',
+            borderRadius: '8px',
+            minWidth: '250px'
+          }}>
+            <h5 style={{ color: '#2e7d32' }}>Allocated Made Tea Weight</h5>
+            <p style={{ fontSize: '1.5rem', fontWeight: 'bold' }}>
+              {parseFloat(allocatedForTeaTypeCategorization).toFixed(2)} kg
+            </p>
+          </div>
+          <div style={{
+            background: '#f1f8e9',
+            borderLeft: '6px solid #9ccc65',
+            padding: '1rem',
+            flex: '1',
+            borderRadius: '8px',
+            minWidth: '250px'
+          }}>
+            <h5 style={{ color: '#689f38' }}>Used Made Tea Weight</h5>
+            <p style={{ fontSize: '1.5rem', fontWeight: 'bold' }}>
+              {parseFloat(usedForTeaTypeCategorization).toFixed(2)} kg
+            </p>
+          </div>
+          <div style={{
+            background: '#e0f2f1',
+            borderLeft: '6px solid #26a69a',
+            padding: '1rem',
+            flex: '1',
+            borderRadius: '8px',
+            minWidth: '250px'
+          }}>
+            <h5 style={{ color: '#00796b' }}>Available Made Tea Weight</h5>
+            <p style={{ fontSize: '1.5rem', fontWeight: 'bold' }}>
+              {parseFloat(availableWeight).toFixed(2)} kg
+            </p>
+          </div>
         </div>
 
         <TeaTypeTotals 
