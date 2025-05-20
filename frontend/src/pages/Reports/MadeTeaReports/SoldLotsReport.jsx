@@ -1,4 +1,6 @@
 import React, { useEffect, useState } from "react";
+import { useNavigate } from 'react-router-dom';
+import { ArrowBack } from '@mui/icons-material';
 import jsPDF from "jspdf";
 import autoTable from "jspdf-autotable";
 import * as XLSX from "xlsx";
@@ -210,10 +212,20 @@ const SoldLotsReport = () => {
   const currentRecords = lots.slice(indexOfFirstRecord, indexOfLastRecord);
   const totalPages = Math.ceil(lots.length / recordsPerPage);
 
+  const navigate = useNavigate();
+
   return (
     <EmployeeLayout>
       <div className="container mt-4 mb-5">
         <div className="d-flex justify-content-between align-items-center mb-4">
+          <Button 
+  variant="outlined" 
+  color="primary" 
+  startIcon={<ArrowBack />}
+  onClick={() => navigate('/report-dashboard')}
+>
+  Back
+</Button>
           <h2 className="mb-0 text-success">Sold Lots Management</h2>
           <div className="d-flex gap-2">
             <Button

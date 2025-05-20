@@ -1,4 +1,6 @@
 import React, { useEffect, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
+import { ArrowBack } from '@mui/icons-material';
 import axios from 'axios';
 import { 
   FileDownload as FileDownloadIcon, 
@@ -210,7 +212,7 @@ const DriverRecords = () => {
   }
 };
 
-
+  const navigate = useNavigate();
 
   const resetFilters = () => {
     setRouteFilter('');
@@ -222,9 +224,19 @@ const DriverRecords = () => {
   return (
     <EmployeeLayout>
     <Paper elevation={3} sx={{ p: 3, mb: 3 }}>
-      <Box display="flex" justifyContent="space-between" alignItems="center" mb={3}>
+       
+      <Box sx={{ mb: 4, display: 'flex', alignItems: 'center' }}>
+        <Button 
+          variant="outlined" 
+          color="primary" 
+          startIcon={<ArrowBack />}
+          onClick={() => navigate('/report-dashboard')}
+        >
+          Back
+        </Button>
+        
         <Typography variant="h4" component="h2">
-          Driver Records
+                        Driver Records
         </Typography>
       </Box>
 

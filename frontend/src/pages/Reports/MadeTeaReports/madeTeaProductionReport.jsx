@@ -1,4 +1,6 @@
 import React, { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
+import { ArrowBack } from '@mui/icons-material';
 import axios from 'axios';
 import {
   Box,
@@ -152,9 +154,20 @@ const MadeTeaProductionReport = () => {
     fetchReport();
   }, []);
 
+  
+const navigate = useNavigate();
+
   return (
     <EmployeeLayout>
     <Paper elevation={3} sx={{ p: 3 }}>
+      <Button 
+  variant="outlined" 
+  color="primary" 
+  startIcon={<ArrowBack />}
+  onClick={() => navigate('/report-dashboard')}
+>
+  Back
+</Button>
       <Typography variant="h5" gutterBottom>
         Made Tea Production Report
       </Typography>

@@ -1,4 +1,6 @@
 import React, { useEffect, useState } from "react";
+import { useNavigate } from 'react-router-dom';
+import { ArrowBack } from '@mui/icons-material';
 import EmployeeLayout from "../../../components/EmployeeLayout/EmployeeLayout";
 import jsPDF from "jspdf";
 import "jspdf-autotable";
@@ -127,9 +129,19 @@ const LotSummaryReport = () => {
   const currentRecords = filteredLots.slice(indexOfLastRecord - recordsPerPage, indexOfLastRecord);
   const totalPages = Math.ceil(filteredLots.length / recordsPerPage);
 
+   const navigate = useNavigate();
+
   return (
     <EmployeeLayout>
       <div className="container mt-4 mb-5">
+        <Button 
+  variant="outlined" 
+  color="primary" 
+  startIcon={<ArrowBack />}
+  onClick={() => navigate('/report-dashboard')}
+>
+  Back
+</Button>
         <h2 className="mb-4 text-success">Lot Summary Report</h2>
 
         <div className="row g-3 align-items-end mb-4">
