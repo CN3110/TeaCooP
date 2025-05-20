@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { Box, Typography, Grid, Paper, CircularProgress, Alert } from '@mui/material';
 
-const DashboardSummaryCards = () => {
+const DashboardSummaryCardsforadmin = () => {
   const [counts, setCounts] = useState({
     suppliers: 0,
     drivers: 0,
@@ -48,10 +48,11 @@ const DashboardSummaryCards = () => {
   );
 
   const cardData = [
-    { label: 'Suppliers', value: counts.suppliers, color: '#2e7d32' }, // Dark green
-    { label: 'Drivers', value: counts.drivers, color: '#43a047' }, // Medium green
-    { label: 'Brokers', value: counts.brokers, color: '#66bb6a' }, // Light green
-   // { label: 'Employees', value: counts.employees, color: 'rgba(165, 214, 167, 0.65)' }, // Very light green
+     { label: 'Employees', value: counts.employees, color: 'rgb(22, 59, 24)' }, 
+    { label: 'Suppliers', value: counts.suppliers, color: ' #2e7d32' }, // Dark green
+    { label: 'Drivers', value: counts.drivers, color: ' #43a047' }, // Medium green
+    { label: 'Brokers', value: counts.brokers, color: ' #66bb6a' }, // Light green
+   
   ];
 
   return (
@@ -84,4 +85,4 @@ const DashboardSummaryCards = () => {
   );
 };
 
-export default DashboardSummaryCards;
+export default DashboardSummaryCardsforadmin;

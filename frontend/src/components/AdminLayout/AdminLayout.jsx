@@ -2,7 +2,7 @@ import React from "react";
 import AdminSideBar from "../AdminSideBar/AdminSideBar";
 import "./AdminLayout.css";
 
-const EmployeeLayout = ({ children }) => {
+const AdminLayout = ({ children }) => {
   return (
     <div className="employee-layout">
       <AdminSideBar/>
@@ -15,4 +15,4 @@ const EmployeeLayout = ({ children }) => {
   );
 };
 
-export default EmployeeLayout;
+export default AdminLayout;
