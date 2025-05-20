@@ -394,7 +394,7 @@ const CreateLot = () => {
               </div>
 
               <div className="lot-form-group">
-                <label>Valuation Price (LKR):</label>
+                <label>Valuation Price per kg(LKR):</label>
                 <input
                   type="number"
                   name="valuationPrice"

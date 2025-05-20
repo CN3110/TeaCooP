@@ -302,7 +302,7 @@ const TeaPacket = () => {
           <Grid item xs={12} sm={4}>
             <Card style={{ padding: 16 }}>
               <Typography variant="subtitle2">Allocated for Packets (5%)</Typography>
-              <Typography variant="h6">{availableData.allocatedForPackets} kg</Typography>
+              <Typography variant="h6">{availableData.allocatedForPackets.toFixed(2)} kg</Typography>
             </Card>
           </Grid>
           <Grid item xs={12} sm={4}>

@@ -220,7 +220,7 @@ const ViewLots = () => {
                 <TableCell sx={{ color: 'common.dark' }} align="right">No. of Bags</TableCell>
                 <TableCell sx={{ color: 'common.dark' }} align="right">Net Weight (kg)</TableCell>
                 <TableCell sx={{ color: 'common.dark' }} align="right">Total Net Weight (kg)</TableCell>
-                <TableCell sx={{ color: 'common.dark' }} align="right">Valuation Price (LKR)</TableCell>
+                <TableCell sx={{ color: 'common.dark' }} align="right">Valuation Price per kg(LKR)</TableCell>
                 <TableCell sx={{ color: 'common.dark' }}>Notes</TableCell>
                 <TableCell sx={{ color: 'common.dark' }}>Status</TableCell>
                 <TableCell sx={{ color: 'common.dark' }}>Actions</TableCell>
