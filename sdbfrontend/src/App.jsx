@@ -35,7 +35,7 @@ const App = () => {
          
 
           {/* Supplier Routes */}
-          <Route path="/supplier-dashboard" element={<SupplierDashboard />} />
+          <Route path="/supplier-dashboard" element={<SupplierNotices />} />
           <Route path="/supplier-notices" element={<SupplierNotices />} />
           <Route path="/supplier-profile" element={<SProfile />} />
           <Route path="/request-transport" element={<RequestTransport />} />
