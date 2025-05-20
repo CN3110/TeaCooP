@@ -1,12 +1,33 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import EmployeeLayout from '../../../components/EmployeeLayout/EmployeeLayout.jsx';
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableContainer,
+  TableHead,
+  TableRow,
+  Paper,
+  TablePagination,
+  TextField,
+  Typography,
+  Box,
+  CircularProgress,
+  Alert,
+  Chip
+} from '@mui/material';
+import SearchIcon from '@mui/icons-material/Search';
 
 const ViewSoldPrices = () => {
   const [soldLots, setSoldLots] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [searchTerm, setSearchTerm] = useState('');
+
+  // Pagination state
+  const [page, setPage] = useState(0);
+  const [rowsPerPage, setRowsPerPage] = useState(10);
 
   useEffect(() => {
     const fetchSoldLots = async () => {
@@ -25,88 +46,132 @@ const ViewSoldPrices = () => {
     fetchSoldLots();
   }, []);
 
-  const filteredLots = soldLots.filter(lot => 
+  const filteredLots = soldLots.filter(lot =>
     lot.lotNumber.toLowerCase().includes(searchTerm.toLowerCase()) ||
     lot.teaGrade.toLowerCase().includes(searchTerm.toLowerCase()) ||
     lot.brokerName.toLowerCase().includes(searchTerm.toLowerCase()) ||
     lot.brokerCompanyName.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
+  // Handle page change
+  const handleChangePage = (event, newPage) => {
+    setPage(newPage);
+  };
+
+  // Handle rows per page change
+  const handleChangeRowsPerPage = (event) => {
+    setRowsPerPage(parseInt(event.target.value, 10));
+    setPage(0);
+  };
+
+  // Format currency
+  const formatCurrency = (amount) => {
+    return new Intl.NumberFormat('en-LK', {
+      style: 'currency',
+      currency: 'LKR',
+      minimumFractionDigits: 2
+    }).format(amount);
+  };
+
   if (loading) {
     return (
       <EmployeeLayout>
-        <div className="d-flex justify-content-center mt-5">
-          <div className="spinner-border text-primary" role="status">
-            <span className="visually-hidden">Loading...</span>
-          </div>
-        </div>
+        <Box display="flex" justifyContent="center" alignItems="center" minHeight="200px">
+          <CircularProgress />
+        </Box>
       </EmployeeLayout>
     );
   }
 
   return (
     <EmployeeLayout>
-      <div className="container mt-4">
-        <div className="card">
-          <div className="card-header bg-primary text-white">
-            <div className="d-flex justify-content-between align-items-center">
-              <h2 className="mb-0">All Sold Lots</h2>
-              <div className="col-md-4">
-                <input
-                  type="text"
-                  className="form-control"
-                  placeholder="Search lots..."
-                  value={searchTerm}
-                  onChange={(e) => setSearchTerm(e.target.value)}
-                />
-              </div>
-            </div>
-          </div>
-          <div className="card-body">
-            {error && <div className="alert alert-danger">{error}</div>}
+      <Box sx={{ p: 3 }}>
+        <Paper elevation={3} sx={{ p: 3, mb: 3 }}>
+          <Box display="flex" justifyContent="space-between" alignItems="center" mb={3}>
+            <Typography variant="h5" component="h1" sx={{ fontWeight: 600 }}>
+              All Sold Lots
+            </Typography>
+            <TextField
+              variant="outlined"
+              size="small"
+              placeholder="Search lots..."
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+              InputProps={{
+                startAdornment: <SearchIcon color="action" sx={{ mr: 1 }} />,
+              }}
+              sx={{ width: 300 }}
+            />
+          </Box>
 
-            {filteredLots.length === 0 ? (
-              <div className="alert alert-info">
-                {searchTerm ? 'No matching lots found' : 'No sold lots available'}
-              </div>
-            ) : (
-              <div className="table-responsive">
-                <table className="table table-striped table-hover">
-                  <thead className="table-light">
-                    <tr>
-                      <th>Lot #</th>
-                      <th>Tea Type</th>
-                      <th>Net Weight (kg)</th>
-                      <th>Broker</th>
-                      <th>Company</th>
-                      <th>Employee Valuation (LKR/kg)</th>
-                      <th>Sold Price (LKR/kg)</th>
-                      <th>Total Sold (LKR)</th>
-                     
-                      <th>Date Sold</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {filteredLots.map(lot => (
-                      <tr key={lot.saleId}>
-                        <td>{lot.lotNumber}</td>
-                        <td>{lot.teaTypeName}</td>
-                        <td>{lot.totalNetWeight}</td>
-                        <td>{lot.brokerName}</td>
-                        <td>{lot.brokerCompanyName}</td>
-                        <td>{lot.employeeValuation}</td>
-                        <td>{lot.soldPrice}</td>
-                        <td>{lot.totalSoldPrice}</td>
-                        <td>{new Date(lot.soldDate).toLocaleDateString()}</td>
-                      </tr>
+          {error && (
+            <Alert severity="error" sx={{ mb: 3 }}>
+              {error}
+            </Alert>
+          )}
+
+          {filteredLots.length === 0 ? (
+            <Alert severity="info" sx={{ mb: 3 }}>
+              {searchTerm ? 'No matching lots found' : 'No sold lots available'}
+            </Alert>
+          ) : (
+            <TableContainer component={Paper}>
+              <Table>
+                <TableHead sx={{ backgroundColor: 'success.main' }}>
+                  <TableRow>
+                    <TableCell sx={{ fontWeight: 600 }}>Lot #</TableCell>
+                    <TableCell sx={{ fontWeight: 600 }}>Tea Type</TableCell>
+                    <TableCell sx={{ fontWeight: 600 }}>Net Weight (kg)</TableCell>
+                    <TableCell sx={{ fontWeight: 600 }}>Broker</TableCell>
+                    <TableCell sx={{ fontWeight: 600 }}>Company</TableCell>
+                    <TableCell sx={{ fontWeight: 600 }}>Employee Valuation (LKR/kg)</TableCell>
+                    <TableCell sx={{ fontWeight: 600 }}>Sold Price (LKR/kg)</TableCell>
+                    <TableCell sx={{ fontWeight: 600 }}>Total Sold (LKR)</TableCell>
+                    <TableCell sx={{ fontWeight: 600 }}>Date Sold</TableCell>
+                  </TableRow>
+                </TableHead>
+                <TableBody>
+                  {filteredLots
+                    .slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage)
+                    .map((lot) => (
+                      <TableRow key={lot.saleId} hover>
+                        <TableCell>{lot.lotNumber}</TableCell>
+                        <TableCell>{lot.teaTypeName}</TableCell>
+                        <TableCell>{lot.totalNetWeight}</TableCell>
+                        <TableCell>{lot.brokerName}</TableCell>
+                        <TableCell>{lot.brokerCompanyName}</TableCell>
+                        <TableCell sx={{ fontWeight: 500 }}>
+                          {formatCurrency(lot.employeeValuation)}
+                        </TableCell>
+                        <TableCell sx={{ fontWeight: 500 }}>
+                          {formatCurrency(lot.soldPrice)}
+                        </TableCell>
+                        <TableCell sx={{ fontWeight: 500 }}>
+                          {formatCurrency(lot.totalSoldPrice)}
+                        </TableCell>
+                        <TableCell>
+                          {new Date(lot.soldDate).toLocaleDateString()}
+                        </TableCell>
+                      </TableRow>
                     ))}
-                  </tbody>
-                </table>
-              </div>
-            )}
-          </div>
-        </div>
-      </div>
+                </TableBody>
+              </Table>
+              <TablePagination
+                rowsPerPageOptions={[5, 10, 25]}
+                component="div"
+                count={filteredLots.length}
+                rowsPerPage={rowsPerPage}
+                page={page}
+                onPageChange={handleChangePage}
+                onRowsPerPageChange={handleChangeRowsPerPage}
+                sx={{
+                  borderTop: '1px solid rgba(224, 224, 224, 1)'
+                }}
+              />
+            </TableContainer>
+          )}
+        </Paper>
+      </Box>
     </EmployeeLayout>
   );
 };

@@ -60,30 +60,39 @@ const SupplierAutocomplete = ({ value, onChange, suppliers, onSelect }) => {
 };
 
 // Card component for supplier and driver info
+// Card component for supplier and driver info
 const InfoCard = ({ title, data, details, detailsTitle, detailsFields }) => {
   if (!data) return null;
   
+  // Basic fields to show for both suppliers and drivers
+  const basicFields = {
+    supplier: ['supplierId', 'supplierName', 'supplierContactNumber', 'supplierEmail', 'notes'],
+    driver: ['driverId', 'driverName', 'driverContactNumber', 'driverEmail', 'notes']
+  };
+  
+  // Determine if this is a supplier or driver card
+  const type = data.supplierId ? 'supplier' : 'driver';
+  
   return (
     <div className="info-card">
-      <h4>{title}</h4>
-      {Object.entries(data).map(([key, value]) => {
-        if (typeof value === 'string' && !key.includes('Details')) {
-          return (
-            <p key={key}>
-              <strong>{key.replace(/([A-Z])/g, ' $1').replace(/^./, str => str.toUpperCase())}:</strong> {value}
-            </p>
-          );
-        }
-        return null;
-      })}
+      <h5>{title}</h5>
       
-      {details && details.length > 0 && (
+      {/* Basic Info */}
+      {basicFields[type].map((field) => (
+        data[field] && (
+          <p key={field}>
+            <strong>{field.replace(/([A-Z])/g, ' $1').replace(/^./, str => str.toUpperCase())}:</strong> {data[field]}
+          </p>
+        )
+      ))}
+      
+      {/* Driver Vehicle Details (only shown for drivers) */}
+      {type === 'driver' && details && details.length > 0 && (
         <>
-          <h5>{detailsTitle}:</h5>
+          <h6>{detailsTitle}:</h6>
           <ul className="details-list">
             {details.map((item, idx) => (
               <li key={idx}>
-                <h6>{detailsTitle.replace(/s$/, '')} {idx + 1}</h6>
                 {detailsFields.map((field) => (
                   <p key={field.key}>
                     <strong>{field.label}:</strong> {item[field.key]} {field.unit || ''}
@@ -605,29 +614,24 @@ const AddNewDeliveryRecord = () => {
             </div>
           </form>
 
-          <div className="info-cards-container">
-            <InfoCard
-              title="Supplier Details"
-              data={selectedSupplier}
-              details={selectedSupplier?.landDetails}
-              detailsTitle="Land Details"
-              detailsFields={[
-                { key: "landAddress", label: "Address" },
-                { key: "landSize", label: "Size", unit: "acres" }
-              ]}
-            />
-            
-            <InfoCard
-              title="Driver Details"
-              data={selectedDriver}
-              details={selectedDriver?.vehicleDetails}
-              detailsTitle="Vehicle Details"
-              detailsFields={[
-                { key: "vehicleNumber", label: "Vehicle Number" },
-                { key: "vehicleType", label: "Vehicle Type" }
-              ]}
-            />
-          </div>
+<div className="info-cards-container">
+  <InfoCard
+    title="Supplier Details"
+    data={selectedSupplier}
+    details={selectedSupplier?.landDetails}
+  />
+
+  <InfoCard
+    title="Driver Details"
+    data={selectedDriver}
+    details={selectedDriver?.vehicleDetails}
+    detailsTitle="Vehicle Details"
+    detailsFields={[
+      { key: "vehicleNumber", label: "Vehicle Number" },
+      { key: "vehicleType", label: "Vehicle Type" }
+    ]}
+  />
+</div>
         </div>
       </div>
     </EmployeeLayout>

@@ -3,7 +3,7 @@ import { useParams, useNavigate } from "react-router-dom";
 import Snackbar from "@mui/material/Snackbar";
 import MuiAlert from "@mui/material/Alert";
 import EmployeeLayout from "../../../components/EmployeeLayout/EmployeeLayout"
-import "./EditDeliveryRecord.css";
+import './EditDeliveryRecord.css';
 
 const EditDeliveryRecord = () => {
   const { deliveryId } = useParams();

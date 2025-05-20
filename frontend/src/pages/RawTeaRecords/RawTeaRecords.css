@@ -1,27 +1,150 @@
 .raw-tea-records-container {
-    padding: 2rem;
+  padding: 2rem;
+  background-color: #f8f9fa;
+  min-height: 100vh;
+}
+
+.raw-tea-records-container h2 {
+  color: #1a3e1a;
+  margin-bottom: 2rem;
+  font-weight: 600;
+  font-size: 2rem;
+  border-bottom: 2px solid #2e7d32;
+  padding-bottom: 0.5rem;
+}
+
+.filter-section {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1.5rem;
+  margin-bottom: 2rem;
+  align-items: flex-end;
+  background-color: #ffffff;
+  padding: 1.5rem;
+  border-radius: 8px;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.08);
+}
+
+.total-section h3 {
+  background-color: #1a3e1a;
+  color: white;
+  padding: 1rem;
+  border-radius: 8px;
+  font-weight: 500;
+  margin: 1.5rem 0;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+/* Table styles */
+.TableContainer-root {
+  border-radius: 8px;
+  overflow: hidden;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+.TableHead-root {
+  background-color: #1a3e1a;
+}
+
+.TableCell-head {
+  color: white !important;
+  font-weight: 600 !important;
+  font-size: 1rem;
+}
+
+.TableRow-root:nth-of-type(odd) {
+  background-color: rgba(46, 125, 50, 0.05);
+}
+
+.TableRow-root:hover {
+  background-color: rgba(46, 125, 50, 0.1);
+}
+
+/* Button styles */
+.MuiButton-contained {
+  background-color: #1a3e1a !important;
+  color: white !important;
+  font-weight: 500 !important;
+  padding: 8px 20px !important;
+  text-transform: none !important;
+  transition: all 0.3s ease !important;
+}
+
+.MuiButton-contained:hover {
+  background-color: #2e7d32 !important;
+  transform: translateY(-1px);
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2) !important;
+}
+
+.MuiButton-outlined {
+  border-color: #1a3e1a !important;
+  color: #1a3e1a !important;
+  font-weight: 500 !important;
+  padding: 8px 20px !important;
+  text-transform: none !important;
+  transition: all 0.3s ease !important;
+}
+
+.MuiButton-outlined:hover {
+  background-color: rgba(46, 125, 50, 0.08) !important;
+  border-color: #2e7d32 !important;
+  color: #2e7d32 !important;
+  transform: translateY(-1px);
+}
+
+/* Pagination styles */
+.MuiTablePagination-root {
+  background-color: #f8f9fa;
+  border-bottom-left-radius: 8px;
+  border-bottom-right-radius: 8px;
+}
+
+.MuiTablePagination-selectLabel,
+.MuiTablePagination-displayedRows {
+  font-weight: 500;
+}
+
+.MuiPaginationItem-page.Mui-selected {
+  background-color: #1a3e1a !important;
+  color: white !important;
+}
+
+/* TextField styles */
+.MuiTextField-root {
+  background-color: white;
+  border-radius: 4px;
+}
+
+.MuiOutlinedInput-root {
+  border-radius: 4px !important;
+}
+
+.MuiOutlinedInput-notchedOutline {
+  border-color: #ced4da !important;
+}
+
+.Mui-focused .MuiOutlinedInput-notchedOutline {
+  border-color: #1a3e1a !important;
+  border-width: 1px !important;
+}
+
+.MuiInputLabel-root.Mui-focused {
+  color: #1a3e1a !important;
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+  .raw-tea-records-container {
+    padding: 1rem;
   }
   
   .filter-section {
-    display: flex;
+    flex-direction: column;
     gap: 1rem;
-    margin-bottom: 1rem;
   }
   
-  .total-raw-tea {
-    margin: 1rem 0;
-    font-weight: bold;
-    font-size: 1.2rem;
-  }
-  
-  .records-table {
+  .MuiButton-root {
     width: 100%;
-    border-collapse: collapse;
+    margin-top: 0.5rem !important;
   }
-  
-  .records-table th, .records-table td {
-    padding: 0.5rem;
-    text-align: center;
-    border: 1px solid #ccc;
-  }
-  
+}
