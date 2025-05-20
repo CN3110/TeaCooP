@@ -4,7 +4,7 @@ const Delivery = require("../models/DeliveryRecord");
 // Fetch all delivery records
 exports.getAllDeliveryRecords = async (req, res) => {
   try {
-    const [deliveryRecords] = await db.query("SELECT * FROM delivery");
+    const [deliveryRecords] = await db.query("SELECT * FROM delivery ORDER BY date DESC");
     res.status(200).json(deliveryRecords);
   } catch (error) {
     res.status(500).json({ error: "Failed to fetch delivery records" });
