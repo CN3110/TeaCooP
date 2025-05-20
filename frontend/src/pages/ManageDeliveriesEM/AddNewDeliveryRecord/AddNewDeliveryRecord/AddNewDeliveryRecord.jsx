@@ -5,32 +5,121 @@ import Snackbar from "@mui/material/Snackbar";
 import MuiAlert from "@mui/material/Alert";
 import "./AddNewDeliveryRecord.css";
 
+// Separate component for the supplier suggestions dropdown
+const SupplierAutocomplete = ({ value, onChange, suppliers, onSelect }) => {
+  const [filteredSuggestions, setFilteredSuggestions] = useState([]);
+  
+  const handleInputChange = (e) => {
+    const input = e.target.value;
+    onChange(e);
+    
+    if (input.length > 0) {
+      const suggestions = suppliers.filter(
+        (s) =>
+          s.supplierId.toLowerCase().includes(input.toLowerCase()) ||
+          s.supplierName.toLowerCase().includes(input.toLowerCase())
+      );
+      setFilteredSuggestions(suggestions);
+    } else {
+      setFilteredSuggestions([]);
+    }
+  };
+  
+  return (
+    <div className="form-group autocomplete">
+      <label htmlFor="supplierId">Supplier ID:</label>
+      <input
+        id="supplierId"
+        type="text"
+        name="supplierId"
+        value={value}
+        onChange={handleInputChange}
+        autoComplete="off"
+        required
+        placeholder="Enter supplier ID or name"
+        className="form-control"
+      />
+      {filteredSuggestions.length > 0 && (
+        <ul className="suggestions-list">
+          {filteredSuggestions.map((supplier) => (
+            <li
+              key={supplier.supplierId}
+              onClick={() => {
+                onChange({ target: { name: "supplierId", value: supplier.supplierId } });
+                onSelect(supplier);
+                setFilteredSuggestions([]);
+              }}
+            >
+              <strong>{supplier.supplierId}</strong> - {supplier.supplierName}
+            </li>
+          ))}
+        </ul>
+      )}
+    </div>
+  );
+};
+
+// Card component for supplier and driver info
+// Card component for supplier and driver info
+const InfoCard = ({ title, data, details, detailsTitle, detailsFields }) => {
+  if (!data) return null;
+  
+  // Basic fields to show for both suppliers and drivers
+  const basicFields = {
+    supplier: ['supplierId', 'supplierName', 'supplierContactNumber', 'supplierEmail', 'notes'],
+    driver: ['driverId', 'driverName', 'driverContactNumber', 'driverEmail', 'notes']
+  };
+  
+  // Determine if this is a supplier or driver card
+  const type = data.supplierId ? 'supplier' : 'driver';
+  
+  return (
+    <div className="info-card">
+      <h5>{title}</h5>
+      
+      {/* Basic Info */}
+      {basicFields[type].map((field) => (
+        data[field] && (
+          <p key={field}>
+            <strong>{field.replace(/([A-Z])/g, ' $1').replace(/^./, str => str.toUpperCase())}:</strong> {data[field]}
+          </p>
+        )
+      ))}
+      
+      {/* Driver Vehicle Details (only shown for drivers) */}
+      {type === 'driver' && details && details.length > 0 && (
+        <>
+          <h6>{detailsTitle}:</h6>
+          <ul className="details-list">
+            {details.map((item, idx) => (
+              <li key={idx}>
+                {detailsFields.map((field) => (
+                  <p key={field.key}>
+                    <strong>{field.label}:</strong> {item[field.key]} {field.unit || ''}
+                  </p>
+                ))}
+              </li>
+            ))}
+          </ul>
+        </>
+      )}
+    </div>
+  );
+};
+
 const AddNewDeliveryRecord = () => {
   const [routeOptions, setRouteOptions] = useState([]);
   const [driverOptions, setDriverOptions] = useState([]);
   const [suppliers, setSuppliers] = useState([]);
-  const [filteredSuggestions, setFilteredSuggestions] = useState([]);
   const [selectedSupplier, setSelectedSupplier] = useState(null);
   const [selectedDriver, setSelectedDriver] = useState(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [formErrors, setFormErrors] = useState({});
   const [snackbar, setSnackbar] = useState({
     open: false,
     message: "",
-    severity: "success", // success | error | warning | info
+    severity: "success",
   });
-
-  const showAlert = (message, severity = "success") => {
-    setSnackbar({
-      open: true,
-      message,
-      severity,
-    });
-  };
-
-  const handleCloseSnackbar = (event, reason) => {
-    if (reason === "clickaway") return;
-    setSnackbar((prev) => ({ ...prev, open: false }));
-  };
 
   const [deliveryData, setDeliveryData] = useState({
     supplierId: "",
@@ -48,199 +137,178 @@ const AddNewDeliveryRecord = () => {
 
   const navigate = useNavigate();
 
-  useEffect(() => {
-    const fetchRoutes = async () => {
-      try {
-        const response = await fetch(
-          "http://localhost:3001/api/deliveryRoutes"
-        );
-        const data = await response.json();
-        setRouteOptions(data);
-      } catch (error) {
-        console.error("Error fetching routes:", error);
-        showAlert(
-          "Failed to fetch delivery routes. Please try again later.",
-          "warning"
-        );
-      }
-    };
+  // Helper functions
+  const showAlert = (message, severity = "success") => {
+    setSnackbar({
+      open: true,
+      message,
+      severity,
+    });
+  };
 
-    const fetchDrivers = async () => {
-      try {
-        const response = await fetch("http://localhost:3001/api/drivers/active");
-        const data = await response.json();
-        const driverOptionsWithSelf = [
-          { driverId: "selfTransport", driverName: "Self Transport" },
-          ...data,
-        ];
-        setDriverOptions(driverOptionsWithSelf);
-      } catch (error) {
-        console.error("Error fetching drivers:", error);
-        setDriverOptions([
-          { driverId: "selfTransport", driverName: "Self Transport" },
-        ]);
-        showAlert("Failed to fetch drivers. Using default options.", "warning");
-      }
-    };
+  const handleCloseSnackbar = (event, reason) => {
+    if (reason === "clickaway") return;
+    setSnackbar((prev) => ({ ...prev, open: false }));
+  };
 
-    const fetchSuppliers = async () => {
-      try {
-        const response = await fetch("http://localhost:3001/api/suppliers");
-        const data = await response.json();
-        setSuppliers(data);
-      } catch (error) {
-        console.error("Error fetching suppliers:", error);
-        showAlert(
-          "Failed to fetch suppliers. Please try again later.",
-          "warning"
-        );
-      }
-    };
-
-    const today = new Date().toISOString().split("T")[0];
-    setDeliveryData((prev) => ({ ...prev, date: today }));
-
-    fetchRoutes();
-    fetchDrivers();
-    fetchSuppliers();
-  }, []);
-
+  // Calculate derived values
   const totalDeductions =
     parseFloat(deliveryData.totalSackWeight || 0) +
     parseFloat(deliveryData.forWater || 0) +
     parseFloat(deliveryData.forWitheredLeaves || 0) +
     parseFloat(deliveryData.forRipeLeaves || 0);
+    
+  const netWeight = parseFloat(deliveryData.totalWeight || 0) - totalDeductions;
+  const greenTeaLeavesWeight = netWeight - parseFloat(deliveryData.randalu || 0);
 
-  const handleInputChange = (e) => {
-    const { name, value } = e.target;
-    const updatedData = {
-      ...deliveryData,
-      [name]: value,
+  // Form validation
+  const validateForm = () => {
+    const errors = {};
+    
+    // Check supplier exists
+    const validSupplier = suppliers.find(
+      (s) => s.supplierId === deliveryData.supplierId
+    );
+    if (!validSupplier) {
+      errors.supplierId = "Please select a valid supplier";
+    }
+    
+    // Validate weights
+    if (parseFloat(deliveryData.totalWeight) <= 0) {
+      errors.totalWeight = "Total weight must be greater than 0";
+    }
+    
+    if (parseFloat(deliveryData.totalWeight) < totalDeductions) {
+      errors.totalWeight = "Total weight must be greater than total deductions";
+    }
+    
+    // Validate negative values
+    ["totalSackWeight", "forWater", "forRipeLeaves", "forWitheredLeaves", "randalu"].forEach(field => {
+      if (parseFloat(deliveryData[field] || 0) < 0) {
+        errors[field] = "Value cannot be negative";
+      }
+    });
+    
+    // Validate required fields
+    ["transport", "route"].forEach(field => {
+      if (!deliveryData[field]) {
+        errors[field] = "This field is required";
+      }
+    });
+    
+    // Validate date
+    const today = new Date().toISOString().split("T")[0];
+    if (deliveryData.date !== today) {
+      errors.date = "Date must be today";
+    }
+    
+    setFormErrors(errors);
+    return Object.keys(errors).length === 0;
+  };
+
+  // Load initial data
+  useEffect(() => {
+    const fetchInitialData = async () => {
+      try {
+        // Set today's date
+        const today = new Date().toISOString().split("T")[0];
+        setDeliveryData((prev) => ({ ...prev, date: today }));
+        
+        // Fetch routes
+        const routesResponse = await fetch("http://localhost:3001/api/deliveryRoutes");
+        if (routesResponse.ok) {
+          const routesData = await routesResponse.json();
+          setRouteOptions(routesData);
+        } else {
+          throw new Error("Failed to fetch routes");
+        }
+        
+        // Fetch drivers
+        const driversResponse = await fetch("http://localhost:3001/api/drivers/active");
+        if (driversResponse.ok) {
+          const driversData = await driversResponse.json();
+          setDriverOptions([
+            { driverId: "selfTransport", driverName: "Self Transport" },
+            ...driversData,
+          ]);
+        } else {
+          throw new Error("Failed to fetch drivers");
+        }
+        
+        // Fetch suppliers
+        const suppliersResponse = await fetch("http://localhost:3001/api/suppliers");
+        if (suppliersResponse.ok) {
+          const suppliersData = await suppliersResponse.json();
+          setSuppliers(suppliersData);
+        } else {
+          throw new Error("Failed to fetch suppliers");
+        }
+      } catch (error) {
+        console.error("Error during initial data fetch:", error);
+        showAlert(`Failed to load some data: ${error.message}`, "warning");
+      }
     };
 
-    if (name === "supplierId") {
-      const input = value.toLowerCase();
-      const suggestions = suppliers.filter(
-        (s) =>
-          s.supplierId.toLowerCase().includes(input) ||
-          s.supplierName.toLowerCase().includes(input)
-      );
-      setFilteredSuggestions(suggestions);
-      setSelectedSupplier(null);
-    }
+    fetchInitialData();
+  }, []);
 
+  // Update calculated fields when weights change
+  useEffect(() => {
+    if (greenTeaLeavesWeight >= 0) {
+      setDeliveryData(prev => ({
+        ...prev,
+        greenTeaLeaves: greenTeaLeavesWeight.toFixed(2)
+      }));
+    }
+  }, [greenTeaLeavesWeight]);
+
+  // Handle form input changes
+  const handleInputChange = (e) => {
+    const { name, value } = e.target;
+    
+    setDeliveryData(prev => ({
+      ...prev,
+      [name]: value
+    }));
+    
+    // Clear error when field is changed
+    if (formErrors[name]) {
+      setFormErrors(prev => ({
+        ...prev,
+        [name]: undefined
+      }));
+    }
+    
+    // Handle driver selection
     if (name === "transport") {
       const selected = driverOptions.find((d) => d.driverId === value);
       setSelectedDriver(
         selected?.driverId === "selfTransport" ? null : selected
       );
     }
-
-    // Convert to float for calculation
-    const getFloat = (val) => parseFloat(val) || 0;
-
-    if (
-      [
-        "totalWeight",
-        "totalSackWeight",
-        "forWater",
-        "forWitheredLeaves",
-        "forRipeLeaves",
-        "randalu",
-      ].includes(name)
-    ) {
-      const totalWeight = getFloat(
-        name === "totalWeight" ? value : deliveryData.totalWeight
-      );
-      const totalSackWeight = getFloat(
-        name === "totalSackWeight" ? value : deliveryData.totalSackWeight
-      );
-      const forWater = getFloat(
-        name === "forWater" ? value : deliveryData.forWater
-      );
-      const forWitheredLeaves = getFloat(
-        name === "forWitheredLeaves" ? value : deliveryData.forWitheredLeaves
-      );
-      const forRipeLeaves = getFloat(
-        name === "forRipeLeaves" ? value : deliveryData.forRipeLeaves
-      );
-      const randalu = getFloat(
-        name === "randalu" ? value : deliveryData.randalu
-      );
-
-      const greenTeaLeaves =
-        totalWeight -
-        totalSackWeight -
-        forWater -
-        forWitheredLeaves -
-        forRipeLeaves -
-        randalu;
-      updatedData.greenTeaLeaves =
-        greenTeaLeaves >= 0 ? greenTeaLeaves.toFixed(2) : 0;
-    }
-
-    setDeliveryData(updatedData);
   };
 
+  // Handle form submission
   const handleSubmit = async (e) => {
     e.preventDefault();
+    
+    // Validate form before submission
+    if (!validateForm()) {
+      showAlert("Please fix the errors in the form", "error");
+      return;
+    }
+    
     setIsSubmitting(true);
-    setSnackbar((prev) => ({ ...prev, open: false }));
-
-    // Validate supplier
-    const validSupplier = suppliers.find(
-      (s) => s.supplierId === deliveryData.supplierId
-    );
-    if (!validSupplier) {
-      showAlert("Supplier ID is not found.", "error");
-      setIsSubmitting(false);
-      return;
-    }
-
-    // Validate weights
-    if (parseFloat(deliveryData.totalWeight) <= 0) {
-      showAlert("Total weight must be greater than 0.", "error");
-      setIsSubmitting(false);
-      return;
-    }
-
-    if (
-      parseFloat(
-        deliveryData.totalSackWeight ||
-          deliveryData.forWater ||
-          deliveryData.forRipeLeaves ||
-          deliveryData.forWitheredLeaves ||
-          deliveryData.greenTeaLeaves ||
-          deliveryData.randalu
-      ) < 0
-    ) {
-      showAlert("Weights cannot be negative.", "error");
-      setIsSubmitting(false);
-      return;
-    }
-    if (parseFloat(deliveryData.totalWeight) < totalDeductions) {
-      showAlert("Total weight must be greater than total deductions.", "error");
-      setIsSubmitting(false);
-      return;
-    }
-
-    // Validate date
-    const today = new Date().toISOString().split("T")[0];
-    if (deliveryData.date !== today) {
-      showAlert("Date must be today.", "error");
-      setIsSubmitting(false);
-      return;
-    }
-
+    
     const payload = {
       ...deliveryData,
       totalWeight: parseFloat(deliveryData.totalWeight),
-      totalSackWeight: parseFloat(deliveryData.totalSackWeight),
-      forWater: parseFloat(deliveryData.forWater),
-      forWitheredLeaves: parseFloat(deliveryData.forWitheredLeaves),
-      forRipeLeaves: parseFloat(deliveryData.forRipeLeaves),
-      greenTeaLeaves: parseFloat(deliveryData.greenTeaLeaves),
-      randalu: parseFloat(deliveryData.randalu),
+      totalSackWeight: parseFloat(deliveryData.totalSackWeight || 0),
+      forWater: parseFloat(deliveryData.forWater || 0),
+      forWitheredLeaves: parseFloat(deliveryData.forWitheredLeaves || 0),
+      forRipeLeaves: parseFloat(deliveryData.forRipeLeaves || 0),
+      greenTeaLeaves: parseFloat(deliveryData.greenTeaLeaves || 0),
+      randalu: parseFloat(deliveryData.randalu || 0),
     };
 
     try {
@@ -271,202 +339,258 @@ const AddNewDeliveryRecord = () => {
   return (
     <EmployeeLayout>
       <div className="add-new-delivery-container">
-        <h3>Add New Tea Delivery</h3>
-        <div className="add-new-delivery">
-          <Snackbar
-            open={snackbar.open}
-            autoHideDuration={4000}
+        <h2 className="page-title">Add New Tea Delivery</h2>
+        
+        <Snackbar
+          open={snackbar.open}
+          autoHideDuration={4000}
+          onClose={handleCloseSnackbar}
+          anchorOrigin={{ vertical: "top", horizontal: "center" }}
+        >
+          <MuiAlert
             onClose={handleCloseSnackbar}
-            anchorOrigin={{ vertical: "top", horizontal: "center" }}
+            severity={snackbar.severity}
+            sx={{
+              width: "100%",
+              fontWeight: "bold",
+              fontSize: "1rem",
+              backgroundColor:
+                snackbar.severity === "success"
+                  ? "rgb(14, 152, 16)"
+                  : snackbar.severity === "error"
+                  ? "rgb(211,47,47)"
+                  : snackbar.severity === "warning"
+                  ? "rgb(237, 201, 72)"
+                  : "#1976d2",
+              color: "white",
+              boxShadow: 3,
+            }}
+            elevation={6}
+            variant="filled"
           >
-            <MuiAlert
-              onClose={handleCloseSnackbar}
-              severity={snackbar.severity}
-              sx={{
-                width: "100%",
-                fontWeight: "bold",
-                fontSize: "1rem",
-                backgroundColor:
-                  snackbar.severity === "success"
-                    ? "rgb(14, 152, 16)"
-                    : snackbar.severity === "error"
-                    ? "rgb(211,47,47)"
-                    : snackbar.severity === "warning"
-                    ? "rgb(237, 201, 72)"
-                    : "#1976d2",
-                color: "white",
-                boxShadow: 3,
-              }}
-              elevation={6}
-              variant="filled"
-            >
-              {snackbar.message}
-            </MuiAlert>
-          </Snackbar>
+            {snackbar.message}
+          </MuiAlert>
+        </Snackbar>
 
-          <form onSubmit={handleSubmit}>
+        <div className="delivery-form-container">
+          <form onSubmit={handleSubmit} className="delivery-form">
             <div className="form-grid">
-              <div className="form-group autocomplete">
-                <label>Supplier ID:</label>
-                <input
-                  type="text"
-                  name="supplierId"
+              <div className="form-section basic-info">
+                <h3 className="section-title">Basic Information</h3>
+                
+                <SupplierAutocomplete
                   value={deliveryData.supplierId}
                   onChange={handleInputChange}
-                  autoComplete="off"
-                  required
+                  suppliers={suppliers}
+                  onSelect={setSelectedSupplier}
                 />
-                {filteredSuggestions.length > 0 && (
-                  <ul className="suggestions-list">
-                    {filteredSuggestions.map((supplier) => (
-                      <li
-                        key={supplier.supplierId}
-                        onClick={() => {
-                          setDeliveryData((prev) => ({
-                            ...prev,
-                            supplierId: supplier.supplierId,
-                          }));
-                          setSelectedSupplier(supplier);
-                          setFilteredSuggestions([]);
-                        }}
-                      >
-                        {supplier.supplierId} - {supplier.supplierName}
-                      </li>
-                    ))}
-                  </ul>
+                {formErrors.supplierId && (
+                  <div className="error-message">{formErrors.supplierId}</div>
                 )}
-              </div>
 
-              <div className="form-group">
-                <label>Date:</label>
-                <input
-                  type="date"
-                  name="date"
-                  value={deliveryData.date}
-                  readOnly
-                  disabled
-                />
-              </div>
-
-              <div className="form-group">
-                <label>Transport:</label>
-                <select
-                  name="transport"
-                  value={deliveryData.transport}
-                  onChange={handleInputChange}
-                  required
-                >
-                  <option value="">Select Transport</option>
-                  {driverOptions.map((driver) => (
-                    <option key={driver.driverId} value={driver.driverId}>
-                      {driver.driverName}
-                    </option>
-                  ))}
-                </select>
-              </div>
-
-              <div className="form-group">
-                <label>Route:</label>
-                <select
-                  name="route"
-                  value={deliveryData.route}
-                  onChange={handleInputChange}
-                  required
-                >
-                  <option value="">Select Route</option>
-                  {routeOptions.map((route) => (
-                    <option
-                      key={route.delivery_routeId}
-                      value={route.delivery_routeName}
-                    >
-                      {route.delivery_routeName}
-                    </option>
-                  ))}
-                </select>
-              </div>
-
-              <div className="form-group">
-                <label>Total Weight (kg):</label>
-                <input
-                  type="number"
-                  name="totalWeight"
-                  value={deliveryData.totalWeight}
-                  onChange={handleInputChange}
-                  required
-                />
-              </div>
-
-              <div className="total-deductions">
-                <h5>Deductions</h5>
                 <div className="form-group">
-                  <label>Total Sack Weight (kg):</label>
+                  <label htmlFor="date">Date:</label>
                   <input
+                    id="date"
+                    type="date"
+                    name="date"
+                    value={deliveryData.date}
+                    className={`form-control ${formErrors.date ? "error" : ""}`}
+                    readOnly
+                    disabled
+                  />
+                  {formErrors.date && (
+                    <div className="error-message">{formErrors.date}</div>
+                  )}
+                </div>
+
+                <div className="form-group">
+                  <label htmlFor="transport">Transport:</label>
+                  <select
+                    id="transport"
+                    name="transport"
+                    value={deliveryData.transport}
+                    onChange={handleInputChange}
+                    className={`form-control ${formErrors.transport ? "error" : ""}`}
+                    required
+                  >
+                    <option value="">Select Transport</option>
+                    {driverOptions.map((driver) => (
+                      <option key={driver.driverId} value={driver.driverId}>
+                        {driver.driverName}
+                      </option>
+                    ))}
+                  </select>
+                  {formErrors.transport && (
+                    <div className="error-message">{formErrors.transport}</div>
+                  )}
+                </div>
+
+                <div className="form-group">
+                  <label htmlFor="route">Route:</label>
+                  <select
+                    id="route"
+                    name="route"
+                    value={deliveryData.route}
+                    onChange={handleInputChange}
+                    className={`form-control ${formErrors.route ? "error" : ""}`}
+                    required
+                  >
+                    <option value="">Select Route</option>
+                    {routeOptions.map((route) => (
+                      <option
+                        key={route.delivery_routeId}
+                        value={route.delivery_routeName}
+                      >
+                        {route.delivery_routeName}
+                      </option>
+                    ))}
+                  </select>
+                  {formErrors.route && (
+                    <div className="error-message">{formErrors.route}</div>
+                  )}
+                </div>
+
+                <div className="form-group">
+                  <label htmlFor="totalWeight">Total Weight (kg):</label>
+                  <input
+                    id="totalWeight"
                     type="number"
+                    step="0.01"
+                    name="totalWeight"
+                    value={deliveryData.totalWeight}
+                    onChange={handleInputChange}
+                    className={`form-control ${formErrors.totalWeight ? "error" : ""}`}
+                    placeholder="Enter total weight"
+                    required
+                  />
+                  {formErrors.totalWeight && (
+                    <div className="error-message">{formErrors.totalWeight}</div>
+                  )}
+                </div>
+              </div>
+
+              <div className="form-section deductions">
+                <h3 className="section-title">Deductions</h3>
+                
+                <div className="form-group">
+                  <label htmlFor="totalSackWeight">Total Sack Weight (kg):</label>
+                  <input
+                    id="totalSackWeight"
+                    type="number"
+                    step="0.01"
                     name="totalSackWeight"
                     value={deliveryData.totalSackWeight}
                     onChange={handleInputChange}
+                    className={`form-control ${formErrors.totalSackWeight ? "error" : ""}`}
+                    placeholder="0.00"
                     required
                   />
+                  {formErrors.totalSackWeight && (
+                    <div className="error-message">{formErrors.totalSackWeight}</div>
+                  )}
                 </div>
 
                 <div className="form-group">
-                  <label>For Water (kg):</label>
+                  <label htmlFor="forWater">For Water (kg):</label>
                   <input
+                    id="forWater"
                     type="number"
+                    step="0.01"
                     name="forWater"
                     value={deliveryData.forWater}
                     onChange={handleInputChange}
+                    className={`form-control ${formErrors.forWater ? "error" : ""}`}
+                    placeholder="0.00"
                     required
                   />
+                  {formErrors.forWater && (
+                    <div className="error-message">{formErrors.forWater}</div>
+                  )}
                 </div>
 
                 <div className="form-group">
-                  <label>For Withered Leaves (kg):</label>
+                  <label htmlFor="forWitheredLeaves">For Withered Leaves (kg):</label>
                   <input
+                    id="forWitheredLeaves"
                     type="number"
+                    step="0.01"
                     name="forWitheredLeaves"
                     value={deliveryData.forWitheredLeaves}
                     onChange={handleInputChange}
+                    className={`form-control ${formErrors.forWitheredLeaves ? "error" : ""}`}
+                    placeholder="0.00"
                     required
                   />
+                  {formErrors.forWitheredLeaves && (
+                    <div className="error-message">{formErrors.forWitheredLeaves}</div>
+                  )}
                 </div>
 
                 <div className="form-group">
-                  <label>For Ripe Leaves (kg):</label>
+                  <label htmlFor="forRipeLeaves">For Ripe Leaves (kg):</label>
                   <input
+                    id="forRipeLeaves"
                     type="number"
+                    step="0.01"
                     name="forRipeLeaves"
                     value={deliveryData.forRipeLeaves}
                     onChange={handleInputChange}
+                    className={`form-control ${formErrors.forRipeLeaves ? "error" : ""}`}
+                    placeholder="0.00"
                     required
                   />
+                  {formErrors.forRipeLeaves && (
+                    <div className="error-message">{formErrors.forRipeLeaves}</div>
+                  )}
                 </div>
 
-                <label>Total Deductions: {totalDeductions.toFixed(2)} kg</label>
+                <div className="deduction-summary">
+                  <div className="summary-item">
+                    <span>Total Deductions:</span>
+                    <span className="summary-value">{totalDeductions.toFixed(2)} kg</span>
+                  </div>
+                </div>
               </div>
 
-              <div className="tea-leaves-weights">
-                <h5>Tea Leaves Weights: </h5>
+              <div className="form-section tea-weights">
+                <h3 className="section-title">Tea Leaves Weights</h3>
+                
                 <div className="form-group">
-                  <label>Randalu (kg):</label>
+                  <label htmlFor="randalu">Randalu (kg):</label>
                   <input
+                    id="randalu"
                     type="number"
+                    step="0.01"
                     name="randalu"
                     value={deliveryData.randalu}
                     onChange={handleInputChange}
+                    className={`form-control ${formErrors.randalu ? "error" : ""}`}
+                    placeholder="0.00"
                     required
                   />
+                  {formErrors.randalu && (
+                    <div className="error-message">{formErrors.randalu}</div>
+                  )}
                 </div>
 
                 <div className="form-group">
-                  <label>Green Tea Leaves (kg):</label>
+                  <label htmlFor="greenTeaLeaves">Green Tea Leaves (kg):</label>
                   <input
+                    id="greenTeaLeaves"
                     type="number"
                     name="greenTeaLeaves"
                     value={deliveryData.greenTeaLeaves}
-                    onChange={handleInputChange}
+                    className="form-control calculated-field"
                     readOnly
                   />
+                </div>
+                
+                <div className="tea-summary">
+                  <div className="summary-item">
+                    <span>Net Weight:</span>
+                    <span className="summary-value">{(parseFloat(deliveryData.totalWeight || 0) - totalDeductions).toFixed(2)} kg</span>
+                  </div>
                 </div>
               </div>
             </div>
@@ -477,7 +601,7 @@ const AddNewDeliveryRecord = () => {
                 className="submit-btn"
                 disabled={isSubmitting}
               >
-                {isSubmitting ? "Submitting..." : "Submit"}
+                {isSubmitting ? "Submitting..." : "Submit Delivery"}
               </button>
               <button
                 type="button"
@@ -490,78 +614,24 @@ const AddNewDeliveryRecord = () => {
             </div>
           </form>
 
-          <div className="cards-container">
-            {selectedSupplier && (
-              <div className="supplier-card">
-                <h4>Supplier Details</h4>
-                <p>
-                  <strong>ID:</strong> {selectedSupplier.supplierId}
-                </p>
-                <p>
-                  <strong>Name:</strong> {selectedSupplier.supplierName}
-                </p>
-                <p>
-                  <strong>Contact:</strong>{" "}
-                  {selectedSupplier.supplierContactNumber}
-                </p>
-                <h5>Land Details:</h5>
-                {selectedSupplier.landDetails &&
-                selectedSupplier.landDetails.length > 0 ? (
-                  <ul>
-                    {selectedSupplier.landDetails.map((land, idx) => (
-                      <li key={idx}>
-                        <h6>Land No. {idx + 1}</h6>
-                        <p>
-                          <strong>Address:</strong> {land.landAddress}
-                          <br />
-                          <strong>Size:</strong> {land.landSize} acres
-                        </p>
-                        <hr />
-                      </li>
-                    ))}
-                  </ul>
-                ) : (
-                  <p>No land details available.</p>
-                )}
-              </div>
-            )}
+<div className="info-cards-container">
+  <InfoCard
+    title="Supplier Details"
+    data={selectedSupplier}
+    details={selectedSupplier?.landDetails}
+  />
 
-            {selectedDriver && (
-              <div className="driver-card">
-                <h4>Driver Details</h4>
-                <p>
-                  <strong>ID:</strong> {selectedDriver.driverId}
-                </p>
-                <p>
-                  <strong>Name:</strong> {selectedDriver.driverName}
-                </p>
-                <p>
-                  <strong>Contact:</strong> {selectedDriver.driverContactNumber}
-                </p>
-                <h5>Vehicle Details:</h5>
-                {selectedDriver.vehicleDetails &&
-                selectedDriver.vehicleDetails.length > 0 ? (
-                  <ul>
-                    {selectedDriver.vehicleDetails.map((vehicle, idx) => (
-                      <li key={idx}>
-                        <h6>Vehicle No. {idx + 1}</h6>
-                        <p>
-                          <strong>Vehicle Number:</strong>{" "}
-                          {vehicle.vehicleNumber}
-                          <br />
-                          <strong>Vehicle Type:</strong> {vehicle.vehicleType}{" "}
-                          acres
-                        </p>
-                        <hr />
-                      </li>
-                    ))}
-                  </ul>
-                ) : (
-                  <p>No vehicle details available.</p>
-                )}
-              </div>
-            )}
-          </div>
+  <InfoCard
+    title="Driver Details"
+    data={selectedDriver}
+    details={selectedDriver?.vehicleDetails}
+    detailsTitle="Vehicle Details"
+    detailsFields={[
+      { key: "vehicleNumber", label: "Vehicle Number" },
+      { key: "vehicleType", label: "Vehicle Type" }
+    ]}
+  />
+</div>
         </div>
       </div>
     </EmployeeLayout>

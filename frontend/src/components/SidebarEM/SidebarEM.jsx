@@ -44,26 +44,11 @@ const SidebarEM = () => {
     <div className="menu">
       <div className="menu-list">
         <Link to="/employee-dashboard" className="item">Dashboard</Link>
-        <Link to="/employee-notices" className="item">Notices</Link>      
+        <Link to="/employee-notices" className="item">Notices</Link>    
+        <Link to="/report-dashboard" className="item">Generate Reports</Link> 
           
 
-        {/* Manage Deliveries Dropdown */}
-        <div className="dropdown">
-          <button
-            className="dropdown-btn"
-            onClick={() => toggleDropdown("deliveries")}
-          >
-            Manage Deliveries
-          </button>
-          {openDropdown === "deliveries" && (
-            <div className="dropdown-content">
-              <Link to="/add-new-delivery-record">Add New Delivery Record</Link>
-              <Link to="/view-delivery-records">View Delivery Records</Link>
-            </div>
-          )}
-        </div> 
-
-        {/* Manage Sales Dropdown */}
+       {/* Manage Sales Dropdown */}
         <div className="dropdown">
           <button
             className="dropdown-btn"
@@ -81,11 +66,28 @@ const SidebarEM = () => {
           )}
         </div>
 
+         {/* Manage Deliveries Dropdown */}
+        <div className="dropdown">
+          <button
+            className="dropdown-btn"
+            onClick={() => toggleDropdown("deliveries")}
+          >
+            Manage Deliveries
+          </button>
+          {openDropdown === "deliveries" && (
+            <div className="dropdown-content">
+              <Link to="/add-new-delivery-record">Add New Delivery Record</Link>
+              <Link to="/view-delivery-records">View Delivery Records</Link>
+            </div>
+          )}
+        </div>
+         <Link to="/raw-tea-records" className="item">Raw Tea Records</Link>
+
         <Link to="/tea-production-summary" className="item">Tea Production Summary</Link>
         <Link to="/tea-production" className="item">Tea Production Management </Link>
         <Link to="/tea-type-stock-management" className="item">Tea Type Stock Management</Link>
         <Link to="/tea-packet" className="item">Tea Packet Management</Link>
-        <Link to="/raw-tea-records" className="item">Raw Tea Records</Link>
+       
 
         {/* Manage Suppliers Dropdown */}
         <div className="dropdown">

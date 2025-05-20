@@ -307,22 +307,25 @@ const AddBroker = () => {
                 onChange={handleInputChange}
               />
             </div>
+            
+           <div className="form-buttons">
+    <button
+      type="button"
+      className="cancel-button"
+      onClick={() => navigate("/view-brokers")}
+      disabled={isSubmitting}
+    >
+      Cancel
+    </button>
+    <button type="submit" className="submit-button" disabled={isSubmitting}>
+      {isSubmitting ? "Saving..." : "Save"}
+    </button>
+  </div>
           </div>
 
-          <div className="form-buttons">
-            <button
-              type="button"
-              className="cancel-button"
-              onClick={() => navigate("/view-brokers")}
-              disabled={isSubmitting}
-            >
-              Cancel
-            </button>
-            <button type="submit" className="submit-button" disabled={isSubmitting}>
-              {isSubmitting ? "Saving..." : "Save"}
-            </button>
-          </div>
-        </form>
+</form>
+
+         
 
         <Snackbar
           open={snackbar.open}

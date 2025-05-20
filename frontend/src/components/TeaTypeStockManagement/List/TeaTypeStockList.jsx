@@ -3,8 +3,10 @@ import axios from 'axios';
 import { format } from 'date-fns';
 import {
   Dialog, DialogTitle, DialogContent, DialogContentText, DialogActions,
-  Button, Snackbar, Alert, TablePagination
+  Button, Snackbar, Alert, TablePagination, IconButton
 } from '@mui/material';
+import EditIcon from '@mui/icons-material/Edit';
+import DeleteIcon from '@mui/icons-material/Delete';
 import './TeaTypeStockList.css';
 
 const TeaTypeStockList = () => {
@@ -137,9 +139,23 @@ const TeaTypeStockList = () => {
                   <td>{parseFloat(stock.weightInKg).toFixed(2)}</td>
                   <td>{stock.employeeName}</td>
                   <td>
-                    <button onClick={() => handleEdit(stock)} className="action-btn edit-btn">Edit</button>
-                    <button onClick={() => setDeleteId(stock.stockId)} className="action-btn delete-btn">Delete</button>
-                  </td>
+  <IconButton 
+    onClick={() => handleEdit(stock)} 
+    color="primary"
+    aria-label="edit"
+    size="small"
+  >
+    <EditIcon fontSize="small" style={{ color: 'rgb(33, 101, 33)' }} />
+  </IconButton>
+  <IconButton 
+    onClick={() => setDeleteId(stock.stockId)} 
+    color="error"
+    aria-label="delete"
+    size="small"
+  >
+    <DeleteIcon fontSize="small" />
+  </IconButton>
+</td>
                 </tr>
               ))}
             </tbody>

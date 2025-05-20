@@ -37,7 +37,7 @@ const SidebarBroker = () => {
     setShowLogoutConfirm(false);
     setShowAlert(true);
     setTimeout(() => {
-      navigate("/login");
+      navigate("/");
     }, 1500); // Give time for the alert to show before redirecting
   };
 
@@ -46,13 +46,13 @@ const SidebarBroker = () => {
   };
 
   return (
-    <div className="sidebar-container">
+    <div className="sidebar-container" style={{height:"100%"}}>
       <h2>Broker Panel</h2>
       <ul className="nav flex-column">
         <li className="nav-item">
-          <Link to="/broker-dashboard" className="nav-link">
+          {/*<Link to="/broker-dashboard" className="nav-link">
             <DashboardIcon /> Dashboard
-          </Link>
+          </Link>*/}
         </li>
         <li className="nav-item">
           <Link to="/broker-notices" className="nav-link">

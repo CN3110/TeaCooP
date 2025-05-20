@@ -10,8 +10,14 @@ import {
   DialogContent,
   DialogContentText,
   DialogTitle,
-  Button
+  Button,
+  IconButton,
+  Tooltip
 } from '@mui/material';
+import EditIcon from '@mui/icons-material/Edit';
+import BlockIcon from '@mui/icons-material/Block';
+import AddCircleIcon from '@mui/icons-material/AddCircle';
+import SearchIcon from '@mui/icons-material/Search';
 import "./ViewDrivers.css";
 
 const Alert = React.forwardRef(function Alert(props, ref) {
@@ -161,7 +167,7 @@ const ViewDrivers = () => {
                 value={searchId}
                 onChange={handleSearchChange}
               />
-              <BiSearch className="icon" />
+              <SearchIcon className="search-icon" />
             </div>
 
             <div className="filters">
@@ -176,95 +182,118 @@ const ViewDrivers = () => {
                 <option value="disabled">Disabled</option>
               </select>
               <button className="add-driver-btn" onClick={handleAddDriver}>
+                <AddCircleIcon className="add-icon" />
                 Add New Driver
               </button>
             </div>
           </div>
         </div>
 
-        <table className="drivers-table">
-          <thead>
-            <tr>
-              <th>Driver ID</th>
-              <th>Driver Name</th>
-              <th>Contact Number</th>
-              <th>Email</th>
-              <th>Status</th>
-              <th>Vehicle Details</th>
-              <th>Notes</th>
-              <th>Actions</th>
-              <th>Added by:</th>
-            </tr>
-          </thead>
-          <tbody>
-            {paginatedDrivers.length > 0 ? (
-              paginatedDrivers.map((driver) => (
-                <tr key={driver.driverId}>
-                  <td>{driver.driverId}</td>
-                  <td>{driver.driverName}</td>
-                  <td>{driver.driverContactNumber}</td>
-                  <td>{driver.driverEmail}</td>
-                  <td className={`status-cell status-${driver.status}`}>
-                    {driver.status.charAt(0).toUpperCase() + driver.status.slice(1)}
-                  </td>
-                  <td>
-                    <ul className="vehicle-details-list">
-                      {driver.vehicleDetails?.length > 0 ? (
-                        driver.vehicleDetails.map((vehicle, index) => (
-                          <li key={index}>
-                            Vehicle {index + 1}: {vehicle.vehicleNumber} ({vehicle.vehicleType})
-                          </li>
-                        ))
-                      ) : (
-                        <li>No vehicle details available</li>
+        <div className="table-container">
+          <table className="drivers-table">
+            <thead>
+              <tr>
+                <th>Driver ID</th>
+                <th>Driver Name</th>
+                <th>Contact Number</th>
+                <th>Email</th>
+                <th>Status</th>
+                <th>Vehicle Details</th>
+                <th>Notes</th>
+                <th>Actions</th>
+                <th>Added by</th>
+              </tr>
+            </thead>
+            <tbody>
+              {paginatedDrivers.length > 0 ? (
+                paginatedDrivers.map((driver) => (
+                  <tr key={driver.driverId}>
+                    <td>{driver.driverId}</td>
+                    <td>{driver.driverName}</td>
+                    <td>{driver.driverContactNumber}</td>
+                    <td>{driver.driverEmail}</td>
+                    <td>
+                      <span className={`status-badge status-${driver.status}`}>
+                        {driver.status.charAt(0).toUpperCase() + driver.status.slice(1)}
+                      </span>
+                    </td>
+                    <td>
+                      <ul className="vehicle-details-list">
+                        {driver.vehicleDetails?.length > 0 ? (
+                          driver.vehicleDetails.map((vehicle, index) => (
+                            <li key={index}>
+                              Vehicle {index + 1}: {vehicle.vehicleNumber} ({vehicle.vehicleType})
+                            </li>
+                          ))
+                        ) : (
+                          <li>No vehicle details available</li>
+                        )}
+                      </ul>
+                    </td>
+                    <td>{driver.notes || "No notes available"}</td>
+                    <td className="action-buttons">
+                      <Tooltip title="Edit Driver">
+                        <IconButton 
+                          className="edit-button" 
+                          onClick={() => handleEdit(driver)}
+                          size="small"
+                        >
+                          <EditIcon />
+                        </IconButton>
+                      </Tooltip>
+                      
+                      {driver.status !== 'disabled' && (
+                        <Tooltip title="Disable Driver">
+                          <IconButton
+                            className="disable-button"
+                            onClick={() => handleOpenDisableConfirm(driver.driverId)}
+                            color="error"
+                            size="small"
+                          >
+                            <BlockIcon />
+                          </IconButton>
+                        </Tooltip>
                       )}
-                    </ul>
-                  </td>
-                  <td>{driver.notes || "No notes available"}</td>
-                  <td>
-                    <button className="edit-btn" onClick={() => handleEdit(driver)}>Edit</button>
-                    {driver.status !== 'disabled' && (
-                      <button
-                        className="disable-button"
-                        onClick={() => handleOpenDisableConfirm(driver.driverId)}
-                      >
-                        Disable
-                      </button>
-                    )}
-                  </td>
-                  <td>
-                    {driver.addedByEmployeeId}<br />
-                    {driver.employeeName && (
-                      <span style={{ color: "#555" }}>({driver.employeeName})</span>
-                    )}
+                    </td>
+                    <td>
+                      {driver.addedByEmployeeId}<br />
+                      {driver.employeeName && (
+                        <span className="employee-name">({driver.employeeName})</span>
+                      )}
+                    </td>
+                  </tr>
+                ))
+              ) : (
+                <tr>
+                  <td colSpan="9" className="no-results">
+                    No drivers found matching your criteria
                   </td>
                 </tr>
-              ))
-            ) : (
-              <tr>
-                <td colSpan="9" className="no-results">
-                  No drivers found matching your criteria
-                </td>
-              </tr>
-            )}
-          </tbody>
-        </table>
+              )}
+            </tbody>
+          </table>
+        </div>
 
         {/* Pagination Controls */}
         <div className="pagination-controls">
-          <button onClick={() => handlePageChange(currentPage - 1)} disabled={currentPage === 1}>
+          <button 
+            className="pagination-button"
+            onClick={() => handlePageChange(currentPage - 1)} 
+            disabled={currentPage === 1}
+          >
             Previous
           </button>
           {[...Array(totalPages)].map((_, index) => (
             <button
               key={index}
-              className={currentPage === index + 1 ? "active-page" : ""}
+              className={currentPage === index + 1 ? "pagination-button active-page" : "pagination-button"}
               onClick={() => handlePageChange(index + 1)}
             >
               {index + 1}
             </button>
           ))}
           <button
+            className="pagination-button"
             onClick={() => handlePageChange(currentPage + 1)}
             disabled={currentPage === totalPages}
           >

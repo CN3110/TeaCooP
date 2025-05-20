@@ -2,12 +2,11 @@ import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import './TeaTypeTotals.css';
 
-const TeaTypeTotals = () => {
+const TeaTypeTotals = ({ used }) => {
   const [teaStock, setTeaStock] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
   const [refreshTrigger, setRefreshTrigger] = useState(0);
-  
 
   useEffect(() => {
     const fetchTeaStock = async () => {
@@ -24,27 +23,32 @@ const TeaTypeTotals = () => {
       }
     };
 
-    
-
     fetchTeaStock();
-    
   }, [refreshTrigger]);
 
   const handleRefresh = () => {
     setRefreshTrigger(prev => prev + 1);
   };
 
+  const getTotalStockSum = () => {
+    return teaStock.reduce((sum, tea) => sum + parseFloat(tea.totalStockWeight || 0), 0);
+  };
+
+  const totalStockSum = getTotalStockSum();
+  const isEqual = Math.abs(totalStockSum - used) < 0.01;
+
   return (
     <div className="tea-totals-container">
       <div className="tea-totals-header" style={{ display: 'flex', alignItems: 'center', gap: '15px' }}>
         <h2>Tea Type Stock Availability</h2>
-       
-        
-
-         <button onClick={handleRefresh} className="refresh-btn">
-          Refresh
-        </button>
+        <button onClick={handleRefresh} className="refresh-btn">Refresh</button>
       </div>
+
+      {!isEqual && (
+        <div className="error-message">
+          ⚠️ Total Tea Type Stock ({totalStockSum.toFixed(2)} kg) does not match Used Made Tea Weight ({parseFloat(used).toFixed(2)} kg)
+        </div>
+      )}
 
       {loading ? (
         <div className="loading-spinner">Loading tea stock...</div>
@@ -57,18 +61,15 @@ const TeaTypeTotals = () => {
           {teaStock.map((tea) => (
             <div key={tea.teaTypeId} className="tea-total-card">
               <h3>{tea.teaTypeName}</h3>
-              
               <div className="stock-info">
                 <div className="stock-row">
                   <span>Total Stock:</span>
                   <span>{parseFloat(tea.totalStockWeight).toFixed(2)} kg</span>
                 </div>
-                
                 <div className="stock-row">
                   <span>Allocated to Lots:</span>
                   <span>{parseFloat(tea.allocatedWeight).toFixed(2)} kg</span>
                 </div>
-                
                 <div className="stock-row highlight">
                   <span>Available:</span>
                   <span>{parseFloat(tea.availableWeight).toFixed(2)} kg</span>

@@ -1,5 +1,5 @@
 import React from "react";
-import DriverLayout from "../../../components/driver/DriverLayout/DriverLayout";
+import DriverLayout from "../../../components/Driver/DriverLayout/DriverLayout";
 
 const DriverDashboard = () => {
   return (

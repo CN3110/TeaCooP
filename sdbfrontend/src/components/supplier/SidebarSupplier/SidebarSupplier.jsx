@@ -37,7 +37,7 @@ const SidebarSupplier = () => {
     setShowLogoutConfirm(false);
     setShowAlert(true);
     setTimeout(() => {
-      navigate("/login");
+      navigate("/");
     }, 1500); // Give time for the alert to show before redirecting
   };
 
@@ -52,11 +52,7 @@ const SidebarSupplier = () => {
     <div className="sidebar-container">
       <h2>Supplier Panel</h2>
       <ul className="nav flex-column">
-        <li className="nav-item">
-          <Link to="/supplier-dashboard" className="nav-link">
-            <DashboardIcon /> Dashboard
-          </Link> 
-        </li>
+        
         <li className="nav-item">
                   <Link to="/supplier-notices" className="nav-link">
                   <NotificationsIcon /> Notices

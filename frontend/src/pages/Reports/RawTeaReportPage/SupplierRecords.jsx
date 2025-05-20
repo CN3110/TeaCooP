@@ -1,4 +1,6 @@
 import React, { useState, useEffect } from "react";
+import { useNavigate } from 'react-router-dom';
+import { ArrowBack } from '@mui/icons-material';
 import axios from "axios";
 import {
   Box,
@@ -216,6 +218,8 @@ const SupplierRecords = () => {
   const indexOfFirstRecord = indexOfLastRecord - recordsPerPage;
   const currentRecords = report.slice(indexOfFirstRecord, indexOfLastRecord);
   const totalPages = Math.ceil(report.length / recordsPerPage);
+  
+  const navigate = useNavigate();
 
   return ( 
    <EmployeeLayout>
@@ -223,6 +227,14 @@ const SupplierRecords = () => {
     <Paper elevation={3} sx={{ p: 3, borderRadius: 2 }}>
       {/* Header */}
       <Box sx={{ mb: 4, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+        <Button 
+          variant="outlined" 
+          color="primary" 
+          startIcon={<ArrowBack />}
+          onClick={() => navigate('/report-dashboard')}
+        >
+          Back
+        </Button>
         <Typography variant="h4" component="h1" color="primary" fontWeight="500">
           Supplier Records Report
         </Typography>

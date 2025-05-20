@@ -113,6 +113,32 @@ const updateBroker = async (brokerId, brokerDetails) => {
   ]);
 };
 
+//update broker profile - by the broker
+const updateBrokerProfile = async (brokerId, brokerDetails) => {
+  const query = `
+    UPDATE broker 
+    SET brokerName = ?, 
+        brokerContactNumber = ?, 
+        brokerEmail = ?, 
+        brokerCompanyName = ?, 
+        brokerCompanyContact = ?, 
+        brokerCompanyEmail = ?, 
+        brokerCompanyAddress = ?
+    WHERE brokerId = ?
+  `;
+  await db.query(query, [
+    brokerDetails.brokerName,
+    brokerDetails.brokerContact,
+    brokerDetails.brokerEmail,
+    brokerDetails.brokerCompanyName,
+    brokerDetails.brokerCompanyContact,
+    brokerDetails.brokerCompanyEmail,
+    brokerDetails.brokerCompanyAddress,
+    brokerId
+  ]);
+};
+
+
 module.exports = {
   generateBrokerId,
   createBroker,
@@ -121,4 +147,5 @@ module.exports = {
   getAllBrokers,
   getBrokerById,
   updateBroker,
+  updateBrokerProfile,
 };

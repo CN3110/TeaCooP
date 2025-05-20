@@ -1,9 +1,9 @@
-//diabled or pending nam okkoma details on naaaa - meka hdannaa
 import React, { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import Snackbar from "@mui/material/Snackbar";
 import MuiAlert from "@mui/material/Alert";
 import "./EditSupplier.css";
+import EmployeeLayout from "../../components/EmployeeLayout/EmployeeLayout";
 
 const Alert = React.forwardRef(function Alert(props, ref) {
   return <MuiAlert elevation={6} ref={ref} variant="filled" {...props} />;
@@ -143,6 +143,7 @@ const EditSupplierPage = () => {
   if (isLoading) return <div className="loading">Loading supplier data...</div>;
 
   return (
+    <EmployeeLayout>
     <div className="edit-supplier-container">
       {/* Snackbar for alerts */}
       <Snackbar
@@ -330,6 +331,7 @@ const EditSupplierPage = () => {
         </div>
       </form>
     </div>
+    </EmployeeLayout>
   );
 };
 

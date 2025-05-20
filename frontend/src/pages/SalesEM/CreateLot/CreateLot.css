@@ -1,101 +1,194 @@
-/* Form container */
+/* Container for the whole page content: flex row for Available Weights + Form */
+.page-content {
+  display: flex;
+  gap: 2rem;
+  padding: 2rem;
+  background-color: #f9fafb;
+  min-height: 80vh;
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+
+/* Available Weights card styling */
+.md\:w-1\/3 {
+  flex: 1 1 30%;
+}
+
+.bg-gray-100 {
+  background-color: #f3f4f6;
+}
+
+.p-6 {
+  padding: 1.5rem;
+}
+
+.rounded-2xl {
+  border-radius: 1rem;
+}
+
+.shadow-md {
+  box-shadow: 0 4px 6px rgb(0 0 0 / 0.1);
+}
+
+.text-green-800 {
+  color: #166534;
+}
+
+.text-lg {
+  font-size: 1.125rem;
+  font-weight: 700;
+  margin-bottom: 1rem;
+}
+
+.flex {
+  display: flex;
+  justify-content: space-between;
+  padding: 0.25rem 0;
+  border-bottom: 1px solid #d1d5db;
+  font-weight: 600;
+  color: #374151;
+}
+
+.flex span:last-child {
+  color: #4b5563;
+}
+
+/* Create Lot container flex */
 .create-lot-container {
-    max-width: 500px;
-    margin: 20px auto;
-    padding: 20px;
-    border: 1px solid #ccc;
-    border-radius: 8px;
-    background-color: #f2f9f1;
-    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
-  }
-  
-  .create-lot-container h2 {
-    text-align: center;
-    margin-bottom: 20px;
-    color: #333;
-  }
-  
-  /* Form grid layout */
-  .form-grid {
-    display: grid;
-    grid-template-columns: repeat(2, 1fr); /* Two columns */
-    gap: 20px; /* Space between fields */
-  }
-  
-  /* Form group (each input field) */
-  .lot-form-group {
-    display: flex;
+  flex: 2 1 65%;
+  background: white;
+  padding: 2rem;
+  border-radius: 1rem;
+  box-shadow: 0 6px 12px rgb(0 0 0 / 0.1);
+  display: flex;
+  flex-direction: column;
+}
+
+/* Form title */
+.create-lot-container > h2 {
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: #111827;
+  margin-bottom: 1.5rem;
+}
+
+/* Form grid: 2 columns with gap */
+.lot-form .form-grid {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1.5rem 2rem;
+}
+
+/* Each form group styles */
+.lot-form-group {
+  flex: 1 1 45%;
+  display: flex;
+  flex-direction: column;
+}
+
+.lot-form-group label {
+  margin-bottom: 0.5rem;
+  font-weight: 600;
+  color: #374151;
+}
+
+.lot-form-group input,
+.lot-form-group select,
+.lot-form-group .react-datepicker-wrapper {
+  padding: 0.6rem 0.8rem;
+  font-size: 1rem;
+  border: 1.5px solid #d1d5db;
+  border-radius: 0.5rem;
+  transition: border-color 0.3s ease;
+  outline-offset: 2px;
+}
+
+.lot-form-group input:focus,
+.lot-form-group select:focus,
+.lot-form-group .react-datepicker-wrapper input:focus {
+  border-color: #22c55e; /* Green focus */
+  box-shadow: 0 0 6px #bbf7d0;
+  outline: none;
+}
+
+/* Readonly inputs styling */
+.read-only-input {
+  background-color: #e5e7eb;
+  cursor: not-allowed;
+  color: #6b7280;
+}
+
+/* Error state */
+.error {
+  border-color: #dc2626 !important; /* Red border */
+}
+
+.error-message {
+  color: #b91c1c;
+  font-size: 0.85rem;
+  margin-top: 0.25rem;
+}
+
+/* Buttons container */
+.form-buttons {
+  margin-top: 2rem;
+  display: flex;
+  gap: 1rem;
+  justify-content: flex-start;
+}
+
+/* Buttons styling */
+.submit-button,
+.cancel-button {
+  padding: 0.75rem 2rem;
+  font-size: 1rem;
+  font-weight: 600;
+  border-radius: 0.5rem;
+  border: none;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+}
+
+/* Submit button */
+.submit-button {
+  background-color: #22c55e;
+  color: white;
+}
+
+.submit-button:hover:not(:disabled) {
+  background-color: #16a34a;
+}
+
+.submit-button:disabled {
+  background-color: #a7f3d0;
+  cursor: not-allowed;
+}
+
+/* Cancel button */
+.cancel-button {
+  background-color: #e5e7eb;
+  color: #374151;
+}
+
+.cancel-button:hover {
+  background-color: #d1d5db;
+}
+
+/* Responsive: stack vertically on smaller screens */
+@media (max-width: 768px) {
+  .page-content {
     flex-direction: column;
-    gap: 5px;
   }
-  
-  .lot-form-group label {
-    font-weight: bold;
-    color: #555;
+
+  .md\:w-1\/3,
+  .create-lot-container {
+    flex: 1 1 100%;
   }
-  
-  .lot-form-group input,
-  .lot-form-group select,
-  .react-datepicker-wrapper input {
-    width: 100%;
-    padding: 8px;
-    border: 1px solid #ccc;
-    border-radius: 4px;
-    font-size: 14px;
+
+  .lot-form .form-grid {
+    flex-direction: column;
   }
-  
-  .lot-form-group input:focus,
-  .lot-form-group select:focus,
-  .react-datepicker-wrapper input:focus {
-    border-color: #154734;
-    outline: none;
-    box-shadow: 0 0 5px rgba(21, 71, 52, 0.5);
+
+  .lot-form-group {
+    flex: 1 1 100%;
   }
-  
-  /* Date picker input */
-  .react-datepicker-wrapper {
-    width: 100%;
-  }
-  
-  /* Buttons container */
-  .form-buttons {
-    display: flex;
-    justify-content: flex-end;
-    gap: 20px; /* Space between buttons */
-    margin-top: 20px;
-  }
-  
-  /* Buttons */
-  .submit-button,
-  .cancel-button {
-    padding: 10px 20px;
-    border: none;
-    border-radius: 4px;
-    font-size: 14px;
-    cursor: pointer;
-  }
-  
-  .submit-button {
-    background-color: #154734;
-    color: white;
-  }
-  
-  .submit-button:hover {
-    background-color: #218838;
-  }
-  
-  .cancel-button {
-    background-color: #ccc;
-    color: #333;
-  }
-  
-  .cancel-button:hover {
-    background-color: #bbb;
-  }
-  
-  /* Responsive design */
-  @media (max-width: 768px) {
-    .form-grid {
-      grid-template-columns: 1fr; /* Stack fields in one column on small screens */
-    }
-  }
+}

@@ -113,7 +113,16 @@ const BProfile = () => {
     if (!validateForm()) return;
 
     try {
-      await axios.put(`http://localhost:3001/api/brokers/${brokerId}`, broker);
+      await axios.put(`http://localhost:3001/api/brokers/profile-edit/${brokerId}`, {
+        brokerName: broker.brokerName,
+        brokerContact: broker.brokerContactNumber,
+        brokerEmail: broker.brokerEmail,
+        brokerCompanyName: broker.brokerCompanyName,
+        brokerCompanyContact: broker.brokerCompanyContact,
+        brokerCompanyEmail: broker.brokerCompanyEmail,
+        brokerCompanyAddress: broker.brokerCompanyAddress
+      });
+
       showSnackbar('Profile updated successfully');
       setIsEditing(false);
       fetchBrokerDetails();

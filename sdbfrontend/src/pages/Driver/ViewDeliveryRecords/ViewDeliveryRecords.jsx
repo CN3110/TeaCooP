@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import DriverLayout from "../../../components/driver/DriverLayout/DriverLayout";
+import DriverLayout from "../../../components/Driver/DriverLayout/DriverLayout";
 import { BiSearch } from "react-icons/bi";
 import "./ViewDeliveryRecords.css";
 import axios from "axios";
@@ -43,7 +43,7 @@ const ViewDeliveryRecords = () => {
   return (
     <DriverLayout>
       <div className="driver-delivery-history">
-        <h3>My Delivery Assignments</h3>
+        <h3>My Delivery Records</h3>
 
         <div className="search-box">
           <input
@@ -63,34 +63,28 @@ const ViewDeliveryRecords = () => {
                 <th>Date</th>
                 <th>Supplier ID</th>
                 <th>Route</th>
-                <th>Total Weight (kg)</th>
-                <th>Total Sack Weight (kg)</th>
-                <th>For Water (kg)</th>
-                <th>Withered Leaves (kg)</th>
-                <th>Ripe Leaves (kg)</th>
-                <th>Randalu (kg)</th>
-                <th>Green Tea Leaves (kg)</th>
+                <th>Raw Tea Weight</th>
               </tr>
             </thead>
             <tbody>
               {filteredDeliveries.length > 0 ? (
-                filteredDeliveries.map((delivery, index) => (
-                  <tr key={index}>
-                    <td>{new Date(delivery.date).toLocaleDateString()}</td>
-                    <td>{delivery.supplierId}</td>
-                    <td>{delivery.route}</td>
-                    <td>{delivery.totalWeight} kg</td>
-                    <td>{delivery.totalSackWeight} kg</td>
-                    <td>{delivery.forWater} kg</td>
-                    <td>{delivery.forWitheredLeaves} kg</td>
-                    <td>{delivery.forRipeLeaves} kg</td>
-                    <td>{delivery.randalu} kg</td>
-                    <td>{delivery.greenTeaLeaves} kg</td>
-                  </tr>
-                ))
+                filteredDeliveries.map((delivery, index) => {
+                  const rawTeaWeight =
+                    (parseFloat(delivery.randalu) || 0) +
+                    (parseFloat(delivery.greenTeaLeaves) || 0);
+
+                  return (
+                    <tr key={index}>
+                      <td>{new Date(delivery.date).toLocaleDateString()}</td>
+                      <td>{delivery.supplierId}</td>
+                      <td>{delivery.route}</td>
+                      <td>{rawTeaWeight.toFixed(2)} kg</td>
+                    </tr>
+                  );
+                })
               ) : (
                 <tr>
-                  <td colSpan="10">No delivery records found.</td>
+                  <td colSpan="4">No delivery records found.</td>
                 </tr>
               )}
             </tbody>

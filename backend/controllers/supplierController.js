@@ -273,6 +273,37 @@ exports.disableSupplier = async (req, res) => {
   }
 };
 
+// PUT update supplier profile - by supplier
+exports.updateSupplierProfile = (req, res) => {
+  const supplierId = req.params.supplierId;
+  const { supplierName, supplierContactNumber, supplierEmail, landDetails } = req.body;
+
+  const updateSupplierProfileQuery = `UPDATE supplier SET supplierName = ?, supplierContactNumber = ?, supplierEmail = ? WHERE supplierId = ?`;
+
+  db.query(updateSupplierProfileQuery, [supplierName, supplierContactNumber, supplierEmail, supplierId], (err) => {
+    if (err) return res.status(500).json({ error: 'Failed to update supplier profile' });
+
+    const deleteLandQuery = `DELETE FROM land WHERE supplierId = ?`;
+    db.query(deleteLandQuery, [supplierId], (err) => {
+      if (err) return res.status(500).json({ error: 'Failed to clear old land data' });
+
+      const insertLandQuery = `INSERT INTO land (supplierId, landSize, landAddress) VALUES ?`;
+
+      const landValues = landDetails.map(ld => [supplierId, ld.landSize, ld.landAddress]);
+
+      if (landValues.length > 0) {
+        db.query(insertLandQuery, [landValues], (err) => {
+          if (err) return res.status(500).json({ error: 'Failed to insert land data' });
+          return res.json({ message: 'Supplier updated successfully' });
+        });
+      } else {
+        return res.json({ message: 'Supplier updated successfully with no land' });
+      }
+    });
+  });
+};
+
+
 exports.updatePassword = async (req, res) => {
   const { supplierId } = req.params;
   const { newPassword } = req.body;
@@ -297,3 +328,4 @@ exports.updatePassword = async (req, res) => {
     res.status(500).json({ error: "Failed to update password" });
   }
 };
+

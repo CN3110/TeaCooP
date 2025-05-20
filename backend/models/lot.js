@@ -1,4 +1,4 @@
-const db = require('../config/database');
+const db = require("../config/database");
 
 // Generate a new unique lot number
 const generateLotNumber = async () => {
@@ -13,13 +13,15 @@ const generateLotNumber = async () => {
 
 // Get all lots
 const getAllLots = async () => {
-  const [lots] = await db.query('SELECT * FROM lot');
+  const [lots] = await db.query("SELECT * FROM lot ORDER BY lotNumber DESC");
   return lots;
 };
 
 // Get a lot by lotNumber
 const getLotById = async (lotNumber) => {
-  const [lots] = await db.query('SELECT * FROM lot WHERE lotNumber = ?', [lotNumber]);
+  const [lots] = await db.query("SELECT * FROM lot WHERE lotNumber = ?", [
+    lotNumber,
+  ]);
   return lots[0] || null;
 };
 
@@ -38,8 +40,6 @@ const getAvailableMadeTeaForTeaTypeCreation = async () => {
   return availableMadeTea;
 };
 
-
-
 // Create a new lot
 const createLot = async ({
   lotNumber,
@@ -48,13 +48,14 @@ const createLot = async ({
   netWeight,
   totalNetWeight,
   valuationPrice,
-  teaTypeId
+  teaTypeId,
+  notes,
 }) => {
   const query = `
     INSERT INTO lot (
       lotNumber, manufacturingDate, noOfBags, netWeight, totalNetWeight,
-      valuationPrice, teaTypeId, status
-    ) VALUES (?, ?, ?, ?, ?, ?, ?, 'available')
+      valuationPrice, teaTypeId, status, notes
+    ) VALUES (?, ?, ?, ?, ?, ?, ?, 'available', ?)
   `;
   await db.query(query, [
     lotNumber,
@@ -63,19 +64,24 @@ const createLot = async ({
     netWeight,
     totalNetWeight,
     valuationPrice,
-    teaTypeId
+    teaTypeId,
+    notes || null,
   ]);
 };
 
 // Update an existing lot
-const updateLot = async (lotNumber, {
-  manufacturingDate,
-  noOfBags,
-  netWeight,
-  totalNetWeight,
-  valuationPrice,
-  teaTypeId
-}) => {
+const updateLot = async (
+  lotNumber,
+  {
+    manufacturingDate,
+    noOfBags,
+    netWeight,
+    totalNetWeight,
+    valuationPrice,
+    teaTypeId,
+    notes,
+  }
+) => {
   const query = `
     UPDATE lot SET
       manufacturingDate = ?,
@@ -83,7 +89,8 @@ const updateLot = async (lotNumber, {
       netWeight = ?,
       totalNetWeight = ?,
       valuationPrice = ?,
-      teaTypeId = ?
+      teaTypeId = ?,
+      notes = ?
     WHERE lotNumber = ?
   `;
   await db.query(query, [
@@ -93,13 +100,30 @@ const updateLot = async (lotNumber, {
     totalNetWeight,
     valuationPrice,
     teaTypeId,
-    lotNumber
+    notes || null,
+    lotNumber,
   ]);
 };
 
 // Delete a lot
 const deleteLot = async (lotNumber) => {
-  const [result] = await db.query('DELETE FROM lot WHERE lotNumber = ?', [lotNumber]);
+  // Check if there are any broker valuations for this lot
+  const [related] = await db.query(
+    "SELECT * FROM broker_valuation WHERE lotNumber = ?",
+    [lotNumber]
+  );
+
+  if (related.length > 0) {
+    // Prevent deletion if any related entries exist
+    throw new Error(
+      "Cannot delete this Lot, because brokers have added valuations for it."
+    );
+  }
+
+  // If no dependencies, proceed with deletion
+  const [result] = await db.query("DELETE FROM lot WHERE lotNumber = ?", [
+    lotNumber,
+  ]);
   return result.affectedRows > 0;
 };
 
@@ -132,6 +156,48 @@ const submitBrokerValuation = async (lotNumber, brokerId, valuationPrice) => {
 };
 
 
+
+const updateLotStatus = async (lotNumber, status) => {
+  const query = `
+    UPDATE lot SET
+      status = ?
+    WHERE lotNumber = ?
+  `;
+  await db.query(query, [status, lotNumber]);
+};
+
+// Confirm a broker valuation
+const confirmBrokerValuation = async (valuationId, employeeId) => {
+  await db.query(
+    `UPDATE broker_valuation 
+     SET is_confirmed = TRUE, 
+         confirmed_by = ?, 
+         confirmed_at = CURRENT_TIMESTAMP 
+     WHERE valuation_id = ?`,
+    [employeeId, valuationId]
+  );
+};
+
+// Get valuation details by ID
+const getValuationById = async (valuationId) => {
+  const [[valuation]] = await db.query(
+    `SELECT * FROM broker_valuation WHERE valuation_id = ?`,
+    [valuationId]
+  );
+  return valuation || null;
+};
+
+// Update lot valuation price and status
+const updateLotValuationAndStatus = async (lotNumber, status) => {
+  await db.query(
+    `UPDATE lot 
+     SET status = ? 
+     WHERE lotNumber = ?`,
+    [status, lotNumber]
+  );
+};
+
+
 module.exports = {
   generateLotNumber,
   getAllLots,
@@ -142,5 +208,9 @@ module.exports = {
   deleteLot,
   getAvailableLotsForBroker,
   getAvailableLots,
-  submitBrokerValuation
+  submitBrokerValuation,
+  updateLotStatus,
+  confirmBrokerValuation,       
+  getValuationById,
+  updateLotValuationAndStatus
 };

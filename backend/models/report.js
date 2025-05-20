@@ -19,6 +19,26 @@ exports.getAllRawTeaRecords = async () => {
   return results;
 };
 
+exports.getAllDailyTeaDeliverySummaries = async () => {
+  const sql = `
+    SELECT 
+      DATE(date) AS deliveryDate,
+      SUM(totalWeight) AS totalWeight,
+      SUM(totalSackWeight) AS totalSackWeight,
+      SUM(forWater) AS forWater,
+      SUM(forWitheredLeaves) AS forWitheredLeaves,
+      SUM(forRipeLeaves) AS forRipeLeaves,
+      SUM(greenTeaLeaves) AS greenTeaLeaves,
+      SUM(randalu) AS randalu
+    FROM delivery
+    GROUP BY DATE(date)
+    ORDER BY DATE(date) DESC
+  `;
+  const [results] = await db.query(sql);
+  return results;
+};
+
+
 exports.getRawTeaRecordsOfSupplier = async (fromDate, toDate, transport) => {
   const sql = `
     SELECT 
@@ -53,50 +73,155 @@ exports.getRawTeaRecordsOfSupplier = async (fromDate, toDate, transport) => {
   return results;
 };
 
-// Fixed function to get driver raw tea records with proper date filtering and aggregation
-exports.getRawTeaRecordsOfDriver = async (fromDate, toDate, driverId) => {
-  let params = [];
-  let whereClause = '';
-  
-  // Build WHERE clause and parameters based on provided filters
-  if (fromDate || toDate || driverId !== 'All') {
-    whereClause = 'WHERE ';
-    
-    if (fromDate) {
-      whereClause += 'd.date >= ? ';
-      params.push(fromDate);
-      
-      if (toDate || driverId !== 'All') {
-        whereClause += 'AND ';
-      }
-    }
-    
-    if (toDate) {
-      whereClause += 'd.date <= ? ';
-      params.push(toDate);
-      
-      if (driverId !== 'All') {
-        whereClause += 'AND ';
-      }
-    }
-    
-    if (driverId !== 'All') {
-      whereClause += 'd.transport = ? ';
-      params.push(driverId);
-    }
+exports.getDriverReport = async (route, startDate, endDate) => {
+  const conditions = ["transport != 'selfTransport'"];
+  const values = [];
+
+  if (route) {
+    conditions.push("route = ?");
+    values.push(route);
   }
 
-  const sql = `
+  if (startDate && endDate) {
+    conditions.push("DATE(date) BETWEEN ? AND ?");
+    values.push(startDate, endDate);
+  }
+
+  const baseWhere = conditions.length > 0 ? "WHERE " + conditions.join(" AND ") : "";
+
+  // Full grouped report by driverId and route
+  const fullQuery = `
     SELECT 
-      d.transport AS driverId,
-      SUM(d.randalu + d.greenTeaLeaves) AS totalRawTeaWeight
-    FROM delivery d
-    JOIN driver dr ON d.transport = dr.driverId
-    ${whereClause}
-    GROUP BY d.transport
-    ORDER BY totalRawTeaWeight DESC
+      transport AS driverId, 
+      route,
+      SUM(CAST(greenTeaLeaves AS DECIMAL(10,2))) + SUM(CAST(randalu AS DECIMAL(10,2))) AS rawTeaWeight
+    FROM delivery
+    ${baseWhere}
+    GROUP BY transport, route
+    ORDER BY rawTeaWeight DESC;
   `;
 
-  const [results] = await db.query(sql, params);
+  // Summary table by driverId only
+  const summaryQuery = `
+    SELECT 
+      transport AS driverId,
+      SUM(CAST(greenTeaLeaves AS DECIMAL(10,2)) + CAST(randalu AS DECIMAL(10,2))) AS rawTeaWeight
+    FROM delivery
+    ${baseWhere}
+    GROUP BY transport
+    ORDER BY rawTeaWeight DESC;
+  `;
+
+  const [detailedReport] = await db.query(fullQuery, values);
+  const [summaryReport] = await db.query(summaryQuery, values);
+
+  return { detailedReport, summaryReport };
+};
+
+exports.getTeaProductionReport = async (startDate, endDate) => {
+  let query = `
+    SELECT 
+      productionId, 
+      DATE_FORMAT(productionDate, '%Y-%m-%d') AS productionDate, 
+      weightInKg, 
+      createdBy, 
+      created_at, 
+      rawTeaUsed
+    FROM tea_production
+  `;
+  
+  const params = [];
+  const conditions = [];
+
+  // Add date filters only if both are provided
+  if (startDate && endDate) {
+    conditions.push(`productionDate BETWEEN ? AND ?`);
+    params.push(startDate, endDate);
+  } 
+  // Optional: Handle cases where only one date is provided
+  else if (startDate) {
+    conditions.push(`productionDate >= ?`);
+    params.push(startDate);
+  } 
+  else if (endDate) {
+    conditions.push(`productionDate <= ?`);
+    params.push(endDate);
+  }
+
+  // Add WHERE clause if there are any conditions
+  if (conditions.length > 0) {
+    query += ` WHERE ${conditions.join(' AND ')}`;
+  }
+
+  query += ` ORDER BY productionDate ASC`;
+
+  const [results] = await db.query(query, params);
   return results;
 };
+
+// Lot summary report
+exports.getLotSummaryReport = async (startDate, endDate, status) => {
+  let sql = `
+  SELECT lot.*, teatype.teaTypeName
+FROM lot
+JOIN teatype ON lot.teaTypeId = teatype.teaTypeId
+WHERE 1=1
+ORDER BY lot.lotNumber DESC;
+
+`;
+const params = [];
+if (startDate && endDate) {
+  sql += ` AND manufacturingDate BETWEEN ? AND ?`;
+  params.push(startDate, endDate);
+}
+if (status) {
+  sql += ` AND lot.status = ?`;
+  params.push(status);
+}
+const [results] = await db.query(sql, params);
+return results;
+
+};
+
+// Sold Lot Report
+exports.getSoldLotsReport = async (startDate, endDate, brokerId) => {
+  let query = `
+    SELECT 
+      lot.lotNumber,
+      broker.brokerName,
+      broker.brokerCompanyName AS brokerCompany,
+      teatype.teaTypeName,
+      lot.noOfBags,
+      lot.netWeight,
+      lot.totalNetWeight,
+      lot.valuationPrice AS employeeValuationPrice,
+      broker_valuation.valuationPrice AS brokerValuationPrice,
+      sold_lot.soldPrice,
+      sold_lot.total_sold_price,
+      sold_lot.soldDate
+    FROM sold_lot
+    JOIN lot ON sold_lot.lotNumber = lot.lotNumber
+    JOIN broker ON sold_lot.brokerId = broker.brokerId
+    JOIN teatype ON lot.teaTypeId = teatype.teaTypeId
+    LEFT JOIN broker_valuation ON lot.lotNumber = broker_valuation.lotNumber
+    WHERE lot.status = 'sold'
+  `;
+
+  const params = [];
+
+  if (startDate && endDate) {
+    query += ` AND sold_lot.soldDate BETWEEN ? AND ?`;
+    params.push(startDate, endDate);
+  }
+
+  if (brokerId) {
+    query += ` AND sold_lot.brokerId = ?`;
+    params.push(brokerId);
+  }
+
+  query += ` ORDER BY sold_lot.soldDate DESC`;
+
+  const [results] = await db.query(query, params);
+  return results;
+};
+

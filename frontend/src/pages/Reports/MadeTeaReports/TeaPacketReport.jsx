@@ -1,4 +1,6 @@
 import React, { useEffect, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
+import { ArrowBack } from '@mui/icons-material';
 import {
   Card, Typography, Button, Grid, CircularProgress, TextField, Pagination
 } from '@mui/material';
@@ -128,9 +130,20 @@ const TeaPacketReport = () => {
   const currentPackets = filteredPackets.slice(indexOfFirstRecord, indexOfLastRecord);
   const totalPages = Math.ceil(filteredPackets.length / recordsPerPage);
 
+    const navigate = useNavigate();
+
+
   return (
     <EmployeeLayout>
       <div style={{ padding: 20 }}>
+         <Button 
+  variant="outlined" 
+  color="primary" 
+  startIcon={<ArrowBack />}
+  onClick={() => navigate('/report-dashboard')}
+>
+  Back
+</Button>
         <Typography variant="h5" gutterBottom>
           Tea Packet Report
         </Typography>

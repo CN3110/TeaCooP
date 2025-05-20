@@ -1,114 +1,279 @@
 .view-driver-container {
-    max-width: 1200px;
-    margin: 20px auto;
-    padding: 20px;
-    background-color: #f9f9f9;
-    border-radius: 8px;
-    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
-  }
-  
-  .view-driver-container h3 {
-    text-align: center;
-    color: #154734;
-    margin-bottom: 20px;
-  }
-  
+  max-width: 1200px;
+  margin: 20px auto;
+  padding: 20px;
+  background-color: #f9f9f9;
+  border-radius: 12px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+}
+
+.view-driver-container h3 {
+  text-align: center;
+  color: #154734;
+  margin-bottom: 24px;
+  font-size: 24px;
+  font-weight: 600;
+}
+
+.content-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 24px;
+  flex-wrap: wrap;
+  gap: 16px;
+}
+
+.header-activity {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  flex-wrap: wrap;
+}
+
+.search-box {
+  display: flex;
+  align-items: center;
+  background-color: white;
+  border: 1px solid #e0e0e0;
+  border-radius: 8px;
+  padding: 8px 14px;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.04);
+  transition: all 0.2s ease;
+}
+
+.search-box:focus-within {
+  border-color: #154734;
+  box-shadow: 0 2px 8px rgba(21, 71, 52, 0.15);
+}
+
+.search-box input {
+  border: none;
+  outline: none;
+  font-size: 16px;
+  width: 220px;
+  padding: 4px 0;
+}
+
+.search-icon {
+  color: #154734;
+  margin-left: 8px;
+}
+
+.filters {
+  display: flex;
+  gap: 16px;
+  align-items: center;
+}
+
+.status-filter {
+  padding: 10px 16px;
+  border-radius: 8px;
+  border: 1px solid #e0e0e0;
+  background-color: white;
+  font-size: 15px;
+  color: #333;
+  min-width: 150px;
+  cursor: pointer;
+  outline: none;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.04);
+}
+
+.add-driver-btn {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 18px;
+  background-color: #154734;
+  color: white;
+  border: none;
+  border-radius: 8px;
+  font-size: 15px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+}
+
+.add-driver-btn:hover {
+  background-color: #0d2f22;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+}
+
+.add-icon {
+  font-size: 20px;
+}
+
+.table-container {
+  overflow-x: auto;
+  margin-bottom: 20px;
+  border-radius: 12px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+}
+
+.drivers-table {
+  width: 100%;
+  border-collapse: separate;
+  border-spacing: 0;
+  background-color: white;
+  overflow: hidden;
+}
+
+.drivers-table th,
+.drivers-table td {
+  padding: 16px;
+  text-align: left;
+}
+
+.drivers-table th {
+  background-color: #154734;
+  color: white;
+  font-weight: 500;
+  font-size: 15px;
+  position: sticky;
+  top: 0;
+}
+
+.drivers-table th:first-child {
+  border-top-left-radius: 12px;
+}
+
+.drivers-table th:last-child {
+  border-top-right-radius: 12px;
+}
+
+.drivers-table tbody tr {
+  border-bottom: 1px solid #eee;
+  transition: all 0.2s ease;
+}
+
+.drivers-table tbody tr:last-child {
+  border-bottom: none;
+}
+
+.drivers-table tbody tr:hover {
+  background-color: #f5f9f7;
+}
+
+.status-badge {
+  display: inline-block;
+  padding: 6px 12px;
+  border-radius: 20px;
+  font-size: 14px;
+  font-weight: 500;
+  text-align: center;
+}
+
+.status-active {
+  background-color: #e6f4ea;
+  color: #1e8e3e;
+}
+
+.status-pending {
+  background-color: #fef7e0;
+  color: #f9a825;
+}
+
+.status-disabled {
+  background-color: #fbe9e7;
+  color: #d32f2f;
+}
+
+.vehicle-details-list {
+  list-style-type: none;
+  padding: 0;
+  margin: 0;
+}
+
+.vehicle-details-list li {
+  padding: 4px 0;
+  font-size: 14px;
+}
+
+.action-buttons {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+}
+
+.edit-button {
+  color: #1976d2 !important;
+}
+
+.disable-button {
+  color: #d32f2f !important;
+}
+
+.employee-name {
+  color: #666;
+  font-size: 13px;
+}
+
+.no-results {
+  text-align: center;
+  padding: 24px;
+  color: #666;
+  font-style: italic;
+}
+
+.pagination-controls {
+  display: flex;
+  justify-content: center;
+  gap: 8px;
+  margin-top: 24px;
+}
+
+.pagination-button {
+  padding: 8px 16px;
+  border: 1px solid #e0e0e0;
+  background-color: white;
+  cursor: pointer;
+  border-radius: 8px;
+  font-size: 14px;
+  transition: all 0.2s ease;
+}
+
+.pagination-button:hover:not(:disabled) {
+  background-color: #f1f1f1;
+  border-color: #ccc;
+}
+
+.pagination-button.active-page {
+  background-color: #154734;
+  color: white;
+  font-weight: 500;
+  border-color: #154734;
+}
+
+.pagination-button:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
   .content-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin-bottom: 20px;
+    flex-direction: column;
+    align-items: flex-start;
   }
   
   .header-activity {
-    display: flex;
-    align-items: center;
-    gap: 15px;
-  }
-  
-  .search-box {
-    display: flex;
-    align-items: center;
-    background-color: white;
-    border: 1px solid #ccc;
-    border-radius: 4px;
-    padding: 5px 10px;
-  }
-  
-  .search-box input {
-    border: none;
-    outline: none;
-    font-size: 16px;
-    width: 200px;
-  }
-  
-  .search-box .icon {
-    color: #154734;
-    cursor: pointer;
-  }
-  
-  .add-driver-btn {
-    padding: 10px 20px;
-    background-color: #154734;
-    color: white;
-    border: none;
-    border-radius: 4px;
-    font-size: 16px;
-    cursor: pointer;
-  }
-  
-  .add-driver-btn:hover {
-    background-color: #0f361f;
-  }
-  
-  .drivers-table {
     width: 100%;
-    border-collapse: collapse;
-    background-color: white;
-    border-radius: 8px;
-    overflow: hidden;
-    box-shadow: 0 0 5px rgba(0, 0, 0, 0.1);
+    flex-direction: column;
+    align-items: flex-start;
   }
   
-  .drivers-table th,
-  .drivers-table td {
-    padding: 12px;
-    text-align: left;
-    border-bottom: 1px solid #ddd;
+  .search-box, .filters {
+    width: 100%;
   }
   
-  .drivers-table th {
-    background-color: #154734;
-    color: white;
+  .filters {
+    flex-direction: column;
+    align-items: flex-start;
   }
   
-  .drivers-table tbody tr:hover {
-    background-color: #f1f1f1;
+  .status-filter, .add-driver-btn {
+    width: 100%;
   }
-
-  .pagination-controls {
-    display: flex;
-    justify-content: center;
-    gap: 8px;
-    margin-top: 20px;
-  }
-  
-  .pagination-controls button {
-    padding: 6px 12px;
-    border: 1px solid #ccc;
-    background-color: #f8f8f8;
-    cursor: pointer;
-    border-radius: 4px;
-  }
-  
-  .pagination-controls button.active-page {
-    background-color: #084008;
-    color: white;
-    font-weight: bold;
-  }
-  
-  .pagination-controls button:disabled {
-    opacity: 0.5;
-    cursor: not-allowed;
-  }
-  
+}

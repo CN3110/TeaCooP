@@ -6,6 +6,7 @@ import TeaProductionList from '../../components/ProductionComponents/List/TeaPro
 import './TeaProduction.css';
 import EmployeeLayout from '../../components/EmployeeLayout/EmployeeLayout'; 
 
+
 const TeaProductionPage = () => {
   const navigate = useNavigate();
 
@@ -13,13 +14,7 @@ const TeaProductionPage = () => {
     <EmployeeLayout> 
     <div className="tea-production-page">
       <div className="page-header">
-        <button 
-          className="back-button"
-          onClick={() => navigate(-1)} // Go back to previous page
-        >
-          <FiArrowLeft className="back-icon" />
-          Back
-        </button>
+        
         <h1>Tea Production Management</h1>
       </div>
       

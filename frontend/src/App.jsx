@@ -46,6 +46,11 @@ import RawTeaReportPage from "./pages/Reports/RawTeaReportPage/RawTeaReportPage.
 import SupplierRecords from "./pages/Reports/RawTeaReportPage/SupplierRecords.jsx";
 import DriverRecords from "./pages/Reports/RawTeaReportPage/DriverRecords.jsx";
 import TeaPacketReport from "./pages/Reports/MadeTeaReports/TeaPacketReport.jsx";
+import MadeTeaProductionReport from "./pages/Reports/MadeTeaReports/madeTeaProductionReport.jsx";
+import DailyTeaDeliveryReport from "./pages/Reports/RawTeaReportPage/DailyTeaDeliveryReport.jsx";
+import LotSummaryReport from "./pages/Reports/MadeTeaReports/LotSummaryReport.jsx";
+import SoldLotsReport from "./pages/Reports/MadeTeaReports/SoldLotsReport.jsx";
+import ReportDashboard from "./pages/Reports/ReportDashboard.jsx";
 
 const App = () => {
   return (
@@ -94,10 +99,15 @@ const App = () => {
             <Route path="/tea-production-summary" element={<TeaProductionSummary />} />
 
              {/* Reports */}
+            <Route path="/report-dashboard" element={<ReportDashboard />} />
             <Route path="/raw-tea-report" element={<RawTeaReportPage />} />
             <Route path="/supplier-delivery-records" element={<SupplierRecords/>} />
             <Route path="/driver-delivery-records" element={<DriverRecords/>} /> 
             <Route path="/tea-packet-reports" element={<TeaPacketReport />} />
+            <Route path="/made-tea-production-report" element={<MadeTeaProductionReport />} /> 
+            <Route path="/daily-tea-delivery-report" element={<DailyTeaDeliveryReport />} />
+            <Route path="/lot-summary-report" element={<LotSummaryReport />} />
+            <Route path="/sold-lots-report" element={<SoldLotsReport />} />
 
             {/* Admin Routes */}
             <Route path="/admin-dashboard" element={<AdminDashboard />} />

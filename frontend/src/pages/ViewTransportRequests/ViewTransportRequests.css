@@ -3,6 +3,28 @@
   font-family: Arial, sans-serif;
 }
 
+.summary-card {
+  background-color: #f2f2f2;
+  border-left: 6px solid #88bc7d;
+  padding: 16px;
+  margin-bottom: 20px;
+  border-radius: 8px;
+  box-shadow: 0 2px 4px rgba(125, 221, 99, 0.1);
+}
+
+.summary-card h3 {
+  margin: 0 0 8px;
+  color: #333;
+}
+
+.summary-card p {
+  font-size: 24px;
+  font-weight: bold;
+  color: #000000;
+  margin: 0;
+}
+
+
 .filter-controls {
   display: flex;
   align-items: center;

@@ -179,6 +179,7 @@ const RawTeaRecords = () => {
         <Button 
           variant="contained" 
           onClick={handleFilter} 
+          color='#1a3e1a'
           style={{ marginTop: '16px', marginRight: '8px' }}
         >
           Filter

@@ -53,11 +53,13 @@ exports.getAvailableMadeTeaForTeaTypeCreation = async (req, res) => {
 // Create a new lot
 exports.createLot = async (req, res) => {
   const {
-    manufacturingDate, noOfBags, netWeight,
-    totalNetWeight, valuationPrice, teaTypeId,
-  } = req.body;
+  manufacturingDate, noOfBags, netWeight,
+  totalNetWeight, valuationPrice, teaTypeId,
+  notes
+} = req.body;
 
-  if (!manufacturingDate || !noOfBags || !netWeight || !totalNetWeight || !valuationPrice || !teaTypeId) {
+
+  if (!manufacturingDate || !noOfBags || !netWeight || !totalNetWeight || !valuationPrice || !teaTypeId ) {
     return res.status(400).json({ message: 'All fields are required' });
   }
 
@@ -71,14 +73,16 @@ exports.createLot = async (req, res) => {
 
     const lotNumber = await lotModel.generateLotNumber();
     await lotModel.createLot({
-      lotNumber,
-      manufacturingDate,
-      noOfBags,
-      netWeight,
-      totalNetWeight,
-      valuationPrice,
-      teaTypeId
-    });
+  lotNumber,
+  manufacturingDate,
+  noOfBags,
+  netWeight,
+  totalNetWeight,
+  valuationPrice,
+  teaTypeId,
+  notes
+});
+
 
     res.status(201).json({ message: 'Lot created successfully', lotNumber });
   } catch (error) {
@@ -91,9 +95,11 @@ exports.createLot = async (req, res) => {
 exports.updateLot = async (req, res) => {
   const { lotNumber } = req.params;
   const {
-    manufacturingDate, noOfBags, netWeight,
-    totalNetWeight, valuationPrice, teaTypeId
-  } = req.body;
+  manufacturingDate, noOfBags, netWeight,
+  totalNetWeight, valuationPrice, teaTypeId,
+  notes
+} = req.body;
+
 
   if (!manufacturingDate || !noOfBags || !netWeight || !totalNetWeight || !valuationPrice || !teaTypeId) {
     return res.status(400).json({ message: 'All fields are required' });
@@ -111,13 +117,14 @@ exports.updateLot = async (req, res) => {
     }
 
     await lotModel.updateLot(lotNumber, {
-      manufacturingDate,
-      noOfBags: Number(noOfBags),
-      netWeight: Number(netWeight),
-      totalNetWeight: Number(totalNetWeight),
-      valuationPrice: Number(valuationPrice),
-      teaTypeId: Number(teaTypeId)
-    });
+  manufacturingDate,
+  noOfBags: Number(noOfBags),
+  netWeight: Number(netWeight),
+  totalNetWeight: Number(totalNetWeight),
+  valuationPrice: Number(valuationPrice),
+  teaTypeId: Number(teaTypeId),
+  notes
+});
 
     res.status(200).json({ message: 'Lot updated successfully' });
   } catch (error) {
@@ -134,13 +141,21 @@ exports.deleteLot = async (req, res) => {
   const { lotNumber } = req.params;
   try {
     const deleted = await lotModel.deleteLot(lotNumber);
-    if (!deleted) return res.status(404).json({ message: 'Lot not found' });
-    res.status(200).json({ message: 'Lot deleted successfully' });
+    if (!deleted) return res.status(404).json({ error: "Lot not found" });
+
+    res.status(200).json({ message: "Lot deleted successfully" });
   } catch (error) {
-    console.error("Error deleting lot:", error);
-    res.status(500).json({ error: "Failed to delete lot" });
+    // Do NOT log specific business logic errors
+    if (error.message.includes("Cannot delete this Lot")) {
+      return res.status(400).json({ error: error.message });
+    }
+
+    // Log unexpected errors only
+    console.error("Unexpected error deleting lot:", error);
+    res.status(500).json({ error: "Failed to delete lot due to server error" });
   }
 };
+
 
 // Get lots available for a specific broker (not yet valued by them)
 exports.getAvailableLotsForBroker = async (req, res) => {
@@ -181,5 +196,51 @@ exports.getAvailableLots = async (req, res) => {
   } catch (error) {
     console.error("Error fetching available lots:", error);
     res.status(500).json({ error: "Failed to fetch available lots" });
+  }
+};
+
+exports.confirmValuation = async (req, res) => {
+  const { valuationId } = req.params;
+  const { employeeId } = req.body;
+
+  if (!employeeId) {
+    return res.status(400).json({ message: 'Employee ID is required' });
+  }
+
+  try {
+    // Start transaction
+    await db.query('START TRANSACTION');
+
+    // 1. Get the valuation details first
+    const valuation = await lotModel.getValuationById(valuationId);
+    if (!valuation) {
+      await db.query('ROLLBACK');
+      return res.status(404).json({ message: 'Valuation not found' });
+    }
+
+    // 2. Confirm the valuation
+    await lotModel.confirmBrokerValuation(valuationId, employeeId);
+
+    // 3. Update the lot status and valuation price
+    await lotModel.updateLotValuationAndStatus(
+      valuation.lotNumber, 
+      'confirmed'
+    );
+
+    // Commit transaction
+    await db.query('COMMIT');
+
+    res.status(200).json({ 
+      message: 'Valuation confirmed and lot status updated',
+      lotNumber: valuation.lotNumber
+    });
+  } catch (error) {
+    // Rollback on error
+    await db.query('ROLLBACK');
+    console.error("Error confirming valuation:", error);
+    res.status(500).json({ 
+      error: "Failed to confirm valuation",
+      details: error.message 
+    });
   }
 };

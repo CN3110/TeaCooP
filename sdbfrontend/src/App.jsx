@@ -35,7 +35,7 @@ const App = () => {
          
 
           {/* Supplier Routes */}
-          <Route path="/supplier-dashboard" element={<SupplierDashboard />} />
+          <Route path="/supplier-dashboard" element={<SupplierNotices />} />
           <Route path="/supplier-notices" element={<SupplierNotices />} />
           <Route path="/supplier-profile" element={<SProfile />} />
           <Route path="/request-transport" element={<RequestTransport />} />
@@ -43,14 +43,14 @@ const App = () => {
 
 
           {/* Driver Routes */}
-          <Route path="/driver-dashboard" element={<DriverDashboard />} />
+          <Route path="/driver-dashboard" element={<DriverNotices />} />
           <Route path="/driver-profile" element={<DProfile />} />
           <Route path="/driver-view-transport-requests" element={<ViewTransportRequests />} />
           <Route path="/driver-delivery-history" element={<ViewDeliveryRecords />} />
           <Route path="/driver-notices" element={<DriverNotices />} />
 
           {/* Broker Routes */}
-          <Route path="/broker-dashboard" element={<BrokerDashboard />} />
+          <Route path="/broker-dashboard" element={<BrokerNotices />} />
           <Route path="/broker-profile" element={<BProfile />} />
           <Route path="/broker-view-new-lots" element={<ViewNewLots />} />
           <Route path="/broker-my-valuations" element={<BrokerMyValuations />} />

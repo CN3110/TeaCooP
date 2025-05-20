@@ -12,27 +12,29 @@ const BrokerValuation = {
   },
 
   async confirmValuation(valuationId, employeeId) {
-    await db.query(`
-      UPDATE broker_valuation 
-      SET is_confirmed = TRUE, 
-          confirmed_by = ?, 
-          confirmed_at = NOW()
-      WHERE valuation_id = ?
-    `, [employeeId, valuationId]);
+  // Confirm selected
+await db.query(`
+  UPDATE broker_valuation
+  SET is_confirmed = TRUE,
+      confirmed_by = ?,
+      confirmed_at = NOW()
+  WHERE valuation_id = ?
+`, [employeeId, valuationId]);
 
-    await db.query(`
-      UPDATE broker_valuation 
-      SET is_confirmed = FALSE 
+// Reject others for same lot
+await db.query(`
+  UPDATE broker_valuation
+  SET is_confirmed = FALSE,
       WHERE lotNumber = (
-        SELECT lotNumber FROM (
-          SELECT lotNumber FROM broker_valuation WHERE valuation_id = ?
-        ) AS sub
-      ) 
-      AND valuation_id != ?
-    `, [valuationId, valuationId]);
-  }, 
+    SELECT lotNumber FROM (
+      SELECT lotNumber FROM broker_valuation WHERE valuation_id = ?
+    ) AS sub
+  )
+  AND valuation_id != ?
+`, [valuationId, valuationId]);
+  },
 
-  async getValuationsByLot(lotNumber) {
+  async getValuationsByLot(lotNumber) { 
     const [results] = await db.query(`
       SELECT 
         bv.*, 
