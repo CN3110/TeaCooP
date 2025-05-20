@@ -37,7 +37,7 @@ const SidebarSupplier = () => {
     setShowLogoutConfirm(false);
     setShowAlert(true);
     setTimeout(() => {
-      navigate("/login");
+      navigate("/");
     }, 1500); // Give time for the alert to show before redirecting
   };
 

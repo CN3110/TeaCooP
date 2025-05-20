@@ -43,7 +43,7 @@ const App = () => {
 
 
           {/* Driver Routes */}
-          <Route path="/driver-dashboard" element={<DriverDashboard />} />
+          <Route path="/driver-dashboard" element={<DriverNotices />} />
           <Route path="/driver-profile" element={<DProfile />} />
           <Route path="/driver-view-transport-requests" element={<ViewTransportRequests />} />
           <Route path="/driver-delivery-history" element={<ViewDeliveryRecords />} />
