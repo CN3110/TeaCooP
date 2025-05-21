@@ -168,7 +168,7 @@ const AddSupplier = () => {
 
       if (response.ok) {
         const result = await response.json();
-        showAlert(`Supplier ${result.supplierId} - ${result.name} added successfully!`, "success");
+        showAlert(`Supplier ${result.supplierId} added successfully!`, "success");
         setTimeout(() => navigate("/view-suppliers"), 3000);
       } else {
         const errorData = await response.json();
@@ -259,7 +259,7 @@ return (
                     value={land.landSize}
                     onChange={(e) => handleLandDetailsChange(index, e)}
                     required={supplierData.status === "active"}                    step="0.01"
-                    min="0"
+                    min="0.01"
                   />
                 </div>
 
