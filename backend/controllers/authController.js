@@ -33,7 +33,7 @@ exports.login = async (req, res) => {
   }
 
   try {
-    // Admin login
+    // Admin login - hardcoded credentials
     if (userId === process.env.ADMIN_USERNAME && password === process.env.ADMIN_PASSWORD) {
       const token = generateToken(userId, 'admin');
       return res.status(200).json({

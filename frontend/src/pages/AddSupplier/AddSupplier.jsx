@@ -7,6 +7,7 @@ import Snackbar from "@mui/material/Snackbar";
 import MuiAlert from "@mui/material/Alert";
 import "./AddSupplier.css";
 
+// Custom Alert component for MUI Snackbar
 const Alert = React.forwardRef(function Alert(props, ref) {
   return <MuiAlert elevation={6} ref={ref} variant="filled" {...props} />;
 });
@@ -93,6 +94,7 @@ const AddSupplier = () => {
     });
   };
 
+  // Function to remove a land detail by index
   const removeLandDetail = (index) => {
     const updatedLandDetails = supplierData.landDetails.filter((_, i) => i !== index);
     setSupplierData({ ...supplierData, landDetails: updatedLandDetails });

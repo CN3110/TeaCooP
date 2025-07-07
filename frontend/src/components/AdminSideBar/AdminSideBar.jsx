@@ -76,7 +76,7 @@ const AdminSideBar = () => {
                     </div>
                   )}
                 </div>
-{/* Manage Deliveries Dropdown */}
+                {/* Manage Deliveries Dropdown */}
                 <div className="dropdown">
                   <button
                     className="dropdown-btn"
@@ -90,11 +90,8 @@ const AdminSideBar = () => {
                       <Link to="/view-delivery-records">View Delivery Records</Link>
                     </div>
                   )}
-                </div> 
-                
-
-
-        
+                </div>  
+                             
                 <Link to="/tea-production-summary" className="item">Tea Production Summary</Link>
                 <Link to="/tea-production" className="item">Tea Production Management </Link>
                 <Link to="/tea-type-stock-management" className="item">Tea Type Stock Management</Link>

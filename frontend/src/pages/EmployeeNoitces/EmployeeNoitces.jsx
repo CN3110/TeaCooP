@@ -19,9 +19,8 @@ const EmployeeNotices = () => {
           return;
         }
         
-        // Transform user role to match recipient type format if needed
-        // For example, if localStorage has "ROLE_DRIVER" but API expects "driver"
-        const recipientType = userRole.toLowerCase().replace('role_', '');
+        // Transform user role to match recipient type
+          const recipientType = userRole.toLowerCase().replace('role_', '');
         
         // Fetch notices filtered by user's role
         const response = await fetch(`http://localhost:3001/api/notices?recipientType=${recipientType}`);
@@ -75,6 +74,7 @@ const EmployeeNotices = () => {
     return <div className="no-notices">No notices available for you at this time.</div>;
   }
 
+  //notice page content to display employee notices
   return (
     <EmployeeLayout>
     <div className="user-notices-container">

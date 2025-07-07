@@ -1,6 +1,7 @@
 const BrokerValuation = require('../models/BrokerValuation');
 const db = require('../config/database');
 
+//Get all valuations for slected lot
 exports.getAllGroupedByLot = async (req, res) => {
   try {
     const results = await BrokerValuation.getAllGroupedByLot();
@@ -11,6 +12,7 @@ exports.getAllGroupedByLot = async (req, res) => {
   }
 };
 
+//confrim valuation by employee
 exports.confirmValuation = async (req, res) => {
   const { valuationId } = req.params;
   const { employeeId } = req.body;
@@ -32,6 +34,7 @@ exports.confirmValuation = async (req, res) => {
   }
 };
 
+//to get all valuations for a specific lot
 exports.getValuationsByLot = async (req, res) => {
   const { lotNumber } = req.params;
 
@@ -44,6 +47,7 @@ exports.getValuationsByLot = async (req, res) => {
   }
 };
 
+//to get all valuations for a specific broker
 exports.getValuationsByBroker = async (req, res) => {
   const { brokerId } = req.params;
 
@@ -56,6 +60,7 @@ exports.getValuationsByBroker = async (req, res) => {
   }
 };
 
+//update valuation price by broker
 exports.updateValuation = async (req, res) => {
   const { valuationId } = req.params;
   const { valuationPrice } = req.body;
@@ -82,6 +87,7 @@ exports.updateValuation = async (req, res) => {
   }
 };
 
+//delete valuation 
 exports.deleteValuation = async (req, res) => {
   const { valuationId } = req.params;
 

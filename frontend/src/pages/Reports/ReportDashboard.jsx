@@ -28,7 +28,8 @@ const ReportDashboard = () => {
   const userRole = localStorage.getItem('userRole'); // Get role from localStorage
 
   const reportCards = [
-    {
+    // Define report cards with titles, icons, paths, and descriptions
+    { 
       title: 'Raw Tea Report',
       icon: <InventoryIcon sx={{ fontSize: 50 }} />,
       path: '/raw-tea-report',

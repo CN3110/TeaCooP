@@ -16,7 +16,7 @@ const Login = () => {
   
   const navigate = useNavigate();
 
-  // Check if user is already logged in
+  //Checks if user is already logged in
   useEffect(() => {
     const token = localStorage.getItem('token');
     const userRole = localStorage.getItem('userRole');

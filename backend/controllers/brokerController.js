@@ -61,7 +61,7 @@ exports.addBroker = async (req, res) => {
       status,
       notes,
       addedByEmployeeId,
-      passcode, // ✅ FIXED: Pass passcode here
+      passcode,
     });
 
     if (status === "active") {
@@ -213,7 +213,7 @@ Morawakkorale Tea Co-op
   }
 };
 
-
+// Disable a broker
 exports.disableBroker = async (req, res) => {
   const { brokerId } = req.params;
 
